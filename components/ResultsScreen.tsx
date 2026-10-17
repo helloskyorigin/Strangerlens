@@ -563,12 +563,12 @@ export default function ResultsScreen({
               <span className="inline-block text-[11px] font-bold tracking-widest text-[#3B82F6] uppercase bg-[#171F2D] px-3 py-1 rounded-full border border-[#263044] mb-3 shadow-xs">
                 {isTestMode ? "TEST MODE" : isCheckoutAvailable ? "FULL ANALYSIS" : "EARLY ACCESS"}
               </span>
-              <h2 className="text-xl sm:text-2xl font-bold mb-2 text-white">Unlock Your Full Analysis</h2>
+              <h2 className="text-xl sm:text-2xl font-bold mb-2 text-white">You&apos;ve seen your scores. Now see what to fix.</h2>
               <div className="text-base sm:text-lg font-bold text-white mb-3">
-                $5 <span className="text-xs sm:text-sm text-[#94A3B8] font-normal">{isCheckoutAvailable ? "· One-time payment" : "one-time · Coming Soon"}</span>
+                $5 <span className="text-xs sm:text-sm text-[#94A3B8] font-normal">· One-time payment</span>
               </div>
               <p className="text-[#94A3B8] text-sm mb-2 max-w-md mx-auto leading-relaxed">
-                Go beyond your scores. Discover what&apos;s working, what&apos;s unclear, and what to improve across all five clarity signals.
+                Understand why each signal received its score, where visitors may get confused, and what you can improve.
               </p>
               {isCheckoutAvailable ? (
                 <div className="mt-6 space-y-4">
@@ -613,17 +613,17 @@ export default function ResultsScreen({
                     {loading || isVerifyingPayment ? (
                       <span>Processing...</span>
                     ) : (
-                      <span>Unlock Full Analysis — $5</span>
+                      <span>Unlock My Full Report — $5</span>
                     )}
                   </button>
                   <p className="text-xs text-amber-400/90 font-medium">
-                    {isTestMode ? "Test Mode — Use Dodo test card to unlock. No real money charged." : "One-time payment · Instant access"}
+                    {isTestMode ? "Test Mode — Use Dodo test card to unlock. No real money charged." : "One-time payment · Includes complete PDF"}
                   </p>
                 </div>
               ) : (
                 <>
                   <p className="text-xs text-[#94A3B8] mb-6 font-medium">
-                    Be first to know when full analysis launches.
+                    Checkout is currently unavailable. Leave your email for an availability update.
                   </p>
 
                   {earlyStatus === "success" ? (
@@ -706,7 +706,7 @@ export default function ResultsScreen({
                     No payment required today. We&apos;ll email you when full analysis is available.
                     <br />
                     <span className="block mt-1.5 text-[11px] text-slate-500">
-                      Submitted email addresses are stored securely and used solely to notify you when StrangerLens Full Analysis launches. Waitlist emails are received and retained in the operator&apos;s Gmail inbox. To request removal, contact hello.skyorigin@gmail.com. Review our{" "}
+                      Submitted email addresses are stored securely and used solely to notify you about StrangerLens Full Analysis availability. Waitlist emails are received and retained in the operator&apos;s Gmail inbox. To request removal, contact hello.skyorigin@gmail.com. Review our{" "}
                       <Link href="/privacy" className="text-[#3B82F6] hover:underline font-medium">
                         Privacy Policy
                       </Link>
@@ -719,12 +719,12 @@ export default function ResultsScreen({
           </section>
         )}
 
-        {/* 4. UPCOMING FEATURES PREVIEW (WHEN FULL ANALYSIS IS COMING SOON / UNLOCKED IS FALSE) */}
+        {/* 4. FULL REPORT PREVIEW (WHEN LOCKED) */}
         {!isReportUnlocked ? (
           <section className="bg-[#121824] border border-[#263044] rounded-2xl p-6 sm:p-8">
             <div className="mb-6">
               <h2 className="text-lg sm:text-xl font-bold text-white mb-1.5">
-                Coming with Full Analysis
+                Inside Your Full Report
               </h2>
               <p className="text-xs sm:text-sm text-[#94A3B8]">
                 A deeper look at what your website communicates — and what needs improvement.
@@ -740,10 +740,10 @@ export default function ResultsScreen({
                 </span>
                 <div className="space-y-0.5">
                   <h3 className="text-sm font-semibold text-white">
-                    Detailed Signal Diagnostics
+                    Why These Scores?
                   </h3>
                   <p className="text-xs text-[#94A3B8] leading-relaxed">
-                    Understand the reasoning behind each of your five clarity scores.
+                    See the reasoning behind all five clarity signals.
                   </p>
                 </div>
               </div>
@@ -755,10 +755,10 @@ export default function ResultsScreen({
                 </span>
                 <div className="space-y-0.5">
                   <h3 className="text-sm font-semibold text-white">
-                    What&apos;s Working &amp; What&apos;s Unclear
+                    What Visitors May Miss
                   </h3>
                   <p className="text-xs text-[#94A3B8] leading-relaxed">
-                    Discover what your website communicates well and where visitors may get confused.
+                    Understand what&apos;s working and what may cause confusion.
                   </p>
                 </div>
               </div>
@@ -770,10 +770,10 @@ export default function ResultsScreen({
                 </span>
                 <div className="space-y-0.5">
                   <h3 className="text-sm font-semibold text-white">
-                    Actionable Improvements
+                    What to Improve
                   </h3>
                   <p className="text-xs text-[#94A3B8] leading-relaxed">
-                    See specific ways to make your website&apos;s message clearer.
+                    Get specific recommendations from your analysis.
                   </p>
                 </div>
               </div>
@@ -788,7 +788,7 @@ export default function ResultsScreen({
                     First 5 Seconds
                   </h3>
                   <p className="text-xs text-[#94A3B8] leading-relaxed">
-                    Explore what a first-time visitor may understand or miss.
+                    See what a first-time visitor may understand or miss.
                   </p>
                 </div>
               </div>
@@ -796,7 +796,7 @@ export default function ResultsScreen({
 
             <div className="mt-6 pt-4 border-t border-[#263044]/70 flex items-center justify-center gap-2 text-xs text-[#94A3B8]">
               <Lock className="w-3.5 h-3.5 text-slate-400" />
-              <span>Available when Full Analysis launches.</span>
+              <span>Unlock these details with your $5 full report.</span>
             </div>
           </section>
         ) : (
