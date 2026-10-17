@@ -1,0 +1,8 @@
+{
+  "name": "Strangerlens",
+  "description": "Website intelligence for builders. See what your website communicates, where visitors may lose trust, and what you should improve first.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

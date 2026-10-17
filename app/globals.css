@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+  background-color: #090D15;
+}
+
+html {
+  background-color: #090D15;
+  color: #F1F5F9;
+  color-scheme: dark;
+  scroll-behavior: smooth;
+  scroll-padding-top: 84px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: #090D15;
+  color: #F1F5F9;
+  color-scheme: dark;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  overflow-x: hidden;
+}
+
+html.light {
+  color-scheme: light;
+  background-color: #F8FAFC !important;
+  color: #0F172A !important;
+}
+
+html.light body {
+  background-color: #F8FAFC !important;
+  color: #0F172A !important;
+}
+
+html.light .bg-\[\#090D15\] {
+  background-color: #F8FAFC !important;
+}
+
+html.light .bg-\[\#121824\] {
+  background-color: #FFFFFF !important;
+}
+
+html.light .bg-\[\#171F2D\] {
+  background-color: #F1F5F9 !important;
+}
+
+html.light .border-\[\#263044\] {
+  border-color: #E2E8F0 !important;
+}
+
+html.light .text-white {
+  color: #0F172A !important;
+}
+
+html.light .text-\[\#F1F5F9\] {
+  color: #0F172A !important;
+}
+
+html.light .text-\[\#94A3B8\] {
+  color: #64748B !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
