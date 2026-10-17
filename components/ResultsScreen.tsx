@@ -117,16 +117,9 @@ export default function ResultsScreen({
   const [isVerifyingPayment, setIsVerifyingPayment] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
-  const isTestMode =
-    process.env.NEXT_PUBLIC_DODO_TEST_MODE === "true" ||
-    paymentEnvironment === "test_mode" ||
-    (typeof window !== "undefined" &&
-      (window.location.hostname.includes("ais-dev") ||
-       window.location.hostname.includes("ais-pre") ||
-       window.location.hostname === "localhost" ||
-       window.location.hostname === "127.0.0.1"));
+  const isTestMode = paymentEnvironment === "test_mode";
 
-  const isCheckoutAvailable = Boolean(checkoutEnabled) || isTestMode;
+  const isCheckoutAvailable = Boolean(checkoutEnabled);
 
   const isReportUnlocked = Boolean(isUnlocked) || verifiedUnlocked;
 
@@ -1037,8 +1030,20 @@ export default function ResultsScreen({
             onClick={async () => {
               setIsGeneratingPdf(true);
               try {
-                if (onDownloadPdf) await onDownloadPdf();
-                else await generateReportPdf(report, isReportUnlocked);
+                const targetReportId = data?.reportId || report.rawReport?.reportId;
+                const token = readReportToken(targetReportId) || data?.reportToken || report.rawReport?.reportToken;
+                
+                const res = await fetch(`/api/report/${encodeURIComponent(targetReportId)}`, {
+                  headers: { Authorization: `Bearer ${token}` }
+                });
+                
+                if (!res.ok) throw new Error("Could not verify report access");
+                
+                const reportData = await res.json();
+                const adaptedReport = adaptReport(reportData);
+                const isUnlocked = reportData.entitlement.unlocked;
+                
+                await generateReportPdf(adaptedReport, isUnlocked);
               } catch (err: any) {
                 alert(`PDF generation failed: ${err?.message || "Please try again."}`);
               } finally {

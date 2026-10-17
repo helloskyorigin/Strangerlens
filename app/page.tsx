@@ -132,6 +132,7 @@ const NAV_ITEMS = [
   { label: "How it works", href: "#how-it-works" },
   { label: "Pricing", href: "#pricing" },
   { label: "FAQ", href: "#faq" },
+  { label: "My Reports", href: "/my-reports" },
 ];
 
 export default function LandingPage() {
@@ -155,6 +156,16 @@ export default function LandingPage() {
   const [isPending, setIsPending] = useState<boolean>(false);
   const [backendError, setBackendError] = useState<string | null>(null);
   const [analysisData, setAnalysisData] = useState<any>(null);
+
+  useEffect(() => {
+    if (analysisData?.reportId) {
+       const saved = JSON.parse(localStorage.getItem("strangerlens_reports") || "[]");
+       if (!saved.some((r: any) => r.reportId === analysisData.reportId)) {
+         saved.push({ reportId: analysisData.reportId });
+         localStorage.setItem("strangerlens_reports", JSON.stringify(saved));
+       }
+    }
+  }, [analysisData]);
 
   // FAQ accordion state — all answers closed by default
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
