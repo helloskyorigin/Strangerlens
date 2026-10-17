@@ -5,6 +5,7 @@ import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import { adaptReport, SIGNAL_ID_TO_KEY } from "@/lib/report-adapter";
 import { generateReportPdf } from "@/lib/pdf-generator";
+import ClaritySignalTooltip from "@/components/ClaritySignalTooltip";
 import {
   startReportCheckout,
   rememberReportAccess,
@@ -103,6 +104,7 @@ export default function ResultsScreen({
   onOpenPricing,
 }: any) {
   const [activeExplorerSignalId, setActiveExplorerSignalId] = useState("first-impression");
+  const [activeSignalTooltip, setActiveSignalTooltip] = useState<string | null>(null);
   const [isScoreModalOpen, setIsScoreModalOpen] = useState(false);
   const [isEarlySuccessModalOpen, setIsEarlySuccessModalOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -501,7 +503,12 @@ export default function ResultsScreen({
                   {/* Mobile Layout (< sm) */}
                   <div className="sm:hidden space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="font-medium text-sm text-[#F1F5F9]">{signal.title}</span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="font-medium text-sm text-[#F1F5F9]">{signal.title}</span>
+                        <ClaritySignalTooltip signalKey={signal.key} name={signal.title} isOpen={activeSignalTooltip === `mobile-${signal.id}`}
+                          onOpen={() => setActiveSignalTooltip(`mobile-${signal.id}`)}
+                          onClose={() => setActiveSignalTooltip(current => current === `mobile-${signal.id}` ? null : current)} />
+                      </span>
                       <span className="font-semibold text-sm text-white">{signal.scoreDisplay}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
@@ -520,7 +527,12 @@ export default function ResultsScreen({
 
                   {/* Desktop Layout (>= sm) */}
                   <div className="hidden sm:flex items-center justify-between">
-                    <span className="font-medium text-[#F1F5F9]">{signal.title}</span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="font-medium text-[#F1F5F9]">{signal.title}</span>
+                      <ClaritySignalTooltip signalKey={signal.key} name={signal.title} isOpen={activeSignalTooltip === `desktop-${signal.id}`}
+                        onOpen={() => setActiveSignalTooltip(`desktop-${signal.id}`)}
+                        onClose={() => setActiveSignalTooltip(current => current === `desktop-${signal.id}` ? null : current)} />
+                    </span>
                     <div className="flex items-center gap-4">
                       <div className="text-right">
                         <div className="font-semibold text-white text-sm">{signal.scoreDisplay}</div>
