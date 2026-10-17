@@ -132,6 +132,11 @@ export default function ResultsScreen({
 
   // Canonical report normalized from authoritative analysis data
   const report = adaptReport(data);
+  // Tease only the public score, never the locked explanation or findings.
+  const weakestSignal = report.signalsList.reduce<(typeof report.signalsList)[number] | null>((weakest, signal) => {
+    if (signal.score === null || !Number.isFinite(signal.score) || signal.score < 0 || signal.score > 100) return weakest;
+    return weakest === null || signal.score < weakest.score! ? signal : weakest;
+  }, null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -563,13 +568,22 @@ export default function ResultsScreen({
               <span className="inline-block text-[11px] font-bold tracking-widest text-[#3B82F6] uppercase bg-[#171F2D] px-3 py-1 rounded-full border border-[#263044] mb-3 shadow-xs">
                 {isTestMode ? "TEST MODE" : isCheckoutAvailable ? "FULL ANALYSIS" : "EARLY ACCESS"}
               </span>
-              <h2 className="text-xl sm:text-2xl font-bold mb-2 text-white">You&apos;ve seen your scores. Now see what to fix.</h2>
+              <h2 className="text-xl sm:text-2xl font-bold leading-tight mb-3 text-white">Your Score Is Just the Beginning.</h2>
               <div className="text-base sm:text-lg font-bold text-white mb-3">
                 $5 <span className="text-xs sm:text-sm text-[#94A3B8] font-normal">· One-time payment</span>
               </div>
               <p className="text-[#94A3B8] text-sm mb-2 max-w-md mx-auto leading-relaxed">
-                Understand why each signal received its score, where visitors may get confused, and what you can improve.
+                You know your clarity score. Now discover WHY it scored that way — and exactly what to improve.
               </p>
+              {weakestSignal && (
+                <div className="mt-5 rounded-xl border border-blue-500/20 bg-[#171F2D]/70 p-4 sm:p-5 text-left" aria-label="Your lowest-scoring clarity signal">
+                  <p className="text-sm sm:text-base font-semibold leading-relaxed text-[#F1F5F9] break-words">
+                    {weakestSignal.title} <span className="text-blue-400 tabular-nums whitespace-nowrap">— {weakestSignal.score}/100</span>
+                  </p>
+                  <p className="mt-2 text-sm leading-relaxed text-[#CBD5E1]">What&apos;s behind this score, and how can you improve it?</p>
+                  <p className="mt-1.5 text-xs sm:text-sm leading-relaxed text-[#94A3B8]">Unlock the detailed explanation and recommended improvements.</p>
+                </div>
+              )}
               {isCheckoutAvailable ? (
                 <div className="mt-6 space-y-4">
                   {paymentError && (
@@ -613,11 +627,11 @@ export default function ResultsScreen({
                     {loading || isVerifyingPayment ? (
                       <span>Processing...</span>
                     ) : (
-                      <span>Unlock My Full Report — $5</span>
+                      <span>Unlock Full Analysis — $5</span>
                     )}
                   </button>
-                  <p className="text-xs text-amber-400/90 font-medium">
-                    {isTestMode ? "Test Mode — Use Dodo test card to unlock. No real money charged." : "One-time payment · Includes complete PDF"}
+                  <p className={`text-xs leading-relaxed font-medium ${isTestMode ? "text-amber-400/90" : "text-[#94A3B8]"}`}>
+                    {isTestMode ? "Test Mode — Use Dodo test card to unlock. No real money charged." : "One-time payment · Instant access · No subscription"}
                   </p>
                 </div>
               ) : (
@@ -724,7 +738,7 @@ export default function ResultsScreen({
           <section className="bg-[#121824] border border-[#263044] rounded-2xl p-6 sm:p-8">
             <div className="mb-6">
               <h2 className="text-lg sm:text-xl font-bold text-white mb-1.5">
-                Inside Your Full Report
+                Inside Your Full Analysis
               </h2>
               <p className="text-xs sm:text-sm text-[#94A3B8]">
                 A deeper look at what your website communicates — and what needs improvement.
@@ -740,7 +754,7 @@ export default function ResultsScreen({
                 </span>
                 <div className="space-y-0.5">
                   <h3 className="text-sm font-semibold text-white">
-                    Why These Scores?
+                    Why Your Website Scored This Way
                   </h3>
                   <p className="text-xs text-[#94A3B8] leading-relaxed">
                     See the reasoning behind all five clarity signals.
@@ -755,7 +769,7 @@ export default function ResultsScreen({
                 </span>
                 <div className="space-y-0.5">
                   <h3 className="text-sm font-semibold text-white">
-                    What Visitors May Miss
+                    What Visitors Understand — and Miss
                   </h3>
                   <p className="text-xs text-[#94A3B8] leading-relaxed">
                     Understand what&apos;s working and what may cause confusion.
@@ -770,7 +784,7 @@ export default function ResultsScreen({
                 </span>
                 <div className="space-y-0.5">
                   <h3 className="text-sm font-semibold text-white">
-                    What to Improve
+                    Specific Fixes You Can Make
                   </h3>
                   <p className="text-xs text-[#94A3B8] leading-relaxed">
                     Get specific recommendations from your analysis.
@@ -785,7 +799,7 @@ export default function ResultsScreen({
                 </span>
                 <div className="space-y-0.5">
                   <h3 className="text-sm font-semibold text-white">
-                    First 5 Seconds
+                    What Visitors Notice First
                   </h3>
                   <p className="text-xs text-[#94A3B8] leading-relaxed">
                     See what a first-time visitor may understand or miss.
