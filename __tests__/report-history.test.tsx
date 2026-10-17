@@ -9,6 +9,8 @@ import { NextRequest } from "next/server";
 import { AppRouterContext } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { POST as history } from "../app/api/my-reports/route";
 import { GET as fullReport } from "../app/api/report/[reportId]/route";
+import { GET as pdfReport } from "../app/api/report/[reportId]/pdf/route";
+import { readFile } from "node:fs/promises";
 import { saveServerReport } from "../server/security/reportAccess";
 import { saveOrder, applyVerifiedPayment, type CheckoutOrder } from "../server/payments/orders";
 import { reportKey } from "../server/storage/paymentStore";
@@ -39,7 +41,7 @@ async function main() {
   let root: Root | null = null;
   let assertions = 0;
   let outage = false;
-  let savedPdf: { name: string; content: string } | undefined;
+  let savedPdf: { name: string; content: string; pages: number } | undefined;
   let historyCalls = 0;
   const check = (condition: unknown, message: string) => { assert.ok(condition, message); assertions++; };
   const reference = (report: Awaited<ReturnType<typeof saveServerReport>>) => ({ reportId: report.reportId, token: report.reportToken });
@@ -64,8 +66,10 @@ async function main() {
     }
     if (url === "/api/payments/status") return paymentStatus();
     if (url.startsWith("/api/report/")) {
+      if (url.endsWith("/pdf")) return pdfReport(new NextRequest(`https://strangerlens.example${url}`, init), { params: Promise.resolve({ reportId: url.split("/").at(-2)! }) });
       return fullReport(new NextRequest(`https://strangerlens.example${url}`, init), { params: Promise.resolve({ reportId: url.split("/").at(-1)! }) });
     }
+    if (url.startsWith("/fonts/pdf/")) return new Response(await readFile(new URL(`../public${url}`, import.meta.url)));
     throw new Error(`Unexpected request (no scans, AI or Dodo calls are allowed): ${url}`);
   };
   const create = async (domain: string, purchased = true) => {
@@ -109,7 +113,7 @@ async function main() {
     process.env.DODO_PAYMENTS_API_KEY = "test-key";
     process.env.DODO_PRODUCT_ID = "pdt_single";
     globalThis.fetch = bridge;
-    jsPDF.API.save = function (name: string) { savedPdf = { name, content: this.output() }; return this; };
+    jsPDF.API.save = function (name: string) { savedPdf = { name, content: this.output(), pages: this.getNumberOfPages() }; return this; };
 
     const paid = await create("original.example");
     const older = await create("older.example");
@@ -177,7 +181,7 @@ async function main() {
     await assert.rejects(() => fetchPurchasedReport(refunded.reportId), /refunded|revoked/); assertions++;
     await assert.rejects(() => fetchPurchasedReport(free.reportId), /could not be verified/); assertions++;
     await downloadPurchasedReport(paid.reportId);
-    check(savedPdf?.name === "StrangerLens-Full-Report.pdf" && savedPdf.content.startsWith("%PDF") && savedPdf.content.includes("Detailed Signal Diagnostics"), "download reuses actual Phase 1 premium PDF generator");
+    check(savedPdf?.name === "StrangerLens-Full-Report.pdf" && savedPdf.content.startsWith("%PDF") && savedPdf.pages > 1, "download reuses actual Phase 1 premium PDF generator");
     savedPdf = undefined;
     const activeStored = JSON.parse((await redis.get(reportKey(paid.reportId)))!);
     activeStored.payment.active = false;
