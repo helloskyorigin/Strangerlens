@@ -95,6 +95,7 @@ export default function ResultsScreen({
   paymentMessage,
   onVerifyPayment,
   onRefreshPaidReport,
+  onDownloadPdf,
   onBackToLanding,
   onRunNewCheck,
   onRecheck,
@@ -443,13 +444,16 @@ export default function ResultsScreen({
               StrangerLens
             </span>
           </button>
-          <button
-            type="button"
-            onClick={onRunNewCheck || onBackToLanding}
-            className="rounded-full bg-[#171F2D] hover:bg-[#263044] text-white font-semibold px-4 py-2 transition text-sm cursor-pointer"
-          >
-            New Check
-          </button>
+          <div className="flex items-center gap-2 sm:gap-5">
+            <Link href="/my-reports" className="rounded text-xs sm:text-sm font-medium text-[#94A3B8] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">My Reports</Link>
+            <button
+              type="button"
+              onClick={onRunNewCheck || onBackToLanding}
+              className="rounded-full bg-[#171F2D] hover:bg-[#263044] text-white font-semibold px-3 sm:px-4 py-2 transition text-xs sm:text-sm cursor-pointer"
+            >
+              New Check
+            </button>
+          </div>
         </div>
         <div className="max-w-[1000px] mx-auto px-4 py-2 flex items-center justify-between text-sm text-[#94A3B8]">
           <span className="font-medium text-[#F1F5F9]">{report.domain}</span>
@@ -1007,7 +1011,8 @@ export default function ResultsScreen({
             onClick={async () => {
               setIsGeneratingPdf(true);
               try {
-                await generateReportPdf(report, isReportUnlocked);
+                if (onDownloadPdf) await onDownloadPdf();
+                else await generateReportPdf(report, isReportUnlocked);
               } catch (err: any) {
                 alert(`PDF generation failed: ${err?.message || "Please try again."}`);
               } finally {

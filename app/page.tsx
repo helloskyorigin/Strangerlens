@@ -443,7 +443,7 @@ export default function LandingPage() {
                 {/* Desktop Navigation */}
                 <nav
                   aria-label="Primary Navigation"
-                  className="hidden md:flex items-center gap-8 text-sm font-medium text-[#94A3B8]"
+                  className="hidden md:flex items-center gap-3 lg:gap-6 xl:gap-8 text-sm font-medium text-[#94A3B8]"
                 >
                   {NAV_ITEMS.map((item) => (
                     <a
@@ -455,6 +455,7 @@ export default function LandingPage() {
                       {item.label}
                     </a>
                   ))}
+                  <Link href="/my-reports" className="rounded py-1 whitespace-nowrap hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#246BFD]">My Reports</Link>
                 </nav>
 
                 <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
@@ -566,6 +567,9 @@ export default function LandingPage() {
                           <ArrowRight className="w-4 h-4 text-[#64748B] group-hover:text-[#3B82F6] group-hover:translate-x-0.5 transition-all" />
                         </motion.a>
                       ))}
+                      <Link href="/my-reports" onClick={() => setMobileMenuOpen(false)} className="flex min-h-[48px] items-center justify-between rounded-2xl px-4 py-3 text-base font-semibold text-[#F1F5F9] hover:bg-[#171F2D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#246BFD]">
+                        My Reports <ArrowRight aria-hidden="true" className="h-4 w-4 text-[#64748B]" />
+                      </Link>
 
                       <motion.div
                         variants={{
