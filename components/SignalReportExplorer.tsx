@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type KeyboardEvent } from "react";
+import React, { useState, type KeyboardEvent } from "react";
 import { AlertCircle, ArrowRight, BookOpenText, CheckCircle2, SearchCheck, Wrench } from "lucide-react";
 import { CLARITY_REPORT_CHAPTERS } from "@/lib/clarity-report-chapters";
 import type { CanonicalPurchaseSignal, CanonicalSignal } from "@/lib/report-adapter";
