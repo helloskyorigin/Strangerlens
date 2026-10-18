@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 import { ArrowRight, CheckCircle2, ClipboardList, FlaskConical, Sparkles } from "lucide-react";
 import type { PriorityItem, PriorityLane } from "@/types/premiumWorkbench";
 import { CLARITY_REPORT_CHAPTERS } from "@/lib/clarity-report-chapters";
