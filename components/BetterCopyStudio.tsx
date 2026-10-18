@@ -28,7 +28,7 @@ export default function BetterCopyStudio({ opportunities }: { opportunities: Cop
     : mode === "my-edit" ? edited : selected.recommended;
 
   const copy = async () => {
-    if (!activeText.trim()) return;
+    if (!selected || !activeText.trim()) return;
     try {
       await navigator.clipboard.writeText(activeText);
       setCopied(`${selected.id}:${mode}`);
