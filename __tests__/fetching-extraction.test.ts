@@ -261,11 +261,13 @@ describe("Phase 1 Task 4: Content Extractor & Fetch Cache Tests", () => {
     expect(canonicalizeSupportingUrl("/search?q=workflow", base)).toBe(null);
   });
 
-  test("Multi-Page Phase 1: Exclusion rules filter out auth, legal, blog, career, asset, deep, and locale links", () => {
+  test("Multi-Page Phase 1: Exclusion rules filter auth and junk while allowing core legal policies", () => {
     expect(isExcludedSupportingPath("/login", "Log in").excluded).toBe(true);
     expect(isExcludedSupportingPath("/signup", "Sign Up").excluded).toBe(true);
-    expect(isExcludedSupportingPath("/privacy-policy", "Privacy Policy").excluded).toBe(true);
-    expect(isExcludedSupportingPath("/terms", "Terms of Service").excluded).toBe(true);
+    expect(isExcludedSupportingPath("/privacy-policy", "Privacy Policy").excluded).toBe(false);
+    expect(isExcludedSupportingPath("/terms", "Terms of Service").excluded).toBe(false);
+    expect(isExcludedSupportingPath("/legal/privacy", "Privacy Policy").excluded).toBe(false);
+    expect(isExcludedSupportingPath("/legal/cookie-policy", "Cookie Policy").excluded).toBe(true);
     expect(isExcludedSupportingPath("/blog/how-we-built-acme", "Read Post").excluded).toBe(true);
     expect(isExcludedSupportingPath("/careers", "Careers").excluded).toBe(true);
     expect(isExcludedSupportingPath("/whitepaper.pdf", "Download PDF").excluded).toBe(true);
