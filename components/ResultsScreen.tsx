@@ -165,10 +165,6 @@ export default function ResultsScreen({
   }, [postScanOfferReportId, currentReportId, isCheckoutAvailable,
       isReportUnlocked, isVerifyingPayment, paymentState]);
 
-  useEffect(() => {
-    if (isReportUnlocked && isPostScanOfferOpen) setIsPostScanOfferOpen(false);
-  }, [isReportUnlocked, isPostScanOfferOpen]);
-
 
   useEffect(() => {
     if (typeof window === "undefined") return;
