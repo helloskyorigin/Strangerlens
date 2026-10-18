@@ -529,6 +529,23 @@ export default function ResultsScreen({
 
       {/* MAIN CONTENT */}
       <main className="flex-1 w-full max-w-[1000px] mx-auto px-4 py-6 sm:py-10 space-y-8 sm:space-y-12">
+        {isReportUnlocked && (
+          <section aria-label="Full analysis unlocked" className="flex flex-col gap-4 rounded-2xl border border-emerald-500/25 bg-[#132A30] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+            <div>
+              <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-emerald-300">
+                <Check className="h-4 w-4" aria-hidden="true" /> Full Analysis Unlocked
+              </p>
+              <h2 className="mt-2 text-xl font-bold tracking-tight text-white">Your complete clarity report is ready.</h2>
+              <p className="mt-1 max-w-lg text-sm leading-relaxed text-[#B8D0CC]">
+                All five detailed signals, the first-five-seconds assessment, improvement plan, and copy suggestions are below.
+              </p>
+            </div>
+            <div className="flex shrink-0 flex-wrap gap-2">
+              <a href="#complete-paid-report" className="inline-flex min-h-11 items-center justify-center rounded-full bg-[#1E815F] px-4 text-xs font-bold text-white hover:bg-[#24936E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Explore All Five →</a>
+              <a href="#report-export-actions" className="inline-flex min-h-11 items-center justify-center rounded-full border border-[#385C62] bg-[#1A363D] px-4 text-xs font-semibold text-[#D6EDE7] hover:bg-[#23474F] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Download PDF</a>
+            </div>
+          </section>
+        )}
         {/* OVERALL CLARITY SCORE */}
         <section className="bg-[#121824] border border-[#263044] rounded-2xl p-5 sm:p-6 shadow-xs">
           <h2 className="text-xs sm:text-sm font-semibold text-[#94A3B8] uppercase tracking-wider mb-3">
@@ -874,7 +891,7 @@ export default function ResultsScreen({
         )}
 
         {/* ACTIONS */}
-        <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-[#263044]">
+        <div id="report-export-actions" className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-[#263044] scroll-mt-24">
           <button 
             onClick={async () => {
               const card = document.createElement('div');
