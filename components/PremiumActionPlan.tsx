@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { Check, Clipboard, FileText, ListChecks, Quote, Sparkles } from "lucide-react";
+import { FileText, Layers3, Quote } from "lucide-react";
+import EvidenceToFix from "@/components/EvidenceToFix";
+import BetterCopyStudio from "@/components/BetterCopyStudio";
+import SmartPriority from "@/components/SmartPriority";
+import type { PremiumWorkbench, EvidenceFix, PriorityItem, CopyOpportunity } from "@/types/premiumWorkbench";
 
-interface Improvement {
+interface LegacyImprovement {
   id?: string;
   title: string;
   description?: string;
@@ -11,7 +14,7 @@ interface Improvement {
   whatToImprove?: string;
   copyableSuggestion?: string;
 }
-interface PriorityFix {
+interface LegacyPriority {
   title?: string;
   subhead?: string;
   explanation?: string;
@@ -25,163 +28,106 @@ interface ReportEvidence {
   missingFindings?: string[];
 }
 interface PremiumActionPlanProps {
-  recommendation?: PriorityFix;
-  otherImprovements?: Improvement[];
+  workbench?: PremiumWorkbench;
+  recommendation?: LegacyPriority;
+  otherImprovements?: LegacyImprovement[];
   evidence?: ReportEvidence;
   visitorThought?: string;
 }
-const isMeaningful = (text: unknown): text is string =>
-  typeof text === "string" && text.replace(/[“”\s]/g, "").length > 0 &&
-  !/\bundefined\b/i.test(text);
-const unique = (items: Array<string | undefined>) => [...new Set(items.filter(isMeaningful))];
+const meaningful = (value: unknown): value is string =>
+  typeof value === "string" && value.trim().length > 0 && !/\bundefined\b/i.test(value);
 
-/** Renders only already-authorized report content passed by ResultsScreen. */
+/** Previous full reports may not contain the new workbench field. Preserve
+ * their recommendations, but never manufacture or claim verified quotations. */
+function legacyWorkbench(priority?: LegacyPriority, improvements: LegacyImprovement[] = []): PremiumWorkbench {
+  const fixes: EvidenceFix[] = [];
+  if (priority && (meaningful(priority.subhead) || meaningful(priority.explanation))) {
+    fixes.push({
+      id: "legacy-primary",
+      title: priority.subhead || priority.title || "Primary recommended improvement",
+      signalKey: null, reason: priority.explanation || "",
+      suggestedAction: priority.strongerDirection || priority.explanation || "",
+      evidence: [], sourceAvailable: false, isPrimary: true,
+      ...(meaningful(priority.strongerDirection) ? { draftCopy: priority.strongerDirection } : {}),
+    });
+  }
+  improvements.filter(x => x && meaningful(x.title)).forEach((item, index) => {
+    fixes.push({
+      id: `legacy-${index}`, title: item.title, signalKey: null,
+      reason: item.whyItMatters || item.description || "",
+      suggestedAction: item.whatToImprove || item.description || "",
+      evidence: [], sourceAvailable: false, isPrimary: false,
+      ...(meaningful(item.copyableSuggestion) ? { draftCopy: item.copyableSuggestion } : {}),
+    });
+  });
+  const copies: CopyOpportunity[] = fixes
+    .filter((fix): fix is EvidenceFix & { draftCopy: string } => meaningful(fix.draftCopy))
+    .map(fix => ({
+      id: fix.id, label: fix.title, signalKey: fix.signalKey,
+      recommended: fix.draftCopy,
+      origin: fix.isPrimary ? "priority" : "additional",
+    }));
+  const priorities: PriorityItem[] = fixes.map(fix => ({
+    id: fix.id, title: fix.title, signalKey: null, evidenceCount: 0,
+    lane: fix.isPrimary ? "do-first" : "worth-testing",
+    reason: fix.reason || fix.suggestedAction,
+    effortNote: fix.isPrimary ? "Primary recommendation from the saved report"
+      : "Older report: confirm source context before editing",
+  }));
+  return { evidenceFixes: fixes, copyOpportunities: copies, priorities };
+}
+
 export default function PremiumActionPlan({
-  recommendation, otherImprovements = [], evidence, visitorThought,
+  workbench, recommendation, otherImprovements = [], evidence, visitorThought,
 }: PremiumActionPlanProps) {
-  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
-  const hasPriority = recommendation && (
-    isMeaningful(recommendation.subhead) || isMeaningful(recommendation.explanation) ||
-    isMeaningful(recommendation.strongerDirection)
-  );
-  const refinements = otherImprovements.filter((item) => item && isMeaningful(item.title));
-  const suggestions = refinements.filter(item => isMeaningful(item.copyableSuggestion));
-  const observed = unique([evidence?.homepageExcerpt, ...(evidence?.clearFindings ?? []),
-    ...(evidence?.missingFindings ?? [])]);
-
-  const copySuggestion = async (value: string, index: number) => {
-    try {
-      await navigator.clipboard.writeText(value);
-      setCopiedIndex(index);
-    } catch {
-      // User can still select and copy the visible text manually.
-    }
-  };
+  const report = workbench || legacyWorkbench(recommendation, otherImprovements);
+  const quotes = [evidence?.homepageExcerpt, ...(evidence?.clearFindings || []), ...(evidence?.missingFindings || [])]
+    .filter(meaningful);
+  const uniqueQuotes = [...new Set(quotes)];
 
   return (
-    <section id="your-improvement-plan" aria-labelledby="improvement-plan-title" className="space-y-5 sm:space-y-6">
-      <div className="border-b border-[#28384E] pb-4">
-        <span className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-blue-300">
-          <Sparkles className="h-4 w-4" /> Turn insights into changes
-        </span>
-        <h2 id="improvement-plan-title" className="mt-2 text-2xl font-bold tracking-tight text-white">
-          Your Website Improvement Plan
+    <section id="your-improvement-plan" className="scroll-mt-24 space-y-8 sm:space-y-10" aria-labelledby="improvement-workbench-title">
+      <div className="overflow-hidden rounded-2xl border border-[#375577] bg-gradient-to-br from-[#142742] via-[#121D30] to-[#101824] p-5 sm:p-7">
+        <p className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-blue-300">
+          <Layers3 className="h-4 w-4" aria-hidden="true"/> Your Implementation Workbench
+        </p>
+        <h2 id="improvement-workbench-title" className="mt-3 text-2xl font-bold leading-tight tracking-tight text-white sm:text-[30px]">
+          From Clarity Scores to Changes You Can Make.
         </h2>
-        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[#AFC1D7]">
-          Turn the full signal analysis into a prioritized first move, supporting refinements,
-          and suggested wording you can review and adapt to your brand.
+        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[#B7C9DD]">
+          Trace findings to the actual website wording where available, organize what to tackle first, then review and edit the suggested copy. The source and recommendations are kept separate.
         </p>
+        <nav aria-label="Implementation workbench sections" className="mt-4 flex flex-wrap gap-2">
+          <a href="#evidence-to-fix" className="rounded-full border border-[#415D82] bg-[#1D3351] px-3 py-2 text-xs font-semibold text-[#D2E6FF] hover:bg-[#284668]">Evidence-to-Fix</a>
+          <a href="#smart-priority" className="rounded-full border border-[#415D82] bg-[#1D3351] px-3 py-2 text-xs font-semibold text-[#D2E6FF] hover:bg-[#284668]">Smart Priority</a>
+          <a href="#better-copy-studio" className="rounded-full border border-[#415D82] bg-[#1D3351] px-3 py-2 text-xs font-semibold text-[#D2E6FF] hover:bg-[#284668]">Better Copy Studio</a>
+        </nav>
       </div>
 
-      {recommendation && hasPriority && (
-        <article className="overflow-hidden rounded-2xl border border-[#3A5480] bg-[#16243A]">
-          <div className="border-b border-[#344962] px-5 py-4 sm:px-6">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-blue-300">Recommended first move</p>
-            <h3 className="mt-1 text-xl font-bold text-white">{recommendation.subhead || recommendation.title || "Top Priority"}</h3>
-            {isMeaningful(recommendation.explanation) &&
-              <p className="mt-2 text-sm leading-relaxed text-[#C4D3E4]">{recommendation.explanation}</p>}
-          </div>
-          {(isMeaningful(recommendation.currentDirection) || isMeaningful(recommendation.strongerDirection)) && (
-            <div className="grid gap-3 p-4 sm:grid-cols-2 sm:p-5">
-              {isMeaningful(recommendation.currentDirection) && (
-                <div className="rounded-xl border border-[#35465B] bg-[#111B2A] p-4">
-                  <p className="text-[11px] font-bold uppercase tracking-widest text-[#91A7C0]">Current wording / direction</p>
-                  <p className="mt-2 break-words text-sm leading-relaxed text-[#D9E2EE]">{recommendation.currentDirection}</p>
-                </div>
-              )}
-              {isMeaningful(recommendation.strongerDirection) && (
-                <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/[.07] p-4">
-                  <p className="text-[11px] font-bold uppercase tracking-widest text-emerald-300">Suggested direction</p>
-                  <p className="mt-2 break-words text-sm leading-relaxed text-white">{recommendation.strongerDirection}</p>
-                </div>
-              )}
-            </div>
-          )}
-        </article>
-      )}
+      <EvidenceToFix fixes={report.evidenceFixes}/>
+      <SmartPriority priorities={report.priorities}/>
+      <BetterCopyStudio opportunities={report.copyOpportunities}/>
 
-      <div className="rounded-2xl border border-[#2B3B50] bg-[#121824] p-5 sm:p-6">
-        <h3 className="flex items-center gap-2 text-lg font-bold text-white">
-          <ListChecks className="h-5 w-5 text-blue-300" /> More Ways to Improve
-        </h3>
-        <p className="mt-1 text-xs leading-relaxed text-[#91A6C0]">Additional recommendations recorded in this report.</p>
-        {refinements.length ? (
-          <div className="mt-4 divide-y divide-[#2A394D]">
-            {refinements.map((item, index) => (
-              <article key={item.id || index} className="flex items-start gap-3 py-4 first:pt-1 last:pb-0">
-                <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[#354966] bg-[#1B2A3D] text-xs font-bold tabular-nums text-blue-300">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-                <div className="min-w-0 space-y-2">
-                  <h4 className="text-sm font-bold text-white">{item.title}</h4>
-                  {unique([item.description, item.whatToImprove]).map((line, lineIndex) => (
-                    <p key={lineIndex} className="text-sm leading-relaxed text-[#C5D1E0]">{line}</p>
-                  ))}
-                  {isMeaningful(item.whyItMatters) && (
-                    <p className="text-xs leading-relaxed text-[#93A7BE]">
-                      Why it matters: {item.whyItMatters}
-                    </p>
-                  )}
-                </div>
-              </article>
-            ))}
-          </div>
-        ) : <p className="mt-4 text-sm text-[#9DACBF]">No additional improvements were recorded beyond the signal-level guidance.</p>}
-      </div>
-
-      <div className="rounded-2xl border border-[#2B3B50] bg-[#121824] p-5 sm:p-6">
-        <h3 className="flex items-center gap-2 text-lg font-bold text-white">
-          <Clipboard className="h-5 w-5 text-blue-300" /> Copy-Ready Improvements
-        </h3>
-        <p className="mt-1 text-sm leading-relaxed text-[#9DB1C8]">
-          Suggested wording from the report. Review it for accuracy before publishing.
-        </p>
-        {suggestions.length ? (
-          <div className="mt-4 space-y-3">
-            {suggestions.map((item, index) => (
-              <div key={item.id || index} className="rounded-xl border border-[#354963] bg-[#1B293B] p-4">
-                <p className="text-xs font-semibold text-[#A9C3E0]">{item.title}</p>
-                <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-relaxed text-white" style={{ userSelect: "text" }}>
-                  {item.copyableSuggestion}
-                </p>
-                <button type="button" onClick={() => copySuggestion(item.copyableSuggestion!, index)}
-                  className="mt-3 inline-flex min-h-9 items-center gap-2 rounded-full border border-[#3D5878] px-3.5 text-xs font-semibold text-[#D8E8FF] hover:bg-[#263A55] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300">
-                  {copiedIndex === index ? <Check className="h-3.5 w-3.5" /> : <Clipboard className="h-3.5 w-3.5" />}
-                  {copiedIndex === index ? "Copied" : "Copy suggestion"}
-                </button>
-              </div>
-            ))}
-          </div>
-        ) : <p className="mt-4 text-sm text-[#A1B2C6]">No copy-ready alternatives were included in this report. See the individual signal recommendations above.</p>}
-      </div>
-
-      {(observed.length > 0 || isMeaningful(visitorThought)) && (
-        <div className="rounded-2xl border border-[#2B3B50] bg-[#121824] p-5 sm:p-6">
-          <h3 className="flex items-center gap-2 text-lg font-bold text-white">
-            <FileText className="h-5 w-5 text-blue-300" /> Content Behind the Assessment
+      {(uniqueQuotes.length > 0 || meaningful(visitorThought)) && (
+        <section aria-labelledby="content-behind-assessment" className="rounded-2xl border border-[#2B3B50] bg-[#121824] p-5 sm:p-6">
+          <h3 id="content-behind-assessment" className="flex items-center gap-2 text-lg font-bold text-white">
+            <FileText className="h-5 w-5 text-blue-300" aria-hidden="true"/> Content Behind the Assessment
           </h3>
-          <p className="mt-1 text-xs text-[#91A6C0]">
-            {evidence?.locationTag || "Public website content inspected during this scan"}
-          </p>
-          {observed.length > 0 && (
-            <div className="mt-4 space-y-2">
-              {observed.map((text, index) => (
-                <blockquote key={index} className="border-l-2 border-[#3D5878] pl-3 text-sm leading-relaxed text-[#C0D1E4]">
-                  {text}
-                </blockquote>
-              ))}
-            </div>
-          )}
-          {isMeaningful(visitorThought) && (
+          <p className="mt-1 text-xs text-[#91A6C0]">{evidence?.locationTag || "Accessible content from the inspected website"}</p>
+          {uniqueQuotes.length > 0 && <div className="mt-4 space-y-2">
+            {uniqueQuotes.slice(0, 8).map((quote, index) =>
+              <blockquote key={index} className="break-words border-l-2 border-[#3D5878] pl-3 text-sm leading-relaxed text-[#C0D1E4]">{quote}</blockquote>)}
+          </div>}
+          {meaningful(visitorThought) && (
             <div className="mt-5 border-t border-[#2B3B50] pt-4">
               <p className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#92A9C4]">
-                <Quote className="h-3.5 w-3.5" /> Simulated first-time visitor impression
+                <Quote className="h-3.5 w-3.5" aria-hidden="true"/> Simulated first-time visitor impression
               </p>
               <p className="text-sm leading-relaxed text-[#D1DEEC]">{visitorThought}</p>
             </div>
           )}
-          <p className="mt-4 text-xs leading-relaxed text-[#7D91AA]">AI interpretation of accessible page content, not actual user testing.</p>
-        </div>
+          <p className="mt-4 text-xs leading-relaxed text-[#7D91AA]">AI interpretation of publicly accessible website content, not recordings, surveys, or measured conversions.</p>
+        </section>
       )}
     </section>
   );
