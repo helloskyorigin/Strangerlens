@@ -8,7 +8,7 @@ import { trackFunnelEvent } from "@/lib/ui-funnel-events";
 import { Link2, Clock, Share2, Download, AlertCircle, Check, Zap, Info, X, Lock, Mail, ArrowRight, Sparkles, Shield, Users, Eye, ChevronDown, Loader2 } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import Link from "next/link";
-import { adaptReport, SIGNAL_ID_TO_KEY } from "@/lib/report-adapter";
+import { adaptReport } from "@/lib/report-adapter";
 import { generateReportPdf } from "@/lib/pdf-generator";
 import ClaritySignalTooltip from "@/components/ClaritySignalTooltip";
 import {
@@ -676,6 +676,7 @@ export default function ResultsScreen({
               signals={report.signalsList}
               purchaseReadinessApplicable={showLockedPurchase}
               canCheckout={isCheckoutAvailable}
+              isTestMode={isTestMode}
               busy={loading || isVerifyingPayment}
               onUnlock={handleUnlockFullAnalysis}
             />
