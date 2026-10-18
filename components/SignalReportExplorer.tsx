@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type KeyboardEvent } from "react";
 import { AlertCircle, ArrowRight, BookOpenText, CheckCircle2, SearchCheck, Wrench } from "lucide-react";
 import { CLARITY_REPORT_CHAPTERS } from "@/lib/clarity-report-chapters";
 import type { CanonicalPurchaseSignal, CanonicalSignal } from "@/lib/report-adapter";
@@ -43,6 +43,23 @@ export default function SignalReportExplorer({
   const purchaseDetails = activePurchase?.details;
   const goodScore = activeSignal.score !== null && activeSignal.score >= 70;
 
+  // Vertical chapter navigation is operable by mouse, touch, Tab, and arrow keys.
+  const onChapterKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
+    const count = fullSignals.length;
+    let next = index;
+    switch (event.key) {
+      case "ArrowDown": next = (index + 1) % count; break;
+      case "ArrowUp": next = (index - 1 + count) % count; break;
+      case "Home": next = 0; break;
+      case "End": next = count - 1; break;
+      default: return;
+    }
+    event.preventDefault();
+    setSelectedKey(fullSignals[next].key);
+    const buttons = event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('[role="tab"]');
+    buttons?.[next]?.focus();
+  };
+
   return (
     <section id="complete-paid-report" aria-labelledby="complete-paid-report-title" className="space-y-5 sm:space-y-6">
       <div className="rounded-[22px] border border-blue-500/25 bg-gradient-to-br from-[#162741] via-[#111b2c] to-[#121824] p-5 sm:p-7">
@@ -73,7 +90,8 @@ export default function SignalReportExplorer({
               return (
                 <button key={signal.key} type="button" role="tab"
                   id={`chapter-tab-${signal.key}`} aria-controls="chapter-detail-panel"
-                  aria-selected={isSelected}
+                  aria-selected={isSelected} tabIndex={isSelected ? 0 : -1}
+                  onKeyDown={(event) => onChapterKeyDown(event, index)}
                   onClick={() => setSelectedKey(signal.key)}
                   className={`flex min-h-[56px] w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 ${isSelected
                     ? "border-blue-500/40 bg-[#1C3352] text-white"
