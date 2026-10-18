@@ -6,6 +6,7 @@ import { normalizeSignalScore } from "@/services/scoring/normalizeSignalScore";
 import { calculateOverallScore } from "@/services/scoring/calculateOverallScore";
 import { assessPurchaseReadiness } from "@/services/scoring/purchaseReadiness";
 import type { SupportingPagesBundle } from "@/lib/supporting-page-fetcher";
+import { correctContradictedLegalClaims } from "./legalClaimGuard";
 import {
   validateEvidenceList,
   hasExplicitAudienceEvidence,
@@ -28,6 +29,7 @@ export function validateAndScoreAnalysis(
   snapshot: WebsiteSnapshot,
   supportingPages?: SupportingPagesBundle
 ): FinalValidatedAnalysis {
+  aiAnalysis = correctContradictedLegalClaims(aiAnalysis, supportingPages);
   const brandName = snapshot.navigation.brandName || snapshot.meta.title || "this website";
   const isIncompleteExtraction =
     (snapshot.stats?.cleanedTextLength ?? 0) < 200 ||
