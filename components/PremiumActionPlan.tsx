@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 
 import { FileText, Layers3, Quote } from "lucide-react";
 import EvidenceToFix from "@/components/EvidenceToFix";
