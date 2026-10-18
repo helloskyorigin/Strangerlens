@@ -25,7 +25,7 @@ export function useReportPayments(analysisData: any, scanController: { restoreSe
     if (result.unlocked !== true || result.reportId !== reportId || !result.analysis || !result.snapshot) throw new Error("Your full report is not available yet. Please try verification again.");
     const mapped = mapBackendToFrontend(result.analysis, result.normalizedUrl, result.snapshot, result.supportingContext);
     if (signal?.aborted) return;
-    scanController.restoreSession(result.normalizedUrl, { ...mapped, reportId, reportToken: token, isFreeTierOnly: false });
+    scanController.restoreSession(result.normalizedUrl, { ...mapped, reportId, reportToken: token, isFreeTierOnly: false, ...(result.scanCoverage ? { scanCoverage: result.scanCoverage } : {}) });
     setUnlockedReportId(reportId);
   }, [scanController]);
 
