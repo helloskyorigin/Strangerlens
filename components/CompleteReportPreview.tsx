@@ -77,6 +77,22 @@ export default function CompleteReportPreview({
         )}
       </div>
 
+      <div className="border-t border-[#2A3E58] bg-[#142137] px-5 py-5 sm:px-8">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-blue-300">Your premium implementation workbench</p>
+        <div className="mt-3 grid gap-2 sm:grid-cols-3">
+          {[
+            ["Evidence-to-Fix", "Link recommendations to verified page wording when available."],
+            ["Smart Priority", "Know what to do first, test next, and preserve."],
+            ["Better Copy Studio", "Review, shorten when safe, edit and copy drafts."],
+          ].map(([name, description]) => (
+            <div key={name} className="rounded-xl border border-[#34506E] bg-[#1B2D45] p-3.5">
+              <p className="text-sm font-semibold text-white">{name}</p>
+              <p className="mt-1 text-xs leading-relaxed text-[#9FB6D0]">{description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <div className="border-t border-[#30445f] bg-[#152238] px-5 py-5 sm:px-8 sm:py-6">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
           <div>
