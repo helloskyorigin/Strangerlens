@@ -134,9 +134,9 @@ export function buildPremiumWorkbench(
     };
   });
   for (const entry of SIGNALS) {
-    const score = analysis.signals[entry.raw]?.score;
+    const score = analysis.signals[entry.raw].score;
     if (!Number.isFinite(score) || score < 80) continue;
-    const strength = verified(analysis.signals[entry.raw]?.evidence);
+    const strength = verified(analysis.signals[entry.raw].evidence);
     if (strength.length === 0) continue;
     priorities.push({
       id: `preserve-${entry.key}`, lane: "keep-as-is",
