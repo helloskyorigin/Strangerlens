@@ -8,6 +8,8 @@ export interface ScanFlowState {
   isVerifying: boolean;
   isPending: boolean;
   isPreparingResults: boolean;
+  /** Set only when /api/check/verify actually confirmed reachability. */
+  verifiedSite: { domain: string; httpStatus: number | null } | null;
   errorMessage: string | null;
   backendError: string | null;
   analysisData: any;
@@ -30,6 +32,7 @@ export function createScanFlowController(options: ScanFlowControllerOptions = {}
     isVerifying: false,
     isPending: false,
     isPreparingResults: false,
+    verifiedSite: null,
     errorMessage: null,
     backendError: null,
     analysisData: null,
@@ -67,6 +70,7 @@ export function createScanFlowController(options: ScanFlowControllerOptions = {}
   function restoreSession(rawUrl: string, analysisData: any) {
     abortCurrentRequest();
     emit({
+      verifiedSite: null,
       url: rawUrl,
       submittedUrl: rawUrl,
       currentView: "results",
@@ -82,6 +86,7 @@ export function createScanFlowController(options: ScanFlowControllerOptions = {}
   function resetToLanding(clearUrl: boolean = true) {
     abortCurrentRequest();
     emit({
+      verifiedSite: null,
       url: clearUrl ? "" : (state.submittedUrl || state.url),
       submittedUrl: clearUrl ? "" : state.submittedUrl,
       currentView: "landing",
@@ -121,6 +126,7 @@ export function createScanFlowController(options: ScanFlowControllerOptions = {}
   function cancelScan() {
     abortCurrentRequest();
     emit({
+      verifiedSite: null,
       url: state.submittedUrl || state.url,
       currentView: "landing",
       isVerifying: false,
@@ -177,6 +183,7 @@ export function createScanFlowController(options: ScanFlowControllerOptions = {}
       url: rawTarget,
       submittedUrl: validation.normalizedUrl,
       currentView: "scan",
+      verifiedSite: null,
       isVerifying: true,
       isPending: true,
       errorMessage: null,
@@ -219,6 +226,10 @@ export function createScanFlowController(options: ScanFlowControllerOptions = {}
         verifyJson?.finalUrl || verifyJson?.normalizedUrl || validation.normalizedUrl;
       emit({
         submittedUrl: finalTargetUrl,
+        verifiedSite: {
+          domain: typeof verifyJson?.domain === "string" ? verifyJson.domain : new URL(finalTargetUrl).hostname,
+          httpStatus: Number.isInteger(verifyJson?.status) ? verifyJson.status : null,
+        },
         isVerifying: false,
         isPending: true,
       });
@@ -249,6 +260,7 @@ export function createScanFlowController(options: ScanFlowControllerOptions = {}
             reportId: checkJson.reportId,
             reportToken: checkJson.reportToken,
             checkoutEnabled: checkJson.entitlement?.checkoutEnabled === true,
+            ...(checkJson.scanCoverage ? { scanCoverage: checkJson.scanCoverage } : {}),
             isFreeTierOnly: !checkJson?.entitlement?.unlocked,
             ...(checkJson.lockedPreviewCounts
               ? { lockedPreviewCounts: checkJson.lockedPreviewCounts }
