@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { mapBackendToFrontend } from "@/lib/mapper";
+import { trackFunnelEvent } from "@/lib/ui-funnel-events";
 import { clearPendingCheckout, paymentJson, readPendingCheckout, readReportToken, rememberReportAccess } from "@/lib/payment-checkout";
 
 function clearPaymentReturnParameters() {
@@ -55,6 +56,7 @@ export function useReportPayments(analysisData: any, scanController: { restoreSe
           await loadPaidReport(reportId, token, controller.signal);
           if (controller.signal.aborted) return;
           clearPendingCheckout(reportId);
+          trackFunnelEvent("payment_verified");
           setPaymentState("success");
           setPaymentMessage("Payment verified. Your full analysis is unlocked.");
           clearPaymentReturnParameters();
