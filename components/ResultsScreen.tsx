@@ -359,8 +359,10 @@ export default function ResultsScreen({
         open={isPostScanOfferOpen && !isReportUnlocked}
         domain={report.domain}
         overallScore={report.overallScoreDisplay}
-        weakestSignal={weakestSignal?.score !== null && weakestSignal?.score !== undefined
-          ? { title: weakestSignal.title, score: weakestSignal.score } : null}
+        signals={report.signalsList.map(signal => ({
+          title: signal.title, scoreDisplay: signal.scoreDisplay,
+        }))}
+        purchaseReadinessApplicable={showLockedPurchase}
         canCheckout={isCheckoutAvailable}
         isTestMode={isTestMode}
         busy={loading || isVerifyingPayment}
