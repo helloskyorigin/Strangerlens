@@ -22,6 +22,7 @@ import ClaritySignalTooltip from "@/components/ClaritySignalTooltip";
 import { useReportPayments } from "@/hooks/useReportPayments";
 import { validateClientUrl } from "@/lib/url-client-validator";
 import { createScanFlowController } from "@/lib/scan-flow-controller";
+import { trackFunnelEvent } from "@/lib/ui-funnel-events";
 import {
   Reveal,
   StaggerContainer,
@@ -153,6 +154,10 @@ export default function LandingPage() {
     setIsMounted(true);
   }, []);
 
+
+  useEffect(() => {
+    if (isMounted && currentView === "landing") trackFunnelEvent("landing_view");
+  }, [isMounted, currentView]);
 
   // API Integration States
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
@@ -396,6 +401,7 @@ export default function LandingPage() {
 
   const handleAnalyze = async (e?: React.FormEvent, overrideUrl?: string) => {
     if (e) e.preventDefault();
+    trackFunnelEvent("scan_submitted");
     payments.cancelPaymentFlow();
     setPostScanOfferReportId(null);
     if (typeof window !== "undefined") {
@@ -735,7 +741,10 @@ export default function LandingPage() {
                           type="text"
                           disabled={isVerifying || isPending}
                           value={url}
-                          onFocus={() => setIsInputFocused(true)}
+                          onFocus={() => {
+                            if (!isInputFocused) trackFunnelEvent("url_input_focused");
+                            setIsInputFocused(true);
+                          }}
                           onBlur={() => setIsInputFocused(false)}
                           onChange={(e) => {
                             scanController.setUrl(e.target.value);
@@ -1423,6 +1432,7 @@ export default function LandingPage() {
               onOpenPricing={() => setActiveInfoModal("pricing")}
               onGoToResults={() => {
                 const freshReportId = scanController.getState().analysisData?.reportId;
+                if (typeof freshReportId === "string") trackFunnelEvent("scan_completed");
                 setPostScanOfferReportId(typeof freshReportId === "string" ? freshReportId : null);
                 scanController.completeScanToResults();
               }}
