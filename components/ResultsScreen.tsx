@@ -556,7 +556,11 @@ export default function ResultsScreen({
               </span>
             </div>
           </div>
+          {report.verdict && <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[#B7C5D7]">{report.verdict}</p>}
           <div className="mt-4 pt-3.5 border-t border-[#263044]/70">
+            <p className="mb-3 text-xs text-[#8799B1]">
+              Based on inspected public website content, not recorded visitor sessions or conversion data.
+            </p>
             <button
               type="button"
               onClick={() => setIsScoreModalOpen(true)}
@@ -581,6 +585,13 @@ export default function ResultsScreen({
                 <p className="mt-1 max-w-xl text-sm leading-relaxed text-[#B7C5D7]">
                   See the reasons behind this score and get a prioritized, copy-ready improvement plan.
                 </p>
+                {Array.isArray(data?.evidence?.missingFindings) &&
+                  typeof data.evidence.missingFindings[0] === "string" && (
+                    <p className="mt-3 rounded-xl bg-[#1d2a3c] px-3 py-2.5 text-xs leading-relaxed text-[#D9E4F0]">
+                      <span className="mr-1 font-bold text-emerald-300">Free preview:</span>
+                      {data.evidence.missingFindings[0]}
+                    </p>
+                  )}
               </div>
               {isCheckoutAvailable ? (
                 <button type="button" onClick={handleUnlockFullAnalysis}
