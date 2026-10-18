@@ -142,7 +142,7 @@ export function buildPremiumWorkbench(
       id: `preserve-${entry.key}`, lane: "keep-as-is",
       title: `Preserve the strong ${entry.key === "firstImpression" ? "First Impression" : entry.key.charAt(0).toUpperCase() + entry.key.slice(1)} message`,
       signalKey: entry.key,
-      reason: `Scored ${score}/100 with verified supporting content. Avoid replacing proven clear wording without testing.`,
+      reason: `Scored ${score}/100 with verified supporting content. Preserve this clear message unless you have a reason to test an alternative.`,
       evidenceCount: strength.length,
       effortNote: "Preserve or carefully refine — no change required by score alone",
     });
