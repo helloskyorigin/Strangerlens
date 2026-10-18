@@ -43,7 +43,7 @@ export function buildPdfReportModel(stored: StoredServerReport, paid: boolean): 
   const model: PdfReportModel = {
     tier: paid ? "paid" : "free", url: stored.normalizedUrl,
     analysisDate: Number.isFinite(originalDate.getTime()) ? originalDate.toISOString() : null,
-    score: score(analysis.overall_score), status: status(analysis.overall_status), verdict: text(analysis.verdict?.text),
+    score: score(analysis.overall_score), status: analysis.overall_status === "clear" ? "Good" : "Needs improvement", verdict: text(analysis.verdict?.text),
     signals: signalDefinitions.map(([key, title, firstKey]) => {
       const signal = analysis.signals?.[key];
       const first = analysis.first_seconds?.[firstKey];
