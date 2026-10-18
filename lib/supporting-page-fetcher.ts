@@ -442,3 +442,32 @@ export async function discoverAndFetchSupportingPages(
     };
   }
 }
+
+
+/**
+ * Fetch independently discovered first-party legal pages even when optional
+ * multi-page product/context analysis is disabled. Only these three policy
+ * page types are eligible; the ordinary supporting-page ranking cannot crowd
+ * them out. Fetching remains SSRF/timeout/redirect protected.
+ */
+export async function discoverAndFetchLegalPages(
+  homepageHtml: string,
+  homepageFinalUrl: string,
+  options: FetchSupportingPagesOptions = {}
+): Promise<SupportingPagesBundle> {
+  try {
+    const maxPages = Math.min(3, options.maxPages ?? 3);
+    const candidates = discoverSupportingPages(homepageHtml, homepageFinalUrl, {
+      maxPages,
+      onlyLegalPolicies: true,
+    });
+    return await fetchSupportingPages(candidates, homepageFinalUrl, { ...options, maxPages });
+  } catch (err: unknown) {
+    console.warn(
+      "Legal-page discovery/fetching degraded gracefully:",
+      err instanceof Error ? err.message : "Unknown error"
+    );
+    return { discoveredCount: 0, attemptedCount: 0, fetchedCount: 0,
+      totalTimingMs: 0, candidates: [], pages: [], attempts: [] };
+  }
+}
