@@ -49,7 +49,7 @@ async function testActualMilestones() {
   assert.equal(controller.getState().analysisData, null, "Never show completed analysis while backend pending.");
 
   analyze.resolve(response({
-    analysis: { overall_score: 70 },
+    score: 70,
     domain: "example.com", reportId: "test-report",
     scanCoverage: { level: "limited", note: "Limited text", observedCharacters: 100 },
   }));
