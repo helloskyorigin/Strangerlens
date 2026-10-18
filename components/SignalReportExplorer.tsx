@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { AlertCircle, ArrowRight, BookOpenText, CheckCircle2, SearchCheck, Sparkles, Wrench } from "lucide-react";
-import { CLARITY_REPORT_CHAPTERS, type ClarityChapterKey } from "@/lib/clarity-report-chapters";
+import { AlertCircle, ArrowRight, BookOpenText, CheckCircle2, SearchCheck, Wrench } from "lucide-react";
+import { CLARITY_REPORT_CHAPTERS } from "@/lib/clarity-report-chapters";
 import type { CanonicalPurchaseSignal, CanonicalSignal } from "@/lib/report-adapter";
 
 interface SignalReportExplorerProps {
