@@ -47,7 +47,7 @@ const planHtml = renderToStaticMarkup(<PremiumActionPlan
   visitorThought="Simulated first-impression example." />);
 assert.ok(planHtml.includes("Do First") && planHtml.includes("Smart Priority"));
 assert.ok(planHtml.includes("Evidence-to-Fix") && planHtml.includes("Exact source quote unavailable"));
-assert.ok(planHtml.includes("Better Copy Studio") && planHtml.includes("See how it works"));
+assert.ok(planHtml.includes("Better Copy Studio") && planHtml.includes("Organize projects for solo founders"), "Selected copy draft renders; alternative drafts appear when selected.");
 assert.ok(planHtml.includes("Content Behind the Assessment"));
 
 const dom = new JSDOM("<!doctype html><html><body><div id=\"app\"></div></body></html>", {
