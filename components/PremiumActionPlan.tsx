@@ -62,7 +62,7 @@ function legacyWorkbench(priority?: LegacyPriority, improvements: LegacyImprovem
   });
   const copies: CopyOpportunity[] = fixes
     .filter((fix): fix is EvidenceFix & { draftCopy: string } => meaningful(fix.draftCopy))
-    .map(fix => ({
+    .map((fix): CopyOpportunity => ({
       id: fix.id, label: fix.title, signalKey: fix.signalKey,
       recommended: fix.draftCopy,
       origin: fix.isPrimary ? "priority" : "additional",
