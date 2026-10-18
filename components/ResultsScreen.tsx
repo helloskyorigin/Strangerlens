@@ -22,6 +22,7 @@ import {
 export interface AnalysisData {
   purchaseReadiness?: import("@/types/purchase-readiness").PurchaseReadiness;
   purchaseReadinessLocked?: true;
+  scanCoverage?: { level: "sufficient" | "limited" | "unreadable"; note: string; observedCharacters: number };
   domain: string;
   score: number;
   scoreStatus: "Needs improvement" | "Good" | "Needs work" | "Excellent";
@@ -531,6 +532,15 @@ export default function ResultsScreen({
 
       {/* MAIN CONTENT */}
       <main className="flex-1 w-full max-w-[1000px] mx-auto px-4 py-6 sm:py-10 space-y-8 sm:space-y-12">
+        {data?.scanCoverage?.level === "limited" && (
+          <section role="note" aria-label="Limited website inspection" className="flex items-start gap-3 rounded-2xl border border-amber-500/25 bg-[#2D2619] p-4 text-[#E9D7B1] sm:p-5">
+            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-300" aria-hidden="true" />
+            <div>
+              <p className="text-sm font-bold">Limited static-page coverage</p>
+              <p className="mt-1 text-xs leading-relaxed text-[#D8C8A9]">{data.scanCoverage.note}</p>
+            </div>
+          </section>
+        )}
         {isReportUnlocked && (
           <section aria-label="Full analysis unlocked" className="flex flex-col gap-4 rounded-2xl border border-emerald-500/25 bg-[#132A30] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
             <div>
