@@ -67,7 +67,7 @@ export default function PostScanUpgradeModal({
   return (
     <div className="fixed inset-0 z-[80] flex items-end justify-center p-0 sm:items-center sm:p-5"
       role="presentation">
-      <div onClick={onContinueFree} aria-hidden="true"
+      <button type="button" tabIndex={-1} aria-hidden="true" onClick={onContinueFree}
         className="absolute inset-0 bg-[#020617]/85 backdrop-blur-sm" />
       <div ref={dialogRef} role="dialog" aria-modal="true"
         aria-labelledby="post-scan-offer-title" aria-describedby="post-scan-offer-description"
