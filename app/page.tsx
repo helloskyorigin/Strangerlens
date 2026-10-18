@@ -58,10 +58,10 @@ const PRICING_PLANS: PricingPlan[] = [
     paymentLabel: "FREE",
     badge: null,
     positioning: "Instant clarity evaluation.",
-    description: "Discover your overall website clarity score and up to six signal statuses with zero friction.",
+    description: "Discover your overall website clarity score and five core signal scores. Purchase Readiness is a conditional premium signal.",
     features: [
       "Overall Website Clarity Score (0–100)",
-      "Up to Six Signal Scores (sixth for paid offerings)",
+      "Five Core Signal Scores and Statuses",
       "Signal Statuses (Clear / Partly clear / Needs work)",
     ],
     cta: "Analyze My Website Free",
@@ -82,6 +82,7 @@ const PRICING_PLANS: PricingPlan[] = [
       "What's Working & What's Unclear",
       "Actionable Improvements",
       "First 5 Seconds (Understand vs Miss)",
+      "Purchase Readiness score and diagnostics (when applicable)",
     ],
     cta: "Check Your Website First",
     disabledCta: "Check Your Website First",
@@ -115,7 +116,7 @@ const FAQ_ITEMS = [
   {
     question: "What is included in the free analysis?",
     answer:
-      "The Free Preview ($0) gives you your Overall Website Clarity Score and up to six signal scores and statuses with zero signup or credit card required. Purchase Readiness is the conditional sixth signal for websites with identified paid offerings; it includes a short explanation and a separate score.",
+      "The Free Preview ($0) gives you your Overall Website Clarity Score and five core signal scores and statuses with zero signup or credit card required. When paid products, subscriptions or services are identified, Purchase Readiness appears as a locked premium card. Its separate score and findings unlock with verified Full Analysis.",
   },
   {
     question: "What does Full Analysis cost?",
@@ -891,7 +892,7 @@ export default function LandingPage() {
                           </span>
                           <span className="text-[11px] font-medium text-blue-400">Paid offerings only</span>
                         </div>
-                        <p className="mt-2 text-xs leading-relaxed text-[#94A3B8]">A separate purchase-communication score, shown when applicable.</p>
+                        <p className="mt-2 text-xs leading-relaxed text-[#94A3B8]">Premium · Score and findings unlock with Full Analysis when a paid offering is identified.</p>
                       </div>
                     </div>
 
@@ -977,7 +978,7 @@ export default function LandingPage() {
                           Get free clarity signals
                         </h3>
                         <p className="text-sm text-[#94A3B8] leading-relaxed">
-                          Discover your overall score and up to six signals, including Purchase Readiness when a paid offering is identified.
+                          Discover your overall score and five core signals. Unlock Purchase Readiness with Full Analysis when a paid offering is identified.
                         </p>
                       </div>
                     </div>
@@ -1077,7 +1078,7 @@ export default function LandingPage() {
                             <p className="text-xs text-[#94A3B8] leading-relaxed">
                               {card.desc}
                             </p>
-                            {card.title === "PURCHASE READINESS" && <p className="mt-2 text-[11px] font-medium text-blue-400">For paid offerings only</p>}
+                            {card.title === "PURCHASE READINESS" && <p className="mt-2 text-[11px] font-medium text-blue-400">Premium · For paid offerings only</p>}
                           </div>
                         </div>
                       </StaggerItem>
@@ -1124,7 +1125,7 @@ export default function LandingPage() {
                           Instant clarity evaluation.
                         </p>
                         <p className="text-xs sm:text-[13px] text-[#94A3B8] leading-relaxed mb-5">
-                          Discover your overall website clarity score and up to six signal statuses with zero friction.
+                          Discover your overall website clarity score and five core signal scores. Purchase Readiness is a conditional premium signal.
                         </p>
 
                         <div className="flex items-baseline gap-2 mb-5 pb-4 border-b border-[#263044] tabular-nums">
@@ -1143,7 +1144,7 @@ export default function LandingPage() {
                           <ul className="space-y-2.5 text-sm text-[#F1F5F9]">
                             {[
                               "Overall Website Clarity Score (0–100)",
-                              "Up to Six Signal Scores (sixth for paid offerings)",
+                              "Five Core Signal Scores and Statuses",
                               "Signal Statuses (Clear / Partly clear / Needs work)",
                             ].map((feat, i) => (
                               <li key={i} className="flex items-start gap-2.5">

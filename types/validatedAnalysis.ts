@@ -16,6 +16,8 @@ export type ValidatedOverallStatus = "clear" | "needs_improvement";
 export type ConfidenceLevel = "high" | "medium" | "low";
 
 export interface FinalValidatedAnalysis {
+  /** Public applicability marker; no Purchase Readiness scores or findings. */
+  purchase_readiness_locked?: true;
   purchase_readiness?: PurchaseReadiness;
   analysis_version: "1.0";
   scoring_version: "1.0";

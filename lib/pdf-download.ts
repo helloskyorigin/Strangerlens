@@ -12,8 +12,8 @@ export function buildLegacyFreePdfModel(report: CanonicalReport): PdfReportModel
     tier: "free", url: typeof raw?.url === "string" ? raw.url : report.domain,
     analysisDate: date && Number.isFinite(date.getTime()) ? date.toISOString() : null,
     score: report.overallScore, status: report.overallStatus, verdict: report.verdict,
-    signals: [...report.signalsList, ...(report.purchaseReadiness ? [report.purchaseReadiness] : [])].map(signal => ({ title: signal.title, score: signal.score, status: signal.status, explanation: "", working: [], unclear: [], improvements: [], ...(signal.key === "purchaseReadiness" ? {independent:true} : {}) })),
-    freeFindings: report.purchaseReadiness ? [{title:"Purchase Readiness — separate assessment",paragraphs:[report.purchaseReadiness.summary]}] : [], understand: [], miss: [], actions: [], evidence: [],
+    signals: report.signalsList.map(signal => ({ title: signal.title, score: signal.score, status: signal.status, explanation: "", working: [], unclear: [], improvements: [] })),
+    freeFindings: [], understand: [], miss: [], actions: [], evidence: [],
   };
 }
 

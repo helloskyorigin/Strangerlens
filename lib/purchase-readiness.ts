@@ -7,22 +7,16 @@ export function isPurchaseReadiness(value: unknown): value is PurchaseReadiness 
     ["clear", "understandable", "partly_clear", "unclear"].includes(item.status) && typeof item.summary === "string" && !!item.summary.trim();
 }
 
-/** Explicit allowlist: do not spread the full paid assessment into a preview. */
-export function purchasePreview(value: unknown): PurchaseReadiness | undefined {
-  if (!isPurchaseReadiness(value)) return undefined;
-  return { applicable: true, method: value.method, score: value.score, status: value.status, summary: value.summary };
-}
-
 /** Redis Lua/cjson can round-trip empty arrays as {} during payment updates.
  * Normalize at the report boundary without changing stored/payment records. */
 export function readPurchaseReadiness(value: unknown): PurchaseReadiness | undefined {
-  const preview = purchasePreview(value);
-  if (!preview || !isPurchaseReadiness(value)) return undefined;
+  if (!isPurchaseReadiness(value)) return undefined;
+  const assessment = { applicable: true as const, method: value.method, score: value.score, status: value.status, summary: value.summary };
   const details = value.details;
-  if (!details || typeof details !== "object") return preview;
+  if (!details || typeof details !== "object") return assessment;
   const strings = (items: unknown): string[] => Array.isArray(items) ? items.filter((x): x is string => typeof x === "string" && !!x.trim()) : [];
   const evidence = (items: unknown) => Array.isArray(items) ? items.filter(x => x?.status === "verified" && typeof x.source === "string" && typeof x.text === "string" && !!x.text.trim()) : [];
-  return { ...preview, details: {
+  return { ...assessment, details: {
     explanation: typeof details.explanation === "string" ? details.explanation : "",
     working: strings(details.working), hesitations: strings(details.hesitations), pricingAndValueIssues: strings(details.pricingAndValueIssues),
     recommendations: strings(details.recommendations), limitations: strings(details.limitations), evidence: evidence(details.evidence),

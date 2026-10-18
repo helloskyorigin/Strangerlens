@@ -15,6 +15,7 @@ import {
 
 export interface AnalysisData {
   purchaseReadiness?: import("@/types/purchase-readiness").PurchaseReadiness;
+  purchaseReadinessLocked?: true;
   domain: string;
   score: number;
   scoreStatus: "Needs improvement" | "Good" | "Needs work" | "Excellent";
@@ -126,7 +127,9 @@ export default function ResultsScreen({
 
   // Canonical report normalized from authoritative analysis data
   const report = adaptReport(data);
-  const displaySignals = report.purchaseReadiness ? [...report.signalsList, report.purchaseReadiness] : report.signalsList;
+  const unlockedPurchase = isReportUnlocked ? report.purchaseReadiness : undefined;
+  const showLockedPurchase = !unlockedPurchase && Boolean(report.purchaseReadinessLocked || report.purchaseReadiness);
+  const displaySignals = unlockedPurchase ? [...report.signalsList, unlockedPurchase] : report.signalsList;
   // Tease only the public score, never the locked explanation or findings.
   const weakestSignal = report.signalsList.reduce<(typeof report.signalsList)[number] | null>((weakest, signal) => {
     if (signal.score === null || !Number.isFinite(signal.score) || signal.score < 0 || signal.score > 100) return weakest;
@@ -291,12 +294,41 @@ export default function ResultsScreen({
     { id: "value", label: "Value" },
     { id: "trust", label: "Trust" },
     { id: "action", label: "Action" },
-    ...(report.purchaseReadiness ? [{ id: "purchase-readiness", label: "Purchase Readiness" }] : []),
+    ...(unlockedPurchase ? [{ id: "purchase-readiness", label: "Purchase Readiness" }] : []),
   ];
 
-  const explorerSignalId = activeExplorerSignalId === "purchase-readiness" && !report.purchaseReadiness ? "first-impression" : activeExplorerSignalId;
+  const explorerSignalId = activeExplorerSignalId === "purchase-readiness" && !unlockedPurchase ? "first-impression" : activeExplorerSignalId;
   const activeSignalKey = SIGNAL_ID_TO_KEY[explorerSignalId] || "firstImpression";
-  const activeSignal = explorerSignalId === "purchase-readiness" && report.purchaseReadiness ? report.purchaseReadiness : report.signals[activeSignalKey];
+  const activeSignal = explorerSignalId === "purchase-readiness" && unlockedPurchase ? unlockedPurchase : report.signals[activeSignalKey];
+
+  const handleUnlockFullAnalysis = async () => {
+    setLoading(true);
+    setPaymentError(null);
+    try {
+      const targetReportId = data?.reportId || report.rawReport?.reportId;
+      const targetReportToken = data?.reportToken || report.rawReport?.reportToken;
+      if (!targetReportId) {
+        setPaymentError("Report session missing. Please run a website scan first.");
+        return;
+      }
+      if (targetReportToken) {
+        rememberReportAccess(targetReportId, targetReportToken);
+      }
+      const result = await startReportCheckout(targetReportId, targetReportToken);
+      if (result.alreadyPaid) {
+        setVerifiedUnlocked(true);
+        if (onRefreshPaidReport) {
+          await onRefreshPaidReport();
+        }
+      } else if (result.checkoutUrl) {
+        window.location.assign(result.checkoutUrl);
+      }
+    } catch (err) {
+      setPaymentError(err instanceof Error ? err.message : "Failed to open checkout.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (!data) return null;
 
@@ -555,12 +587,37 @@ export default function ResultsScreen({
                     <div className="mt-3 border-t border-[#263044]/70 pt-3 space-y-2">
                       <p className="text-xs text-[#64748B]">Separate score · Not included in Overall Clarity Score</p>
                       <p className="text-xs sm:text-sm leading-relaxed text-[#94A3B8]">{report.purchaseReadiness.summary}</p>
-                      {!isReportUnlocked && <p className="text-xs leading-relaxed text-blue-400 inline-flex items-start gap-1.5"><Lock className="w-3.5 h-3.5 mt-0.5 shrink-0" aria-hidden="true" />Unlock buyer-hesitation findings, pricing and value issues, and specific improvements with Full Analysis.</p>}
                     </div>
                   )}
                 </div>
               );
             })}
+            {showLockedPurchase && (
+              <div data-testid="purchase-readiness-locked" className="p-4 sm:p-4.5 space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="font-medium text-sm sm:text-base text-[#F1F5F9]">Purchase Readiness</span>
+                    <ClaritySignalTooltip signalKey="purchaseReadiness" name="Purchase Readiness" isOpen={activeSignalTooltip === "locked-purchase"}
+                      onOpen={() => setActiveSignalTooltip("locked-purchase")}
+                      onClose={() => setActiveSignalTooltip(current => current === "locked-purchase" ? null : current)} />
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/20 bg-blue-500/10 px-2.5 py-1 text-[11px] font-semibold text-blue-400">
+                    <Lock className="h-3 w-3" aria-hidden="true" />Premium
+                  </span>
+                </div>
+                <p className="text-xs sm:text-sm leading-relaxed text-[#94A3B8]">This website offers paid products, subscriptions or services. Unlock its Purchase Readiness score and discover how clearly it helps visitors decide to buy.</p>
+                <p className="text-xs leading-relaxed text-[#64748B]">A separate assessment of pricing, value, buyer confidence and purchase next steps. Your Overall Clarity Score uses only the original five signals.</p>
+                {!isReportUnlocked ? (
+                  <>
+                    <button type="button" onClick={handleUnlockFullAnalysis} disabled={!isCheckoutAvailable || loading || isVerifyingPayment}
+                      className="w-full sm:w-auto max-w-full rounded-full bg-[#246BFD] px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-600 disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#121824]">
+                      {loading || isVerifyingPayment ? "Processing..." : "Unlock Full Analysis — $5"}
+                    </button>
+                    {!isCheckoutAvailable && <p className="text-xs text-[#94A3B8]">Checkout is currently unavailable. Please try again later.</p>}
+                  </>
+                ) : <p className="text-xs text-[#94A3B8]">Your score is awaiting the verified full report. Refresh the report to try again.</p>}
+              </div>
+            )}
           </div>
         </section>
 
@@ -598,34 +655,7 @@ export default function ResultsScreen({
                   <button
                     type="button"
                     disabled={loading || isVerifyingPayment}
-                    onClick={async () => {
-                      setLoading(true);
-                      setPaymentError(null);
-                      try {
-                        const targetReportId = data?.reportId || report.rawReport?.reportId;
-                        const targetReportToken = data?.reportToken || report.rawReport?.reportToken;
-                        if (!targetReportId) {
-                          setPaymentError("Report session missing. Please run a website scan first.");
-                          return;
-                        }
-                        if (targetReportToken) {
-                          rememberReportAccess(targetReportId, targetReportToken);
-                        }
-                        const result = await startReportCheckout(targetReportId, targetReportToken);
-                        if (result.alreadyPaid) {
-                          setVerifiedUnlocked(true);
-                          if (onRefreshPaidReport) {
-                            await onRefreshPaidReport();
-                          }
-                        } else if (result.checkoutUrl) {
-                          window.location.assign(result.checkoutUrl);
-                        }
-                      } catch (err) {
-                        setPaymentError(err instanceof Error ? err.message : "Failed to open checkout.");
-                      } finally {
-                        setLoading(false);
-                      }
-                    }}
+                    onClick={handleUnlockFullAnalysis}
                     className="w-full bg-[#246BFD] hover:bg-blue-600 active:scale-[0.98] disabled:opacity-60 text-white font-semibold py-3.5 px-6 rounded-full text-sm transition-all shadow-md shadow-blue-500/25 cursor-pointer inline-flex items-center justify-center gap-2"
                   >
                     {loading || isVerifyingPayment ? (

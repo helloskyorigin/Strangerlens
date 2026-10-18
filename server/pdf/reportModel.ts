@@ -65,7 +65,7 @@ export function buildPdfReportModel(stored: StoredServerReport, paid: boolean): 
     freeFindings: [], understand: [], miss: [], actions: [], evidence: [],
   };
 
-  const purchase = readPurchaseReadiness(analysis.purchase_readiness);
+  const purchase = paid ? readPurchaseReadiness(analysis.purchase_readiness) : undefined;
   if (purchase) {
     model.signals.push({ title: "Purchase Readiness", score: purchase.score, status: status(purchase.status), independent: true,
       explanation: paid ? text(purchase.details?.explanation) : "", working: paid ? purchase.details?.working || [] : [],

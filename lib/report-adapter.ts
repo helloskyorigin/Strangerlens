@@ -68,6 +68,7 @@ export interface CanonicalPurchaseSignal extends Omit<CanonicalSignal, "key"> {
 }
 
 export interface CanonicalReport {
+  purchaseReadinessLocked?: boolean;
   purchaseReadiness?: CanonicalPurchaseSignal;
   domain: string;
   overallScore: number | null;
@@ -202,6 +203,7 @@ export function adaptReport(raw: any): CanonicalReport {
     verdictSubtext,
     signals,
     signalsList,
+    ...(raw.purchaseReadinessLocked === true || raw.purchase_readiness_locked === true || raw.analysis?.purchase_readiness_locked === true ? { purchaseReadinessLocked: true } : {}),
     ...(purchaseReadiness ? { purchaseReadiness } : {}),
     firstSeconds,
     rawReport: raw,

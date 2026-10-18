@@ -31,14 +31,19 @@ Missing content means it was not identified in the accessible extraction, not th
 it is absent everywhere. Conservative detection can omit a monetized site if its
 paid offering is only available behind scripts, login, or unfetched pages.
 
-Free APIs allowlist only applicability, method, score, status, and a short summary.
-Details, evidence, issues, recommendations and contextual CTA copy suggestions stay
-in the stored paid report. Existing ownership and payment entitlement checks protect
+Free APIs return only the boolean `purchase_readiness_locked: true` applicability
+marker. No sixth-signal score, status, summary, findings, evidence or fixes are sent
+to unpaid browsers. The frontend maps this to `purchaseReadinessLocked` and displays
+a premium locked card after Action with the existing $5 checkout CTA. Full scores
+and findings stay in the stored paid report. Free PDFs and legacy PDF fallbacks
+export only the original five signals, even if client state contains an older
+assessment. Verified premium PDFs include the applicable sixth assessment. Existing ownership and payment entitlement checks protect
 both full-report retrieval and PDF data. Refunded access remains denied.
 
 The original five canonical keys and `signalsList` remain unchanged. Results append
-the optional row after Action and expose a matching paid diagnostic tab. PDF and
-share exports label its score as independent. No database migration is needed.
+the optional paid row after Action and expose a matching paid diagnostic tab. Paid
+PDF and paid share exports label its score as independent. Free share exports keep
+only the five public scores. No database migration is needed.
 
 Run `npm run test:purchase-readiness`, the existing regression suite, and PDF/history
 tests (with their disposable local Redis database) before releasing.

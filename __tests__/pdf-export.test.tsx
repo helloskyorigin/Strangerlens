@@ -125,7 +125,10 @@ async function main() {
     purchaseAnalysis.purchase_readiness.details!.recommendations.push("PAID_PURCHASE_RECOMMENDATION_SENTINEL");
     const purchaseReport = await saveServerReport({domain:"example.com",normalizedUrl:"https://example.com/purchase",snapshot:purchaseSnapshot,fullAnalysis:purchaseAnalysis});
     const purchaseFree = (await (await request(purchaseReport.reportId,purchaseReport.reportToken,"?paid=true")).json()).report;
-    check(purchaseFree.tier==="free" && purchaseFree.signals.length===6 && !JSON.stringify(purchaseFree).includes("PAID_PURCHASE_RECOMMENDATION_SENTINEL"), "purchase PDF route ignores forged paid query and redacts the sixth signal");
+    check(purchaseFree.tier==="free" && purchaseFree.signals.length===5 && !JSON.stringify(purchaseFree).includes("Purchase Readiness") && !JSON.stringify(purchaseFree).includes("PAID_PURCHASE_RECOMMENDATION_SENTINEL"), "purchase PDF route ignores forged paid query and redacts the sixth signal");
+    const readFullPurchase=()=>paidReportData(new NextRequest(`https://example.com/api/report/${purchaseReport.reportId}?paid=true&unlocked=true`,{headers:{Authorization:`Bearer ${purchaseReport.reportToken}`}}),{params:Promise.resolve({reportId:purchaseReport.reportId})});
+    const unpaidFull=await readFullPurchase();
+    check(unpaidFull.status===403 && !JSON.stringify(await unpaidFull.json()).includes('purchase_readiness'), 'unpaid full report denies access even with forged paid UI/query flags');
     const purchaseOrder: CheckoutOrder = {orderId:randomUUID(),reportId:purchaseReport.reportId,environment:"test_mode",productId:"pdt_single",createdAt:Date.now(),sessionId:"cks_purchase_fixture"};
     await saveOrder(purchaseOrder); await applyVerifiedPayment(purchaseOrder,"pay_purchase_fixture",true);
     check((await request(purchaseReport.reportId,free.reportToken)).status===404,"another report's token cannot access purchase details");
@@ -135,7 +138,7 @@ async function main() {
     const purchasePaidPayload = await purchasePaidResponse.json();
     assert.equal(purchasePaidResponse.status, 200, JSON.stringify(purchasePaidPayload));
     const purchasePaid = purchasePaidPayload.report;
-    check(purchasePaid.tier==="paid" && JSON.stringify(purchasePaid).includes("PAID_PURCHASE_RECOMMENDATION_SENTINEL"), "sixth-signal PDF findings require verified server payment");
+    check(purchasePaid.tier==="paid" && purchasePaid.signals.length===6 && JSON.stringify(purchasePaid).includes("PAID_PURCHASE_RECOMMENDATION_SENTINEL"), "sixth-signal PDF findings require verified server payment");
     const fullPurchaseResponse = await paidReportData(new NextRequest(`https://example.com/api/report/${purchaseReport.reportId}`,{headers:{Authorization:`Bearer ${purchaseReport.reportToken}`}}),{params:Promise.resolve({reportId:purchaseReport.reportId})});
     const fullPurchase = (await fullPurchaseResponse.json()).analysis.purchase_readiness;
     check(fullPurchase.score===purchaseAnalysis.purchase_readiness.score,"stored paid report/history retrieval returns the original independent assessment");
@@ -143,7 +146,12 @@ async function main() {
     const purchaseStored:any = await redis.get(reportKey(purchaseReport.reportId));
     const refunded=JSON.parse(purchaseStored);refunded.payment.active=false;await redis.set(reportKey(purchaseReport.reportId),JSON.stringify(refunded));
     check((await request(purchaseReport.reportId,purchaseReport.reportToken)).status===403,"refund revokes purchase-readiness premium PDF access");
+    check((await readFullPurchase()).status===403,'refund revokes full Purchase Readiness findings as well as PDF');
     await redis.set(reportKey(purchaseReport.reportId),purchaseStored);
+    const originalEnvironment=process.env.DODO_ENVIRONMENT;
+    process.env.DODO_ENVIRONMENT='live_mode';
+    check((await request(purchaseReport.reportId,purchaseReport.reportToken)).status===403 && (await readFullPurchase()).status===403,'test-mode purchase cannot unlock live-mode sixth signal or PDF');
+    process.env.DODO_ENVIRONMENT=originalEnvironment;
     await writeFile(path.join(outputDirectory,"purchase-free.pdf"),Buffer.from(buildReportPdf(purchaseFree,fonts).output("arraybuffer")));
     await writeFile(path.join(outputDirectory,"purchase-paid.pdf"),Buffer.from(buildReportPdf(purchasePaid,fonts).output("arraybuffer")));
     const docs = { free: buildReportPdf(freeModel, fonts), paid: buildReportPdf(paidModel, fonts) };

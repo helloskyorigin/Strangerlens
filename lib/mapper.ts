@@ -482,6 +482,7 @@ export function mapBackendToFrontend(
   return {
     domain: cleanDomain,
     ...(purchaseReadiness ? { purchaseReadiness } : {}),
+    ...(backendAnalysis.purchase_readiness_locked === true ? { purchaseReadinessLocked: true as const } : {}),
     score: backendAnalysis.overall_score,
     scoreStatus: scoreToStatus(backendAnalysis.overall_score),
     verdict: backendAnalysis.verdict.text,
