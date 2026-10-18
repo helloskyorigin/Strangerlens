@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import PostScanUpgradeModal from "@/components/PostScanUpgradeModal";
+import { trackFunnelEvent } from "@/lib/ui-funnel-events";
 import { Link2, Clock, Share2, Download, AlertCircle, Check, Zap, Info, X, Lock, Mail, ArrowRight, Sparkles, Shield, Users, Eye, ChevronDown, Loader2 } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import Link from "next/link";
@@ -120,7 +121,10 @@ export default function ResultsScreen({
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [isPostScanOfferOpen, setIsPostScanOfferOpen] = useState(false);
   const offeredReportRef = useRef<string | null>(null);
-  const closePostScanOffer = useCallback(() => setIsPostScanOfferOpen(false), []);
+  const closePostScanOffer = useCallback(() => {
+    trackFunnelEvent("post_scan_offer_dismissed");
+    setIsPostScanOfferOpen(false);
+  }, []);
   const [isVerifyingPayment, setIsVerifyingPayment] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
@@ -155,14 +159,15 @@ export default function ResultsScreen({
       offeredReportRef.current = currentReportId;
       try { window.sessionStorage.setItem(`sl_post_scan_offer_v1:${currentReportId}`, "shown"); } catch { /* no-op */ }
       setIsPostScanOfferOpen(true);
+      trackFunnelEvent("post_scan_offer_shown");
     }, 700);
     return () => window.clearTimeout(timer);
   }, [postScanOfferReportId, currentReportId, isCheckoutAvailable,
       isReportUnlocked, isVerifyingPayment, paymentState]);
 
   useEffect(() => {
-    if (isReportUnlocked && isPostScanOfferOpen) closePostScanOffer();
-  }, [isReportUnlocked, isPostScanOfferOpen, closePostScanOffer]);
+    if (isReportUnlocked && isPostScanOfferOpen) setIsPostScanOfferOpen(false);
+  }, [isReportUnlocked, isPostScanOfferOpen]);
 
 
   useEffect(() => {
@@ -331,6 +336,7 @@ export default function ResultsScreen({
   const activeSignal = explorerSignalId === "purchase-readiness" && unlockedPurchase ? unlockedPurchase : report.signals[activeSignalKey];
 
   const handleUnlockFullAnalysis = async () => {
+    trackFunnelEvent("upgrade_clicked");
     setLoading(true);
     setPaymentError(null);
     try {
@@ -350,6 +356,7 @@ export default function ResultsScreen({
           await onRefreshPaidReport();
         }
       } else if (result.checkoutUrl) {
+        trackFunnelEvent("checkout_opened");
         window.location.assign(result.checkoutUrl);
       }
     } catch (err) {
