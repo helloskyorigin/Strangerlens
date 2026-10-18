@@ -43,3 +43,5 @@ jobs:
         run: npm test
       - name: Purchase readiness regressions
         run: npm run test:purchase-readiness
+      - name: Production build
+        run: npm run build
