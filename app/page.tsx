@@ -163,6 +163,7 @@ export default function LandingPage() {
   // API Integration States
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
   const [isPending, setIsPending] = useState<boolean>(false);
+  const [verifiedSite, setVerifiedSite] = useState<{domain:string;httpStatus:number|null}|null>(null);
   const [backendError, setBackendError] = useState<string | null>(null);
   const [analysisData, setAnalysisData] = useState<any>(null);
   // Fresh-scan-only upsell: never auto-open on restoring an existing report.
@@ -206,6 +207,7 @@ export default function LandingPage() {
         setCurrentView(nextState.currentView);
         setIsVerifying(nextState.isVerifying);
         setIsPending(nextState.isPending);
+        setVerifiedSite(nextState.verifiedSite);
         setErrorMessage(nextState.errorMessage);
         setBackendError(nextState.backendError);
         setAnalysisData(nextState.analysisData);
@@ -1409,6 +1411,8 @@ export default function LandingPage() {
               rawUrl={submittedUrl}
               isBackendReady={!isPending && !isVerifying && analysisData !== null}
               isScanning={isPending || isVerifying}
+              isVerifying={isVerifying}
+              verifiedSite={verifiedSite}
               backendError={backendError}
               onRetry={() => {
                 scanController.retryScan();
