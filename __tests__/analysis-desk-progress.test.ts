@@ -93,7 +93,10 @@ function testCoverage() {
   assert.equal(assessScanCoverage(rich).level, "sufficient");
 }
 
-await testActualMilestones();
-await testFailureAndReset();
-testCoverage();
-console.log("PASS: scanning progress follows verified network events, failed scans never complete, and empty HTML receives no unreliable score.");
+async function main() {
+  await testActualMilestones();
+  await testFailureAndReset();
+  testCoverage();
+  console.log("PASS: scanning progress follows verified network events, failed scans never complete, and empty HTML receives no unreliable score.");
+}
+main().catch(error => { console.error(error); process.exitCode = 1; });
