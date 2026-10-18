@@ -763,8 +763,15 @@ export function discoverSupportingPages(
   }
 
   const maxHtmlChars = SERVER_LIMITS.WEBSITE_MAX_HTML_CHARS;
+  // Policy links are frequently in the footer, after a very long homepage.
+  // Prefer the final bounded portion for legal-only discovery rather than
+  // silently discarding footer links outside the standard extraction window.
   const boundedHtml =
-    html.length > maxHtmlChars ? html.slice(0, maxHtmlChars) : html;
+    html.length > maxHtmlChars
+      ? options.onlyLegalPolicies
+        ? html.slice(-maxHtmlChars)
+        : html.slice(0, maxHtmlChars)
+      : html;
 
   const $ = cheerio.load(boundedHtml);
 
