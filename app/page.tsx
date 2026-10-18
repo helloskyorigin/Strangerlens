@@ -79,11 +79,12 @@ const PRICING_PLANS: PricingPlan[] = [
     positioning: "Actionable clarity & diagnostics.",
     description: "Go beyond your clarity scores. Discover what's working, what's unclear, and how to improve your website.",
     features: [
-      "Detailed Signal Diagnostics",
-      "What's Working & What's Unclear",
-      "Actionable Improvements",
-      "First 5 Seconds (Understand vs Miss)",
-      "Purchase Readiness score and diagnostics (when applicable)",
+      "Five Detailed Signal Diagnostics",
+      "Evidence-to-Fix (verified wording when available)",
+      "Smart Priority & Action Plan",
+      "Better Copy Studio (review, edit & copy)",
+      "First 5 Seconds + Premium PDF",
+      "Purchase Readiness (when applicable)",
     ],
     cta: "Check Your Website First",
     disabledCta: "Check Your Website First",
@@ -122,7 +123,7 @@ const FAQ_ITEMS = [
   {
     question: "What does Full Analysis cost?",
     answer:
-      "Full Analysis costs $5 per report, paid once with no subscription. Run a free preview first, then unlock detailed signal diagnostics, actionable improvements, and the First 5 Seconds breakdown. Checkout availability is shown on your report.",
+      "Full Analysis costs $5 per report, paid once with no subscription. Run a free preview first, then unlock five detailed signal analyses, Evidence-to-Fix findings with verified quotes when available, a Smart Priority plan, an editable Better Copy Studio, and the First 5 Seconds breakdown. Checkout availability is shown on your report.",
   },
   {
     question: "Do I need to create an account?",
