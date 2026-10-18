@@ -19,7 +19,7 @@ export function trackFunnelEvent(event: FunnelEvent): void {
   if (typeof window === "undefined") return;
   const detail = { event: `strangerlens_${event}`, product: "strangerlens" };
   try {
-    window.dispatchEvent(new CustomEvent("strangerlens:funnel", { detail }));
+    window.dispatchEvent(new window.CustomEvent("strangerlens:funnel", { detail }));
     const analyticsWindow = window as Window & {
       dataLayer?: Array<Record<string, string>>;
     };
