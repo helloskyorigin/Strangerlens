@@ -1,5 +1,6 @@
 "use client";
-import React, { useState, useMemo, useEffect, useRef } from "react";
+import React, { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import PostScanUpgradeModal from "@/components/PostScanUpgradeModal";
 import { Link2, Clock, Share2, Download, AlertCircle, Check, Zap, Info, X, Lock, Mail, ArrowRight, Sparkles, Shield, Users, Eye, ChevronDown, Loader2 } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import Link from "next/link";
@@ -104,6 +105,7 @@ export default function ResultsScreen({
   onRecheck,
   onOpenFaq,
   onOpenPricing,
+  postScanOfferReportId = null,
 }: any) {
   const [activeExplorerSignalId, setActiveExplorerSignalId] = useState("first-impression");
   const [activeSignalTooltip, setActiveSignalTooltip] = useState<string | null>(null);
@@ -116,6 +118,9 @@ export default function ResultsScreen({
   const [loading, setLoading] = useState(false);
   const [verifiedUnlocked, setVerifiedUnlocked] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [isPostScanOfferOpen, setIsPostScanOfferOpen] = useState(false);
+  const offeredReportRef = useRef<string | null>(null);
+  const closePostScanOffer = useCallback(() => setIsPostScanOfferOpen(false), []);
   const [isVerifyingPayment, setIsVerifyingPayment] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
@@ -135,6 +140,30 @@ export default function ResultsScreen({
     if (signal.score === null || !Number.isFinite(signal.score) || signal.score < 0 || signal.score > 100) return weakest;
     return weakest === null || signal.score < weakest.score! ? signal : weakest;
   }, null);
+  // Offer only after a FRESH, successfully completed scan (never on restore,
+  // back navigation, a purchased report, or after returning from checkout).
+  const currentReportId: string | null = data?.reportId || report.rawReport?.reportId || null;
+  useEffect(() => {
+    if (!postScanOfferReportId || currentReportId !== postScanOfferReportId ||
+      !isCheckoutAvailable || isReportUnlocked || isVerifyingPayment ||
+      paymentState === "pending" || paymentState === "success") return;
+    if (offeredReportRef.current === currentReportId) return;
+    try {
+      if (window.sessionStorage.getItem(`sl_post_scan_offer_v1:${currentReportId}`) === "shown") return;
+    } catch { /* Private browsing may disable session storage. */ }
+    const timer = window.setTimeout(() => {
+      offeredReportRef.current = currentReportId;
+      try { window.sessionStorage.setItem(`sl_post_scan_offer_v1:${currentReportId}`, "shown"); } catch { /* no-op */ }
+      setIsPostScanOfferOpen(true);
+    }, 700);
+    return () => window.clearTimeout(timer);
+  }, [postScanOfferReportId, currentReportId, isCheckoutAvailable,
+      isReportUnlocked, isVerifyingPayment, paymentState]);
+
+  useEffect(() => {
+    if (isReportUnlocked && isPostScanOfferOpen) closePostScanOffer();
+  }, [isReportUnlocked, isPostScanOfferOpen, closePostScanOffer]);
+
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -334,6 +363,19 @@ export default function ResultsScreen({
 
   return (
     <div id="results-content" className="min-h-screen bg-[#090D15] text-[#F1F5F9] font-sans antialiased flex flex-col">
+      <PostScanUpgradeModal
+        open={isPostScanOfferOpen && !isReportUnlocked}
+        domain={report.domain}
+        overallScore={report.overallScoreDisplay}
+        weakestSignal={weakestSignal?.score !== null && weakestSignal?.score !== undefined
+          ? { title: weakestSignal.title, score: weakestSignal.score } : null}
+        canCheckout={isCheckoutAvailable}
+        isTestMode={isTestMode}
+        busy={loading || isVerifyingPayment}
+        paymentError={paymentError}
+        onContinueFree={closePostScanOffer}
+        onUpgrade={handleUnlockFullAnalysis}
+      />
       {/* EARLY ACCESS THANK YOU SUCCESS MODAL */}
       <AnimatePresence>
         {isEarlySuccessModalOpen && (
@@ -526,6 +568,32 @@ export default function ResultsScreen({
           </div>
         </section>
 
+        {/* Give an immediate reason to explore paid details without hiding free scores. */}
+        {!isReportUnlocked && weakestSignal && weakestSignal.score !== null && (
+          <section className="rounded-2xl border border-blue-500/25 bg-[#111d30] p-4 sm:p-6"
+            aria-label="Your top clarity opportunity">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
+                <p className="text-[11px] font-bold uppercase tracking-widest text-blue-300">A Clarity Opportunity</p>
+                <h2 className="mt-1.5 text-lg font-bold text-white">
+                  {weakestSignal.title} <span className="font-semibold text-amber-300">— {weakestSignal.score}/100</span>
+                </h2>
+                <p className="mt-1 max-w-xl text-sm leading-relaxed text-[#B7C5D7]">
+                  See the reasons behind this score and get a prioritized, copy-ready improvement plan.
+                </p>
+              </div>
+              {isCheckoutAvailable ? (
+                <button type="button" onClick={handleUnlockFullAnalysis}
+                  disabled={loading || isVerifyingPayment}
+                  className="w-full shrink-0 rounded-full bg-[#246BFD] px-5 py-3 text-sm font-semibold text-white hover:bg-blue-600 disabled:opacity-50 sm:w-auto">
+                  {loading || isVerifyingPayment ? "Opening checkout…" : "See Detailed Fixes — $5 →"}
+                </button>
+              ) : <span className="shrink-0 text-xs text-[#9AAAC0]">Your free analysis is below ↓</span>}
+            </div>
+            {paymentError && !isPostScanOfferOpen && <p role="alert" className="mt-3 text-xs text-rose-300">{paymentError}</p>}
+          </section>
+        )}
+
         {/* 1. FREE: FIVE CLARITY SIGNALS */}
         <section>
           <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6 text-[#F1F5F9]">Your Clarity Signals</h2>
@@ -629,20 +697,20 @@ export default function ResultsScreen({
               <span className="inline-block text-[11px] font-bold tracking-widest text-[#3B82F6] uppercase bg-[#171F2D] px-3 py-1 rounded-full border border-[#263044] mb-3 shadow-xs">
                 {isTestMode ? "TEST MODE" : isCheckoutAvailable ? "FULL ANALYSIS" : "EARLY ACCESS"}
               </span>
-              <h2 className="text-xl sm:text-2xl font-bold leading-tight mb-3 text-white">Your Score Is Just the Beginning.</h2>
+              <h2 className="text-xl sm:text-2xl font-bold leading-tight mb-3 text-white">Turn Your Clarity Scores Into Improvements.</h2>
               <div className="text-base sm:text-lg font-bold text-white mb-3">
                 $5 <span className="text-xs sm:text-sm text-[#94A3B8] font-normal">· One-time payment</span>
               </div>
               <p className="text-[#94A3B8] text-sm mb-2 max-w-md mx-auto leading-relaxed">
-                You know your clarity score. Now discover WHY it scored that way — and exactly what to improve.
+                Your free scores show where to look. Unlock website-specific explanations, your priority fix, and copy you can adapt immediately.
               </p>
               {weakestSignal && (
                 <div className="mt-5 rounded-xl border border-blue-500/20 bg-[#171F2D]/70 p-4 sm:p-5 text-left" aria-label="Your lowest-scoring clarity signal">
                   <p className="text-sm sm:text-base font-semibold leading-relaxed text-[#F1F5F9] break-words">
                     {weakestSignal.title} <span className="text-blue-400 tabular-nums whitespace-nowrap">— {weakestSignal.score}/100</span>
                   </p>
-                  <p className="mt-2 text-sm leading-relaxed text-[#CBD5E1]">What&apos;s behind this score, and how can you improve it?</p>
-                  <p className="mt-1.5 text-xs sm:text-sm leading-relaxed text-[#94A3B8]">Unlock the detailed explanation and recommended improvements.</p>
+                  <p className="mt-2 text-sm leading-relaxed text-[#CBD5E1]">What influenced this score — and what should you improve first?</p>
+                  <p className="mt-1.5 text-xs sm:text-sm leading-relaxed text-[#94A3B8]">Unlock the detailed explanation, prioritized steps and copy suggestions.</p>
                 </div>
               )}
               {isCheckoutAvailable ? (
@@ -775,7 +843,7 @@ export default function ResultsScreen({
                 Inside Your Full Analysis
               </h2>
               <p className="text-xs sm:text-sm text-[#94A3B8]">
-                A deeper look at what your website communicates — and what needs improvement.
+                A practical improvement plan based on the pages inspected — not just another score.
               </p>
             </div>
 
