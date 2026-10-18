@@ -901,7 +901,7 @@ export default function ResultsScreen({
               workbench={data?.premiumWorkbench}
             />
           </>
-        )}
+        ) : null}
 
         {/* ACTIONS */}
         <div id="report-export-actions" className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-[#263044] scroll-mt-24">
