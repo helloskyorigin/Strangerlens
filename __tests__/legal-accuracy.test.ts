@@ -24,7 +24,7 @@ describe("Trust legal policy accuracy regressions", () => {
   test("First-party legal pages are safely fetched; an inaccessible policy is never treated as verified", async () => {
     const policies = discoverSupportingPages(homepage, base, { onlyLegalPolicies: true, maxPages: 3 });
     const bundle = await fetchSupportingPages(policies, base, {
-      fetcher: async (rawUrl: string) => rawUrl.includes("/privacy/")
+      fetcher: async (rawUrl: string) => rawUrl.includes("/privacy")
         ? {
             success: true as const, originalUrl: rawUrl, normalizedUrl: rawUrl,
             finalUrl: rawUrl, domain: "taskpocket.io", html: "<html><body><h1>Privacy Policy</h1></body></html>",
