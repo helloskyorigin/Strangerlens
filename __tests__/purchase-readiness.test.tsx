@@ -114,7 +114,7 @@ async function main() {
       await act(async()=>doc.dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:'Escape',bubbles:true})));
       check(!doc.querySelector('[role="tooltip"]'), `${width}px: tooltip keyboard dismissal works`);
       if(paid){
-        const tab=[...doc.querySelectorAll('button')].find(x=>x.textContent==='Purchase Readiness')!;
+        const tab=[...doc.querySelectorAll<HTMLButtonElement>('#complete-paid-report [role="tab"]')].find(x=>x.textContent?.includes('Purchase Readiness'))!;
         await act(async()=>tab.click());
         check(doc.body.textContent?.includes('PREMIUM_PURCHASE_SENTINEL') && doc.body.textContent?.includes('Observed Website Evidence'), `${width}px: authorized purchase tab displays original paid findings and evidence`);
       }else{
@@ -131,7 +131,7 @@ async function main() {
       }
       await act(async()=>root.render(<ResultsScreen analysisData={mapBackendToFrontend(legacy,'https://example.com',s)} isUnlocked={paid} onBackToLanding={()=>{}}/>));
       check(!doc.querySelector('button[aria-label="About Purchase Readiness"]') && ![...doc.querySelectorAll('h3')].some(x=>x.textContent==='Purchase Readiness'), `${width}px: switching to an old report removes the sixth signal and its findings`);
-      if(paid)check([...doc.querySelectorAll('button')].some(x=>x.textContent==='First Impression' && x.className.includes('bg-blue-600')), `${width}px: a removed optional signal falls back to the first diagnostic tab`);
+      if(paid)check([...doc.querySelectorAll<HTMLButtonElement>('#complete-paid-report [role="tab"]')].some(x=>x.textContent?.includes('First Impression') && x.getAttribute('aria-selected')==='true'), `${width}px: a removed optional signal falls back to the first diagnostic tab`);
       if(paid){
         for(const [name,html,applies,title] of cases){
           const sample=snapshot(html,title);
