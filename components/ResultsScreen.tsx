@@ -1037,7 +1037,7 @@ export default function ResultsScreen({
                 </div>
 
                 <div style="text-align: center; font-size: 11px; color: #64748B; border-top: 1px solid #263044; padding-top: 16px;">
-                  Analyzed with StrangerLens · strangerlens.ai
+                  Analyzed with StrangerLens · strangerlens.ai.studio
                 </div>
               `;
 
