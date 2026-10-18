@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { validateUrl, checkSsrf } from "@/lib/url-validator";
 import { fetchWebsiteHomepage } from "@/lib/website-fetcher";
 import { extractWebsiteSnapshot } from "@/lib/content-extractor";
+import { assessScanCoverage } from "@/lib/scan-coverage";
 import { discoverAndFetchLegalPages } from "@/lib/supporting-page-fetcher";
 import { analyzeWebsite } from "@/services/ai/analyzeWebsite";
 import { validateAndScoreAnalysis } from "@/services/validation/analysisValidator";
@@ -170,6 +171,13 @@ export async function POST(req: NextRequest) {
       const snapshot = extractWebsiteSnapshot(fetchResult.html, {
         baseUrl: fetchResult.finalUrl,
       });
+      const coverage = assessScanCoverage(snapshot);
+      if (coverage.level === "unreadable") {
+        return NextResponse.json(
+          { success: false, error: "INSUFFICIENT_PAGE_CONTENT", message: coverage.note, scanCoverage: coverage },
+          { status: 422, headers: { "Cache-Control": "private, no-store" } }
+        );
+      }
       const snapDurationMs = Math.round(performance.now() - snapStart);
 
       // 5. Fetch legal pages regardless of the optional multi-page feature flag.
@@ -259,6 +267,7 @@ export async function POST(req: NextRequest) {
               : PAYMENT_INFRASTRUCTURE_BLOCKER,
           },
           lockedPreviewCounts,
+          scanCoverage: coverage,
           snapshot,
           analysis: redactAnalysisForFreeTier(finalValidatedAnalysis),
         },
