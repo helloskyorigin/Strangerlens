@@ -10,6 +10,7 @@ import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import { adaptReport } from "@/lib/report-adapter";
 import { generateReportPdf } from "@/lib/pdf-generator";
+import type { PremiumWorkbench } from "@/types/premiumWorkbench";
 import ClaritySignalTooltip from "@/components/ClaritySignalTooltip";
 import {
   startReportCheckout,
@@ -70,6 +71,7 @@ export interface AnalysisData {
     currentDirection: string;
     strongerDirection: string;
   };
+  premiumWorkbench?: PremiumWorkbench;
   otherImprovements: Array<{
     id: string;
     title: string;
@@ -886,6 +888,7 @@ export default function ResultsScreen({
               otherImprovements={Array.isArray(data?.otherImprovements) ? data.otherImprovements : []}
               evidence={data?.evidence}
               visitorThought={data?.visitorThought}
+              workbench={data?.premiumWorkbench}
             />
           </>
         )}
