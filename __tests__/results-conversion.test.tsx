@@ -31,11 +31,11 @@ try {
         check(!/Coming Soon|Coming with Full Analysis|Available when Full Analysis launches/i.test(text), "no obsolete launch copy in Free or Paid results");
         check(doc.querySelectorAll('button[aria-label^="About "]').length === 10, "all five signals remain in both responsive layouts");
         if (paid) {
-          check(!teaser && !text.includes("Your Score Is Just the Beginning."), "paid results hide conversion content");
+          check(!teaser && !text.includes("Turn Your Clarity Scores Into Improvements."), "paid results hide conversion content");
           check(text.includes("Signal Diagnostics") && text.includes(privateText), "paid diagnostics remain available");
         } else {
-          check(text.includes("Your Score Is Just the Beginning."), "requested conversion heading");
-          check(text.includes("You know your clarity score. Now discover WHY it scored that way — and exactly what to improve."), "requested supporting copy");
+          check(text.includes("Turn Your Clarity Scores Into Improvements."), "requested conversion heading");
+          check(text.includes("Your free scores show where to look. Unlock website-specific explanations, your priority fix, and copy you can adapt immediately."), "requested supporting copy");
           check(teaser?.textContent?.includes("Audience — 48/100"), "teaser uses the actual lowest signal and original score");
           check(!teaser?.textContent?.includes(privateText) && !text.includes(privateText), "no premium findings leak into the free report");
           check(text.includes("Inside Your Full Analysis") && benefits.every(benefit => text.includes(benefit)), "all four benefits use the requested copy");
