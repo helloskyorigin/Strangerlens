@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 
 import { ArrowRight, Check, FileDown, LockKeyhole, Sparkles } from "lucide-react";
 import type { CanonicalSignal } from "@/lib/report-adapter";
