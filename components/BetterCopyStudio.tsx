@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Check, ClipboardCopy, PencilLine, SlidersHorizontal } from "lucide-react";
 import type { CopyOpportunity } from "@/types/premiumWorkbench";
 
@@ -26,11 +26,6 @@ export default function BetterCopyStudio({ opportunities }: { opportunities: Cop
   const edited = selected ? (drafts[selected.id] ?? selected.recommended) : "";
   const activeText = !selected ? "" : mode === "concise" && shortened ? shortened
     : mode === "my-edit" ? edited : selected.recommended;
-
-  useEffect(() => {
-    setCopied(null);
-    setCopyError(false);
-  }, [activeIndex, mode]);
 
   const copy = async () => {
     if (!activeText.trim()) return;
