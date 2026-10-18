@@ -8,6 +8,7 @@ interface CompleteReportPreviewProps {
   signals: CanonicalSignal[];
   purchaseReadinessApplicable: boolean;
   canCheckout: boolean;
+  isTestMode?: boolean;
   busy: boolean;
   onUnlock: () => void;
 }
@@ -15,7 +16,7 @@ interface CompleteReportPreviewProps {
 /** Only five PUBLIC scores plus evergreen chapter descriptions.
  * Paid explanations and suggestions are never passed to the free preview. */
 export default function CompleteReportPreview({
-  signals, purchaseReadinessApplicable, canCheckout, busy, onUnlock,
+  signals, purchaseReadinessApplicable, canCheckout, isTestMode = false, busy, onUnlock,
 }: CompleteReportPreviewProps) {
   return (
     <section id="complete-report-preview" aria-labelledby="complete-report-title"
@@ -94,7 +95,9 @@ export default function CompleteReportPreview({
           {!busy && <ArrowRight className="h-4 w-4" aria-hidden="true" />}
         </button>
         <p className="mt-3 text-center text-xs text-[#92A7C0]">
-          One-time payment · No subscription · Your free scores stay available
+          {isTestMode
+            ? "Test Mode — Use Dodo test card to unlock. No real money charged."
+            : "One-time payment · Instant access · No subscription · Free scores stay available"}
         </p>
         {!canCheckout && <p role="status" className="mt-2 text-center text-xs text-amber-300">Checkout is temporarily unavailable. Your free report remains available.</p>}
       </div>
