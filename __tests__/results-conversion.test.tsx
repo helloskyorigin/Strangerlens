@@ -37,7 +37,7 @@ for (const width of [320, 390, 1440]) {
         check(doc.querySelectorAll('#complete-paid-report [role="tab"][aria-selected="true"]').length === 1, "one full report chapter is active");
         check(text.includes("Why This Score") && text.includes("What's Working") && text.includes("How to Improve"), "paid chapter contains detailed reasoning and recommendations");
         check(text.includes(privateText), "paid signal explanations are rendered");
-        check(!!doc.querySelector("#your-improvement-plan") && text.includes("Copy-Ready Improvements"), "paid improvements and copy proposals are visible");
+        check(!!doc.querySelector("#your-improvement-plan") && text.includes("Better Copy Studio") && text.includes("Evidence-to-Fix") && text.includes("Smart Priority"), "paid improvements and copy proposals are visible");
       } else {
         const preview = doc.querySelector("#complete-report-preview");
         check(!!preview, "free visitor sees complete-report preview");
