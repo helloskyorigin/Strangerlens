@@ -48,14 +48,20 @@ export function correctContradictedLegalClaims(
   };
   const replaceClaim = (value: string): string => absentClaim(value) ? grounded : value;
 
-  corrected.verdict.text = replaceClaim(corrected.verdict.text);
+  if (corrected.verdict?.text) corrected.verdict.text = replaceClaim(corrected.verdict.text);
   if (corrected.website_message) {
     corrected.website_message.summary = replaceClaim(corrected.website_message.summary);
   }
-  corrected.visitor_thought.text = replaceClaim(corrected.visitor_thought.text);
-  corrected.first_seconds.why_should_i_care.explanation =
-    replaceClaim(corrected.first_seconds.why_should_i_care.explanation);
-  corrected.signals.trust.explanation = replaceClaim(corrected.signals.trust.explanation);
+  if (corrected.visitor_thought?.text) {
+    corrected.visitor_thought.text = replaceClaim(corrected.visitor_thought.text);
+  }
+  if (corrected.first_seconds?.why_should_i_care?.explanation) {
+    corrected.first_seconds.why_should_i_care.explanation =
+      replaceClaim(corrected.first_seconds.why_should_i_care.explanation);
+  }
+  if (corrected.signals?.trust?.explanation) {
+    corrected.signals.trust.explanation = replaceClaim(corrected.signals.trust.explanation);
+  }
 
   corrected.risks = corrected.risks?.map(risk => {
     if (![risk.title, risk.description, risk.why_it_matters].some(absentClaim)) return risk;
@@ -68,7 +74,7 @@ export function correctContradictedLegalClaims(
     };
   });
 
-  if (Object.values(corrected.priority_fix).some(value =>
+  if (corrected.priority_fix && Object.values(corrected.priority_fix).some(value =>
     typeof value === "string" && absentClaim(value))) {
     corrected.priority_fix = {
       title: "Surface existing trust information at decision points",
