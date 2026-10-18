@@ -159,6 +159,8 @@ export default function LandingPage() {
   const [isPending, setIsPending] = useState<boolean>(false);
   const [backendError, setBackendError] = useState<string | null>(null);
   const [analysisData, setAnalysisData] = useState<any>(null);
+  // Fresh-scan-only upsell: never auto-open on restoring an existing report.
+  const [postScanOfferReportId, setPostScanOfferReportId] = useState<string | null>(null);
   const [landingSignalTooltip, setLandingSignalTooltip] = useState<string | null>(null);
 
   useEffect(() => {
@@ -395,6 +397,7 @@ export default function LandingPage() {
   const handleAnalyze = async (e?: React.FormEvent, overrideUrl?: string) => {
     if (e) e.preventDefault();
     payments.cancelPaymentFlow();
+    setPostScanOfferReportId(null);
     if (typeof window !== "undefined") {
       window.history.pushState({ strangerLens: true, view: "scan" }, "");
     }
@@ -648,7 +651,7 @@ export default function LandingPage() {
                     }}
                     className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold tracking-wider text-[#3B82F6] uppercase bg-[#171F2D] mb-4 sm:mb-5 border border-[#263044]"
                   >
-                    AI WEBSITE FIRST-IMPRESSION ANALYZER
+                    FOR FOUNDERS &amp; WEBSITE BUILDERS
                   </motion.div>
 
                   {/* 2. Staggered Hero Headline Lines */}
@@ -663,7 +666,7 @@ export default function LandingPage() {
                       }}
                       className="block"
                     >
-                      Does Your Website
+                      Your Website Makes Sense to You.
                     </motion.span>
                     <motion.span
                       initial={shouldReduceMotion ? false : { opacity: 0, y: 14 }}
@@ -675,8 +678,8 @@ export default function LandingPage() {
                       }}
                       className="block"
                     >
-                      Make Sense to a{" "}
-                      <span className="text-[#3B82F6]">Stranger?</span>
+                      But Does It Make Sense to{" "}
+                      <span className="text-[#3B82F6]">Visitors?</span>
                     </motion.span>
                   </h1>
 
@@ -691,7 +694,7 @@ export default function LandingPage() {
                     }}
                     className="text-[15px] sm:text-lg text-[#94A3B8] leading-relaxed mb-6 sm:mb-7 max-w-lg font-normal"
                   >
-                    See your website through a stranger&apos;s eyes. Get an AI-powered first-impression clarity review to uncover what&apos;s clear, what confuses first-time visitors, and how to improve.
+                    Find out what first-time visitors understand, what confuses them, and where your homepage could communicate more clearly. Start with five free clarity scores.
                   </motion.p>
 
                   {/* 4. URL Input Pill & Primary Hero CTA */}
@@ -737,7 +740,7 @@ export default function LandingPage() {
                           onChange={(e) => {
                             scanController.setUrl(e.target.value);
                           }}
-                          placeholder="https://yourwebsite.com"
+                          placeholder="yourwebsite.com"
                           className="w-full min-w-0 bg-transparent text-white placeholder:text-[#64748B] text-sm sm:text-base outline-none font-normal pr-2 disabled:opacity-75"
                           aria-label="Website URL"
                         />
@@ -754,12 +757,12 @@ export default function LandingPage() {
                             ? "bg-[#246BFD] text-white opacity-90 cursor-wait"
                             : "bg-[#246BFD] hover:bg-blue-600 active:scale-[0.98] text-white shadow-md shadow-blue-500/25"
                         }`}
-                        aria-label="Analyze My Website Free"
+                        aria-label="Check My Website Free"
                       >
                         {isVerifying && (
                           <Loader2 className="w-4 h-4 animate-spin text-white shrink-0" />
                         )}
-                        <span>Analyze My Website Free →</span>
+                        <span>Check My Website Free →</span>
                       </button>
                     </div>
 
@@ -789,7 +792,7 @@ export default function LandingPage() {
                     }}
                     className="mt-3.5 text-xs sm:text-[13px] text-[#94A3B8] font-medium leading-relaxed"
                   >
-                    No signup required · AI-powered clarity review · Up to six signals
+                    No signup · No card for free scan · $5 only if you want detailed fixes
                   </motion.p>
                 </div>
 
@@ -817,17 +820,20 @@ export default function LandingPage() {
                         </div>
                         <div className="min-w-0">
                           <span className="font-extrabold text-[#F1F5F9] text-sm sm:text-base tracking-tight block">
-                            Your Website Clarity
+                            Example Clarity Report
                           </span>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         <span className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-bold text-amber-400 bg-amber-500/10 px-2.5 sm:px-3 py-1 rounded-full shrink-0 border border-amber-500/20">
-                          Overall Score: 69/100 · Needs Improvement
+                          Example Score: 69/100
                         </span>
                       </div>
                     </div>
 
+                    <p className="mb-3 text-[11px] text-[#94A3B8]">
+                      Illustrative preview · Scores are examples, not a real customer result.
+                    </p>
                     {/* B. Five core signals plus the conditional purchase assessment */}
                     <div className="bg-[#121824] rounded-xl overflow-hidden divide-y divide-[#263044]/70 space-y-2">
                       {[
@@ -894,6 +900,13 @@ export default function LandingPage() {
                         </div>
                         <p className="mt-2 text-xs leading-relaxed text-[#94A3B8]">Premium · Score and findings unlock with Full Analysis when a paid offering is identified.</p>
                       </div>
+                    </div>
+
+                    <div className="mb-4 rounded-xl border border-blue-500/20 bg-[#192438] p-3.5">
+                      <p className="text-[11px] font-bold uppercase tracking-widest text-blue-300">Example of a copy improvement</p>
+                      <p className="mt-2 text-xs text-[#A9B9CF]">Before: “Everything you need to work smarter.”</p>
+                      <p className="mt-1.5 text-sm font-medium leading-relaxed text-white">After: “Organize client projects, tasks and deadlines in one workspace.”</p>
+                      <p className="mt-2 text-[11px] text-[#A9B9CF]">Illustrative wording only — your actual report uses your website.</p>
                     </div>
 
                     {/* C. Premium Preview Area (Why This Score, What's Working, Unclear, First 5 Seconds) */}
@@ -1409,6 +1422,8 @@ export default function LandingPage() {
               }}
               onOpenPricing={() => setActiveInfoModal("pricing")}
               onGoToResults={() => {
+                const freshReportId = scanController.getState().analysisData?.reportId;
+                setPostScanOfferReportId(typeof freshReportId === "string" ? freshReportId : null);
                 scanController.completeScanToResults();
               }}
             />
@@ -1425,6 +1440,7 @@ export default function LandingPage() {
             <ResultsScreen
               rawUrl={submittedUrl}
               analysisData={analysisData || undefined}
+              postScanOfferReportId={postScanOfferReportId}
               isUnlocked={Boolean(analysisData?.reportId && payments.unlockedReportId === analysisData.reportId)}
               checkoutEnabled={payments.checkoutEnabled}
               paymentEnvironment={payments.environment}
@@ -1445,6 +1461,7 @@ export default function LandingPage() {
               }}
               onRunNewCheck={() => {
                 payments.cancelPaymentFlow();
+                setPostScanOfferReportId(null);
                 // New Check: navigate to clean URL input screen, NEVER start scanning
                 clearPersistedReportSession();
                 scanController.resetToLanding(true);
@@ -1456,6 +1473,7 @@ export default function LandingPage() {
                 }, 60);
               }}
               onRecheck={() => {
+                setPostScanOfferReportId(null);
                 // Recheck Website: explicitly start exactly ONE new scan
                 if (typeof window !== "undefined") {
                   window.history.pushState({ strangerLens: true, view: "scan" }, "");
