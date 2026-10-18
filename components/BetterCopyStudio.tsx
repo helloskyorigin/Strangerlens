@@ -6,13 +6,15 @@ import type { CopyOpportunity } from "@/types/premiumWorkbench";
 
 type CopyMode = "recommended" | "concise" | "my-edit";
 
-/** Shortening only drops later complete sentences; it never adds unsourced
- * features, statistics, users or guarantees. Show it only when meaning survives. */
+/** Only remove a trailing generic "learn more" invitation. Dropping an
+ * arbitrary second sentence can delete qualifiers, evidence or limitations. */
 function conciseDraft(value: string): string | null {
-  const sentence = value.trim().match(/^(.{28,220}?[.!?])\s+\S/);
+  const sentence = value.trim().match(/^(.{28,220}?[.!?])\s+(.+)$/);
   if (!sentence) return null;
   const first = sentence[1].trim();
-  return first !== value.trim() && first.length >= 28 ? first : null;
+  const trailing = sentence[2].trim();
+  if (!/^(?:learn more|find out more|read more|explore more|discover more|get started today)[.!?]?$/i.test(trailing)) return null;
+  return first;
 }
 
 export default function BetterCopyStudio({ opportunities }: { opportunities: CopyOpportunity[] }) {
@@ -111,7 +113,7 @@ export default function BetterCopyStudio({ opportunities }: { opportunities: Cop
               </button>
               {copyError && <p role="status" className="mt-2 text-xs text-amber-300">Automatic copying is unavailable. Select the visible text and copy manually.</p>}
               <p className="mt-3 flex items-start gap-2 text-xs leading-relaxed text-[#92A9C0]">
-                <SlidersHorizontal className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true"/> The suggested draft comes from the scan. The shorter draft removes later sentences only; it does not add new claims. Review accuracy, context and audience before publishing.
+                <SlidersHorizontal className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true"/> The suggested draft comes from the scan. The shorter draft appears only when a generic closing invitation can be removed. No new product claims are generated. Review accuracy, context and audience before publishing.
               </p>
             </div>
           </div>
