@@ -34,15 +34,15 @@ export function correctContradictedLegalClaims(
   const referencesKnown = (value: string): boolean => {
     const t = value.toLowerCase();
     const explicit =
-      (knownTypes.has("privacy_policy") && /\\bprivacy\\b/i.test(t)) ||
-      (knownTypes.has("terms_of_service") && /\\bterms(?: of service| and conditions)?\\b/i.test(t)) ||
-      (knownTypes.has("refund_policy") && /\\brefund|return policy\\b/i.test(t));
-    const general = /\\b(?:legal (?:pages?|documents?|documentation|links?|polic(?:y|ies))|polic(?:y|ies) (?:links?|pages?|documentation))\\b/i.test(t);
+      (knownTypes.has("privacy_policy") && /\bprivacy\b/i.test(t)) ||
+      (knownTypes.has("terms_of_service") && /\bterms(?: of service| and conditions)?\b/i.test(t)) ||
+      (knownTypes.has("refund_policy") && /\brefund|return policy\b/i.test(t));
+    const general = /\b(?:legal (?:pages?|documents?|documentation|links?|polic(?:y|ies))|polic(?:y|ies) (?:links?|pages?|documentation))\b/i.test(t);
     return Boolean(explicit || general);
   };
   const absentClaim = (value: string): boolean => {
     if (!value || !referencesKnown(value)) return false;
-    return /\\b(?:lack(?:s|ing)?|missing|absen(?:t|ce)|not (?:available|accessible|linked|provided|found|displayed)|no (?:visible |accessible )?(?:privacy|terms|legal|policy)|does not (?:provide|have|include|link|display)|without (?:privacy|terms|legal)|add (?:a |the )?(?:privacy|terms|legal|policy)|add (?:legal|policy) links|need(?:s)? (?:a |to add )?(?:privacy|terms|legal))\\b/i.test(value);
+    return /\b(?:lack(?:s|ing)?|missing|absen(?:t|ce)|not (?:available|accessible|linked|provided|found|displayed)|no (?:visible |accessible )?(?:privacy|terms|legal|policy)|does not (?:provide|have|include|link|display)|without (?:privacy|terms|legal)|add (?:a |the )?(?:privacy|terms|legal|policy)|add (?:legal|policy) links|need(?:s)? (?:a |to add )?(?:privacy|terms|legal))\b/i.test(value);
   };
   const replaceClaim = (value: string): string => absentClaim(value) ? grounded : value;
 
