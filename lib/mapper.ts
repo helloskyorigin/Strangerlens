@@ -53,12 +53,9 @@ export function mapBackendToFrontend(
     return s === "needs_work" ? "Needs work" : "Unclear";
   };
 
-  const scoreToStatus = (score: number): "Needs improvement" | "Good" | "Needs work" | "Excellent" => {
-    if (score >= 90) return "Excellent";
-    if (score >= 75) return "Good";
-    if (score >= 50) return "Needs work";
-    return "Needs improvement";
-  };
+  // Match server-authoritative overall_status; never relabel 79/100 as Good.
+  const scoreToStatus = (_score: number): "Good" | "Needs improvement" =>
+    backendAnalysis.overall_status === "clear" ? "Good" : "Needs improvement";
 
   const brandName = snapshot?.navigation?.brandName || cleanDomain.split(".")[0];
   const capitalizedBrand = brandName.charAt(0).toUpperCase() + brandName.slice(1);
