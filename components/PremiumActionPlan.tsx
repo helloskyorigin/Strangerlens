@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Clipboard, FileText, ListChecks, Lightbulb, Quote, Sparkles } from "lucide-react";
+import { Check, Clipboard, FileText, ListChecks, Quote, Sparkles } from "lucide-react";
 
 interface Improvement {
   id?: string;
@@ -73,7 +73,7 @@ export default function PremiumActionPlan({
         </p>
       </div>
 
-      {hasPriority && (
+      {recommendation && hasPriority && (
         <article className="overflow-hidden rounded-2xl border border-[#3A5480] bg-[#16243A]">
           <div className="border-b border-[#344962] px-5 py-4 sm:px-6">
             <p className="text-[11px] font-bold uppercase tracking-widest text-blue-300">Recommended first move</p>
