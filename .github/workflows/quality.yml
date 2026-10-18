@@ -1,0 +1,41 @@
+name: StrangerLens quality checks
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "components/**"
+      - "lib/**"
+      - "app/**"
+      - "services/**"
+      - "server/**"
+      - "hooks/**"
+      - "types/**"
+      - "__tests__/**"
+      - "package.json"
+      - "tsconfig.json"
+      - ".github/workflows/quality.yml"
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Typecheck and regression tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund --ignore-scripts
+      - name: TypeScript
+        run: npm run typecheck
+      - name: Regression suite
+        run: npm test
+      - name: Purchase readiness regressions
+        run: npm run test:purchase-readiness
