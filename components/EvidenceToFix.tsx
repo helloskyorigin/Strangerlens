@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 import { ArrowUpRight, CheckCircle2, FileSearch, SearchX } from "lucide-react";
 import type { EvidenceFix } from "@/types/premiumWorkbench";
 import { CLARITY_REPORT_CHAPTERS } from "@/lib/clarity-report-chapters";
