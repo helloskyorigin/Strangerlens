@@ -3,16 +3,16 @@
 import { useEffect, useRef } from "react";
 import { ArrowRight, Check, LockKeyhole, X } from "lucide-react";
 
-interface WeakSignal {
+interface PublicSignal {
   title: string;
-  score: number;
+  scoreDisplay: string;
 }
-
 interface PostScanUpgradeModalProps {
   open: boolean;
   domain: string;
   overallScore: string;
-  weakestSignal: WeakSignal | null;
+  signals: PublicSignal[];
+  purchaseReadinessApplicable?: boolean;
   canCheckout: boolean;
   isTestMode: boolean;
   busy: boolean;
@@ -21,11 +21,11 @@ interface PostScanUpgradeModalProps {
   onUpgrade: () => void;
 }
 
-/** A single, dismissible offer after a NEW successful scan.
- * Free results are never conditioned on opening checkout. */
+/** Shown once after a fresh scan. The full free report remains available
+ * without paying; no premium finding or sixth signal score is sent here. */
 export default function PostScanUpgradeModal({
-  open, domain, overallScore, weakestSignal, canCheckout, isTestMode,
-  busy, paymentError, onContinueFree, onUpgrade,
+  open, domain, overallScore, signals, purchaseReadinessApplicable = false,
+  canCheckout, isTestMode, busy, paymentError, onContinueFree, onUpgrade,
 }: PostScanUpgradeModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const freeButtonRef = useRef<HTMLButtonElement>(null);
@@ -35,7 +35,7 @@ export default function PostScanUpgradeModal({
     if (!open) return;
     previousFocusRef.current = document.activeElement instanceof HTMLElement
       ? document.activeElement : null;
-    const originalOverflow = document.body.style.overflow;
+    const oldOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const focusTimer = window.setTimeout(() => freeButtonRef.current?.focus(), 0);
     const onKeyDown = (event: KeyboardEvent) => {
@@ -57,21 +57,19 @@ export default function PostScanUpgradeModal({
     return () => {
       window.clearTimeout(focusTimer);
       window.removeEventListener("keydown", onKeyDown);
-      document.body.style.overflow = originalOverflow;
+      document.body.style.overflow = oldOverflow;
       previousFocusRef.current?.focus();
     };
   }, [open, onContinueFree]);
 
   if (!open) return null;
-
   return (
-    <div className="fixed inset-0 z-[80] flex items-end justify-center p-0 sm:items-center sm:p-5"
-      role="presentation">
+    <div className="fixed inset-0 z-[80] flex items-end justify-center sm:items-center sm:p-5">
       <button type="button" tabIndex={-1} aria-hidden="true" onClick={onContinueFree}
         className="absolute inset-0 bg-[#020617]/85 backdrop-blur-sm" />
       <div ref={dialogRef} role="dialog" aria-modal="true"
         aria-labelledby="post-scan-offer-title" aria-describedby="post-scan-offer-description"
-        className="relative z-10 w-full max-w-[510px] max-h-[94dvh] overflow-y-auto rounded-t-[28px] border border-[#344158] bg-[#111a29] p-5 pb-[max(22px,env(safe-area-inset-bottom))] text-[#F1F5F9] shadow-[0_30px_90px_rgba(0,0,0,.65)] sm:rounded-[28px] sm:p-8">
+        className="relative z-10 w-full max-w-[520px] max-h-[94dvh] overflow-y-auto rounded-t-[28px] border border-[#34465F] bg-[#111a29] p-5 pb-[max(22px,env(safe-area-inset-bottom))] text-[#F1F5F9] shadow-[0_30px_90px_rgba(0,0,0,.65)] sm:rounded-[28px] sm:p-7">
         <div className="flex items-center justify-between gap-3">
           <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-300">
             <Check className="h-3.5 w-3.5" aria-hidden="true" /> Your free scan is ready
@@ -82,39 +80,52 @@ export default function PostScanUpgradeModal({
           </button>
         </div>
 
-        <div className="mt-5">
-          <p className="text-sm text-[#A8B5C9] break-all">{domain} · {overallScore} overall</p>
-          <h2 id="post-scan-offer-title" className="mt-2 text-[26px] leading-tight font-bold tracking-tight text-white sm:text-[30px]">
-            Your score is ready. Want to know what to fix?
+        <div className="mt-4">
+          <p className="break-all text-xs text-[#A8B5C9]">{domain} · Overall {overallScore}</p>
+          <h2 id="post-scan-offer-title" className="mt-2 text-[24px] font-bold leading-tight tracking-tight text-white sm:text-[28px]">
+            Five Scores. Five Complete Breakdowns.
           </h2>
-          <p id="post-scan-offer-description" className="mt-3 text-sm leading-relaxed text-[#B4C1D1]">
-            Your five clarity scores are free. Unlock the detailed reasons, prioritized improvements and copy suggestions for a one-time $5 payment.
+          <p id="post-scan-offer-description" className="mt-2 text-sm leading-relaxed text-[#B4C1D1]">
+            Your scores are free. The complete report explains every signal — what works, what is unclear, why it matters,
+            and what you can improve. Not just a fix for your lowest score.
           </p>
         </div>
 
-        {weakestSignal && (
-          <div className="mt-5 rounded-2xl border border-amber-400/20 bg-[#1c2635] p-4">
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-sm font-medium text-white">Lowest clarity signal</span>
-              <span className="text-sm font-bold tabular-nums text-amber-300">{weakestSignal.score}/100</span>
-            </div>
-            <p className="mt-1.5 text-base font-semibold text-white">{weakestSignal.title}</p>
-            <p className="mt-1 text-sm leading-relaxed text-[#B4C1D1]">See what influenced this score and how you could improve it.</p>
+        <div className="mt-4 rounded-2xl border border-[#344760] bg-[#19283b] p-3.5">
+          <div className="mb-2.5 flex items-center justify-between gap-2">
+            <p className="text-xs font-bold uppercase tracking-widest text-[#9DBCE2]">Your five clarity signals</p>
+            <LockKeyhole className="h-4 w-4 text-[#8DAACD]" aria-hidden="true" />
           </div>
-        )}
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs sm:text-sm">
+            {signals.slice(0, 5).map(signal => (
+              <div key={signal.title} className="flex min-w-0 items-center justify-between gap-2 border-b border-[#33475d] pb-2">
+                <span className="truncate text-[#DAE5F0]">{signal.title}</span>
+                <span className="shrink-0 font-semibold tabular-nums text-white">{signal.scoreDisplay}</span>
+              </div>
+            ))}
+          </div>
+          <p className="mt-2.5 text-xs text-[#95A9C1]">Unlock the explanation and actionable guidance behind all five.</p>
+        </div>
 
-        <div className="mt-5 grid gap-2 text-sm text-[#DFE6F1]">
-          <div className="flex items-center gap-2.5"><Check className="h-4 w-4 shrink-0 text-emerald-400" /> Evidence-based signal breakdown</div>
-          <div className="flex items-center gap-2.5"><Check className="h-4 w-4 shrink-0 text-emerald-400" /> Your #1 priority fix and next steps</div>
-          <div className="flex items-center gap-2.5"><Check className="h-4 w-4 shrink-0 text-emerald-400" /> Copy-ready suggestions and downloadable report</div>
+        <div className="mt-4 grid gap-2 text-[13px] text-[#DCE7F2]">
+          <div className="flex items-start gap-2.5"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
+            <span>Why each score, what&apos;s working and what&apos;s unclear</span></div>
+          <div className="flex items-start gap-2.5"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
+            <span>Improvements across your website and priority action plan</span></div>
+          <div className="flex items-start gap-2.5"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
+            <span>First 5 Seconds, copy-ready ideas and downloadable full PDF</span></div>
+          {purchaseReadinessApplicable && (
+            <div className="flex items-start gap-2.5"><Check className="mt-0.5 h-4 w-4 shrink-0 text-blue-300" />
+              <span>Bonus Purchase Readiness assessment (when applicable)</span></div>
+          )}
         </div>
 
         {paymentError && <p role="alert" className="mt-4 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200">{paymentError}</p>}
-        <div className="mt-6 space-y-3">
+        <div className="mt-5 space-y-2.5">
           <button type="button" onClick={onUpgrade} disabled={!canCheckout || busy}
             className="flex min-h-[50px] w-full items-center justify-center gap-2 rounded-full bg-[#246BFD] px-4 py-3 text-sm font-bold text-white transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300">
             <LockKeyhole className="h-4 w-4" aria-hidden="true" />
-            {busy ? "Opening checkout…" : "Unlock Full Analysis — $5"}
+            {busy ? "Opening checkout…" : "Unlock Complete Report — $5"}
             {!busy && <ArrowRight className="h-4 w-4" aria-hidden="true" />}
           </button>
           <button ref={freeButtonRef} type="button" onClick={onContinueFree}
