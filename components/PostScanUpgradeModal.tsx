@@ -67,8 +67,8 @@ export default function PostScanUpgradeModal({
   return (
     <div className="fixed inset-0 z-[80] flex items-end justify-center p-0 sm:items-center sm:p-5"
       role="presentation">
-      <button type="button" onClick={onContinueFree} aria-label="Continue to free report"
-        className="absolute inset-0 cursor-default bg-[#020617]/85 backdrop-blur-sm" />
+      <div onClick={onContinueFree} aria-hidden="true"
+        className="absolute inset-0 bg-[#020617]/85 backdrop-blur-sm" />
       <div ref={dialogRef} role="dialog" aria-modal="true"
         aria-labelledby="post-scan-offer-title" aria-describedby="post-scan-offer-description"
         className="relative z-10 w-full max-w-[510px] max-h-[94dvh] overflow-y-auto rounded-t-[28px] border border-[#344158] bg-[#111a29] p-5 pb-[max(22px,env(safe-area-inset-bottom))] text-[#F1F5F9] shadow-[0_30px_90px_rgba(0,0,0,.65)] sm:rounded-[28px] sm:p-8">
