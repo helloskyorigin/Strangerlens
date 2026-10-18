@@ -459,7 +459,7 @@ export default function LandingPage() {
                   aria-label="Primary Navigation"
                   className="hidden md:flex items-center gap-3 lg:gap-6 xl:gap-8 text-sm font-medium text-[#94A3B8]"
                 >
-                  {NAV_ITEMS.map((item) => (
+                  {NAV_ITEMS.filter((item) => item.href !== "/my-reports").map((item) => (
                     <a
                       key={item.href}
                       href={item.href}
@@ -562,7 +562,7 @@ export default function LandingPage() {
                       aria-label="Mobile Navigation"
                       className="flex flex-col space-y-1"
                     >
-                      {NAV_ITEMS.map((item) => (
+                      {NAV_ITEMS.filter((item) => item.href !== "/my-reports").map((item) => (
                         <motion.a
                           key={item.href}
                           href={item.href}
