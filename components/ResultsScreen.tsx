@@ -1,5 +1,8 @@
 "use client";
 import React, { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import CompleteReportPreview from "@/components/CompleteReportPreview";
+import SignalReportExplorer from "@/components/SignalReportExplorer";
+import PremiumActionPlan from "@/components/PremiumActionPlan";
 import PostScanUpgradeModal from "@/components/PostScanUpgradeModal";
 import { trackFunnelEvent } from "@/lib/ui-funnel-events";
 import { Link2, Clock, Share2, Download, AlertCircle, Check, Zap, Info, X, Lock, Mail, ArrowRight, Sparkles, Shield, Users, Eye, ChevronDown, Loader2 } from "lucide-react";
@@ -108,7 +111,6 @@ export default function ResultsScreen({
   onOpenPricing,
   postScanOfferReportId = null,
 }: any) {
-  const [activeExplorerSignalId, setActiveExplorerSignalId] = useState("first-impression");
   const [activeSignalTooltip, setActiveSignalTooltip] = useState<string | null>(null);
   const [isScoreModalOpen, setIsScoreModalOpen] = useState(false);
   const [isEarlySuccessModalOpen, setIsEarlySuccessModalOpen] = useState(false);
@@ -317,19 +319,6 @@ export default function ResultsScreen({
   };
 
   const overallTheme = getStatusTheme(report.overallStatus);
-
-  const explorerTabs = [
-    { id: "first-impression", label: "First Impression" },
-    { id: "audience", label: "Audience" },
-    { id: "value", label: "Value" },
-    { id: "trust", label: "Trust" },
-    { id: "action", label: "Action" },
-    ...(unlockedPurchase ? [{ id: "purchase-readiness", label: "Purchase Readiness" }] : []),
-  ];
-
-  const explorerSignalId = activeExplorerSignalId === "purchase-readiness" && !unlockedPurchase ? "first-impression" : activeExplorerSignalId;
-  const activeSignalKey = SIGNAL_ID_TO_KEY[explorerSignalId] || "firstImpression";
-  const activeSignal = explorerSignalId === "purchase-readiness" && unlockedPurchase ? unlockedPurchase : report.signals[activeSignalKey];
 
   const handleUnlockFullAnalysis = async () => {
     trackFunnelEvent("upgrade_clicked");
@@ -575,39 +564,6 @@ export default function ResultsScreen({
           </div>
         </section>
 
-        {/* Give an immediate reason to explore paid details without hiding free scores. */}
-        {!isReportUnlocked && weakestSignal && weakestSignal.score !== null && (
-          <section className="rounded-2xl border border-blue-500/25 bg-[#111d30] p-4 sm:p-6"
-            aria-label="Your top clarity opportunity">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="min-w-0">
-                <p className="text-[11px] font-bold uppercase tracking-widest text-blue-300">A Clarity Opportunity</p>
-                <h2 className="mt-1.5 text-lg font-bold text-white">
-                  {weakestSignal.title} <span className="font-semibold text-amber-300">— {weakestSignal.score}/100</span>
-                </h2>
-                <p className="mt-1 max-w-xl text-sm leading-relaxed text-[#B7C5D7]">
-                  See the reasons behind this score and get a prioritized, copy-ready improvement plan.
-                </p>
-                {Array.isArray(data?.evidence?.missingFindings) &&
-                  typeof data.evidence.missingFindings[0] === "string" && (
-                    <p className="mt-3 rounded-xl bg-[#1d2a3c] px-3 py-2.5 text-xs leading-relaxed text-[#D9E4F0]">
-                      <span className="mr-1 font-bold text-emerald-300">Free preview:</span>
-                      {data.evidence.missingFindings[0]}
-                    </p>
-                  )}
-              </div>
-              {isCheckoutAvailable ? (
-                <button type="button" onClick={handleUnlockFullAnalysis}
-                  disabled={loading || isVerifyingPayment}
-                  className="w-full shrink-0 rounded-full bg-[#246BFD] px-5 py-3 text-sm font-semibold text-white hover:bg-blue-600 disabled:opacity-50 sm:w-auto">
-                  {loading || isVerifyingPayment ? "Opening checkout…" : "See Detailed Fixes — $5 →"}
-                </button>
-              ) : <span className="shrink-0 text-xs text-[#9AAAC0]">Your free analysis is below ↓</span>}
-            </div>
-            {paymentError && !isPostScanOfferOpen && <p role="alert" className="mt-3 text-xs text-rose-300">{paymentError}</p>}
-          </section>
-        )}
-
         {/* 1. FREE: FIVE CLARITY SIGNALS */}
         <section>
           <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6 text-[#F1F5F9]">Your Clarity Signals</h2>
@@ -703,8 +659,32 @@ export default function ResultsScreen({
           </div>
         </section>
 
-        {/* EARLY ACCESS SECTION */}
+        {/* Free scores remain visible. Premium value is a complete breakdown of ALL signals. */}
         {!isReportUnlocked && (
+          <>
+            {Array.isArray(data?.evidence?.missingFindings) &&
+              typeof data.evidence.missingFindings[0] === "string" && (
+              <section aria-label="Free first insight" className="rounded-2xl border border-[#2B4059] bg-[#152237] p-5 sm:p-6">
+                <p className="text-[11px] font-bold uppercase tracking-widest text-emerald-300">One insight from your free scan</p>
+                <p className="mt-2 text-sm leading-relaxed text-[#D4E0EE]">{data.evidence.missingFindings[0]}</p>
+                <p className="mt-2 text-xs text-[#8DA6C1]">Based on the inspected website content. The full report explains each signal in depth.</p>
+              </section>
+            )}
+            <CompleteReportPreview
+              signals={report.signalsList}
+              purchaseReadinessApplicable={showLockedPurchase}
+              canCheckout={isCheckoutAvailable}
+              busy={loading || isVerifyingPayment}
+              onUnlock={handleUnlockFullAnalysis}
+            />
+            {paymentError && !isPostScanOfferOpen && (
+              <p role="alert" className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200">{paymentError}</p>
+            )}
+          </>
+        )}
+
+        {/* EARLY ACCESS SECTION */}
+        {!isReportUnlocked && !isCheckoutAvailable && (
           <section className="bg-[#121824] border border-[#263044] rounded-2xl p-6 sm:p-8 text-center shadow-lg relative overflow-hidden">
             <div className="absolute top-0 right-0 transform translate-x-4 -translate-y-4 w-32 h-32 bg-blue-500/5 rounded-full blur-2xl pointer-events-none" />
             <div className="relative z-10 max-w-lg mx-auto">
@@ -849,183 +829,13 @@ export default function ResultsScreen({
           </section>
         )}
 
-        {/* 4. FULL REPORT PREVIEW (WHEN LOCKED) */}
-        {!isReportUnlocked ? (
-          <section className="bg-[#121824] border border-[#263044] rounded-2xl p-6 sm:p-8">
-            <div className="mb-6">
-              <h2 className="text-lg sm:text-xl font-bold text-white mb-1.5">
-                Inside Your Full Analysis
-              </h2>
-              <p className="text-xs sm:text-sm text-[#94A3B8]">
-                A practical improvement plan based on the pages inspected — not just another score.
-              </p>
-            </div>
-
-            {/* Four Compact Feature Rows */}
-            <div className="space-y-3.5">
-              {/* Feature 01 */}
-              <div className="flex items-start gap-3.5 p-3.5 sm:p-4 rounded-xl bg-[#171F2D]/70 border border-[#263044]/80">
-                <span className="shrink-0 text-xs font-mono font-bold text-[#3B82F6] bg-blue-500/10 border border-blue-500/20 px-2 py-1 rounded-md">
-                  01
-                </span>
-                <div className="space-y-0.5">
-                  <h3 className="text-sm font-semibold text-white">
-                    Why Your Website Scored This Way
-                  </h3>
-                  <p className="text-xs text-[#94A3B8] leading-relaxed">
-                    See the reasoning behind all five clarity signals.
-                  </p>
-                </div>
-              </div>
-
-              {/* Feature 02 */}
-              <div className="flex items-start gap-3.5 p-3.5 sm:p-4 rounded-xl bg-[#171F2D]/70 border border-[#263044]/80">
-                <span className="shrink-0 text-xs font-mono font-bold text-[#3B82F6] bg-blue-500/10 border border-blue-500/20 px-2 py-1 rounded-md">
-                  02
-                </span>
-                <div className="space-y-0.5">
-                  <h3 className="text-sm font-semibold text-white">
-                    What Visitors Understand — and Miss
-                  </h3>
-                  <p className="text-xs text-[#94A3B8] leading-relaxed">
-                    Understand what&apos;s working and what may cause confusion.
-                  </p>
-                </div>
-              </div>
-
-              {/* Feature 03 */}
-              <div className="flex items-start gap-3.5 p-3.5 sm:p-4 rounded-xl bg-[#171F2D]/70 border border-[#263044]/80">
-                <span className="shrink-0 text-xs font-mono font-bold text-[#3B82F6] bg-blue-500/10 border border-blue-500/20 px-2 py-1 rounded-md">
-                  03
-                </span>
-                <div className="space-y-0.5">
-                  <h3 className="text-sm font-semibold text-white">
-                    Specific Fixes You Can Make
-                  </h3>
-                  <p className="text-xs text-[#94A3B8] leading-relaxed">
-                    Get specific recommendations from your analysis.
-                  </p>
-                </div>
-              </div>
-
-              {/* Feature 04 */}
-              <div className="flex items-start gap-3.5 p-3.5 sm:p-4 rounded-xl bg-[#171F2D]/70 border border-[#263044]/80">
-                <span className="shrink-0 text-xs font-mono font-bold text-[#3B82F6] bg-blue-500/10 border border-blue-500/20 px-2 py-1 rounded-md">
-                  04
-                </span>
-                <div className="space-y-0.5">
-                  <h3 className="text-sm font-semibold text-white">
-                    What Visitors Notice First
-                  </h3>
-                  <p className="text-xs text-[#94A3B8] leading-relaxed">
-                    See what a first-time visitor may understand or miss.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 pt-4 border-t border-[#263044]/70 flex items-center justify-center gap-2 text-xs text-[#94A3B8]">
-              <Lock className="w-3.5 h-3.5 text-slate-400" />
-              <span>Unlock these details with your $5 full report.</span>
-            </div>
-          </section>
-        ) : (
+        {isReportUnlocked ? (
           <>
-            {/* PREMIUM: INTERACTIVE ANALYSIS (ONLY RENDERED WHEN FULL ANALYSIS IS UNLOCKED) */}
-            <section>
-              <h2 className="text-xl font-bold mb-6 text-white">Signal Diagnostics</h2>
-              
-              <div className="flex gap-2 mb-6 overflow-x-auto pb-2 -mx-2 px-2 scrollbar-hide">
-                {explorerTabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveExplorerSignalId(tab.id)}
-                    className={`px-4 py-2 rounded-full font-medium text-sm whitespace-nowrap transition cursor-pointer ${explorerSignalId === tab.id ? "bg-blue-600 text-white" : "bg-[#121824] border border-[#263044] text-[#94A3B8]"}`}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-
-              <div className="bg-[#121824] border border-[#263044] rounded-xl p-5 sm:p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h3 className="text-lg font-bold text-white">{activeSignal.title}</h3>
-                    <div className="flex items-center gap-1.5 mt-1">
-                      <span className={`w-1.5 h-1.5 rounded-full ${getStatusTheme(activeSignal.status, activeSignal.badgeType).dot}`} aria-hidden="true" />
-                      <span className={`text-xs font-medium ${getStatusTheme(activeSignal.status, activeSignal.badgeType).text}`}>
-                        {formatStatusText(activeSignal.status)}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="text-sm font-semibold text-white">{activeSignal.scoreDisplay}</div>
-                </div>
-                
-                <div className="space-y-6">
-                  {explorerSignalId === "purchase-readiness" && report.purchaseReadiness?.details && (
-                    <div className="space-y-5">
-                      <p className="text-xs text-[#64748B]">Separate evidence-based assessment · Does not affect the Overall Clarity Score</p>
-                      <div>
-                        <h4 className="text-[10px] font-bold text-amber-400 mb-2 tracking-widest uppercase">Pricing and Value Communication</h4>
-                        {report.purchaseReadiness.details.pricingAndValueIssues.map((finding,i) => <p key={i} className="text-[#94A3B8] text-sm mb-2">{finding}</p>)}
-                        {!report.purchaseReadiness.details.pricingAndValueIssues.length && <p className="text-[#94A3B8] text-sm">No gaps were identified by the pricing and value checks in the inspected content.</p>}
-                      </div>
-                      {report.purchaseReadiness.details.copyImprovements.map((copy,i) => <div key={i} className="text-sm text-[#94A3B8] space-y-1"><h4 className="text-[10px] font-bold text-blue-400 mb-2 tracking-widest uppercase">Suggested CTA Copy</h4><p>Current: {copy.current}</p><p className="text-[#F1F5F9] select-all">{copy.suggested}</p></div>)}
-                      <div>
-                        <h4 className="text-[10px] font-bold text-blue-400 mb-2 tracking-widest uppercase">Observed Website Evidence</h4>
-                        {report.purchaseReadiness.details.evidence.map((item,i) => <blockquote key={i} className="border-l border-[#263044] pl-3 mb-3 text-sm text-[#94A3B8] break-words"><p>{item.text}</p><cite className="text-xs text-[#64748B] not-italic">{item.source}</cite></blockquote>)}
-                      </div>
-                      {report.purchaseReadiness.details.limitations.map((item,i) => <p key={i} className="text-xs leading-relaxed text-[#64748B]">{item}</p>)}
-                    </div>
-                  )}
-                  <div>
-                    <h4 className="text-[10px] font-bold text-blue-400 mb-2 tracking-widest uppercase">Why This Score</h4>
-                    <p className="text-[#94A3B8] text-sm">
-                      {activeSignal.explanation || "Diagnostic analysis not available for this signal."}
-                    </p>
-                  </div>
-                  <div className="border-t border-[#263044]"></div>
-                  <div>
-                    <h4 className="text-[10px] font-bold text-emerald-400 mb-2 tracking-widest uppercase">What&apos;s Working</h4>
-                    {activeSignal.positiveFindings.length > 0 ? (
-                      <ul className="text-[#94A3B8] text-sm space-y-1.5">
-                        {activeSignal.positiveFindings.map((finding, i) => (
-                          <li key={i}>✓ {finding}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-[#94A3B8] text-sm">No clear positive signals detected in the initial content.</p>
-                    )}
-                  </div>
-                  <div className="border-t border-[#263044]"></div>
-                  <div>
-                    <h4 className="text-[10px] font-bold text-amber-400 mb-2 tracking-widest uppercase">What&apos;s Unclear</h4>
-                    {activeSignal.concerns.length > 0 ? (
-                      <ul className="text-[#94A3B8] text-sm space-y-1.5">
-                        {activeSignal.concerns.map((concern, i) => (
-                          <li key={i}>! {concern}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-[#94A3B8] text-sm">No significant ambiguities identified for this signal.</p>
-                    )}
-                  </div>
-                  <div className="border-t border-[#263044]"></div>
-                  <div>
-                    <h4 className="text-[10px] font-bold text-rose-400 mb-2 tracking-widest uppercase">How to Improve</h4>
-                    {activeSignal.recommendations.length > 0 ? (
-                      <ul className="text-[#94A3B8] text-sm space-y-1.5">
-                        {activeSignal.recommendations.map((rec, i) => (
-                          <li key={i}>→ {rec}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-[#94A3B8] text-sm">Maintain current messaging clarity in this area.</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </section>
+            {/* Verified paid access unlocks the complete multi-chapter analysis. */}
+            <SignalReportExplorer
+              signals={report.signalsList}
+              purchaseReadiness={unlockedPurchase}
+            />
 
             {/* FIRST 5 SECONDS */}
             <section>
@@ -1064,6 +874,13 @@ export default function ResultsScreen({
                 </div>
               </div>
             </section>
+
+            <PremiumActionPlan
+              recommendation={data?.recommendation}
+              otherImprovements={Array.isArray(data?.otherImprovements) ? data.otherImprovements : []}
+              evidence={data?.evidence}
+              visitorThought={data?.visitorThought}
+            />
           </>
         )}
 
