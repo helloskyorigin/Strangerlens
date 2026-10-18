@@ -35,7 +35,7 @@ for (const width of [320, 390, 1440]) {
         check(!!doc.querySelector("#complete-paid-report"), "paid users see full report explorer");
         check(doc.querySelectorAll('#complete-paid-report [role="tab"]').length === 5, "paid explorer provides all five core chapters");
         check(doc.querySelectorAll('#complete-paid-report [role="tab"][aria-selected="true"]').length === 1, "one full report chapter is active");
-        check(text.includes("Why This Score") && text.includes("What’s Working".replace("’", "'").slice(0,4)) && text.includes("How to Improve"), "paid chapter contains detailed reasoning and recommendations");
+        check(text.includes("Why This Score") && text.includes("What's Working") && text.includes("How to Improve"), "paid chapter contains detailed reasoning and recommendations");
         check(text.includes(privateText), "paid signal explanations are rendered");
         check(!!doc.querySelector("#your-improvement-plan") && text.includes("Copy-Ready Improvements"), "paid improvements and copy proposals are visible");
       } else {
