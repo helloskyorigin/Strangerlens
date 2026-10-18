@@ -1,11 +1,11 @@
 "use client";
-import React, { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import CompleteReportPreview from "@/components/CompleteReportPreview";
 import SignalReportExplorer from "@/components/SignalReportExplorer";
 import PremiumActionPlan from "@/components/PremiumActionPlan";
 import PostScanUpgradeModal from "@/components/PostScanUpgradeModal";
 import { trackFunnelEvent } from "@/lib/ui-funnel-events";
-import { Link2, Clock, Share2, Download, AlertCircle, Check, Zap, Info, X, Lock, Mail, ArrowRight, Sparkles, Shield, Users, Eye, ChevronDown, Loader2 } from "lucide-react";
+import { Share2, Download, Check, Info, X, Lock, Loader2 } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import { adaptReport } from "@/lib/report-adapter";
@@ -141,11 +141,6 @@ export default function ResultsScreen({
   const unlockedPurchase = isReportUnlocked ? report.purchaseReadiness : undefined;
   const showLockedPurchase = !unlockedPurchase && Boolean(report.purchaseReadinessLocked || report.purchaseReadiness);
   const displaySignals = unlockedPurchase ? [...report.signalsList, unlockedPurchase] : report.signalsList;
-  // Tease only the public score, never the locked explanation or findings.
-  const weakestSignal = report.signalsList.reduce<(typeof report.signalsList)[number] | null>((weakest, signal) => {
-    if (signal.score === null || !Number.isFinite(signal.score) || signal.score < 0 || signal.score > 100) return weakest;
-    return weakest === null || signal.score < weakest.score! ? signal : weakest;
-  }, null);
   // Offer only after a FRESH, successfully completed scan (never on restore,
   // back navigation, a purchased report, or after returning from checkout).
   const currentReportId: string | null = data?.reportId || report.rawReport?.reportId || null;
@@ -694,22 +689,13 @@ export default function ResultsScreen({
               <span className="inline-block text-[11px] font-bold tracking-widest text-[#3B82F6] uppercase bg-[#171F2D] px-3 py-1 rounded-full border border-[#263044] mb-3 shadow-xs">
                 {isTestMode ? "TEST MODE" : isCheckoutAvailable ? "FULL ANALYSIS" : "EARLY ACCESS"}
               </span>
-              <h2 className="text-xl sm:text-2xl font-bold leading-tight mb-3 text-white">Turn Your Clarity Scores Into Improvements.</h2>
+              <h2 className="text-xl sm:text-2xl font-bold leading-tight mb-3 text-white">Your Complete Five-Signal Report</h2>
               <div className="text-base sm:text-lg font-bold text-white mb-3">
                 $5 <span className="text-xs sm:text-sm text-[#94A3B8] font-normal">· One-time payment</span>
               </div>
               <p className="text-[#94A3B8] text-sm mb-2 max-w-md mx-auto leading-relaxed">
-                Your free scores show where to look. Unlock website-specific explanations, your priority fix, and copy you can adapt immediately.
+                The full report explores all five signals in depth, from existing strengths to actionable improvements. Your free scores stay available.
               </p>
-              {weakestSignal && (
-                <div className="mt-5 rounded-xl border border-blue-500/20 bg-[#171F2D]/70 p-4 sm:p-5 text-left" aria-label="Your lowest-scoring clarity signal">
-                  <p className="text-sm sm:text-base font-semibold leading-relaxed text-[#F1F5F9] break-words">
-                    {weakestSignal.title} <span className="text-blue-400 tabular-nums whitespace-nowrap">— {weakestSignal.score}/100</span>
-                  </p>
-                  <p className="mt-2 text-sm leading-relaxed text-[#CBD5E1]">What influenced this score — and what should you improve first?</p>
-                  <p className="mt-1.5 text-xs sm:text-sm leading-relaxed text-[#94A3B8]">Unlock the detailed explanation, prioritized steps and copy suggestions.</p>
-                </div>
-              )}
               {isCheckoutAvailable ? (
                 <div className="mt-6 space-y-4">
                   {paymentError && (
