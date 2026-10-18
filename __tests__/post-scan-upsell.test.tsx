@@ -8,41 +8,46 @@ import { mapBackendToFrontend } from "../lib/mapper";
 import { paymentAnalysis, paymentSnapshot, privateText } from "./fixtures/payment-report";
 
 let assertions = 0;
-const check = (test: unknown, message: string) => { assert.ok(test, message); assertions++; };
+const check = (value: unknown, message: string) => { assert.ok(value, message); assertions++; };
 const modalProps = {
-  domain: "example.com", overallScore: "79/100",
-  weakestSignal: { title: "Trust", score: 60 },
+  domain: "example.com",
+  overallScore: "79/100",
+  signals: [
+    { title: "First Impression", scoreDisplay: "90/100" },
+    { title: "Audience", scoreDisplay: "62/100" },
+    { title: "Value", scoreDisplay: "85/100" },
+    { title: "Trust", scoreDisplay: "60/100" },
+    { title: "Action", scoreDisplay: "90/100" },
+  ],
   canCheckout: true, isTestMode: false, busy: false,
   onContinueFree: () => {}, onUpgrade: () => {},
 };
 
 const offer = new JSDOM(renderToStaticMarkup(<PostScanUpgradeModal open={true} {...modalProps} />));
 const doc = offer.window.document;
-check(doc.querySelector('[role="dialog"][aria-modal="true"]'), "post-scan offer is an accessible dialog");
-check(doc.querySelector('button[aria-label="Close and view free results"]'), "modal offers a close button");
-check([...doc.querySelectorAll("button")].some(b => b.textContent?.includes("Continue with my free results")), "free report always remains directly accessible");
-check([...doc.querySelectorAll("button")].some(b => b.textContent?.includes("Unlock Full Analysis — $5")), "paid offer has one-time price");
-check(doc.body.textContent?.includes("Trust") && doc.body.textContent?.includes("60/100"), "weakest free signal is correctly personalized");
-check(!doc.body.textContent?.includes(privateText), "premium private content never appears in modal");
+const text = doc.body.textContent || "";
+check(doc.querySelector('[role="dialog"][aria-modal="true"]'), "post-scan offer has an accessible dialog");
+check(doc.querySelector('button[aria-label="Close and view free results"]'), "modal has close button");
+check([...doc.querySelectorAll("button")].some(b => b.textContent?.includes("Continue with my free results")), "free report is accessible without purchase");
+check([...doc.querySelectorAll("button")].some(b => b.textContent?.includes("Unlock Complete Report — $5")), "premium CTA is for the complete report at $5");
+check(modalProps.signals.every(signal => text.includes(signal.title) && text.includes(signal.scoreDisplay)), "modal lists every public signal score");
+check(!text.includes(privateText), "private paid content is never placed in the popup");
 offer.window.close();
 
 const hidden = renderToStaticMarkup(<PostScanUpgradeModal open={false} {...modalProps} />);
-check(hidden === "", "modal renders nothing when dismissed");
+check(hidden === "", "dismissed modal renders nothing");
 const unavailable = new JSDOM(renderToStaticMarkup(<PostScanUpgradeModal open={true} {...modalProps} canCheckout={false} />));
-check(Boolean(unavailable.window.document.querySelector('button:disabled')), "checkout action disabled honestly if checkout unavailable");
-check(unavailable.window.document.body.textContent?.includes("Your free report is ready below"), "free report still available when checkout is down");
+check(!!unavailable.window.document.querySelector('button:disabled'), "offline checkout disables paid button");
+check(unavailable.window.document.body.textContent?.includes("Your free report is ready below"), "free report survives checkout errors");
 unavailable.window.close();
 
-const free = structuredClone(paymentAnalysis);
-const freeReport = mapBackendToFrontend(free, "https://example.com", paymentSnapshot);
+const freeReport = mapBackendToFrontend(structuredClone(paymentAnalysis), "https://example.com", paymentSnapshot);
 const freeMarkup = renderToStaticMarkup(<ResultsScreen analysisData={freeReport} rawUrl="https://example.com" checkoutEnabled={true} />);
-check(freeMarkup.includes("A Clarity Opportunity"), "results promote a personalized opportunity above the signals");
-check(freeMarkup.includes("See Detailed Fixes — $5"), "above-the-fold paid CTA exists");
-check(freeMarkup.includes("Website Clarity Score"), "core free overall score is preserved");
-check(freeMarkup.includes("Your Clarity Signals"), "all five free signal scores remain available");
-check(!freeMarkup.includes(privateText), "free report markup does not expose private paid findings");
+check(freeMarkup.includes('id="complete-report-preview"'), "full report preview is present for free users");
+check(freeMarkup.includes("First Impression") && freeMarkup.includes("Audience") && freeMarkup.includes("Trust"), "five signal preview remains populated");
+check(freeMarkup.includes('id="complete-report-preview"') && !freeMarkup.includes('id="your-improvement-plan"'), "no paid plan rendered in free report");
 
 const paidMarkup = renderToStaticMarkup(<ResultsScreen analysisData={freeReport} rawUrl="https://example.com" checkoutEnabled={true} isUnlocked={true} />);
-check(!paidMarkup.includes("A Clarity Opportunity"), "verified paid reports omit upgrade teaser");
-
-console.log(`PASS: ${assertions} post-scan modal, free-access, and premium-isolation UX assertions.`);
+check(!paidMarkup.includes('id="complete-report-preview"'), "paid users do not see locked preview");
+check(paidMarkup.includes('id="complete-paid-report"') && paidMarkup.includes('id="your-improvement-plan"'), "verified paid users see full chapter explorer and actionable plan");
+console.log(`PASS: ${assertions} full-report popup, five-signal preview, free access and premium gating assertions.`);
