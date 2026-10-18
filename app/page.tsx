@@ -13,10 +13,12 @@ import {
   Shield,
   Users,
   Sparkles,
+  ShoppingBag,
 } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import ScanScreen from "@/components/ScanScreen";
 import ResultsScreen from "@/components/ResultsScreen";
+import ClaritySignalTooltip from "@/components/ClaritySignalTooltip";
 import { useReportPayments } from "@/hooks/useReportPayments";
 import { validateClientUrl } from "@/lib/url-client-validator";
 import { createScanFlowController } from "@/lib/scan-flow-controller";
@@ -56,11 +58,11 @@ const PRICING_PLANS: PricingPlan[] = [
     paymentLabel: "FREE",
     badge: null,
     positioning: "Instant clarity evaluation.",
-    description: "Discover your overall website clarity score and five signal statuses with zero friction.",
+    description: "Discover your overall website clarity score and up to six signal statuses with zero friction.",
     features: [
       "Overall Website Clarity Score (0–100)",
-      "Five Clarity Signal Scores",
-      "Five Signal Statuses (Clear / Partly clear / Needs work)",
+      "Up to Six Signal Scores (sixth for paid offerings)",
+      "Signal Statuses (Clear / Partly clear / Needs work)",
     ],
     cta: "Analyze My Website Free",
     disabledCta: "Analyze My Website Free",
@@ -93,7 +95,7 @@ const FAQ_ITEMS = [
   {
     question: "What does StrangerLens analyse?",
     answer:
-      "StrangerLens is an AI-powered website first-impression clarity analyzer. It evaluates website communication across five core visitor signals — First Impression, Audience, Value, Trust, and Action — using the content actually inspected from your URL.",
+      "StrangerLens is an AI-powered website first-impression clarity analyzer. It evaluates First Impression, Audience, Value, Trust, and Action using inspected website content. A sixth signal, Purchase Readiness, appears when a genuine paid offering is identified. Its separate score does not affect the Overall Clarity Score.",
   },
   {
     question: "Does StrangerLens work with any website?",
@@ -113,7 +115,7 @@ const FAQ_ITEMS = [
   {
     question: "What is included in the free analysis?",
     answer:
-      "The Free Preview ($0) gives you your Overall Website Clarity Score, five Clarity Signal Scores (First Impression, Audience, Value, Trust, Action), and five Signal Statuses with zero signup or credit card required.",
+      "The Free Preview ($0) gives you your Overall Website Clarity Score and up to six signal scores and statuses with zero signup or credit card required. Purchase Readiness is the conditional sixth signal for websites with identified paid offerings; it includes a short explanation and a separate score.",
   },
   {
     question: "What does Full Analysis cost?",
@@ -156,6 +158,7 @@ export default function LandingPage() {
   const [isPending, setIsPending] = useState<boolean>(false);
   const [backendError, setBackendError] = useState<string | null>(null);
   const [analysisData, setAnalysisData] = useState<any>(null);
+  const [landingSignalTooltip, setLandingSignalTooltip] = useState<string | null>(null);
 
   useEffect(() => {
     if (analysisData?.reportId) {
@@ -785,7 +788,7 @@ export default function LandingPage() {
                     }}
                     className="mt-3.5 text-xs sm:text-[13px] text-[#94A3B8] font-medium leading-relaxed"
                   >
-                    No signup required · AI-powered clarity review · Five clarity signals
+                    No signup required · AI-powered clarity review · Up to six signals
                   </motion.p>
                 </div>
 
@@ -824,7 +827,7 @@ export default function LandingPage() {
                       </div>
                     </div>
 
-                    {/* B. Five Clarity Signals in Preview (Matching exact ResultsScreen responsive layout) */}
+                    {/* B. Five core signals plus the conditional purchase assessment */}
                     <div className="bg-[#121824] rounded-xl overflow-hidden divide-y divide-[#263044]/70 space-y-2">
                       {[
                         { label: "First Impression", score: 85, status: "Clear", color: "bg-emerald-500", text: "text-emerald-400", dot: "bg-emerald-400" },
@@ -878,6 +881,18 @@ export default function LandingPage() {
                           </div>
                         </div>
                       ))}
+                      <div className="bg-[#171F2D] border border-[#263044] rounded-xl p-3 sm:p-4.5">
+                        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+                          <span className="inline-flex items-center gap-1.5 text-sm font-medium text-[#F1F5F9]">
+                            Purchase Readiness
+                            <ClaritySignalTooltip signalKey="purchaseReadiness" name="Purchase Readiness" isOpen={landingSignalTooltip === "preview"}
+                              onOpen={() => setLandingSignalTooltip("preview")}
+                              onClose={() => setLandingSignalTooltip(current => current === "preview" ? null : current)} />
+                          </span>
+                          <span className="text-[11px] font-medium text-blue-400">Paid offerings only</span>
+                        </div>
+                        <p className="mt-2 text-xs leading-relaxed text-[#94A3B8]">A separate purchase-communication score, shown when applicable.</p>
+                      </div>
                     </div>
 
                     {/* C. Premium Preview Area (Why This Score, What's Working, Unclear, First 5 Seconds) */}
@@ -962,7 +977,7 @@ export default function LandingPage() {
                           Get free clarity signals
                         </h3>
                         <p className="text-sm text-[#94A3B8] leading-relaxed">
-                          Discover your overall score and five first-impression signals evaluating core communication.
+                          Discover your overall score and up to six signals, including Purchase Readiness when a paid offering is identified.
                         </p>
                       </div>
                     </div>
@@ -986,7 +1001,7 @@ export default function LandingPage() {
                 </StaggerContainer>
               </section>
 
-              {/* SECTION: FIVE CLARITY SIGNALS (Compact & Sleek) */}
+              {/* SECTION: SIX SIGNALS (Purchase Readiness is conditional) */}
               <section
                 id="product"
                 className="scroll-mt-20 sm:scroll-mt-24 py-10 sm:py-12 md:py-16 border-t border-[#263044]"
@@ -994,24 +1009,24 @@ export default function LandingPage() {
                 <div className="max-w-4xl mx-auto text-center mb-6 sm:mb-8">
                   <Reveal y={10} blur>
                     <span className="inline-block text-[11px] font-bold tracking-widest text-[#3B82F6] uppercase bg-[#171F2D] px-3 py-1 rounded-full border border-[#263044]">
-                      FIVE CLARITY SIGNALS
+                      UP TO SIX SIGNALS
                     </span>
                   </Reveal>
                   <Reveal y={14} delay={0.06}>
                     <h2 className="text-2xl min-[375px]:text-3xl sm:text-4xl font-extrabold text-white tracking-tight mt-3 mb-2 [text-wrap:balance]">
-                      Five signals. One clearer picture.
+                      Six signals. One clearer picture.
                     </h2>
                   </Reveal>
                   <Reveal y={14} delay={0.12}>
                     <p className="text-sm sm:text-base text-[#94A3B8] max-w-2xl mx-auto leading-relaxed font-normal">
-                      Every signal evaluates how your website communicates essential visitor expectations.
+                      Five core clarity signals, plus Purchase Readiness for websites with paid products, plans or services. The sixth score is separate from your Overall Clarity Score.
                     </p>
                   </Reveal>
                 </div>
 
                 <StaggerContainer
                   staggerDelay={0.06}
-                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-3.5 max-w-6xl mx-auto items-stretch"
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-3.5 max-w-6xl mx-auto items-stretch"
                 >
                   {[
                     {
@@ -1039,6 +1054,11 @@ export default function LandingPage() {
                       desc: "Is the next step clear?",
                       icon: ArrowRight,
                     },
+                    {
+                      title: "PURCHASE READINESS",
+                      desc: "Are the reasons to pay, pricing and purchase next step clear?",
+                      icon: ShoppingBag,
+                    },
                   ].map((card, idx) => {
                     const IconComponent = card.icon;
                     return (
@@ -1048,12 +1068,16 @@ export default function LandingPage() {
                             <div className="w-8 h-8 rounded-xl bg-[#171F2D] border border-[#263044] text-[#3B82F6] flex items-center justify-center mb-3 transition-transform duration-200 group-hover:scale-105 group-hover:bg-[#1C2638]">
                               <IconComponent className="w-4 h-4" />
                             </div>
-                            <h3 className="font-extrabold text-white text-xs tracking-wider uppercase mb-1">
-                              {card.title}
+                            <h3 className="font-extrabold text-white text-xs tracking-wider uppercase mb-1 inline-flex items-start gap-1.5">
+                              <span>{card.title}</span>
+                              {card.title === "PURCHASE READINESS" && <ClaritySignalTooltip signalKey="purchaseReadiness" name="Purchase Readiness" isOpen={landingSignalTooltip === "feature"}
+                                onOpen={() => setLandingSignalTooltip("feature")}
+                                onClose={() => setLandingSignalTooltip(current => current === "feature" ? null : current)} />}
                             </h3>
                             <p className="text-xs text-[#94A3B8] leading-relaxed">
                               {card.desc}
                             </p>
+                            {card.title === "PURCHASE READINESS" && <p className="mt-2 text-[11px] font-medium text-blue-400">For paid offerings only</p>}
                           </div>
                         </div>
                       </StaggerItem>
@@ -1100,7 +1124,7 @@ export default function LandingPage() {
                           Instant clarity evaluation.
                         </p>
                         <p className="text-xs sm:text-[13px] text-[#94A3B8] leading-relaxed mb-5">
-                          Discover your overall website clarity score and five signal statuses with zero friction.
+                          Discover your overall website clarity score and up to six signal statuses with zero friction.
                         </p>
 
                         <div className="flex items-baseline gap-2 mb-5 pb-4 border-b border-[#263044] tabular-nums">
@@ -1119,8 +1143,8 @@ export default function LandingPage() {
                           <ul className="space-y-2.5 text-sm text-[#F1F5F9]">
                             {[
                               "Overall Website Clarity Score (0–100)",
-                              "Five Clarity Signal Scores",
-                              "Five Signal Statuses (Clear / Partly clear / Needs work)",
+                              "Up to Six Signal Scores (sixth for paid offerings)",
+                              "Signal Statuses (Clear / Partly clear / Needs work)",
                             ].map((feat, i) => (
                               <li key={i} className="flex items-start gap-2.5">
                                 <Check className="w-4 h-4 shrink-0 mt-0.5 text-emerald-400" />
