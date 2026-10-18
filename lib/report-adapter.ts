@@ -24,6 +24,8 @@
  * and handles missing data gracefully without fabricating content.
  */
 
+import { readPurchaseReadiness } from "@/lib/purchase-readiness";
+
 export type CanonicalSignalKey =
   | "firstImpression"
   | "audience"
@@ -59,7 +61,14 @@ export interface CanonicalFirstSeconds {
   missingFindings: string[];
 }
 
+export interface CanonicalPurchaseSignal extends Omit<CanonicalSignal, "key"> {
+  key: "purchaseReadiness";
+  summary: string;
+  details?: import("@/types/purchase-readiness").PurchaseReadiness["details"];
+}
+
 export interface CanonicalReport {
+  purchaseReadiness?: CanonicalPurchaseSignal;
   domain: string;
   overallScore: number | null;
   overallScoreDisplay: string;
@@ -170,6 +179,15 @@ export function adaptReport(raw: any): CanonicalReport {
   };
 
   const signalsList = [firstImpression, audience, value, trust, action];
+  const purchase = readPurchaseReadiness(raw.purchaseReadiness ?? raw.purchase_readiness ?? raw.analysis?.purchase_readiness);
+  const purchaseReadiness: CanonicalPurchaseSignal | undefined = purchase ? {
+    key: "purchaseReadiness", id: "purchase-readiness", title: "Purchase Readiness", score: purchase.score,
+    scoreDisplay: `${purchase.score}/100`, status: purchase.status.replace(/_/g, " "),
+    badgeType: purchase.score >= 65 ? "clear" : purchase.score >= 45 ? "amber" : "coral",
+    explanation: purchase.details?.explanation || purchase.summary,
+    positiveFindings: purchase.details?.working || [], concerns: purchase.details?.hesitations || [], recommendations: purchase.details?.recommendations || [],
+    hasRealScore: true, isAvailable: true, summary: purchase.summary, details: purchase.details,
+  } : undefined;
 
   // 4. Build Structured First 5 Seconds Insights
   const firstSeconds = buildCanonicalFirstSeconds(raw, signals);
@@ -184,6 +202,7 @@ export function adaptReport(raw: any): CanonicalReport {
     verdictSubtext,
     signals,
     signalsList,
+    ...(purchaseReadiness ? { purchaseReadiness } : {}),
     firstSeconds,
     rawReport: raw,
   };

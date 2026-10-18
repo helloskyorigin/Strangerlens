@@ -12,7 +12,8 @@
     "clean": "next clean",
     "test:payments": "node --import tsx __tests__/dodo-checkout.test.ts",
     "test:history": "node --import tsx __tests__/report-history.test.tsx",
-    "test:pdf": "node --import tsx __tests__/pdf-export.test.tsx"
+    "test:pdf": "node --import tsx __tests__/pdf-export.test.tsx",
+    "test:purchase-readiness": "node --import tsx __tests__/purchase-readiness.test.tsx"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",

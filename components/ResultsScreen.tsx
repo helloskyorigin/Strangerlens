@@ -14,6 +14,7 @@ import {
 } from "@/lib/payment-checkout";
 
 export interface AnalysisData {
+  purchaseReadiness?: import("@/types/purchase-readiness").PurchaseReadiness;
   domain: string;
   score: number;
   scoreStatus: "Needs improvement" | "Good" | "Needs work" | "Excellent";
@@ -125,6 +126,7 @@ export default function ResultsScreen({
 
   // Canonical report normalized from authoritative analysis data
   const report = adaptReport(data);
+  const displaySignals = report.purchaseReadiness ? [...report.signalsList, report.purchaseReadiness] : report.signalsList;
   // Tease only the public score, never the locked explanation or findings.
   const weakestSignal = report.signalsList.reduce<(typeof report.signalsList)[number] | null>((weakest, signal) => {
     if (signal.score === null || !Number.isFinite(signal.score) || signal.score < 0 || signal.score > 100) return weakest;
@@ -289,10 +291,12 @@ export default function ResultsScreen({
     { id: "value", label: "Value" },
     { id: "trust", label: "Trust" },
     { id: "action", label: "Action" },
+    ...(report.purchaseReadiness ? [{ id: "purchase-readiness", label: "Purchase Readiness" }] : []),
   ];
 
-  const activeSignalKey = SIGNAL_ID_TO_KEY[activeExplorerSignalId] || "firstImpression";
-  const activeSignal = report.signals[activeSignalKey];
+  const explorerSignalId = activeExplorerSignalId === "purchase-readiness" && !report.purchaseReadiness ? "first-impression" : activeExplorerSignalId;
+  const activeSignalKey = SIGNAL_ID_TO_KEY[explorerSignalId] || "firstImpression";
+  const activeSignal = explorerSignalId === "purchase-readiness" && report.purchaseReadiness ? report.purchaseReadiness : report.signals[activeSignalKey];
 
   if (!data) return null;
 
@@ -494,7 +498,7 @@ export default function ResultsScreen({
         <section>
           <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6 text-[#F1F5F9]">Your Clarity Signals</h2>
           <div className="bg-[#121824] border border-[#263044] rounded-xl overflow-hidden divide-y divide-[#263044]/70">
-            {report.signalsList.map((signal) => {
+            {displaySignals.map((signal) => {
               const theme = getStatusTheme(signal.status, signal.badgeType);
               return (
                 <div key={signal.id} className="p-4 sm:p-4.5 transition-colors">
@@ -547,6 +551,13 @@ export default function ResultsScreen({
                       </div>
                     </div>
                   </div>
+                  {signal.key === "purchaseReadiness" && report.purchaseReadiness && (
+                    <div className="mt-3 border-t border-[#263044]/70 pt-3 space-y-2">
+                      <p className="text-xs text-[#64748B]">Separate score · Not included in Overall Clarity Score</p>
+                      <p className="text-xs sm:text-sm leading-relaxed text-[#94A3B8]">{report.purchaseReadiness.summary}</p>
+                      {!isReportUnlocked && <p className="text-xs leading-relaxed text-blue-400 inline-flex items-start gap-1.5"><Lock className="w-3.5 h-3.5 mt-0.5 shrink-0" aria-hidden="true" />Unlock buyer-hesitation findings, pricing and value issues, and specific improvements with Full Analysis.</p>}
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -817,7 +828,7 @@ export default function ResultsScreen({
                   <button
                     key={tab.id}
                     onClick={() => setActiveExplorerSignalId(tab.id)}
-                    className={`px-4 py-2 rounded-full font-medium text-sm whitespace-nowrap transition cursor-pointer ${activeExplorerSignalId === tab.id ? "bg-blue-600 text-white" : "bg-[#121824] border border-[#263044] text-[#94A3B8]"}`}
+                    className={`px-4 py-2 rounded-full font-medium text-sm whitespace-nowrap transition cursor-pointer ${explorerSignalId === tab.id ? "bg-blue-600 text-white" : "bg-[#121824] border border-[#263044] text-[#94A3B8]"}`}
                   >
                     {tab.label}
                   </button>
@@ -839,6 +850,22 @@ export default function ResultsScreen({
                 </div>
                 
                 <div className="space-y-6">
+                  {explorerSignalId === "purchase-readiness" && report.purchaseReadiness?.details && (
+                    <div className="space-y-5">
+                      <p className="text-xs text-[#64748B]">Separate evidence-based assessment · Does not affect the Overall Clarity Score</p>
+                      <div>
+                        <h4 className="text-[10px] font-bold text-amber-400 mb-2 tracking-widest uppercase">Pricing and Value Communication</h4>
+                        {report.purchaseReadiness.details.pricingAndValueIssues.map((finding,i) => <p key={i} className="text-[#94A3B8] text-sm mb-2">{finding}</p>)}
+                        {!report.purchaseReadiness.details.pricingAndValueIssues.length && <p className="text-[#94A3B8] text-sm">No gaps were identified by the pricing and value checks in the inspected content.</p>}
+                      </div>
+                      {report.purchaseReadiness.details.copyImprovements.map((copy,i) => <div key={i} className="text-sm text-[#94A3B8] space-y-1"><h4 className="text-[10px] font-bold text-blue-400 mb-2 tracking-widest uppercase">Suggested CTA Copy</h4><p>Current: {copy.current}</p><p className="text-[#F1F5F9] select-all">{copy.suggested}</p></div>)}
+                      <div>
+                        <h4 className="text-[10px] font-bold text-blue-400 mb-2 tracking-widest uppercase">Observed Website Evidence</h4>
+                        {report.purchaseReadiness.details.evidence.map((item,i) => <blockquote key={i} className="border-l border-[#263044] pl-3 mb-3 text-sm text-[#94A3B8] break-words"><p>{item.text}</p><cite className="text-xs text-[#64748B] not-italic">{item.source}</cite></blockquote>)}
+                      </div>
+                      {report.purchaseReadiness.details.limitations.map((item,i) => <p key={i} className="text-xs leading-relaxed text-[#64748B]">{item}</p>)}
+                    </div>
+                  )}
                   <div>
                     <h4 className="text-[10px] font-bold text-blue-400 mb-2 tracking-widest uppercase">Why This Score</h4>
                     <p className="text-[#94A3B8] text-sm">
@@ -968,9 +995,9 @@ export default function ResultsScreen({
                 </div>
 
                 <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
-                  ${report.signalsList.map(s => `
+                  ${displaySignals.map(s => `
                     <div style="background: #121824; border: 1px solid #263044; border-radius: 12px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;">
-                      <span style="font-size: 14px; font-weight: 600; color: #F1F5F9;">${s.title}</span>
+                      <span style="font-size: 14px; font-weight: 600; color: #F1F5F9;">${s.title}${s.key === "purchaseReadiness" ? ' <span style="font-size: 10px; color: #94A3B8;">(separate score)</span>' : ""}</span>
                       <div style="display: flex; align-items: center; gap: 12px;">
                         <span style="font-size: 12px; color: #94A3B8;">${s.status}</span>
                         <span style="font-size: 14px; font-weight: 700; color: #FFFFFF; min-width: 45px; text-align: right;">${s.scoreDisplay}</span>
@@ -1030,20 +1057,10 @@ export default function ResultsScreen({
             onClick={async () => {
               setIsGeneratingPdf(true);
               try {
-                const targetReportId = data?.reportId || report.rawReport?.reportId;
-                const token = readReportToken(targetReportId) || data?.reportToken || report.rawReport?.reportToken;
-                
-                const res = await fetch(`/api/report/${encodeURIComponent(targetReportId)}`, {
-                  headers: { Authorization: `Bearer ${token}` }
-                });
-                
-                if (!res.ok) throw new Error("Could not verify report access");
-                
-                const reportData = await res.json();
-                const adaptedReport = adaptReport(reportData);
-                const isUnlocked = reportData.entitlement.unlocked;
-                
-                await generateReportPdf(adaptedReport, isUnlocked);
+                // PDF export verifies its tier on /api/report/[id]/pdf. The
+                // full-report endpoint intentionally rejects free reports.
+                if (onDownloadPdf) await onDownloadPdf();
+                else await generateReportPdf(report, isReportUnlocked);
               } catch (err: any) {
                 alert(`PDF generation failed: ${err?.message || "Please try again."}`);
               } finally {

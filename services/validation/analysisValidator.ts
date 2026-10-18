@@ -4,6 +4,8 @@ import { FinalValidatedAnalysis, ValidatedDecisionStatus, ValidatedEvidenceRef }
 import { SCORING_VERSION } from "@/services/scoring/scoringConfig";
 import { normalizeSignalScore } from "@/services/scoring/normalizeSignalScore";
 import { calculateOverallScore } from "@/services/scoring/calculateOverallScore";
+import { assessPurchaseReadiness } from "@/services/scoring/purchaseReadiness";
+import type { SupportingPagesBundle } from "@/lib/supporting-page-fetcher";
 import {
   validateEvidenceList,
   hasExplicitAudienceEvidence,
@@ -23,7 +25,8 @@ import {
  */
 export function validateAndScoreAnalysis(
   aiAnalysis: WebsiteAnalysis,
-  snapshot: WebsiteSnapshot
+  snapshot: WebsiteSnapshot,
+  supportingPages?: SupportingPagesBundle
 ): FinalValidatedAnalysis {
   const brandName = snapshot.navigation.brandName || snapshot.meta.title || "this website";
   const isIncompleteExtraction =
@@ -603,7 +606,9 @@ export function validateAndScoreAnalysis(
     : "medium";
 
   // 6. Assemble Final Validated Analysis Object
+  const purchaseReadiness = assessPurchaseReadiness(snapshot, supportingPages);
   return {
+    ...(purchaseReadiness ? { purchase_readiness: purchaseReadiness } : {}),
     analysis_version: "1.0",
     scoring_version: SCORING_VERSION,
 

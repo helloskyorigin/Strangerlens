@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { paymentFailure } from "@/server/payments/http";
+import { readPurchaseReadiness } from "@/lib/purchase-readiness";
 import {
   getServerReport,
   extractEntitlementTokenFromHeaders,
@@ -61,6 +62,7 @@ export async function GET(
           supportingContext: stored.supportingContext,
         }
       : stored.fullAnalysis;
+    const purchaseReadiness = readPurchaseReadiness(stored.fullAnalysis.purchase_readiness);
 
     return NextResponse.json(
       {
@@ -75,7 +77,7 @@ export async function GET(
           checkoutEnabled: entitlement.checkoutEnabled,
         },
         snapshot: stored.snapshot,
-        analysis: analysisPayload,
+        analysis: purchaseReadiness ? { ...analysisPayload, purchase_readiness: purchaseReadiness } : analysisPayload,
         ...(stored.supportingContext
           ? { supportingContext: stored.supportingContext }
           : {}),

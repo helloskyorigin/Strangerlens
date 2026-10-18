@@ -5,6 +5,7 @@ import type { WebsiteSnapshot } from "@/lib/content-extractor";
 import type { AnalysisData } from "@/components/ResultsScreen";
 import { isDurableStorageConfigured, paymentStore, reportKey, UNPAID_RETENTION_SECONDS, cleanEnvString } from "@/server/storage/paymentStore";
 import { getDodoConfig } from "@/server/payments/dodo";
+import { purchasePreview } from "@/lib/purchase-readiness";
 
 export interface StoredServerReport {
   reportId: string;
@@ -144,7 +145,9 @@ export function computeLockedPreviewCounts(
 export function redactAnalysisForFreeTier(
   analysis: FinalValidatedAnalysis
 ): FinalValidatedAnalysis {
+  const purchaseReadiness = purchasePreview(analysis.purchase_readiness);
   return {
+    ...(purchaseReadiness ? { purchase_readiness: purchaseReadiness } : {}),
     analysis_version: analysis.analysis_version,
     scoring_version: analysis.scoring_version,
     overall_score: analysis.overall_score,
@@ -220,6 +223,7 @@ export function redactFrontendDataForFreeTier(
 
   return {
     ...data,
+    purchaseReadiness: purchasePreview(data.purchaseReadiness),
     firstSeconds: [],
     visitorThought: "",
     evidence: {

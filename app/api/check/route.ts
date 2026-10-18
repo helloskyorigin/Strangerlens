@@ -199,7 +199,7 @@ export async function POST(req: NextRequest) {
 
       // 6. Phase 4: Evidence Validation & Deterministic Scoring (Primary Homepage ONLY)
       const scoreStart = performance.now();
-      const finalValidatedAnalysis = validateAndScoreAnalysis(rawAiAnalysis, snapshot);
+      const finalValidatedAnalysis = validateAndScoreAnalysis(rawAiAnalysis, snapshot, optionalSupportingResult.supportingPagesBundle);
       const scoreDurationMs = Math.round(performance.now() - scoreStart);
 
       const totalDurationMs = Math.round(performance.now() - overallStart);

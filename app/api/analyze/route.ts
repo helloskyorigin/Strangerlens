@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
     );
 
     const aiAnalysis = await analyzeWebsite(snapshot, supportingPagesBundle);
-    const validated = validateAndScoreAnalysis(aiAnalysis, snapshot);
+    const validated = validateAndScoreAnalysis(aiAnalysis, snapshot, supportingPagesBundle);
 
     const stored = await saveServerReport({
       normalizedUrl: fetchResult.finalUrl,

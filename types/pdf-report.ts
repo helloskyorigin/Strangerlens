@@ -1,5 +1,6 @@
 export interface PdfFinding { title: string; paragraphs: string[] }
 export interface PdfSignal {
+  independent?: boolean;
   title: string;
   score: number | null;
   status: string;

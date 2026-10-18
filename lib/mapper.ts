@@ -2,6 +2,7 @@ import { FinalValidatedAnalysis } from "@/types/validatedAnalysis";
 import { SupportingContext } from "@/types/supportingContext";
 import { WebsiteSnapshot, isNavigationOrUtilityCtaLabel } from "@/lib/content-extractor";
 import { AnalysisData } from "@/components/ResultsScreen";
+import { readPurchaseReadiness } from "@/lib/purchase-readiness";
 
 /**
  * Maps the backend's structured FinalValidatedAnalysis and WebsiteSnapshot
@@ -477,8 +478,10 @@ export function mapBackendToFrontend(
   const resolvedSupportingContext =
     supportingContextOverride ?? backendAnalysis.supportingContext;
 
+  const purchaseReadiness = readPurchaseReadiness(backendAnalysis.purchase_readiness);
   return {
     domain: cleanDomain,
+    ...(purchaseReadiness ? { purchaseReadiness } : {}),
     score: backendAnalysis.overall_score,
     scoreStatus: scoreToStatus(backendAnalysis.overall_score),
     verdict: backendAnalysis.verdict.text,
