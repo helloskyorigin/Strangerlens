@@ -666,7 +666,7 @@ export default function LandingPage() {
                       }}
                       className="block"
                     >
-                      Your Website Makes Sense to You.
+                      You Know Your Website.
                     </motion.span>
                     <motion.span
                       initial={shouldReduceMotion ? false : { opacity: 0, y: 14 }}
@@ -678,7 +678,7 @@ export default function LandingPage() {
                       }}
                       className="block"
                     >
-                      But Does It Make Sense to{" "}
+                      But Do{" "}
                       <span className="text-[#3B82F6]">Visitors?</span>
                     </motion.span>
                   </h1>
