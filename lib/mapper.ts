@@ -3,6 +3,7 @@ import { SupportingContext } from "@/types/supportingContext";
 import { WebsiteSnapshot, isNavigationOrUtilityCtaLabel } from "@/lib/content-extractor";
 import { AnalysisData } from "@/components/ResultsScreen";
 import { readPurchaseReadiness } from "@/lib/purchase-readiness";
+import { buildPremiumWorkbench } from "@/lib/premium-workbench";
 
 /**
  * Maps the backend's structured FinalValidatedAnalysis and WebsiteSnapshot
@@ -472,6 +473,13 @@ export function mapBackendToFrontend(
     };
   });
 
+  // Free reports have redacted signal explanations; only authenticated full
+  // payloads receive the evidence/copy/priority workbench.
+  const isFullAnalysis = Object.values(backendAnalysis.signals).some(
+    signal => typeof signal?.explanation === "string" && signal.explanation.trim().length > 0
+  );
+  const premiumWorkbench = isFullAnalysis ? buildPremiumWorkbench(backendAnalysis, snapshot) : undefined;
+
   const resolvedSupportingContext =
     supportingContextOverride ?? backendAnalysis.supportingContext;
 
@@ -493,6 +501,7 @@ export function mapBackendToFrontend(
     risks,
     recommendation,
     otherImprovements,
+    ...(premiumWorkbench ? { premiumWorkbench } : {}),
     ...(resolvedSupportingContext
       ? { supportingContext: resolvedSupportingContext }
       : {}),
