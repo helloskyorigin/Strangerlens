@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { validateUrl, checkSsrf } from "@/lib/url-validator";
 import { fetchWebsiteHomepage } from "@/lib/website-fetcher";
 import { extractWebsiteSnapshot } from "@/lib/content-extractor";
+import { discoverAndFetchLegalPages } from "@/lib/supporting-page-fetcher";
 import { analyzeWebsite } from "@/services/ai/analyzeWebsite";
 import { validateAndScoreAnalysis } from "@/services/validation/analysisValidator";
 import { generateSupportingPageContext } from "@/services/ai/supportingContextAnalyzer";
@@ -171,35 +172,49 @@ export async function POST(req: NextRequest) {
       });
       const snapDurationMs = Math.round(performance.now() - snapStart);
 
-      // 5. Concurrent Execution: Run homepage AI analysis and optional supporting-page discovery concurrently
-      //    when enabled, preventing unnecessary sequential waiting.
+      // 5. Fetch legal pages regardless of the optional multi-page feature flag.
+      // Ground the Trust assessment in actual policy pages before asking the AI.
+      // Other supporting-page analysis can run concurrently with these fetches.
       const aiStart = performance.now();
       const shouldRunSupportingPages =
         isSupportingPagesEnabled() && !pipelineController.signal.aborted;
       type SupportingResultType = Awaited<ReturnType<typeof generateSupportingPageContext>>;
-
+      const legalPagesPromise = discoverAndFetchLegalPages(
+        fetchResult.html, fetchResult.finalUrl, { signal: pipelineController.signal }
+      );
+      const extraPagesPromise: Promise<SupportingResultType> = shouldRunSupportingPages
+        ? generateSupportingPageContext(
+            snapshot, fetchResult.finalUrl, fetchResult.html,
+            { signal: pipelineController.signal }
+          ).catch((err: unknown): SupportingResultType => {
+            console.warn("[SUPP-WARN] Supporting-page context failed gracefully:",
+              err instanceof Error ? err.message : String(err));
+            return {};
+          })
+        : Promise.resolve({} as SupportingResultType);
+      const legalPages = await legalPagesPromise;
+      const rawAiPromise = analyzeWebsite(snapshot, legalPages);
       const [rawAiAnalysis, optionalSupportingResult] = await Promise.all([
-        analyzeWebsite(snapshot),
-        shouldRunSupportingPages
-          ? generateSupportingPageContext(
-              snapshot,
-              fetchResult.finalUrl,
-              fetchResult.html,
-              { signal: pipelineController.signal }
-            ).catch((err: unknown): SupportingResultType => {
-              console.warn(
-                "[SUPP-WARN] Supporting pages context failed gracefully:",
-                err instanceof Error ? err.message : String(err)
-              );
-              return {};
-            })
-          : Promise.resolve({} as SupportingResultType),
+        rawAiPromise, extraPagesPromise,
       ]);
       const aiDurationMs = Math.round(performance.now() - aiStart);
 
-      // 6. Phase 4: Evidence Validation & Deterministic Scoring (Primary Homepage ONLY)
+      // Merge policy links with any feature-flagged product/pricing context so
+      // payment-readiness keeps the richer evidence while Trust sees legal pages.
+      const extraPages = optionalSupportingResult.supportingPagesBundle;
+      const analysisPages = {
+        ...legalPages,
+        candidates: [...legalPages.candidates, ...(extraPages?.candidates ?? [])],
+        pages: [...legalPages.pages, ...(extraPages?.pages ?? []).filter(
+          (page) => !legalPages.pages.some((legal) => legal.finalUrl === page.finalUrl)
+        )],
+      };
+
+      // 6. Deterministic evidence validation & scoring
       const scoreStart = performance.now();
-      const finalValidatedAnalysis = validateAndScoreAnalysis(rawAiAnalysis, snapshot, optionalSupportingResult.supportingPagesBundle);
+      const finalValidatedAnalysis = validateAndScoreAnalysis(
+        rawAiAnalysis, snapshot, analysisPages
+      );
       const scoreDurationMs = Math.round(performance.now() - scoreStart);
 
       const totalDurationMs = Math.round(performance.now() - overallStart);
