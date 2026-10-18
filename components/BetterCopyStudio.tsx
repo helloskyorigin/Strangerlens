@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Check, ClipboardCopy, PencilLine, SlidersHorizontal } from "lucide-react";
 import type { CopyOpportunity } from "@/types/premiumWorkbench";
 
