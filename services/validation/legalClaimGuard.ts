@@ -43,7 +43,7 @@ export function correctContradictedLegalClaims(
   const absentClaim = (value: string): boolean => {
     if (!value || !referencesKnown(value)) return false;
     // Requests to add links which are already present are also misleading.
-    if (/\b(?:add|create|include|provide|link)\b/i.test(value) && /\b(?:links?|footer|polic(?:y|ies)|terms|privacy|legal)\b/i.test(value)) return true;
+    if (/\b(?:add|create|include|provide)\b/i.test(value) && /\b(?:links?|footer|polic(?:y|ies)|terms|privacy|legal)\b/i.test(value)) return true;
     return /\b(?:lack(?:s|ing)?|missing|absen(?:t|ce)|not (?:available|accessible|linked|provided|found|displayed)|no (?:visible |accessible )?(?:privacy|terms|legal|policy)|does not (?:provide|have|include|link|display)|without (?:privacy|terms|legal)|add (?:a |the )?(?:privacy|terms|legal|policy)|add (?:legal|policy) links|need(?:s)? (?:a |to add )?(?:privacy|terms|legal))\b/i.test(value);
   };
   const replaceClaim = (value: string): string => absentClaim(value) ? grounded : value;
