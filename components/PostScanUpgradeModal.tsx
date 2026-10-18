@@ -111,9 +111,9 @@ export default function PostScanUpgradeModal({
           <div className="flex items-start gap-2.5"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
             <span>Why each score, what&apos;s working and what&apos;s unclear</span></div>
           <div className="flex items-start gap-2.5"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
-            <span>Improvements across your website and priority action plan</span></div>
+            <span>Evidence-to-Fix, Smart Priority and a practical action plan</span></div>
           <div className="flex items-start gap-2.5"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
-            <span>First 5 Seconds, copy-ready ideas and downloadable full PDF</span></div>
+            <span>Better Copy Studio, First 5 Seconds and full PDF</span></div>
           {purchaseReadinessApplicable && (
             <div className="flex items-start gap-2.5"><Check className="mt-0.5 h-4 w-4 shrink-0 text-blue-300" />
               <span>Bonus Purchase Readiness assessment (when applicable)</span></div>
