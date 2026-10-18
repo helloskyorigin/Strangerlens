@@ -235,6 +235,7 @@ export function redactFrontendDataForFreeTier(
     },
     risks: Array.isArray(data.risks) ? data.risks.slice(0, 1) : [],
     otherImprovements: [],
+    premiumWorkbench: undefined,
     supportingContext: undefined,
     isFreeTierOnly: true,
     lockedPreviewCounts: lockedPreviewCounts ?? {
