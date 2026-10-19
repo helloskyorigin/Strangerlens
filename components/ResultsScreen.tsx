@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import CompleteReportPreview from "@/components/CompleteReportPreview";
 import SignalReportExplorer from "@/components/SignalReportExplorer";
 import PremiumActionPlan from "@/components/PremiumActionPlan";
+import RecheckComparison from "@/components/RecheckComparison";
 import PostScanUpgradeModal from "@/components/PostScanUpgradeModal";
 import { trackFunnelEvent } from "@/lib/ui-funnel-events";
 import { Share2, Download, Check, Info, X, Lock, Loader2, AlertCircle, ArrowRight, FileText } from "lucide-react";
@@ -641,6 +642,8 @@ export default function ResultsScreen({
           </div>
         </section>
 
+        <RecheckComparison report={report} reportId={currentReportId} onRecheck={onRecheck}/>
+
         {/* Mobile: direct $5 entry right after the free overall score.
             The actual free scores remain available below without paying. */}
         {!isReportUnlocked && (
@@ -969,7 +972,7 @@ export default function ResultsScreen({
               </div>
             </section>
 
-            <PremiumActionPlan
+            <PremiumActionPlan reportId={currentReportId}
               recommendation={data?.recommendation}
               otherImprovements={Array.isArray(data?.otherImprovements) ? data.otherImprovements : []}
               evidence={data?.evidence}
