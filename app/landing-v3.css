@@ -134,6 +134,19 @@ html[data-landing-theme="light"] .landing-v3 .sl-v3-primary,
 html[data-landing-theme="light"] .landing-v3 .sl-v3-primary * {color:#fff!important;}
 /* The chrome is shared; make the hamburger lines visible on a dark landing. */
 html[data-landing-theme="dark"] .landing-v3 .bg-slate-800 {background-color:#D7E5F8;}
+/* Mobile/tablet menu tracks the selected appearance as well. */
+.landing-v3 .sl-mobile-menu {
+  background:color-mix(in srgb,var(--sl-surface) 97%,transparent)!important;
+  border-color:var(--sl-border)!important;
+  color:var(--sl-text);
+}
+.landing-v3 .sl-mobile-menu .bg-\[\#121824\] {background:var(--sl-surface)!important;}
+/* Lift only the selected pricing tier; motion stays subordinate to the CTA. */
+.landing-v3 #pricing .border-2.border-\[\#3B82F6\] {
+  box-shadow:0 24px 68px -40px rgba(48,102,221,.37);
+}
+.landing-v3 #pricing button:focus-visible,
+.landing-v3 .sl-demo-signal:focus-visible {outline:2px solid #246BFD;outline-offset:3px;}
 /* LIGHT/DARK/SYSTEM segmented control */
 .sl-theme-switch {
   display:inline-flex;
