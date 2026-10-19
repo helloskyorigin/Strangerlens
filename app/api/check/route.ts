@@ -208,14 +208,16 @@ async function runCheck(req: NextRequest, onProgress?: ProgressEmitter) {
           })
         : Promise.resolve({} as SupportingResultType);
       const legalPages = await legalPagesPromise;
-      let analysisMode: "ai" | "heuristic" = "heuristic";
+      // Mutable holder: provenance is set by asynchronous provider selection.
+      const provenance: { mode: "ai" | "heuristic" } = { mode: "heuristic" };
       const rawAiPromise = analyzeWebsite(snapshot, legalPages, {
-        onSource: source => { analysisMode = source === "deterministic" ? "heuristic" : "ai"; },
+        onSource: source => { provenance.mode = source === "deterministic" ? "heuristic" : "ai"; },
       });
       const [rawAiAnalysis, optionalSupportingResult] = await Promise.all([
         rawAiPromise, extraPagesPromise,
       ]);
       const aiDurationMs = Math.round(performance.now() - aiStart);
+      const analysisMode: "ai" | "heuristic" = provenance.mode;
 
       // Merge policy links with any feature-flagged product/pricing context so
       // payment-readiness keeps the richer evidence while Trust sees legal pages.
