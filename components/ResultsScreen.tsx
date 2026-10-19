@@ -125,6 +125,9 @@ export default function ResultsScreen({
   const [verifiedUnlocked, setVerifiedUnlocked] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [isPostScanOfferOpen, setIsPostScanOfferOpen] = useState(false);
+  const mobileUpgradeRef = useRef<HTMLElement | null>(null);
+  const [showMobileUpgradeBar, setShowMobileUpgradeBar] = useState(false);
+
   const offeredReportRef = useRef<string | null>(null);
   const closePostScanOffer = useCallback(() => {
     trackFunnelEvent("post_scan_offer_dismissed");
@@ -144,6 +147,28 @@ export default function ResultsScreen({
   const unlockedPurchase = isReportUnlocked ? report.purchaseReadiness : undefined;
   const showLockedPurchase = !unlockedPurchase && Boolean(report.purchaseReadinessLocked || report.purchaseReadiness);
   const displaySignals = unlockedPurchase ? [...report.signalsList, unlockedPurchase] : report.signalsList;
+  // Keep a compact $5 entry point available while mobile visitors scroll the
+  // free report. Hide it when either upgrade card is in view or the modal opens.
+  useEffect(() => {
+    if (isReportUnlocked || !isCheckoutAvailable) return;
+    const updateVisibility = () => {
+      const entry = mobileUpgradeRef.current;
+      const checkoutSection = document.getElementById("complete-report-preview");
+      if (!entry) return;
+      const entryAboveViewport = entry.getBoundingClientRect().bottom < 0;
+      const previewRect = checkoutSection?.getBoundingClientRect();
+      const previewVisible = Boolean(previewRect && previewRect.top < window.innerHeight - 65 && previewRect.bottom > 65);
+      setShowMobileUpgradeBar(entryAboveViewport && !previewVisible);
+    };
+    updateVisibility();
+    window.addEventListener("scroll", updateVisibility, { passive: true });
+    window.addEventListener("resize", updateVisibility);
+    return () => {
+      window.removeEventListener("scroll", updateVisibility);
+      window.removeEventListener("resize", updateVisibility);
+    };
+  }, [isReportUnlocked, isCheckoutAvailable, data?.reportId]);
+
   // Offer only after a FRESH, successfully completed scan (never on restore,
   // back navigation, a purchased report, or after returning from checkout).
   const currentReportId: string | null = data?.reportId || report.rawReport?.reportId || null;
@@ -352,7 +377,7 @@ export default function ResultsScreen({
   if (!data) return null;
 
   return (
-    <div id="results-content" className="min-h-screen bg-[#090D15] text-[#F1F5F9] font-sans antialiased flex flex-col">
+    <div id="results-content" className={`min-h-screen bg-[#090D15] text-[#F1F5F9] font-sans antialiased flex flex-col ${!isReportUnlocked && isCheckoutAvailable ? "pb-16 sm:pb-0" : ""}`}>
       <PostScanUpgradeModal
         open={isPostScanOfferOpen && !isReportUnlocked}
         domain={report.domain}
@@ -368,6 +393,23 @@ export default function ResultsScreen({
         onContinueFree={closePostScanOffer}
         onUpgrade={handleUnlockFullAnalysis}
       />
+      {/* Mobile-only compact offer stays available while long free results scroll.
+          Never blocks the report, the checkout modal, or the main premium CTA. */}
+      {!isReportUnlocked && isCheckoutAvailable && showMobileUpgradeBar && !isPostScanOfferOpen && (
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-[#355275] bg-[#101B2B]/95 px-4 py-2.5 shadow-[0_-10px_35px_rgba(0,0,0,.45)] backdrop-blur-xl sm:hidden"
+          style={{ paddingBottom: "max(10px, env(safe-area-inset-bottom))" }}>
+          <div className="mx-auto flex max-w-md items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-white">Complete 5-signal report</p>
+              <p className="text-[11px] text-[#A6BCD5]">$5 once · Full findings &amp; fixes</p>
+            </div>
+            <button type="button" onClick={handleUnlockFullAnalysis} disabled={loading || isVerifyingPayment}
+              className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full bg-[#246BFD] px-4 text-xs font-bold text-white disabled:opacity-50">
+              {loading || isVerifyingPayment ? "Opening…" : "Unlock — $5"} <ArrowRight className="h-3.5 w-3.5" aria-hidden="true"/>
+            </button>
+          </div>
+        </div>
+      )}
       {/* EARLY ACCESS THANK YOU SUCCESS MODAL */}
       <AnimatePresence>
         {isEarlySuccessModalOpen && (
@@ -590,6 +632,31 @@ export default function ResultsScreen({
           </div>
         </section>
 
+        {/* Mobile: direct $5 entry right after the free overall score.
+            The actual free scores remain available below without paying. */}
+        {!isReportUnlocked && (
+          <section ref={mobileUpgradeRef} aria-label="Unlock the detailed report"
+            className="rounded-2xl border border-[#36537B] bg-gradient-to-r from-[#142944] to-[#162136] p-4 shadow-[0_14px_32px_-23px_rgba(39,108,255,.4)] sm:hidden">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-[#8FBCFF]">Go beyond your score</p>
+                <h2 className="mt-1 text-[17px] font-bold leading-snug text-white">Understand all 5 signals.</h2>
+                <p className="mt-1 text-xs leading-relaxed text-[#B6C8E0]">Detailed findings, evidence, fixes &amp; copy suggestions.</p>
+              </div>
+              <span className="shrink-0 rounded-lg border border-[#405F83] bg-[#1F3450] px-2.5 py-1.5 text-base font-extrabold text-white">$5</span>
+            </div>
+            <button type="button" onClick={handleUnlockFullAnalysis} disabled={!isCheckoutAvailable || loading || isVerifyingPayment}
+              className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-[#246BFD] px-4 text-sm font-bold text-white transition hover:bg-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 disabled:cursor-not-allowed disabled:opacity-50">
+              {loading || isVerifyingPayment ? "Opening checkout…" : "Unlock Complete Analysis — $5"}
+              {!loading && !isVerifyingPayment && <ArrowRight className="h-4 w-4" aria-hidden="true"/>}
+            </button>
+            <p className="mt-2 text-center text-[11px] text-[#90A5C1]">
+              {isTestMode ? "Test payment only · No real charge" : "One-time payment · No subscription"}
+              {!isCheckoutAvailable && " · Checkout unavailable"}
+            </p>
+          </section>
+        )}
+
         {/* 1. FREE: FIVE CLARITY SIGNALS */}
         <section>
           <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6 text-[#F1F5F9]">Your Clarity Signals</h2>
@@ -597,9 +664,9 @@ export default function ResultsScreen({
             {displaySignals.map((signal) => {
               const theme = getStatusTheme(signal.status, signal.badgeType);
               return (
-                <div key={signal.id} className="p-4 sm:p-4.5 transition-colors">
+                <div key={signal.id} className="px-3.5 py-3 sm:p-4.5 transition-colors">
                   {/* Mobile Layout (< sm) */}
-                  <div className="sm:hidden space-y-2">
+                  <div className="sm:hidden space-y-1.5">
                     <div className="flex items-center justify-between">
                       <span className="inline-flex items-center gap-1.5">
                         <span className="font-medium text-sm text-[#F1F5F9]">{signal.title}</span>
@@ -615,7 +682,7 @@ export default function ResultsScreen({
                         {formatStatusText(signal.status)}
                       </span>
                     </div>
-                    <div className="w-full h-1.5 bg-[#171F2D] border border-[#263044]/40 rounded-full overflow-hidden mt-1.5">
+                    <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-[#171F2D] border border-[#263044]/40">
                       <div
                         className={`h-full rounded-full transition-all duration-300 ${theme.bg}`}
                         style={{ width: `${Math.min(100, Math.max(0, signal.score ?? 0))}%` }}
