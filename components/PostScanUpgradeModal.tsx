@@ -47,7 +47,7 @@ export default function PostScanUpgradeModal({
       if (event.key !== "Tab") return;
       const nodes = Array.from(dialogRef.current?.querySelectorAll<HTMLElement>(
         'button:not(:disabled), a[href], [tabindex]:not([tabindex="-1"])'
-      ) ?? []);
+      ) ?? []).filter(node => node.getClientRects().length > 0);
       if (!nodes.length) return;
       const first = nodes[0];
       const last = nodes[nodes.length - 1];
