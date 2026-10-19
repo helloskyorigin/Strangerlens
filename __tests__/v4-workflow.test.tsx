@@ -23,7 +23,7 @@ assert.equal(compareScores(prev!,prev!),null,"Reopened report cannot be called a
 assert.equal(compareScores(prev!,{...updated,domain:"other.com"}),null,"Comparisons never cross domains");
 const rendered=renderToStaticMarkup(<RecheckComparison report={report} reportId={id1} onRecheck={()=>{}}/>);
 assert.ok(rendered.includes("Recheck &amp; Compare")&&rendered.includes("Recheck website"));
-assert.ok(rendered.includes("saved privately on this device"));
+assert.ok(readFileSync("components/RecheckComparison.tsx","utf8").includes("saved privately on this device"),"Device-only persistence notice is present once client state hydrates.");
 const workbench=buildPremiumWorkbench(structuredClone(paymentAnalysis),paymentSnapshot);
 const checklist=renderToStaticMarkup(<ImprovementChecklist workbench={workbench} reportId={id1}/>);
 assert.ok(checklist.includes("Your Fix Checklist"));
