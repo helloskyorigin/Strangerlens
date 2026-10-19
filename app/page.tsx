@@ -473,7 +473,7 @@ export default function LandingPage() {
                 {/* Desktop Navigation */}
                 <nav
                   aria-label="Primary Navigation"
-                  className="hidden md:flex items-center gap-3 lg:gap-6 xl:gap-8 text-sm font-medium text-[#94A3B8]"
+                  className="hidden lg:flex items-center gap-3 lg:gap-6 xl:gap-8 text-sm font-medium text-[#94A3B8]"
                 >
                   {NAV_ITEMS.filter((item) => item.href !== "/my-reports").map((item) => (
                     <a
@@ -504,7 +504,7 @@ export default function LandingPage() {
                     ref={hamburgerButtonRef}
                     type="button"
                     onClick={() => setMobileMenuOpen((prev) => !prev)}
-                    className="md:hidden w-10 h-10 rounded-xl text-[#94A3B8] hover:text-white hover:bg-[#171F2D] active:scale-95 transition-all flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#246BFD]"
+                    className="lg:hidden w-10 h-10 rounded-xl text-[#94A3B8] hover:text-white hover:bg-[#171F2D] active:scale-95 transition-all flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#246BFD]"
                     aria-label={
                       mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"
                     }
@@ -528,7 +528,7 @@ export default function LandingPage() {
                   role="dialog"
                   aria-modal="true"
                   aria-label="Mobile Navigation"
-                  className="fixed inset-0 top-[64px] sm:top-[72px] z-40 md:hidden flex flex-col"
+                  className="fixed inset-0 top-[64px] sm:top-[72px] z-40 lg:hidden flex flex-col"
                 >
                   {/* Blurred & Dimmed Backdrop */}
                   <motion.div
@@ -561,7 +561,7 @@ export default function LandingPage() {
                       ease: EASE_OUT_EXPO,
                     }}
                     onClick={(e) => e.stopPropagation()}
-                    className="relative z-10 w-full bg-[#121824]/95 backdrop-blur-2xl border-b border-[#263044] shadow-[0_24px_48px_-12px_rgba(0,0,0,0.6)] rounded-b-3xl px-5 pt-4 pb-6 overflow-y-auto max-h-[calc(100dvh-64px)] text-[#F1F5F9]"
+                    className="sl-mobile-menu relative z-10 w-full bg-[#121824]/95 backdrop-blur-2xl border-b border-[#263044] shadow-[0_24px_48px_-12px_rgba(0,0,0,0.6)] rounded-b-3xl px-5 pt-4 pb-6 overflow-y-auto max-h-[calc(100dvh-64px)] text-[#F1F5F9]"
                   >
                     <motion.nav
                       initial="hidden"
