@@ -169,6 +169,7 @@ export default function LandingPage() {
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
   const [isPending, setIsPending] = useState<boolean>(false);
   const [verifiedSite, setVerifiedSite] = useState<{domain:string;httpStatus:number|null}|null>(null);
+  const [scanMilestone, setScanMilestone] = useState<import("@/lib/scan-flow-controller").ScanMilestone>("connecting");
   const [backendError, setBackendError] = useState<string | null>(null);
   const [analysisData, setAnalysisData] = useState<any>(null);
   // Fresh-scan-only upsell: never auto-open on restoring an existing report.
@@ -213,6 +214,7 @@ export default function LandingPage() {
         setIsVerifying(nextState.isVerifying);
         setIsPending(nextState.isPending);
         setVerifiedSite(nextState.verifiedSite);
+        setScanMilestone(nextState.scanMilestone);
         setErrorMessage(nextState.errorMessage);
         setBackendError(nextState.backendError);
         setAnalysisData(nextState.analysisData);
@@ -1302,6 +1304,7 @@ export default function LandingPage() {
               isScanning={isPending || isVerifying}
               isVerifying={isVerifying}
               verifiedSite={verifiedSite}
+              scanMilestone={scanMilestone}
               backendError={backendError}
               onRetry={() => {
                 scanController.retryScan();
