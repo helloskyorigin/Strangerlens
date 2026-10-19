@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AlertCircle, ArrowLeft, ArrowRight, Check, CheckCircle2, Circle, Globe2, LoaderCircle, RotateCcw, ScanEye, X } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
+import { LandingThemeSwitcher } from "@/components/landing/LandingThemeSwitcher";
 
 interface VerifiedSite { domain: string; httpStatus: number | null }
 interface ScanScreenProps {
@@ -105,7 +106,7 @@ export default function ScanScreen({
     : safeError(backendError);
 
   return (
-    <div className="flex min-h-dvh flex-col overflow-x-hidden bg-[#090D15] text-[#F1F5F9] antialiased">
+    <div className="sl-app-theme flex min-h-dvh flex-col overflow-x-hidden bg-[#090D15] text-[#F1F5F9] antialiased">
       <header className="border-b border-[#243146]">
         <div className="mx-auto flex h-[62px] w-full max-w-3xl items-center justify-between gap-3 px-4 sm:h-[70px] sm:px-6">
           <button type="button" onClick={() => { transitioned.current = true; onBackToLanding(); }}
@@ -116,10 +117,12 @@ export default function ScanScreen({
             </span>
             <span className="truncate text-[15px] font-bold tracking-tight sm:text-base">StrangerLens</span>
           </button>
+          <div className="ml-auto flex items-center gap-1.5"><LandingThemeSwitcher compact />
           <button type="button" onClick={stop}
             className="inline-flex min-h-10 items-center gap-1.5 rounded-full px-2.5 text-xs font-medium text-[#A8B9CF] transition hover:bg-[#192438] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">
             <X className="h-4 w-4" aria-hidden="true"/> Cancel
           </button>
+          </div>
         </div>
       </header>
 
