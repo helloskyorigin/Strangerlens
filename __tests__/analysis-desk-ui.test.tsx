@@ -8,27 +8,27 @@ const render = (overrides: Record<string, unknown>) =>
   renderToStaticMarkup(<ScanScreen {...props} {...overrides} />);
 
 const connecting = render({ isVerifying: true });
-assert.ok(connecting.includes("Building your clarity report."), "Connecting headline is clear.");
-assert.ok(connecting.includes("Checking that the website is reachable"), "Verification is real status.");
+assert.ok(connecting.includes("Connecting to your website."), "Connecting headline is clear.");
+assert.ok(connecting.includes("Connecting to website"), "Verification is real status.");
 assert.ok(!connecting.includes("Confirmed: example.com"), "No fake completed verification.");
 assert.ok(!connecting.includes("View My Clarity Report"), "No early result CTA.");
-assert.ok(connecting.includes("md:grid-cols-"), "Desktop analysis desk has two-column structure.");
+assert.ok(connecting.includes("max-w-[620px]"), "Desktop analysis desk has two-column structure.");
 
 const analyzing = render({
   isVerifying: false,
   verifiedSite: { domain: "example.com", httpStatus: 200 },
 });
-assert.ok(analyzing.includes("Confirmed: example.com"), "Actual verification milestone is visible.");
-assert.ok(analyzing.includes("Evaluating accessible website content"), "Real backend analysis state is represented.");
+assert.ok(analyzing.includes("Website verified"), "Actual verification milestone is visible.");
+assert.ok(analyzing.includes("Looking at your website with fresh eyes."), "Real backend analysis state is represented.");
 assert.ok(!analyzing.includes("View My Clarity Report"), "Analysis cannot declare ready early.");
 
 const ready = render({
   isVerifying: false, isBackendReady: true,
   verifiedSite: { domain: "example.com", httpStatus: 200 },
 });
-assert.ok(ready.includes("Your clarity report is ready."));
+assert.ok(ready.includes("Your report is ready."));
 assert.ok(ready.includes("View My Clarity Report"), "Ready state has strong CTA.");
-assert.ok(ready.includes("Results ready to view"));
+assert.ok(ready.includes("Preparing your report"));
 
 const error = render({
   backendError: "We couldn't extract content from this website",
