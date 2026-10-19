@@ -15,6 +15,8 @@ export interface StoredServerReport {
   tokenHash: string;
   snapshot: WebsiteSnapshot;
   fullAnalysis: FinalValidatedAnalysis;
+  /** Provenance prevents heuristic-only reports from being marketed as paid AI analysis. */
+  analysisMode?: "ai" | "heuristic";
   supportingContext?: SupportingContext;
   payment?: { paymentId: string; environment: string; orderId: string; active: boolean; verifiedAt: number };
 }
@@ -62,6 +64,8 @@ export async function saveServerReport(params: {
   domain: string;
   snapshot: WebsiteSnapshot;
   fullAnalysis: FinalValidatedAnalysis;
+  /** Provenance prevents heuristic-only reports from being marketed as paid AI analysis. */
+  analysisMode?: "ai" | "heuristic";
   supportingContext?: SupportingContext;
 }): Promise<StoredServerReport & { reportToken: string }> {
   const reportToken = `sl_ent_${crypto.randomBytes(24).toString("hex")}`;
