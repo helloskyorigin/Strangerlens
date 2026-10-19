@@ -68,12 +68,12 @@ export default function PostScanUpgradeModal({
 
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-[80] flex items-end justify-center sm:items-center sm:p-5">
+    <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 sm:p-6">
       <button type="button" tabIndex={-1} aria-hidden="true" onClick={onContinueFree}
         className="absolute inset-0 bg-[#020617]/85 backdrop-blur-sm" />
       <div ref={dialogRef} role="dialog" aria-modal="true"
         aria-labelledby="post-scan-offer-title" aria-describedby="post-scan-offer-description"
-        className="relative z-10 w-full max-w-[520px] max-h-[94dvh] overflow-y-auto rounded-t-[28px] border border-[#34465F] bg-[#111a29] p-5 pb-[max(22px,env(safe-area-inset-bottom))] text-[#F1F5F9] shadow-[0_30px_90px_rgba(0,0,0,.65)] sm:rounded-[28px] sm:p-7">
+        className="sl-upgrade-dialog relative z-10 w-full max-w-[500px] max-h-[min(90dvh,730px)] overflow-y-auto overscroll-contain rounded-[24px] border border-[#34465F] bg-[#111a29] p-5 text-[#F1F5F9] shadow-[0_30px_90px_rgba(0,0,0,.65)] sm:rounded-[28px] sm:p-7">
         <div className="flex items-center justify-between gap-3">
           <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-300">
             <Check className="h-3.5 w-3.5" aria-hidden="true" /> Your free scan is ready
