@@ -378,6 +378,7 @@ export default function ResultsScreen({
         window.location.assign(result.checkoutUrl);
       }
     } catch (err) {
+      trackFunnelEvent("checkout_failed");
       setPaymentError(err instanceof Error ? err.message : "Failed to open checkout.");
     } finally {
       setLoading(false);
