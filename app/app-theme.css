@@ -343,3 +343,53 @@ html[data-landing-theme="light"] .sl-app-theme .bg-rose-500\/10 {background-colo
 @media(prefers-reduced-motion:reduce) {
   .sl-app-theme #your-improvement-plan > section {transition:none;}
 }
+
+/* Visibility audit: semantic action contrast across BOTH theme scopes.
+   Use exact class-token selectors: never recolor a card merely because it
+   contains a blue button. Filled CTA backgrounds stay blue with white ink. */
+html[data-landing-theme="light"] :is(.landing-v3,.sl-app-theme) :is(a,button)[class~="bg-[#246BFD]"],
+html[data-landing-theme="light"] :is(.landing-v3,.sl-app-theme) :is(a,button)[class~="bg-blue-600"],
+html[data-landing-theme="light"] :is(.landing-v3,.sl-app-theme) :is(a,button)[class~="bg-emerald-600"],
+html[data-landing-theme="light"] :is(.landing-v3,.sl-app-theme) :is(a,button)[class~="bg-[#1E815F]"],
+html[data-landing-theme="light"] :is(.landing-v3,.sl-app-theme) :is(a,button)[class~="bg-[#3B82F6]"],
+html[data-landing-theme="light"] :is(.landing-v3,.sl-app-theme) .sl-v3-primary {
+  background-color:#246BFD!important;
+  color:#FFFFFF!important;
+  -webkit-text-fill-color:#FFFFFF;
+  border-color:transparent;
+}
+html[data-landing-theme="light"] :is(.landing-v3,.sl-app-theme) :is(a,button)[class~="bg-[#246BFD]"] *,
+html[data-landing-theme="light"] :is(.landing-v3,.sl-app-theme) :is(a,button)[class~="bg-blue-600"] *,
+html[data-landing-theme="light"] :is(.landing-v3,.sl-app-theme) :is(a,button)[class~="bg-emerald-600"] *,
+html[data-landing-theme="light"] :is(.landing-v3,.sl-app-theme) :is(a,button)[class~="bg-[#1E815F]"] *,
+html[data-landing-theme="light"] :is(.landing-v3,.sl-app-theme) :is(a,button)[class~="bg-[#3B82F6]"] *,
+html[data-landing-theme="light"] :is(.landing-v3,.sl-app-theme) .sl-v3-primary * {
+  color:#FFFFFF!important;
+  -webkit-text-fill-color:#FFFFFF;
+}
+html[data-landing-theme="light"] :is(.landing-v3,.sl-app-theme) :is(a,button)[class~="bg-[#246BFD]"]:hover,
+html[data-landing-theme="light"] :is(.landing-v3,.sl-app-theme) :is(a,button)[class~="bg-blue-600"]:hover,
+html[data-landing-theme="light"] :is(.landing-v3,.sl-app-theme) .sl-v3-primary:hover {
+  background-color:#1558D9!important;
+}
+html[data-landing-theme="light"] :is(.landing-v3,.sl-app-theme) button[class~="bg-[#171F2D]"]:not([disabled]):hover,
+html[data-landing-theme="light"] :is(.landing-v3,.sl-app-theme) a[class~="bg-[#171F2D]"]:hover,
+html[data-landing-theme="light"] :is(.landing-v3,.sl-app-theme) button[class~="bg-[#1B2738]"]:hover {
+  background-color:#E5EFFB!important;
+  color:#203A59!important;
+}
+/* Card-level light theme status indicators and selected tabs must never go pale. */
+html[data-landing-theme="light"] .sl-app-theme .sl-upgrade-dialog {
+  background:#FFFFFF!important;color:#18283E!important;
+  border-color:#C9D9ED!important;
+}
+html[data-landing-theme="light"] .sl-app-theme .sl-upgrade-dialog button:not(:disabled) {
+  visibility:visible;opacity:1;
+}
+html[data-landing-theme="light"] .sl-app-theme .sl-upgrade-dialog button[disabled] {
+  opacity:.5;
+}
+/* Dark backgrounds are not introduced by hover-only utilities in light mode. */
+html[data-landing-theme="light"] :is(.landing-v3,.sl-app-theme) button[class*="hover:bg-[#263044]"]:hover {
+  background-color:#E9F0FA!important;
+}
