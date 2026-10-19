@@ -41,7 +41,7 @@ export function LandingThemeSwitcher({ compact = false }: { compact?: boolean })
     apply();
     const media = window.matchMedia?.("(prefers-color-scheme: dark)");
     const syncStorage = (event: Event) => {
-      if (event instanceof StorageEvent && event.key !== LANDING_THEME_KEY) return;
+      if ("key" in event && (event as StorageEvent).key !== LANDING_THEME_KEY) return;
       const next = getPreference();
       setChoice(next);
       const resolved = resolveTheme(next);
