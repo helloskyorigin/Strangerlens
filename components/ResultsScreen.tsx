@@ -6,6 +6,7 @@ import PremiumActionPlan from "@/components/PremiumActionPlan";
 import PostScanUpgradeModal from "@/components/PostScanUpgradeModal";
 import { trackFunnelEvent } from "@/lib/ui-funnel-events";
 import { Share2, Download, Check, Info, X, Lock, Loader2, AlertCircle, ArrowRight } from "lucide-react";
+import { LandingThemeSwitcher } from "@/components/landing/LandingThemeSwitcher";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import { adaptReport } from "@/lib/report-adapter";
@@ -377,7 +378,7 @@ export default function ResultsScreen({
   if (!data) return null;
 
   return (
-    <div id="results-content" className={`min-h-screen bg-[#090D15] text-[#F1F5F9] font-sans antialiased flex flex-col ${!isReportUnlocked && isCheckoutAvailable ? "pb-16 sm:pb-0" : ""}`}>
+    <div id="results-content" className={`sl-app-theme min-h-screen bg-[#090D15] text-[#F1F5F9] font-sans antialiased flex flex-col ${!isReportUnlocked && isCheckoutAvailable ? "pb-16 sm:pb-0" : ""}`}>
       <PostScanUpgradeModal
         open={isPostScanOfferOpen && !isReportUnlocked}
         domain={report.domain}
@@ -557,6 +558,7 @@ export default function ResultsScreen({
             </span>
           </button>
           <div className="flex items-center gap-2 sm:gap-5">
+                <LandingThemeSwitcher compact />
             <Link href="/my-reports" className="rounded text-xs sm:text-sm font-medium text-[#94A3B8] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">My Reports</Link>
             <button
               type="button"
