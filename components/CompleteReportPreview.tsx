@@ -22,21 +22,22 @@ export default function CompleteReportPreview({
   return (
     <section id="complete-report-preview" aria-labelledby="complete-report-title"
       className="overflow-hidden rounded-[24px] border border-[#30445f] bg-[#111b2a] shadow-[0_24px_60px_-38px_rgba(29,98,217,.38)]">
-      <div className="relative border-b border-[#293b52] p-5 sm:p-8">
+      <div className="relative border-b border-[#293b52] p-4 sm:p-8">
         <div className="pointer-events-none absolute right-0 top-0 h-44 w-52 rounded-full bg-blue-500/10 blur-3xl" />
         <div className="relative">
           <span className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[.14em] text-[#82B3FF]">
             <Sparkles className="h-4 w-4" aria-hidden="true" />
             Inside Your Full Analysis
           </span>
-          <h2 id="complete-report-title" className="mt-3 max-w-2xl text-[24px] font-bold leading-tight tracking-tight text-white sm:text-[30px]">
-            You Have the Scores. Now Understand the Whole Picture.
+          <h2 id="complete-report-title" className="mt-3 max-w-2xl text-[21px] font-bold leading-tight tracking-tight text-white sm:text-[30px]">
+            <span className="sm:hidden">The Story Behind All 5 Scores.</span>
+            <span className="hidden sm:inline">You Have the Scores. Now Understand the Whole Picture.</span>
           </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#BBC9DA] sm:text-[15px]">
+          <p className="mt-2 max-w-2xl text-[13px] leading-relaxed text-[#BBC9DA] sm:mt-3 sm:text-[15px]">
             Five complete clarity breakdowns — not just a fix for your lowest score.
             Learn what is working, what is unclear, why it matters, and what you can improve across your homepage.
           </p>
-          <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-xs text-[#B5C7DE]">
+          <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-[11px] text-[#B5C7DE] sm:mt-5 sm:gap-y-2 sm:text-xs">
             <span className="inline-flex items-center gap-2"><Check className="h-3.5 w-3.5 text-emerald-400" /> All five signal analyses</span>
             <span className="inline-flex items-center gap-2"><Check className="h-3.5 w-3.5 text-emerald-400" /> Evidence &amp; practical guidance</span>
             <span className="inline-flex items-center gap-2"><FileDown className="h-3.5 w-3.5" /> Downloadable full PDF</span>
@@ -44,23 +45,23 @@ export default function CompleteReportPreview({
         </div>
       </div>
 
-      <div className="px-5 py-2 sm:px-8">
+      <div className="px-4 py-1 sm:px-8 sm:py-2">
         {CLARITY_REPORT_CHAPTERS.map((chapter, index) => {
           const publicSignal = signals.find(signal => signal.key === chapter.key);
           return (
-            <div key={chapter.key} className="flex items-start gap-3 border-b border-[#26374c] py-4 last:border-b-0 sm:gap-4">
-              <span className="mt-0.5 w-6 shrink-0 text-xs font-semibold tabular-nums text-[#7086A4]">
+            <div key={chapter.key} className="flex items-center gap-2.5 border-b border-[#26374c] py-3 last:border-b-0 sm:items-start sm:gap-4 sm:py-4">
+              <span className="w-5 shrink-0 text-[11px] font-semibold tabular-nums text-[#7086A4] sm:mt-0.5 sm:w-6 sm:text-xs">
                 {String(index + 1).padStart(2, "0")}
               </span>
               <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 sm:gap-x-3">
                   <h3 className="text-sm font-bold text-[#F1F5F9] sm:text-base">{chapter.title}</h3>
                   {publicSignal && <span className="text-xs font-semibold tabular-nums text-[#8EABCC]">{publicSignal.scoreDisplay}</span>}
                 </div>
-                <p className="mt-1 text-sm font-medium leading-snug text-[#D6E2F0]">{chapter.question}</p>
-                <p className="mt-1 text-xs leading-relaxed text-[#92A7C0]">{chapter.focus}</p>
+                <p className="mt-1 hidden text-sm font-medium leading-snug text-[#D6E2F0] sm:block">{chapter.question}</p>
+                <p className="mt-1 hidden text-xs leading-relaxed text-[#92A7C0] sm:block">{chapter.focus}</p>
               </div>
-              <LockKeyhole className="mt-1 h-4 w-4 shrink-0 text-[#6381A9]" aria-label="Detailed breakdown available in Full Analysis" />
+              <LockKeyhole className="h-4 w-4 shrink-0 text-[#6381A9] sm:mt-1" aria-label="Detailed breakdown available in Full Analysis" />
             </div>
           );
         })}
@@ -78,9 +79,9 @@ export default function CompleteReportPreview({
         )}
       </div>
 
-      <div className="border-t border-[#2A3E58] bg-[#142137] px-5 py-5 sm:px-8">
+      <div className="border-t border-[#2A3E58] bg-[#142137] px-4 py-4 sm:px-8 sm:py-5">
         <p className="text-[11px] font-bold uppercase tracking-widest text-blue-300">Your premium implementation workbench</p>
-        <div className="mt-3 grid gap-2 sm:grid-cols-3">
+        <div className="mt-3 hidden gap-2 sm:grid sm:grid-cols-3">
           {[
             ["Evidence-to-Fix", "Link recommendations to verified page wording when available."],
             ["Smart Priority", "Know what to do first, test next, and preserve."],
@@ -92,9 +93,10 @@ export default function CompleteReportPreview({
             </div>
           ))}
         </div>
+        <p className="mt-2 text-xs leading-relaxed text-[#B5C9E0] sm:hidden">Evidence-to-Fix · Smart Priority · Better Copy Studio</p>
       </div>
 
-      <div className="border-t border-[#30445f] bg-[#152238] px-5 py-5 sm:px-8 sm:py-6">
+      <div className="border-t border-[#30445f] bg-[#152238] px-4 py-4 sm:px-8 sm:py-6">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="text-sm font-semibold text-white">Unlock the complete report</p>
