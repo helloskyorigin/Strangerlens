@@ -257,3 +257,34 @@ html[data-landing-theme="light"] .sl-app-theme a:focus-visible {outline:2px soli
 @media(prefers-reduced-motion:reduce) {
   .sl-app-theme .animate-spin, .sl-app-theme .animate-pulse {animation:none!important;}
 }
+
+/* Preserve case-sensitive arbitrary Tailwind hex classes in components. */
+html[data-landing-theme="light"] .sl-app-theme .bg-\[\#111a29\],html[data-landing-theme="light"] .sl-app-theme.bg-\[\#111a29\]{background-color:#FFFFFF!important;}
+html[data-landing-theme="light"] .sl-app-theme .bg-\[\#111b2a\],html[data-landing-theme="light"] .sl-app-theme.bg-\[\#111b2a\]{background-color:#FFFFFF!important;}
+html[data-landing-theme="light"] .sl-app-theme .bg-\[\#1b2738\],html[data-landing-theme="light"] .sl-app-theme.bg-\[\#1b2738\]{background-color:#EAF2FE!important;}
+html[data-landing-theme="light"] .sl-app-theme .bg-\[\#19283b\],html[data-landing-theme="light"] .sl-app-theme.bg-\[\#19283b\]{background-color:#EAF2FE!important;}
+html[data-landing-theme="light"] .sl-app-theme .border-\[\#30445f\],html[data-landing-theme="light"] .sl-app-theme.border-\[\#30445f\]{border-color:#D8E3F1!important;}
+html[data-landing-theme="light"] .sl-app-theme .border-\[\#293b52\],html[data-landing-theme="light"] .sl-app-theme.border-\[\#293b52\]{border-color:#D8E3F1!important;}
+html[data-landing-theme="light"] .sl-app-theme .border-\[\#26374c\],html[data-landing-theme="light"] .sl-app-theme.border-\[\#26374c\]{border-color:#D8E3F1!important;}
+html[data-landing-theme="light"] .sl-app-theme .border-\[\#33475d\],html[data-landing-theme="light"] .sl-app-theme.border-\[\#33475d\]{border-color:#D8E3F1!important;}
+
+/* Body text, surface headings and modal content in light mode. */
+html[data-landing-theme="light"] .sl-app-theme .text-white,
+html[data-landing-theme="light"] .sl-app-theme .text-\[\#F1F5F9\] {color:#182941!important;}
+html[data-landing-theme="light"] .sl-app-theme .text-slate-200,
+html[data-landing-theme="light"] .sl-app-theme .text-slate-100 {color:#233A56!important;}
+html[data-landing-theme="light"] .sl-app-theme .text-slate-400 {color:#536D8B!important;}
+html[data-landing-theme="light"] .sl-app-theme .text-\[\#94A3B8\] {color:#546B85!important;}
+html[data-landing-theme="light"] .sl-app-theme button.bg-\[\#246BFD\],
+html[data-landing-theme="light"] .sl-app-theme a.bg-\[\#246BFD\],
+html[data-landing-theme="light"] .sl-app-theme button.bg-blue-600,
+html[data-landing-theme="light"] .sl-app-theme a.bg-blue-600,
+html[data-landing-theme="light"] .sl-app-theme button.bg-\[\#246BFD\] *,
+html[data-landing-theme="light"] .sl-app-theme a.bg-\[\#246BFD\] *,
+html[data-landing-theme="light"] .sl-app-theme button.bg-blue-600 *,
+html[data-landing-theme="light"] .sl-app-theme a.bg-blue-600 *,
+html[data-landing-theme="light"] .sl-app-theme a.bg-\[\#1E815F\] *,
+html[data-landing-theme="light"] .sl-app-theme button.bg-\[\#1E815F\] * {color:#FFFFFF!important;}
+/* Gradients kept chromatic only in the theme-controlled landing. */
+html[data-landing-theme="light"] .sl-app-theme button.bg-gradient-to-r,
+html[data-landing-theme="light"] .sl-app-theme a.bg-gradient-to-r {background:#246BFD!important;color:white!important;}
