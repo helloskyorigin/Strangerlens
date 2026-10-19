@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./landing-v3.css";
+@import "./app-theme.css";
 
 :root {
   color-scheme: dark;
