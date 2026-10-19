@@ -12,7 +12,7 @@ const EVENTS = [
 type EventName = (typeof EVENTS)[number];
 const VALID = new Set<string>(EVENTS);
 const dateKey = (date:Date) => date.toISOString().slice(0,10);
-export const funnelKey = (date:string,event:EventName) => `sl:v4:funnel:${date}:${event}`;
+const funnelKey = (date:string,event:EventName) => `sl:v4:funnel:${date}:${event}`;
 
 function allowedOrigin(req:NextRequest):boolean {
   const sec=req.headers.get("sec-fetch-site");
