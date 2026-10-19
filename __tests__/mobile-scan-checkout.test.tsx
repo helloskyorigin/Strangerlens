@@ -11,7 +11,7 @@ import { paymentAnalysis, paymentSnapshot } from "./fixtures/payment-report";
 const scan = renderToStaticMarkup(<ScanScreen rawUrl="https://example.com" onBackToLanding={() => {}} isVerifying={true}/>);
 assert.ok(scan.includes('max-w-[620px]'), "Scanning is a compact centered flow.");
 assert.ok(!scan.includes("Communication map") && !scan.includes("Schematic preview"), "Oversized audit workspace was removed.");
-assert.ok(scan.includes("Connecting to your website.") && scan.includes("Connecting to website"), "Real verification UI is shown.");
+assert.ok(scan.includes("Connecting to your website.") && scan.includes("Website connection verified"), "Real verification UI is shown.");
 assert.ok(!scan.includes("Verify website connection") || !scan.includes("Session status"), "No old giant stage panel.");
 
 const mapped = mapBackendToFrontend(structuredClone(paymentAnalysis), "https://example.com", paymentSnapshot);
