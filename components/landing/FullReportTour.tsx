@@ -1,122 +1,159 @@
 "use client";
 
 import React, { useState } from "react";
-import { ArrowRight, CheckCircle2, FileSearch, Layers3, LockKeyhole, PencilLine, Sparkles } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Check, CheckCircle2, Eye, FileSearch, FileText, Layers3, LockKeyhole, PencilLine, ShieldCheck, Sparkles } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 
-const TABS = [
-  { id:"overview", title:"Overview", Icon:Layers3 },
-  { id:"signals", title:"Signal deep dive", Icon:Sparkles },
-  { id:"evidence", title:"Evidence-to-Fix", Icon:FileSearch },
-  { id:"copy", title:"Copy Studio", Icon:PencilLine },
-  { id:"priority", title:"Smart Priority", Icon:CheckCircle2 },
+const SECTIONS = [
+  { id: "overview", title: "Full overview", Icon: Layers3 },
+  { id: "signals", title: "Five deep dives", Icon: Eye },
+  { id: "evidence", title: "Evidence → Fix", Icon: FileSearch },
+  { id: "copy", title: "Better Copy Studio", Icon: PencilLine },
+  { id: "priority", title: "Smart Priority", Icon: CheckCircle2 },
 ] as const;
-type Tab = typeof TABS[number]["id"];
+type Section = (typeof SECTIONS)[number]["id"];
 
-function Panel({ active }: { active: Tab }) {
-  switch(active) {
-    case "overview":
-      return <div className="sl-tour-section">
-        <p className="sl-tour-eyebrow">Your Clarity Snapshot</p>
-        <div className="sl-tour-scoreline"><strong>69<span>/100</span></strong><span className="sl-tour-pill">Room to improve</span></div>
-        <p className="sl-tour-text">A single score starts the story. Full Analysis explains five different parts of your homepage, so you're not paying for just one fix.</p>
-        <div className="sl-tour-stat-row">
-          <div><strong>5</strong><span>Signal chapters</span></div>
-          <div><strong>01</strong><span>Priority action</span></div>
-          <div><strong>$5</strong><span>One-time report</span></div>
-        </div>
-      </div>;
-    case "signals":
-      return <div className="sl-tour-section">
-        <p className="sl-tour-eyebrow">Chapter 02 / Audience</p>
-        <div className="sl-tour-scoreline"><h3>Audience Clarity</h3><strong className="sl-tour-sm-score">58/100</strong></div>
-        <div className="sl-tour-insight"><span className="sl-tour-tag">Why this score</span>
-          <p>The headline suggests a productivity product, but it doesn't immediately identify whom it serves.</p></div>
-        <div className="sl-tour-insight"><span className="sl-tour-tag">What to improve</span>
-          <p>Add a concise audience-specific subheading close to the headline. Keep the language understandable to the target visitor.</p></div>
-        <p className="sl-tour-footnote">Five chapters follow this detailed structure. Example analysis only.</p>
-      </div>;
-    case "evidence":
-      return <div className="sl-tour-section">
-        <p className="sl-tour-eyebrow">Source → Finding → Action</p>
-        <div className="sl-tour-quote"><span>Illustrative homepage wording</span><blockquote>“Everything you need to work smarter.”</blockquote></div>
-        <div className="sl-tour-insight"><span className="sl-tour-tag">Why review it</span>
-          <p>The claim is broad and doesn't explain the actual use case.</p></div>
-        <div className="sl-tour-insight"><span className="sl-tour-tag">Action</span>
-          <p>Replace vague promises with a concrete audience and outcome, using only facts the business can support.</p></div>
-        <p className="sl-tour-footnote">Real paid reports show verified source evidence when available.</p>
-      </div>;
-    case "copy":
-      return <div className="sl-tour-section">
-        <p className="sl-tour-eyebrow">Better Copy Studio</p>
-        <div className="sl-tour-quote"><span>Illustrative original</span><blockquote>“Everything you need to work smarter.”</blockquote></div>
-        <div className="sl-tour-suggestion"><span>Illustrative rewrite</span><p>“Organize projects, tasks and deadlines in one workspace.”</p></div>
-        <p className="sl-tour-text">Inside your own report, suggested wording can be reviewed, edited and copied before you publish anything.</p>
-        <p className="sl-tour-footnote">This fictitious example does not describe a scanned customer website.</p>
-      </div>;
-    case "priority":
-      return <div className="sl-tour-section">
-        <p className="sl-tour-eyebrow">Your Improvement Roadmap</p>
-        <div className="sl-tour-priority">
-          <div><span className="sl-tour-pill is-blue">Do first</span><p>Make the intended audience unmistakable in the hero.</p></div>
-          <div><span className="sl-tour-pill is-mint">Quick win</span><p>Clarify the primary call-to-action label.</p></div>
-          <div><span className="sl-tour-pill is-amber">Worth testing</span><p>Try a more specific value proposition.</p></div>
-          <div><span className="sl-tour-pill">Keep as is</span><p>Preserve an already understandable next step.</p></div>
-        </div>
-        <p className="sl-tour-footnote">Example order, not predicted conversion impact.</p>
-      </div>;
-  }
+const SIGNALS = [
+  { name:"First Impression", score:78, issue:"Headline is recognizable, but category could be clearer." },
+  { name:"Audience", score:56, issue:"Your ideal customer is not immediately explicit." },
+  { name:"Value", score:77, issue:"Benefits are understandable but could be more concrete." },
+  { name:"Trust", score:45, issue:"Specific reassurance and credibility context is missing." },
+  { name:"Action", score:88, issue:"The next step is easy to locate and understand." },
+] as const;
+
+function Row({name,score}:{name:string;score:number}) {
+  return <div className="sl-report-signal-row">
+    <span>{name}</span>
+    <div className="sl-report-meter"><i style={{width:`${score}%`}}/></div>
+    <strong>{score}<small>/100</small></strong>
+  </div>;
+}
+function Detail({selected}:{selected:Section}){
+  if(selected==="overview")return <div className="sl-showcase-section">
+    <span className="sl-report-overline">01 · FIRST IMPRESSION REPORT</span>
+    <h3>Here's what your homepage communicates.</h3>
+    <p className="sl-showcase-description">The visitor can identify a project workspace and find the primary action, but the audience and trust message deserve more attention.</p>
+    <div className="sl-report-verdict"><Sparkles size={17}/><p><strong>Main verdict:</strong> Clear starting point. Strengthen audience specificity and supporting credibility before adding more features.</p></div>
+    <div className="sl-report-two-col">
+      <div className="sl-report-finding">
+        <span className="sl-report-kicker"><CheckCircle2 size={15}/> WHAT'S WORKING</span>
+        <p>The next action is visible, and the product category becomes understandable from surrounding copy.</p>
+      </div>
+      <div className="sl-report-finding is-warning">
+        <span className="sl-report-kicker"><Eye size={15}/> WHAT'S UNCLEAR</span>
+        <p>The current headline could describe many products. A new visitor may not know who benefits most.</p>
+      </div>
+    </div>
+    <p className="sl-tour-footnote">Fictional homepage example. No visitor behavior has been observed or measured.</p>
+  </div>;
+  if(selected==="signals")return <div className="sl-showcase-section">
+    <span className="sl-report-overline">02 · DEEP ANALYSIS / ALL FIVE SIGNALS</span>
+    <h3>Not one generic score. Five useful explanations.</h3>
+    <p className="sl-showcase-description">Every chapter explains its score, what's working, what's unclear, observed supporting content when available, and what to improve.</p>
+    <div className="sl-report-chapter-list">{SIGNALS.map((signal,i)=>
+      <div className="sl-report-chapter" key={signal.name}>
+        <span className="sl-report-chapter-num">0{i+1}</span>
+        <div><strong>{signal.name}</strong><p>{signal.issue}</p></div>
+        <b>{signal.score}</b>
+      </div>)}
+    </div>
+    <p className="sl-tour-footnote">Illustrative scores and findings, not an actual audit.</p>
+  </div>;
+  if(selected==="evidence")return <div className="sl-showcase-section">
+    <span className="sl-report-overline">03 · EVIDENCE-TO-FIX</span>
+    <h3>See what informed the recommendation.</h3>
+    <p className="sl-showcase-description">Specific observed wording and a practical change, side-by-side. Real reports don't invent missing evidence.</p>
+    <div className="sl-report-evidence-grid">
+      <div className="sl-report-evidence-before">
+        <span>EXAMPLE HOMEPAGE / HERO</span>
+        <blockquote>“Everything you need to work smarter.”</blockquote>
+        <p>Illustrative source wording</p>
+      </div>
+      <div className="sl-report-evidence-after">
+        <span><ArrowUpRight size={13}/> RECOMMENDED DIRECTION</span>
+        <strong>Say who it's for and what outcome it delivers.</strong>
+        <p>Describe the actual user and concrete benefit rather than making a broad productivity promise.</p>
+      </div>
+    </div>
+    <p className="sl-tour-footnote">In real paid reports, only verified quotes are labeled as source evidence. Unavailable proof is clearly disclosed.</p>
+  </div>;
+  if(selected==="copy")return <div className="sl-showcase-section">
+    <span className="sl-report-overline">04 · BETTER COPY STUDIO</span>
+    <h3>Go from unclear copy to a usable draft.</h3>
+    <p className="sl-showcase-description">Review a copy-ready suggestion, tailor the wording to your actual business, and copy the version you approve.</p>
+    <div className="sl-report-copy-grid">
+      <div><span>BEFORE · EXAMPLE</span><p>“Everything you need to work smarter.”</p></div>
+      <div className="is-after"><span>AFTER · EXAMPLE REWRITE</span><p>“Organize projects, tasks and deadlines in one workspace.”</p></div>
+    </div>
+    <div className="sl-report-mini-tool"><PencilLine size={16}/><span>Inside your report: Suggested · Shorter when safe · My edit · Copy</span></div>
+    <p className="sl-tour-footnote">Copy is illustrative. Every real rewrite should be checked against the site's actual features and claims.</p>
+  </div>;
+  return <div className="sl-showcase-section">
+    <span className="sl-report-overline">05 · SMART PRIORITY PLAN</span>
+    <h3>Stop guessing what to fix first.</h3>
+    <p className="sl-showcase-description">A suggested order helps you act on issues while protecting the parts of the website that already communicate clearly.</p>
+    <div className="sl-report-priority-grid">
+      <div><span className="sl-report-pill is-first">DO FIRST</span><strong>Clarify your ideal visitor.</strong><p>Specify the target audience near the hero headline.</p></div>
+      <div><span className="sl-report-pill is-fast">QUICK WIN</span><strong>Improve a vague label.</strong><p>Make the next step explicit where applicable.</p></div>
+      <div><span className="sl-report-pill is-test">WORTH TESTING</span><strong>Try a clearer benefit.</strong><p>Compare specific outcomes with broad claims.</p></div>
+      <div><span className="sl-report-pill is-keep">KEEP AS IS</span><strong>Preserve the clear CTA.</strong><p>Avoid rewriting elements without a reason.</p></div>
+    </div>
+    <p className="sl-tour-footnote">An example priority order, not predicted revenue uplift or measured conversion lift.</p>
+  </div>;
 }
 
-export default function FullReportTour({ onTryFree }: { onTryFree: () => void }) {
-  const [active,setActive] = useState<Tab>("overview");
-  const index = TABS.findIndex(t => t.id === active);
-  const reduceMotion = useReducedMotion();
-  return (
-    <section id="full-report-demo" className="sl-tour-section-wrapper" aria-labelledby="sl-tour-heading">
-      <div className="sl-tour-heading">
-        <span className="sl-tour-kicker"><Sparkles size={15} aria-hidden="true"/> THE COMPLETE REPORT</span>
-        <h2 id="sl-tour-heading">Know the score. Understand the whole picture.</h2>
-        <p>Your free score shows where clarity stands. See what a detailed $5 report helps you explore—across every signal, not just the weakest one.</p>
+export default function FullReportTour({onTryFree}:{onTryFree:()=>void}){
+  const [selected,setSelected]=useState<Section>("overview");
+  const reducedMotion=useReducedMotion();
+  return <section id="full-report-demo" className="sl-tour-section-wrapper sl-report-showcase" aria-labelledby="sl-tour-heading">
+    <div className="sl-tour-heading">
+      <span className="sl-tour-kicker"><Sparkles size={15} aria-hidden="true"/> THE $5 COMPLETE REPORT</span>
+      <h2 id="sl-tour-heading">From five scores to a real improvement plan.</h2>
+      <p>Explore a detailed, report-style example. See how Full Analysis connects clarity signals to findings, verified evidence when available, copy suggestions and prioritized fixes.</p>
+    </div>
+    <div className="sl-tour-shell">
+      <header className="sl-tour-topline">
+        <div><span className="sl-tour-browserdots"><i/><i/><i/></span><span>StrangerLens / Full Clarity Report</span></div>
+        <span className="sl-tour-example-tag">INTERACTIVE SAMPLE · FICTIONAL WEBSITE</span>
+      </header>
+      <div className="sl-report-score-hero">
+        <div>
+          <span className="sl-report-overline">PROJECTNEST.APP / SAMPLE REPORT</span>
+          <h3>Your first-impression clarity, explained.</h3>
+          <p>A complete example: what helps the visitor, what creates hesitation and what to change next.</p>
+        </div>
+        <div className="sl-report-score"><strong>69<span>/100</span></strong><small>Overall clarity · Example</small></div>
       </div>
-      <div className="sl-tour-shell">
-        <div className="sl-tour-topline">
-          <div><span className="sl-tour-browserdots"><i/><i/><i/></span><span>StrangerLens / Full Analysis</span></div>
-          <span className="sl-tour-example-tag">Interactive example · Not a real scan</span>
+      <div className="sl-report-signal-summary">
+        {SIGNALS.map(item=><Row key={item.name} name={item.name} score={item.score}/>)}
+      </div>
+      <div className="sl-tour-body">
+        <div className="sl-tour-tabs" role="tablist" aria-label="Explore detailed paid report sections">
+          {SECTIONS.map(({id,title,Icon},i)=><button key={id} type="button" role="tab" id={`tour-tab-${id}`}
+            aria-controls="sl-tour-panel" aria-selected={selected===id} tabIndex={selected===id?0:-1}
+            onClick={()=>setSelected(id)}
+            onKeyDown={event=>{
+              if(!["ArrowRight","ArrowLeft","ArrowDown","ArrowUp","Home","End"].includes(event.key))return;
+              event.preventDefault();
+              const next=event.key==="Home"?0:event.key==="End"?SECTIONS.length-1:
+                (i+(event.key==="ArrowLeft"||event.key==="ArrowUp"?-1:1)+SECTIONS.length)%SECTIONS.length;
+              setSelected(SECTIONS[next].id);
+              document.getElementById(`tour-tab-${SECTIONS[next].id}`)?.focus();
+            }} className={`sl-tour-tab ${selected===id?"is-active":""}`}>
+            <Icon size={16} aria-hidden="true"/><span>{title}</span>
+            {selected===id&&<span className="sl-tour-tab-indicator"/>}
+          </button>)}
         </div>
-        <div className="sl-tour-body">
-          <nav className="sl-tour-tabs" role="tablist" aria-label="Explore full report sections">
-            {TABS.map(({id,title,Icon},i)=>(
-              <button key={id} role="tab" type="button" id={`tour-tab-${id}`}
-                aria-controls="sl-tour-panel" aria-selected={active===id} tabIndex={active===id?0:-1}
-                onClick={()=>setActive(id)}
-                onKeyDown={event=>{
-                  if(!["ArrowRight","ArrowLeft","ArrowDown","ArrowUp","Home","End"].includes(event.key))return;
-                  event.preventDefault();
-                  const next = event.key==="Home"?0:event.key==="End"?TABS.length-1:
-                    (i+(event.key==="ArrowLeft"||event.key==="ArrowUp"?-1:1)+TABS.length)%TABS.length;
-                  setActive(TABS[next].id);
-                  document.getElementById(`tour-tab-${TABS[next].id}`)?.focus();
-                }}
-                className={`sl-tour-tab ${active===id?"is-active":""}`}>
-                <Icon size={16} aria-hidden="true"/><span>{title}</span>
-                {active===id&&<span className="sl-tour-tab-indicator"/>}
-              </button>
-            ))}
-          </nav>
-          <div className="sl-tour-content" role="tabpanel" id="sl-tour-panel" aria-labelledby={`tour-tab-${active}`}>
-            <motion.div key={active} initial={reduceMotion?false:{opacity:0,y:9}}
-              animate={{opacity:1,y:0}} transition={{duration:.26}}>
-              <Panel active={active}/>
-            </motion.div>
-          </div>
-        </div>
-        <div className="sl-tour-footer">
-          <div><LockKeyhole size={15} aria-hidden="true"/><span>Five deep dives · Evidence · Copy Studio · Priority plan · PDF</span></div>
-          <button type="button" onClick={onTryFree}>Try Your Website Free <ArrowRight size={15} aria-hidden="true"/></button>
+        <div className="sl-tour-content" id="sl-tour-panel" role="tabpanel" aria-labelledby={`tour-tab-${selected}`}>
+          <motion.div key={selected} initial={reducedMotion?false:{opacity:0,y:9}} animate={{opacity:1,y:0}}
+            transition={{duration:.25}}><Detail selected={selected}/></motion.div>
         </div>
       </div>
-      <p className="sl-tour-caption">This is an educational interface demonstration. Actual scan findings and rewrite suggestions are generated only from accessible website content.</p>
-    </section>
-  );
+      <footer className="sl-tour-footer">
+        <div><ShieldCheck size={16}/><span>Five detailed signals · Evidence · Copy Studio · Priority plan · PDF</span></div>
+        <button type="button" onClick={onTryFree}>Analyze My Website Free <ArrowRight size={15} aria-hidden="true"/></button>
+      </footer>
+    </div>
+    <p className="sl-tour-caption">This is a fictional demonstration. Free results remain free; verified paid reports contain website-specific findings only after confirmed payment.</p>
+  </section>;
 }
