@@ -345,7 +345,7 @@ export async function POST(req: NextRequest): Promise<Response> {
       let closed = false;
       const send = (value: unknown) => {
         if (closed) return;
-        try { controller.enqueue(encoder.encode(JSON.stringify(value) + "\\n")); }
+        try { controller.enqueue(encoder.encode(JSON.stringify(value) + "\n")); }
         catch { closed = true; }
       };
       const run = async () => {
