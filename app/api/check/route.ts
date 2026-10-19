@@ -122,6 +122,9 @@ async function runCheck(req: NextRequest, onProgress?: ProgressEmitter) {
 
     // 3. Fetch Website Homepage (Use pre-scan cache if available)
     const pipelineController = new AbortController();
+    const abortOnDisconnect = () => pipelineController.abort();
+    if (req.signal.aborted) pipelineController.abort();
+    else req.signal.addEventListener("abort", abortOnDisconnect, { once: true });
     const pipelineTimer = setTimeout(
       () => pipelineController.abort(),
       SERVER_LIMITS.ANALYSIS_TOTAL_TIMEOUT_MS
@@ -288,6 +291,7 @@ async function runCheck(req: NextRequest, onProgress?: ProgressEmitter) {
 
     } finally {
       clearTimeout(pipelineTimer);
+      req.signal.removeEventListener("abort", abortOnDisconnect);
     }
   } catch (error: unknown) {
     console.error("Error in /api/check endpoint:", error instanceof Error ? error.message : "Unknown error");
