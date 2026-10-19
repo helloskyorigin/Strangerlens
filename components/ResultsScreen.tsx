@@ -5,7 +5,7 @@ import SignalReportExplorer from "@/components/SignalReportExplorer";
 import PremiumActionPlan from "@/components/PremiumActionPlan";
 import PostScanUpgradeModal from "@/components/PostScanUpgradeModal";
 import { trackFunnelEvent } from "@/lib/ui-funnel-events";
-import { Share2, Download, Check, Info, X, Lock, Loader2, AlertCircle, ArrowRight } from "lucide-react";
+import { Share2, Download, Check, Info, X, Lock, Loader2, AlertCircle, ArrowRight, FileText } from "lucide-react";
 import { LandingThemeSwitcher } from "@/components/landing/LandingThemeSwitcher";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import Link from "next/link";
@@ -553,13 +553,13 @@ export default function ResultsScreen({
             className="flex items-center gap-2 cursor-pointer bg-transparent border-0 p-0 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
             aria-label="Return to StrangerLens home"
           >
-            <span className="font-bold text-xl tracking-tight text-white hover:text-slate-200 transition-colors">
+            <span className="font-bold text-base sm:text-xl tracking-tight text-white hover:text-slate-200 transition-colors">
               StrangerLens
             </span>
           </button>
-          <div className="flex items-center gap-2 sm:gap-5">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-4">
                 <LandingThemeSwitcher compact />
-            <Link href="/my-reports" className="rounded text-xs sm:text-sm font-medium text-[#94A3B8] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">My Reports</Link>
+            <Link href="/my-reports" aria-label="My Reports" className="inline-flex min-h-10 items-center gap-1 rounded text-xs sm:text-sm font-medium text-[#94A3B8] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"><FileText className="h-4 w-4 min-[420px]:hidden" aria-hidden="true"/><span className="hidden min-[420px]:inline">My Reports</span></Link>
             <button
               type="button"
               onClick={onRunNewCheck || onBackToLanding}
