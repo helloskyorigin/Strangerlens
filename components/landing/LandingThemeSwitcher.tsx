@@ -33,20 +33,28 @@ export function LandingThemeSwitcher({ compact = false }: { compact?: boolean })
   useEffect(() => {
     const preference = getPreference();
     setChoice(preference);
-    const apply = () => { document.documentElement.dataset.landingTheme = resolveTheme(preference); };
+    const apply = () => {
+      const resolved = resolveTheme(preference);
+      document.documentElement.dataset.landingTheme = resolved;
+      document.documentElement.classList.toggle("dark", resolved === "dark");
+    };
     apply();
     const media = window.matchMedia?.("(prefers-color-scheme: dark)");
     const syncStorage = (event: StorageEvent) => {
       if (event.key !== LANDING_THEME_KEY) return;
       const next = getPreference();
       setChoice(next);
-      document.documentElement.dataset.landingTheme = resolveTheme(next);
+      const resolved = resolveTheme(next);
+      document.documentElement.dataset.landingTheme = resolved;
+      document.documentElement.classList.toggle("dark", resolved === "dark");
     };
     if (preference === "system") media?.addEventListener?.("change", apply);
     window.addEventListener("storage", syncStorage);
+    window.addEventListener("strangerlens:theme-preference", syncStorage);
     return () => {
       if (preference === "system") media?.removeEventListener?.("change", apply);
       window.removeEventListener("storage", syncStorage);
+      window.removeEventListener("strangerlens:theme-preference", syncStorage);
     };
   }, [choice]);
 
@@ -66,8 +74,11 @@ export function LandingThemeSwitcher({ compact = false }: { compact?: boolean })
 
   const choose = (value: LandingThemePreference) => {
     try { window.localStorage.setItem(LANDING_THEME_KEY, value); } catch { /* private mode */ }
-    document.documentElement.dataset.landingTheme = resolveTheme(value);
+    const resolved = resolveTheme(value);
+    document.documentElement.dataset.landingTheme = resolved;
+    document.documentElement.classList.toggle("dark", resolved === "dark");
     setChoice(value);
+    window.dispatchEvent(new Event("strangerlens:theme-preference"));
     setMenuOpen(false);
   };
 
