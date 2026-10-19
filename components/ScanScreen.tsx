@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AlertCircle, ArrowLeft, ArrowRight, Check, CheckCircle2, Circle, Globe2, LoaderCircle, RotateCcw, ScanEye, X } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { LandingThemeSwitcher } from "@/components/landing/LandingThemeSwitcher";
+import type { ScanMilestone } from "@/lib/scan-flow-controller";
 
 interface VerifiedSite { domain: string; httpStatus: number | null }
 interface ScanScreenProps {
@@ -16,6 +17,7 @@ interface ScanScreenProps {
   isScanning?: boolean;
   isVerifying?: boolean;
   verifiedSite?: VerifiedSite | null;
+  scanMilestone?: ScanMilestone;
   backendError?: string | null;
   onOpenFaq?: () => void;
   onOpenPricing?: () => void;
@@ -27,9 +29,10 @@ export const SCAN_FOCUS_MESSAGES = [
 ] as const;
 
 export const SCAN_STAGES = [
-  { id: "verify", label: "Connecting to website" },
-  { id: "analyze", label: "Analyzing clarity" },
-  { id: "ready", label: "Preparing your report" },
+  { id: "verify", label: "Website connection verified" },
+  { id: "content", label: "Homepage content inspected" },
+  { id: "signals", label: "Five clarity signals evaluated" },
+  { id: "report", label: "Your clarity report prepared" },
 ] as const;
 
 const SIGNALS = ["First Impression", "Audience", "Value", "Trust", "Action"];
@@ -56,13 +59,15 @@ function hostname(value: string): string {
 export default function ScanScreen({
   rawUrl, onBackToLanding, onCancel, onGoToResults, onRetry,
   isBackendReady = false, isVerifying = false, verifiedSite = null,
-  backendError = null,
+  scanMilestone = "connecting", backendError = null,
 }: ScanScreenProps) {
   const reduceMotion = useReducedMotion();
   const transitioned = useRef(false);
   const [elapsed, setElapsed] = useState(0);
   const phase = backendError ? "error" : isBackendReady ? "ready" :
-    isVerifying || !verifiedSite ? "verify" : "analyze";
+    isVerifying || !verifiedSite ? "verify" :
+    scanMilestone === "signals_evaluated" ? "prepare" :
+    scanMilestone === "content_inspected" ? "evaluate" : "read";
   const domain = useMemo(() => hostname(verifiedSite?.domain || rawUrl), [verifiedSite?.domain, rawUrl]);
 
   useEffect(() => {
@@ -99,10 +104,16 @@ export default function ScanScreen({
     transitioned.current = true;
     (onCancel || onBackToLanding)();
   };
-  const active = phase === "verify" ? 0 : phase === "analyze" ? 1 : phase === "ready" ? 3 : verifiedSite ? 1 : 0;
-  const subtitle = phase === "verify" ? "Verifying the website before analysis begins."
-    : phase === "analyze" ? "Reviewing how a new visitor understands your website."
-    : phase === "ready" ? "Your free scores are ready. Open your clarity report."
+  // Each completion is confirmed by a backend event. Nothing auto-advances on a timer.
+  const active = phase === "verify" ? 0 : phase === "read" ? 1 :
+    phase === "evaluate" ? 2 : phase === "prepare" ? 3 :
+    phase === "ready" ? 4 : scanMilestone === "signals_evaluated" ? 3 :
+    scanMilestone === "content_inspected" ? 2 : verifiedSite ? 1 : 0;
+  const subtitle = phase === "verify" ? "Checking that your website is reachable and safe to inspect."
+    : phase === "read" ? "Extracting accessible headings, value statements and calls to action."
+    : phase === "evaluate" ? "Assessing how a first-time visitor might understand your message."
+    : phase === "prepare" ? "Validating findings and securely preparing your free report."
+    : phase === "ready" ? "Five clarity scores are ready. Discover what your website communicates."
     : safeError(backendError);
 
   return (
@@ -160,7 +171,9 @@ export default function ScanScreen({
             {phase === "error" ? "We couldn't finish this scan."
               : phase === "ready" ? "Your report is ready."
               : phase === "verify" ? "Connecting to your website."
-              : "Looking at your website with fresh eyes."}
+              : phase === "read" ? "Reading what your visitors see."
+              : phase === "evaluate" ? "Seeing your website through fresh eyes."
+              : "Turning findings into your clarity report."}
           </h1>
           <p className="mx-auto max-w-[400px] text-[13px] leading-relaxed text-[#9DB0C9] sm:text-sm">{subtitle}</p>
         </div>
@@ -179,7 +192,7 @@ export default function ScanScreen({
                     <Circle className="h-3 w-3" aria-hidden="true"/>}
                 </span>
                 <span className={`flex-1 text-[13px] font-medium ${complete || running ? "text-[#E8F0FB]" : "text-[#7389A4]"}`}>{stage.label}</span>
-                {index === 0 && complete && <span className="text-[10px] font-semibold text-emerald-300">Verified</span>}
+                {complete && <span className="text-[10px] font-semibold text-emerald-300">Done</span>}
               </div>;
             })}
           </div>
@@ -219,7 +232,10 @@ export default function ScanScreen({
           </React.Fragment>)}
         </div>
         <span className="sr-only" role="status" aria-live="polite">{phase === "verify" ? "Verifying website connection" :
-          phase === "analyze" ? "Website verified; analysis is running" : phase === "ready" ? "Clarity report ready" : "Website scan failed"}</span>
+          phase === "read" ? "Website verified; inspecting homepage content" :
+          phase === "evaluate" ? "Homepage inspected; evaluating clarity signals" :
+          phase === "prepare" ? "Clarity signals evaluated; preparing report" :
+          phase === "ready" ? "Clarity report ready" : "Website scan failed"}</span>
       </main>
     </div>
   );
