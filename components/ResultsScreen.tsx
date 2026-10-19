@@ -25,6 +25,7 @@ export interface AnalysisData {
   purchaseReadiness?: import("@/types/purchase-readiness").PurchaseReadiness;
   purchaseReadinessLocked?: true;
   scanCoverage?: { level: "sufficient" | "limited" | "unreadable"; note: string; observedCharacters: number };
+  analysisMode?: "ai" | "heuristic";
   domain: string;
   score: number;
   scoreStatus: "Needs improvement" | "Good" | "Needs work" | "Excellent";
@@ -584,6 +585,19 @@ export default function ResultsScreen({
 
       {/* MAIN CONTENT */}
       <main className="flex-1 w-full max-w-[1000px] mx-auto px-4 py-6 sm:py-10 space-y-8 sm:space-y-12">
+        {data?.analysisMode === "heuristic" && (
+          <section role="note" aria-label="Limited heuristic preview" className="rounded-2xl border border-amber-500/30 bg-[#30271A] p-4 sm:p-5">
+            <p className="text-sm font-bold text-amber-200">Limited preview · AI analysis unavailable</p>
+            <p className="mt-1 text-xs leading-relaxed text-[#E5D3AD]">
+              AI analysis wasn't available for this scan, so these scores are basic rules-based indicators.
+              A complete $5 AI report cannot be purchased from this preview. Please retry when the AI service is available.
+            </p>
+            {onRecheck && <button type="button" onClick={onRecheck}
+              className="mt-3 min-h-10 rounded-full border border-amber-500/35 px-4 text-xs font-bold text-amber-200 hover:bg-amber-500/10">
+              Retry for full AI analysis
+            </button>}
+          </section>
+        )}
         {data?.scanCoverage?.level === "limited" && (
           <section role="note" aria-label="Limited website inspection" className="flex items-start gap-3 rounded-2xl border border-amber-500/25 bg-[#2D2619] p-4 text-[#E9D7B1] sm:p-5">
             <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-300" aria-hidden="true" />
