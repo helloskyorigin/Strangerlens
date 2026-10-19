@@ -37,11 +37,11 @@ const dom=new JSDOM('<!doctype html><html><body><div id="root"></div></body></ht
   url:"https://strangerlens.ai.studio",pretendToBeVisual:true
 });
 const old:Record<string,PropertyDescriptor|undefined>={};
-for(const key of ["window","document","HTMLElement","Element","Node","IS_REACT_ACT_ENVIRONMENT"]){
+for(const key of ["window","self","document","HTMLElement","Element","Node","IS_REACT_ACT_ENVIRONMENT"]){
   old[key]=Object.getOwnPropertyDescriptor(globalThis,key);
   Object.defineProperty(globalThis,key,{
     configurable:true,writable:true,
-    value:key==="IS_REACT_ACT_ENVIRONMENT"?true:key==="window"?dom.window:(dom.window as any)[key],
+    value:key==="IS_REACT_ACT_ENVIRONMENT"?true:(key==="window"||key==="self")?dom.window:(dom.window as any)[key],
   });
 }
 async function main(){
@@ -67,7 +67,7 @@ async function main(){
   }finally{
     await act(async()=>root.unmount());
     dom.window.close();
-    for(const key of ["window","document","HTMLElement","Element","Node","IS_REACT_ACT_ENVIRONMENT"]){
+    for(const key of ["window","self","document","HTMLElement","Element","Node","IS_REACT_ACT_ENVIRONMENT"]){
       if(old[key])Object.defineProperty(globalThis,key,old[key]!);
       else delete (globalThis as any)[key];
     }
