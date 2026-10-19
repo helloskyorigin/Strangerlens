@@ -85,7 +85,7 @@ export default function FullReportTour({ onTryFree }: { onTryFree: () => void })
           <span className="sl-tour-example-tag">Interactive example · Not a real scan</span>
         </div>
         <div className="sl-tour-body">
-          <nav className="sl-tour-tabs" aria-label="Explore full report sections">
+          <nav className="sl-tour-tabs" role="tablist" aria-label="Explore full report sections">
             {TABS.map(({id,title,Icon},i)=>(
               <button key={id} role="tab" type="button" id={`tour-tab-${id}`}
                 aria-controls="sl-tour-panel" aria-selected={active===id} tabIndex={active===id?0:-1}
