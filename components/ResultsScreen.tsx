@@ -5,7 +5,7 @@ import SignalReportExplorer from "@/components/SignalReportExplorer";
 import PremiumActionPlan from "@/components/PremiumActionPlan";
 import PostScanUpgradeModal from "@/components/PostScanUpgradeModal";
 import { trackFunnelEvent } from "@/lib/ui-funnel-events";
-import { Share2, Download, Check, Info, X, Lock, Loader2, AlertCircle } from "lucide-react";
+import { Share2, Download, Check, Info, X, Lock, Loader2, AlertCircle, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import { adaptReport } from "@/lib/report-adapter";
