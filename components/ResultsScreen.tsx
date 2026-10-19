@@ -125,7 +125,15 @@ export default function ResultsScreen({
   const [loading, setLoading] = useState(false);
   const [verifiedUnlocked, setVerifiedUnlocked] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
-  const [isPostScanOfferOpen, setIsPostScanOfferOpen] = useState(false);
+  // Initialize the fresh-scan offer BEFORE first Results paint. Previously
+  // waiting 700ms made the report flash underneath a delayed modal.
+  const [isPostScanOfferOpen, setIsPostScanOfferOpen] = useState(() => {
+    const fresh = Boolean(postScanOfferReportId && data?.reportId === postScanOfferReportId &&
+      checkoutEnabled && !isUnlocked && paymentState !== "pending" && paymentState !== "success");
+    if (!fresh || typeof window === "undefined") return false;
+    try { return window.sessionStorage.getItem(`sl_post_scan_offer_v1:${postScanOfferReportId}`) !== "shown"; }
+    catch { return true; }
+  });
   const mobileUpgradeRef = useRef<HTMLElement | null>(null);
   const [showMobileUpgradeBar, setShowMobileUpgradeBar] = useState(false);
 
@@ -181,13 +189,12 @@ export default function ResultsScreen({
     try {
       if (window.sessionStorage.getItem(`sl_post_scan_offer_v1:${currentReportId}`) === "shown") return;
     } catch { /* Private browsing may disable session storage. */ }
-    const timer = window.setTimeout(() => {
-      offeredReportRef.current = currentReportId;
-      try { window.sessionStorage.setItem(`sl_post_scan_offer_v1:${currentReportId}`, "shown"); } catch { /* no-op */ }
-      setIsPostScanOfferOpen(true);
-      trackFunnelEvent("post_scan_offer_shown");
-    }, 700);
-    return () => window.clearTimeout(timer);
+    offeredReportRef.current = currentReportId;
+    try { window.sessionStorage.setItem(`sl_post_scan_offer_v1:${currentReportId}`, "shown"); } catch { /* no-op */ }
+    // A new report triggers this only once. The initial state is already open
+    // on the first client paint; effect handles report changes while mounted.
+    setIsPostScanOfferOpen(true);
+    trackFunnelEvent("post_scan_offer_shown");
   }, [postScanOfferReportId, currentReportId, isCheckoutAvailable,
       isReportUnlocked, isVerifyingPayment, paymentState]);
 
@@ -380,7 +387,7 @@ export default function ResultsScreen({
   return (
     <div id="results-content" className={`sl-app-theme min-h-screen bg-[#090D15] text-[#F1F5F9] font-sans antialiased flex flex-col ${!isReportUnlocked && isCheckoutAvailable ? "pb-16 sm:pb-0" : ""}`}>
       <PostScanUpgradeModal
-        open={isPostScanOfferOpen && !isReportUnlocked}
+        open={isPostScanOfferOpen && !isReportUnlocked && isCheckoutAvailable}
         domain={report.domain}
         overallScore={report.overallScoreDisplay}
         signals={report.signalsList.map(signal => ({
