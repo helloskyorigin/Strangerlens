@@ -19,6 +19,7 @@ import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import ScanScreen from "@/components/ScanScreen";
 import ChromaticAtmosphere from "@/components/landing/ChromaticAtmosphere";
 import InteractiveReportPreview from "@/components/landing/InteractiveReportPreview";
+import FullReportTour from "@/components/landing/FullReportTour";
 import { LandingThemeSwitcher } from "@/components/landing/LandingThemeSwitcher";
 import ResultsScreen from "@/components/ResultsScreen";
 import ClaritySignalTooltip from "@/components/ClaritySignalTooltip";
@@ -138,6 +139,7 @@ const FAQ_ITEMS = [
 const NAV_ITEMS = [
   { label: "Product", href: "#product" },
   { label: "How it works", href: "#how-it-works" },
+  { label: "Full report", href: "#full-report-demo" },
   { label: "Pricing", href: "#pricing" },
   { label: "FAQ", href: "#faq" },
   { label: "My Reports", href: "/my-reports" },
@@ -989,6 +991,14 @@ export default function LandingPage() {
                   })}
                 </StaggerContainer>
               </section>
+
+              {/* Complete paid report demonstration, entirely illustrative. */}
+              <div className="sl-section-v3 border-t border-[#263044]">
+                <ChromaticAtmosphere variant="threads" />
+                <Reveal y={14}>
+                  <FullReportTour onTryFree={scrollToInput} />
+                </Reveal>
+              </div>
 
               {/* SECTION: PRICING */}
               <section
