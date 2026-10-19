@@ -17,6 +17,9 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import ScanScreen from "@/components/ScanScreen";
+import ChromaticAtmosphere from "@/components/landing/ChromaticAtmosphere";
+import InteractiveReportPreview from "@/components/landing/InteractiveReportPreview";
+import { LandingThemeSwitcher } from "@/components/landing/LandingThemeSwitcher";
 import ResultsScreen from "@/components/ResultsScreen";
 import ClaritySignalTooltip from "@/components/ClaritySignalTooltip";
 import { useReportPayments } from "@/hooks/useReportPayments";
@@ -436,14 +439,14 @@ export default function LandingPage() {
             animate={{ opacity: 1 }}
             exit={shouldReduceMotion ? {} : { opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="w-full min-h-screen flex flex-col bg-[#090D15] text-[#F1F5F9]"
+            className="landing-v3 w-full min-h-screen flex flex-col bg-[#090D15] text-[#F1F5F9]"
           >
             {/* STICKY HEADER */}
             <motion.header
               initial={shouldReduceMotion ? false : { opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, ease: EASE_OUT_EXPO }}
-              className="w-full bg-[#090D15]/85 backdrop-blur-md border-b border-[#263044] sticky top-0 z-50 transition-colors"
+              className="sl-landing-header w-full bg-[#090D15]/85 backdrop-blur-md border-b border-[#263044] sticky top-0 z-50 transition-colors"
             >
               <div className="max-w-[1180px] mx-auto px-4 sm:px-6 md:px-8 h-[64px] sm:h-[72px] flex items-center justify-between gap-2 sm:gap-4">
                 <a
@@ -485,10 +488,11 @@ export default function LandingPage() {
                   <Link href="/my-reports" className="rounded py-1 whitespace-nowrap hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#246BFD]">My Reports</Link>
                 </nav>
 
-                <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+                <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                  <div className="hidden sm:block"><LandingThemeSwitcher /></div>
                   <button
                     onClick={scrollToInput}
-                    className="group rounded-full bg-[#246BFD] hover:bg-blue-600 active:scale-[0.97] text-white text-xs sm:text-sm font-medium px-4 sm:px-5 py-2 sm:py-2.5 transition-all duration-200 inline-flex items-center gap-1.5 shadow-md shadow-blue-500/20 cursor-pointer whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#246BFD] focus-visible:ring-offset-2"
+                    className="sl-v3-primary group rounded-full bg-[#246BFD] hover:bg-blue-600 active:scale-[0.97] text-white text-xs sm:text-sm font-medium px-4 sm:px-5 py-2 sm:py-2.5 transition-all duration-200 inline-flex items-center gap-1.5 shadow-md shadow-blue-500/20 cursor-pointer whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#246BFD] focus-visible:ring-offset-2"
                   >
                     <span>Try for free</span>
                     <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
@@ -594,6 +598,10 @@ export default function LandingPage() {
                           <ArrowRight className="w-4 h-4 text-[#64748B] group-hover:text-[#3B82F6] group-hover:translate-x-0.5 transition-all" />
                         </motion.a>
                       ))}
+                      <div className="flex items-center justify-between gap-3 border-t border-[#263044] px-4 py-3">
+                        <span className="text-sm font-semibold text-[#F1F5F9]">Appearance</span>
+                        <LandingThemeSwitcher />
+                      </div>
                       <Link href="/my-reports" onClick={() => setMobileMenuOpen(false)} className="flex min-h-[48px] items-center justify-between rounded-2xl px-4 py-3 text-base font-semibold text-[#F1F5F9] hover:bg-[#171F2D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#246BFD]">
                         My Reports <ArrowRight aria-hidden="true" className="h-4 w-4 text-[#64748B]" />
                       </Link>
@@ -643,8 +651,9 @@ export default function LandingPage() {
 
             <main className="flex-1 w-full max-w-[1180px] mx-auto px-4 sm:px-6 md:px-8">
               {/* HERO SECTION — Side-by-side two-column layout on desktop, stacked on mobile */}
-              <section className="pt-7 pb-11 sm:pt-12 sm:pb-16 md:pt-14 md:pb-18 lg:pt-20 lg:pb-22 grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-8 sm:gap-10 lg:gap-12 items-center">
-                <div className="w-full flex flex-col items-start text-left min-w-0">
+              <section className="sl-hero-v3 flex flex-col items-center gap-8 sm:gap-10">
+                <ChromaticAtmosphere variant="hero" />
+                <div className="sl-hero-content mx-auto w-full max-w-[920px] flex flex-col items-center text-center min-w-0">
                   {/* 1. Eyebrow with subtle blur-to-sharp entrance */}
                   <motion.div
                     initial={
@@ -664,7 +673,7 @@ export default function LandingPage() {
                   </motion.div>
 
                   {/* 2. Staggered Hero Headline Lines */}
-                  <h1 className="text-[32px] min-[375px]:text-4xl sm:text-5xl lg:text-[54px] font-extrabold text-white tracking-tight leading-[1.09] mb-4 sm:mb-5 [text-wrap:balance]">
+                  <h1 className="text-[34px] min-[375px]:text-[40px] sm:text-[56px] lg:text-[72px] font-extrabold text-white tracking-tight leading-[1.09] mb-4 sm:mb-5 [text-wrap:balance]">
                     <motion.span
                       initial={shouldReduceMotion ? false : { opacity: 0, y: 14 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -688,7 +697,7 @@ export default function LandingPage() {
                       className="block"
                     >
                       But Do{" "}
-                      <span className="text-[#3B82F6]">Visitors?</span>
+                      <span className="sl-hero-accent text-[#3B82F6]">Visitors?</span>
                     </motion.span>
                   </h1>
 
@@ -701,7 +710,7 @@ export default function LandingPage() {
                       delay: 0.3,
                       ease: EASE_OUT_EXPO,
                     }}
-                    className="text-[15px] sm:text-lg text-[#94A3B8] leading-relaxed mb-6 sm:mb-7 max-w-lg font-normal"
+                    className="text-[15px] sm:text-lg text-[#94A3B8] leading-relaxed mb-6 sm:mb-7 max-w-[640px] font-normal"
                   >
                     Find out what first-time visitors understand, what confuses them, and where your homepage could communicate more clearly. Start with five free clarity scores.
                   </motion.p>
@@ -720,10 +729,10 @@ export default function LandingPage() {
                       delay: 0.38,
                       ease: EASE_OUT_EXPO,
                     }}
-                    className="w-full max-w-lg"
+                    className="sl-url-form w-full max-w-[650px]"
                   >
                     <div
-                      className={`relative flex flex-col sm:flex-row md:flex-col lg:flex-row items-stretch lg:items-center bg-[#121824] rounded-3xl sm:rounded-full md:rounded-3xl lg:rounded-full border transition-all duration-200 p-2 sm:p-1.5 sm:pl-5 md:p-2 lg:p-1.5 lg:pl-5 ${
+                      className={`sl-url-frame relative flex flex-col sm:flex-row items-stretch sm:items-center bg-[#121824] rounded-3xl sm:rounded-full border transition-all duration-200 p-2 sm:p-1.5 sm:pl-5 ${
                         errorMessage || urlValidation.status === "invalid"
                           ? "border-rose-500 ring-4 ring-rose-500/20 shadow-sm"
                           : urlValidation.status === "valid"
@@ -762,7 +771,7 @@ export default function LandingPage() {
                         disabled={
                           isVerifying || isPending || urlValidation.status === "invalid"
                         }
-                        className={`group mt-1.5 sm:mt-0 md:mt-1.5 lg:mt-0 w-full sm:w-auto md:w-full lg:w-auto min-h-[44px] sm:min-h-[46px] px-4 sm:px-5 py-2.5 rounded-full font-semibold text-xs sm:text-[13px] flex items-center justify-center gap-1.5 shrink-0 whitespace-nowrap transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#246BFD] focus-visible:ring-offset-2 ${
+                        className={`sl-v3-primary group mt-1.5 sm:mt-0 w-full sm:w-auto min-h-[44px] sm:min-h-[46px] px-4 sm:px-5 py-2.5 rounded-full font-semibold text-xs sm:text-[13px] flex items-center justify-center gap-1.5 shrink-0 whitespace-nowrap transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#246BFD] focus-visible:ring-offset-2 ${
                           urlValidation.status === "invalid"
                             ? "bg-[#171F2D] text-[#64748B] cursor-not-allowed shadow-none border border-[#263044]"
                             : isVerifying
@@ -808,153 +817,22 @@ export default function LandingPage() {
                   </motion.p>
                 </div>
 
-                {/* 6. Right Column — Final Product Report Preview */}
+                {/* Real interactive example — illustrative content only. */}
                 <motion.div
-                  initial={
-                    shouldReduceMotion
-                      ? false
-                      : { opacity: 0, y: 22, scale: 0.98 }
-                  }
+                  initial={shouldReduceMotion ? false : { opacity: 0, y: 22, scale: 0.98 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{
-                    duration: 0.65,
-                    delay: 0.24,
-                    ease: EASE_OUT_EXPO,
-                  }}
-                  className="w-full min-w-0 flex justify-center md:justify-end"
-                >
-                  <div className="w-full bg-[#121824] border border-[#263044] rounded-3xl p-4 sm:p-6 shadow-[0_20px_50px_-15px_rgba(9,13,21,0.5)] text-[#F1F5F9]">
-                    {/* A. Card Header */}
-                    <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[#263044] mb-3.5">
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-7 h-7 rounded-lg bg-[#3B82F6]/15 text-[#3B82F6] flex items-center justify-center shrink-0">
-                          <Sparkles className="w-4 h-4" />
-                        </div>
-                        <div className="min-w-0">
-                          <span className="font-extrabold text-[#F1F5F9] text-sm sm:text-base tracking-tight block">
-                            Example Clarity Report
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-bold text-amber-400 bg-amber-500/10 px-2.5 sm:px-3 py-1 rounded-full shrink-0 border border-amber-500/20">
-                          Example Score: 69/100
-                        </span>
-                      </div>
-                    </div>
-
-                    <p className="mb-3 text-[11px] text-[#94A3B8]">
-                      Illustrative preview · Scores are examples, not a real customer result.
-                    </p>
-                    {/* B. Five core signals plus the conditional purchase assessment */}
-                    <div className="bg-[#121824] rounded-xl overflow-hidden divide-y divide-[#263044]/70 space-y-2">
-                      {[
-                        { label: "First Impression", score: 85, status: "Clear", color: "bg-emerald-500", text: "text-emerald-400", dot: "bg-emerald-400" },
-                        { label: "Audience", score: 58, status: "Partly clear", color: "bg-amber-500", text: "text-amber-400", dot: "bg-amber-400" },
-                        { label: "Value", score: 72, status: "Understandable", color: "bg-emerald-500", text: "text-emerald-400", dot: "bg-emerald-400" },
-                        { label: "Trust", score: 30, status: "Unclear", color: "bg-rose-500", text: "text-rose-400", dot: "bg-rose-400" },
-                        { label: "Action", score: 90, status: "Clear", color: "bg-emerald-500", text: "text-emerald-400", dot: "bg-emerald-400" },
-                      ].map((sig) => (
-                        <div
-                          key={sig.label}
-                          className="bg-[#171F2D] border border-[#263044] rounded-xl p-3 sm:p-4.5 transition-colors hover:border-[#384660]"
-                        >
-                          {/* Mobile Layout (< sm) */}
-                          <div className="sm:hidden space-y-2">
-                            <div className="flex items-center justify-between">
-                              <span className="font-medium text-sm text-[#F1F5F9]">{sig.label}</span>
-                              <span className="font-semibold text-sm text-white">{sig.score}%</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <span className={`w-1.5 h-1.5 rounded-full ${sig.dot}`} aria-hidden="true" />
-                              <span className={`text-xs font-normal ${sig.text}`}>
-                                {sig.status}
-                              </span>
-                            </div>
-                            <div className="w-full h-1.5 bg-[#090D15] border border-[#263044]/40 rounded-full overflow-hidden mt-1.5">
-                              <div
-                                className={`h-full rounded-full transition-all duration-300 ${sig.color}`}
-                                style={{ width: `${Math.min(100, Math.max(0, sig.score))}%` }}
-                              />
-                            </div>
-                          </div>
-
-                          {/* Desktop Layout (>= sm) */}
-                          <div className="hidden sm:flex items-center justify-between">
-                            <span className="font-medium text-[#F1F5F9]">{sig.label}</span>
-                            <div className="flex items-center gap-4">
-                              <div className="text-right">
-                                <div className="font-semibold text-white text-sm">{sig.score}%</div>
-                                <div className={`text-xs font-medium flex items-center justify-end gap-1.5 ${sig.text}`}>
-                                  <span className={`w-1.5 h-1.5 rounded-full ${sig.dot}`} aria-hidden="true" />
-                                  <span>{sig.status}</span>
-                                </div>
-                              </div>
-                              <div className="w-20 h-1.5 bg-[#090D15] border border-[#263044]/40 rounded-full overflow-hidden">
-                                <div
-                                  className={`h-full rounded-full transition-all duration-300 ${sig.color}`}
-                                  style={{ width: `${Math.min(100, Math.max(0, sig.score))}%` }}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                      <div className="bg-[#171F2D] border border-[#263044] rounded-xl p-3 sm:p-4.5">
-                        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-                          <span className="inline-flex items-center gap-1.5 text-sm font-medium text-[#F1F5F9]">
-                            Purchase Readiness
-                            <ClaritySignalTooltip signalKey="purchaseReadiness" name="Purchase Readiness" isOpen={landingSignalTooltip === "preview"}
-                              onOpen={() => setLandingSignalTooltip("preview")}
-                              onClose={() => setLandingSignalTooltip(current => current === "preview" ? null : current)} />
-                          </span>
-                          <span className="text-[11px] font-medium text-blue-400">Paid offerings only</span>
-                        </div>
-                        <p className="mt-2 text-xs leading-relaxed text-[#94A3B8]">Premium · Score and findings unlock with Full Analysis when a paid offering is identified.</p>
-                      </div>
-                    </div>
-
-                    <div className="mb-4 rounded-xl border border-blue-500/20 bg-[#192438] p-3.5">
-                      <p className="text-[11px] font-bold uppercase tracking-widest text-blue-300">Example of a copy improvement</p>
-                      <p className="mt-2 text-xs text-[#A9B9CF]">Before: “Everything you need to work smarter.”</p>
-                      <p className="mt-1.5 text-sm font-medium leading-relaxed text-white">After: “Organize client projects, tasks and deadlines in one workspace.”</p>
-                      <p className="mt-2 text-[11px] text-[#A9B9CF]">Illustrative wording only — your actual report uses your website.</p>
-                    </div>
-
-                    {/* C. Premium Preview Area (Why This Score, What's Working, Unclear, First 5 Seconds) */}
-                    <div className="rounded-2xl bg-[#171F2D] border border-[#263044] p-3 sm:p-3.5 space-y-2 text-xs">
-                      <div className="flex items-center justify-between font-semibold border-b border-[#263044] pb-2 text-[11px] sm:text-xs">
-                        <span className="text-[#94A3B8]">Full Analysis Sections</span>
-                        <span className="text-[#3B82F6] font-bold">$5 One-Time</span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 pt-0.5 text-[11px] sm:text-xs text-[#F1F5F9]">
-                        <div className="bg-[#121824] border border-[#263044] rounded-lg p-2 sm:p-2.5">
-                          <span className="font-bold text-[#3B82F6] block mb-0.5">Why This Score?</span>
-                          <span className="text-[#94A3B8] text-[10px] sm:text-[11px] leading-tight block">Deep signal rationale</span>
-                        </div>
-                        <div className="bg-[#121824] border border-[#263044] rounded-lg p-2 sm:p-2.5">
-                          <span className="font-bold text-emerald-400 block mb-0.5">What{"'"}s Working?</span>
-                          <span className="text-[#94A3B8] text-[10px] sm:text-[11px] leading-tight block">Strong visitor cues</span>
-                        </div>
-                        <div className="bg-[#121824] border border-[#263044] rounded-lg p-2 sm:p-2.5">
-                          <span className="font-bold text-amber-400 block mb-0.5">What{"'"}s Unclear?</span>
-                          <span className="text-[#94A3B8] text-[10px] sm:text-[11px] leading-tight block">Friction &amp; doubt points</span>
-                        </div>
-                        <div className="bg-[#121824] border border-[#263044] rounded-lg p-2 sm:p-2.5">
-                          <span className="font-bold text-[#3B82F6] block mb-0.5">First 5 Seconds</span>
-                          <span className="text-[#94A3B8] text-[10px] sm:text-[11px] leading-tight block">Understand vs Miss</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  transition={{ duration: 0.65, delay: 0.28, ease: EASE_OUT_EXPO }}
+                  className="sl-hero-content mx-auto w-full max-w-[840px]">
+                  <InteractiveReportPreview />
                 </motion.div>
               </section>
 
               {/* SECTION: HOW IT WORKS (3 Steps) */}
               <section
                 id="how-it-works"
-                className="scroll-mt-20 sm:scroll-mt-24 py-12 sm:py-14 md:py-20 border-t border-[#263044]"
+                className="sl-section-v3 scroll-mt-20 sm:scroll-mt-24 py-12 sm:py-14 md:py-20 border-t border-[#263044]"
               >
+                <ChromaticAtmosphere variant="threads" />
                 <div className="max-w-4xl mx-auto text-center mb-8 sm:mb-10 md:mb-12">
                   <Reveal y={10} blur>
                     <span className="inline-block text-[11px] font-bold tracking-widest text-[#3B82F6] uppercase bg-[#171F2D] px-3 py-1 rounded-full border border-[#263044]">
@@ -978,7 +856,7 @@ export default function LandingPage() {
                   className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 max-w-4xl mx-auto items-stretch"
                 >
                   <StaggerItem y={16} className="h-full min-w-0">
-                    <div className="h-full bg-[#121824] border border-[#263044] rounded-3xl p-6 sm:p-7 flex flex-col justify-between shadow-lg hover:border-[#384660] transition-all">
+                    <div className="sl-step-v3 h-full bg-[#121824] border border-[#263044] rounded-3xl p-6 sm:p-7 flex flex-col justify-between shadow-lg hover:border-[#384660] transition-all">
                       <div>
                         <div className="w-10 h-10 rounded-2xl bg-[#171F2D] text-[#3B82F6] border border-[#263044] flex items-center justify-center font-extrabold text-sm mb-4">
                           01
@@ -994,7 +872,7 @@ export default function LandingPage() {
                   </StaggerItem>
 
                   <StaggerItem y={16} className="h-full min-w-0">
-                    <div className="h-full bg-[#121824] border border-[#263044] rounded-3xl p-6 sm:p-7 flex flex-col justify-between shadow-lg hover:border-[#384660] transition-all">
+                    <div className="sl-step-v3 h-full bg-[#121824] border border-[#263044] rounded-3xl p-6 sm:p-7 flex flex-col justify-between shadow-lg hover:border-[#384660] transition-all">
                       <div>
                         <div className="w-10 h-10 rounded-2xl bg-[#171F2D] text-[#3B82F6] border border-[#263044] flex items-center justify-center font-extrabold text-sm mb-4">
                           02
@@ -1010,7 +888,7 @@ export default function LandingPage() {
                   </StaggerItem>
 
                   <StaggerItem y={16} className="h-full min-w-0">
-                    <div className="h-full bg-[#121824] border border-[#263044] rounded-3xl p-6 sm:p-7 flex flex-col justify-between shadow-lg hover:border-[#384660] transition-all">
+                    <div className="sl-step-v3 h-full bg-[#121824] border border-[#263044] rounded-3xl p-6 sm:p-7 flex flex-col justify-between shadow-lg hover:border-[#384660] transition-all">
                       <div>
                         <div className="w-10 h-10 rounded-2xl bg-[#171F2D] text-[#3B82F6] border border-[#263044] flex items-center justify-center font-extrabold text-sm mb-4">
                           03
@@ -1325,9 +1203,10 @@ export default function LandingPage() {
               </section>
 
               {/* FINAL CTA & FOOTER */}
-              <section className="pt-11 pb-8 sm:pt-14 sm:pb-10 md:pt-20 md:pb-12 border-t border-[#263044] text-center">
+              <section className="sl-section-v3 pt-11 pb-8 sm:pt-14 sm:pb-10 md:pt-20 md:pb-12 border-t border-[#263044] text-center">
                 <Reveal y={18}>
-                  <div className="max-w-4xl mx-auto rounded-3xl bg-gradient-to-b from-[#121824] to-[#171F2D] border border-[#263044] p-7 sm:p-10 md:p-14 mb-8 sm:mb-10 shadow-2xl">
+                  <div className="sl-final-v3 max-w-4xl mx-auto rounded-3xl bg-gradient-to-b from-[#121824] to-[#171F2D] border border-[#263044] p-7 sm:p-10 md:p-14 mb-8 sm:mb-10 shadow-2xl">
+                    <ChromaticAtmosphere variant="cta" />
                     <h2 className="text-2xl min-[375px]:text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-3.5 [text-wrap:balance]">
                       Does Your Website Make Sense to a Stranger?
                     </h2>
@@ -1336,7 +1215,7 @@ export default function LandingPage() {
                     </p>
                     <button
                       onClick={scrollToInput}
-                      className="group rounded-full bg-[#246BFD] hover:bg-blue-600 active:scale-[0.98] text-white font-medium px-7 sm:px-8 py-3.5 sm:py-4 inline-flex items-center gap-2 shadow-md shadow-blue-500/25 transition-all duration-200 cursor-pointer text-sm sm:text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#246BFD] focus-visible:ring-offset-2"
+                      className="sl-v3-primary group rounded-full bg-[#246BFD] hover:bg-blue-600 active:scale-[0.98] text-white font-medium px-7 sm:px-8 py-3.5 sm:py-4 inline-flex items-center gap-2 shadow-md shadow-blue-500/25 transition-all duration-200 cursor-pointer text-sm sm:text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#246BFD] focus-visible:ring-offset-2"
                     >
                       <span>Analyze My Website Free →</span>
                     </button>
