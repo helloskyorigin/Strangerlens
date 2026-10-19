@@ -208,7 +208,10 @@ async function runCheck(req: NextRequest, onProgress?: ProgressEmitter) {
           })
         : Promise.resolve({} as SupportingResultType);
       const legalPages = await legalPagesPromise;
-      const rawAiPromise = analyzeWebsite(snapshot, legalPages);
+      let analysisMode: "ai" | "heuristic" = "heuristic";
+      const rawAiPromise = analyzeWebsite(snapshot, legalPages, {
+        onSource: source => { analysisMode = source === "deterministic" ? "heuristic" : "ai"; },
+      });
       const [rawAiAnalysis, optionalSupportingResult] = await Promise.all([
         rawAiPromise, extraPagesPromise,
       ]);
@@ -258,6 +261,7 @@ async function runCheck(req: NextRequest, onProgress?: ProgressEmitter) {
         domain: fetchResult.domain,
         snapshot,
         fullAnalysis: finalValidatedAnalysis,
+        analysisMode,
         supportingContext: optionalSupportingResult.supportingContext,
       });
 
@@ -270,13 +274,14 @@ async function runCheck(req: NextRequest, onProgress?: ProgressEmitter) {
           entitlement: {
             unlocked: false,
             tier: "free",
-            checkoutEnabled: isPaymentInfrastructureConfigured(),
-            blocker: isPaymentInfrastructureConfigured()
-              ? null
-              : PAYMENT_INFRASTRUCTURE_BLOCKER,
+            checkoutEnabled: analysisMode === "ai" && isPaymentInfrastructureConfigured(),
+            blocker: analysisMode === "heuristic"
+              ? "Only a heuristic preview was available. AI Full Analysis is not ready for purchase; please retry later."
+              : isPaymentInfrastructureConfigured() ? null : PAYMENT_INFRASTRUCTURE_BLOCKER,
           },
           lockedPreviewCounts,
           scanCoverage: coverage,
+          analysisMode,
           snapshot,
           analysis: redactAnalysisForFreeTier(finalValidatedAnalysis),
         },
