@@ -393,3 +393,35 @@ html[data-landing-theme="light"] .sl-app-theme .sl-upgrade-dialog button[disable
 html[data-landing-theme="light"] :is(.landing-v3,.sl-app-theme) button[class*="hover:bg-[#263044]"]:hover {
   background-color:#E9F0FA!important;
 }
+
+
+/* V4 implementation checklist and comparison surfaces in genuine light mode.
+   Arbitrary Tailwind classes are exact case-sensitive tokens. */
+html[data-landing-theme="light"] .sl-app-theme [class~='bg-[#121D2E]'],
+html[data-landing-theme="light"] .sl-app-theme [class~='bg-[#141F31]'] {
+  background-color:#FFFFFF!important;
+  border-color:#D8E5F2!important;
+}
+html[data-landing-theme="light"] .sl-app-theme [class~='bg-[#1B2A3F]'],
+html[data-landing-theme="light"] .sl-app-theme [class~='bg-[#1A2A3E]'],
+html[data-landing-theme="light"] .sl-app-theme [class~='bg-[#1B304A]'] {
+  background-color:#EEF5FF!important;
+  border-color:#CEDFF2!important;
+}
+html[data-landing-theme="light"] .sl-app-theme [class~='bg-[#283A52]'] {
+  background-color:#D8E5F2!important;
+}
+html[data-landing-theme="light"] .sl-app-theme [class~='text-[#B0C2D8]'],
+html[data-landing-theme="light"] .sl-app-theme [class~='text-[#AABED7]'],
+html[data-landing-theme="light"] .sl-app-theme [class~='text-[#AFC0D6]'],
+html[data-landing-theme="light"] .sl-app-theme [class~='text-[#BDD0E6]'],
+html[data-landing-theme="light"] .sl-app-theme [class~='text-[#93AAC6]'],
+html[data-landing-theme="light"] .sl-app-theme [class~='text-[#95ABC4]'],
+html[data-landing-theme="light"] .sl-app-theme [class~='text-[#9BB2CE]'],
+html[data-landing-theme="light"] .sl-app-theme [class~='text-[#A5BAD2]'],
+html[data-landing-theme="light"] .sl-app-theme [class~='text-[#A8BAD0]'],
+html[data-landing-theme="light"] .sl-app-theme [class~='text-[#90A8C5]'],
+html[data-landing-theme="light"] .sl-app-theme [class~='text-[#C8D8EB]'],
+html[data-landing-theme="light"] .sl-app-theme [class~='text-[#C4DDFB]'] {color:#415B78!important;}
+html[data-landing-theme="light"] .sl-app-theme [class~='text-[#D6E6FD]'] {color:#234F8D!important;}
+html[data-landing-theme="light"] .sl-app-theme .sl-recheck-section button:hover {color:#174C97!important;}
