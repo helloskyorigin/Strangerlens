@@ -5,6 +5,7 @@ import { FileText, Layers3, Quote } from "lucide-react";
 import EvidenceToFix from "@/components/EvidenceToFix";
 import BetterCopyStudio from "@/components/BetterCopyStudio";
 import SmartPriority from "@/components/SmartPriority";
+import ImprovementChecklist from "@/components/ImprovementChecklist";
 import type { PremiumWorkbench, EvidenceFix, PriorityItem, CopyOpportunity } from "@/types/premiumWorkbench";
 
 interface LegacyImprovement {
@@ -34,6 +35,7 @@ interface PremiumActionPlanProps {
   otherImprovements?: LegacyImprovement[];
   evidence?: ReportEvidence;
   visitorThought?: string;
+  reportId?: string | null;
 }
 const meaningful = (value: unknown): value is string =>
   typeof value === "string" && value.trim().length > 0 && !/\bundefined\b/i.test(value);
@@ -79,7 +81,7 @@ function legacyWorkbench(priority?: LegacyPriority, improvements: LegacyImprovem
 }
 
 export default function PremiumActionPlan({
-  workbench, recommendation, otherImprovements = [], evidence, visitorThought,
+  workbench, recommendation, otherImprovements = [], evidence, visitorThought, reportId,
 }: PremiumActionPlanProps) {
   const report = workbench || legacyWorkbench(recommendation, otherImprovements);
   const quotes = [evidence?.homepageExcerpt, ...(evidence?.clearFindings || []), ...(evidence?.missingFindings || [])]
@@ -108,6 +110,7 @@ export default function PremiumActionPlan({
       <EvidenceToFix fixes={report.evidenceFixes}/>
       <SmartPriority priorities={report.priorities}/>
       <BetterCopyStudio opportunities={report.copyOpportunities}/>
+      <ImprovementChecklist workbench={report} reportId={reportId}/>
 
       {(uniqueQuotes.length > 0 || meaningful(visitorThought)) && (
         <section aria-labelledby="content-behind-assessment" className="rounded-2xl border border-[#2B3B50] bg-[#121824] p-5 sm:p-6">
