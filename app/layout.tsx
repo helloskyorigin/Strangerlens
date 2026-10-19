@@ -25,13 +25,13 @@ const earlyTheme = `(function(){try{
 var v=localStorage.getItem("strangerlens-theme-v3");
 var p=v==="dark"||v==="light"||v==="system"?v:"light";
 var dark=p==="dark"||(p==="system"&&window.matchMedia("(prefers-color-scheme: dark)").matches);
-document.documentElement.dataset.landingTheme=dark?"dark":"light";
-}catch(e){document.documentElement.dataset.landingTheme="light";}
+document.documentElement.dataset.landingTheme=dark?"dark":"light";document.documentElement.classList.toggle("dark",dark);
+}catch(e){document.documentElement.dataset.landingTheme="light";document.documentElement.classList.remove("dark");}
 })();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark" data-landing-theme="light" suppressHydrationWarning>
+    <html lang="en" data-landing-theme="light" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: earlyTheme }} />
       </head>
