@@ -9,10 +9,12 @@ export type FunnelEvent =
   | "url_input_focused"
   | "scan_submitted"
   | "scan_completed"
+  | "scan_failed"
   | "post_scan_offer_shown"
   | "post_scan_offer_dismissed"
   | "upgrade_clicked"
   | "checkout_opened"
+  | "checkout_failed"
   | "payment_verified";
 
 export function trackFunnelEvent(event: FunnelEvent): void {
@@ -26,6 +28,20 @@ export function trackFunnelEvent(event: FunnelEvent): void {
     if (Array.isArray(analyticsWindow.dataLayer)) {
       analyticsWindow.dataLayer.push(detail);
     }
+    // Optional first-party aggregate counters (no URLs, IDs, secrets or emails).
+    // Respect the browser's Do Not Track preference. Measurement never blocks UX.
+    if (window.navigator?.doNotTrack !== "1" && typeof window.fetch === "function") {
+      try {
+        void window.fetch("/api/analytics/funnel", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ event }),
+          keepalive: true,
+          credentials: "omit",
+        }).catch(() => {});
+      } catch { /* Analytics is strictly optional. */ }
+    }
+
   } catch {
     // Tracking is optional and must never interrupt scanning or checkout.
   }
