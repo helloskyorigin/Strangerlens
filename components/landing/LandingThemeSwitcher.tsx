@@ -78,7 +78,7 @@ export function LandingThemeSwitcher({ compact = false }: { compact?: boolean })
     document.documentElement.dataset.landingTheme = resolved;
     document.documentElement.classList.toggle("dark", resolved === "dark");
     setChoice(value);
-    window.dispatchEvent(new Event("strangerlens:theme-preference"));
+    window.dispatchEvent(new window.Event("strangerlens:theme-preference"));
     setMenuOpen(false);
   };
 
