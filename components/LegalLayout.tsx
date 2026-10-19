@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { ArrowLeft, Shield, FileText, RefreshCcw, Mail } from "lucide-react";
 import { BRAND_NAME, LEGAL_CONFIG } from "@/lib/legal-config";
+import { LandingThemeSwitcher } from "@/components/landing/LandingThemeSwitcher";
 
 interface LegalLayoutProps {
   activePage: "privacy" | "terms" | "refund" | "contact";
@@ -46,7 +47,7 @@ export default function LegalLayout({
   ];
 
   return (
-    <div className="min-h-screen bg-[#090D15] text-[#F1F5F9] font-sans selection:bg-[#246BFD] selection:text-white flex flex-col justify-between">
+    <div className="sl-app-theme min-h-screen bg-[#090D15] text-[#F1F5F9] font-sans selection:bg-[#246BFD] selection:text-white flex flex-col justify-between">
       {/* Top Navigation Bar */}
       <header className="sticky top-0 z-40 bg-[#090D15]/90 backdrop-blur-md border-b border-[#263044]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
@@ -69,6 +70,7 @@ export default function LegalLayout({
           </div>
 
           <div className="flex items-center gap-2.5">
+            <LandingThemeSwitcher compact />
             <Link
               href="/"
               className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#F1F5F9] hover:text-white bg-[#171F2D] hover:bg-[#1C2638] border border-[#263044] hover:border-[#384660] px-3.5 py-2 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#246BFD]"
