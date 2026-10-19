@@ -29,6 +29,7 @@ export default function PostScanUpgradeModal({
 }: PostScanUpgradeModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const freeButtonRef = useRef<HTMLButtonElement>(null);
+  const mobileFreeButtonRef = useRef<HTMLButtonElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -37,7 +38,10 @@ export default function PostScanUpgradeModal({
       ? document.activeElement : null;
     const oldOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    const focusTimer = window.setTimeout(() => freeButtonRef.current?.focus(), 0);
+    const focusTimer = window.setTimeout(() => {
+      const mobile = window.matchMedia?.("(max-width: 639px)").matches;
+      (mobile ? mobileFreeButtonRef : freeButtonRef).current?.focus();
+    }, 0);
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") { event.preventDefault(); onContinueFree(); return; }
       if (event.key !== "Tab") return;
@@ -85,13 +89,33 @@ export default function PostScanUpgradeModal({
           <h2 id="post-scan-offer-title" className="mt-2 text-[24px] font-bold leading-tight tracking-tight text-white sm:text-[28px]">
             Five Scores. Five Complete Breakdowns.
           </h2>
-          <p id="post-scan-offer-description" className="mt-2 text-sm leading-relaxed text-[#B4C1D1]">
-            Your scores are free. The complete report explains every signal — what works, what is unclear, why it matters,
-            and what you can improve. Not just a fix for your lowest score.
+          <p id="post-scan-offer-description" className="mt-2 text-[13px] leading-relaxed text-[#B4C1D1] sm:text-sm">
+            <span className="sm:hidden">Your free scores are ready. Unlock what works, what needs attention, and specific improvements across all five signals.</span>
+            <span className="hidden sm:inline">Your scores are free. The complete report explains every signal — what works, what is unclear, why it matters,
+            and what you can improve. Not just a fix for your lowest score.</span>
           </p>
         </div>
 
-        <div className="mt-4 rounded-2xl border border-[#344760] bg-[#19283b] p-3.5">
+        {/* Primary conversion action comes BEFORE the long details on small screens. */}
+        <div className="mt-4 space-y-2 sm:hidden">
+          {paymentError && <p role="alert" className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-200">{paymentError}</p>}
+          <button type="button" onClick={onUpgrade} disabled={!canCheckout || busy}
+            className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full bg-[#246BFD] px-4 py-3 text-sm font-bold text-white transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300">
+            <LockKeyhole className="h-4 w-4" aria-hidden="true"/>
+            {busy ? "Opening checkout…" : "Unlock Full Analysis — $5"}
+            {!busy && <ArrowRight className="h-4 w-4" aria-hidden="true"/>}
+          </button>
+          <button ref={mobileFreeButtonRef} type="button" onClick={onContinueFree}
+            className="flex min-h-11 w-full items-center justify-center rounded-full border border-[#354257] bg-[#1B2738] px-4 text-xs font-semibold text-[#E5ECF5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300">
+            Continue with free results
+          </button>
+          <p className="text-center text-[11px] text-[#9FB0C6]">
+            {isTestMode ? "Test mode · No real charge" : "One-time payment · No subscription"}
+          </p>
+          {!canCheckout && <p className="text-center text-xs text-amber-300">Checkout unavailable. Free results remain accessible.</p>}
+        </div>
+
+        <div className="mt-4 hidden rounded-2xl border border-[#344760] bg-[#19283b] p-3.5 sm:block">
           <div className="mb-2.5 flex items-center justify-between gap-2">
             <p className="text-xs font-bold uppercase tracking-widest text-[#9DBCE2]">Your five clarity signals</p>
             <LockKeyhole className="h-4 w-4 text-[#8DAACD]" aria-hidden="true" />
@@ -107,7 +131,7 @@ export default function PostScanUpgradeModal({
           <p className="mt-2.5 text-xs text-[#95A9C1]">Unlock the explanation and actionable guidance behind all five.</p>
         </div>
 
-        <div className="mt-4 grid gap-2 text-[13px] text-[#DCE7F2]">
+        <div className="mt-4 grid gap-1.5 text-xs text-[#DCE7F2] sm:gap-2 sm:text-[13px]">
           <div className="flex items-start gap-2.5"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
             <span>Why each score, what&apos;s working and what&apos;s unclear</span></div>
           <div className="flex items-start gap-2.5"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
@@ -120,8 +144,8 @@ export default function PostScanUpgradeModal({
           )}
         </div>
 
-        {paymentError && <p role="alert" className="mt-4 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200">{paymentError}</p>}
-        <div className="mt-5 space-y-2.5">
+        {paymentError && <p role="alert" className="mt-4 hidden rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200 sm:block">{paymentError}</p>}
+        <div className="mt-5 hidden space-y-2.5 sm:block">
           <button type="button" onClick={onUpgrade} disabled={!canCheckout || busy}
             className="flex min-h-[50px] w-full items-center justify-center gap-2 rounded-full bg-[#246BFD] px-4 py-3 text-sm font-bold text-white transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300">
             <LockKeyhole className="h-4 w-4" aria-hidden="true" />
