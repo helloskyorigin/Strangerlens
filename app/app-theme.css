@@ -288,3 +288,58 @@ html[data-landing-theme="light"] .sl-app-theme button.bg-\[\#1E815F\] * {color:#
 /* Gradients kept chromatic only in the theme-controlled landing. */
 html[data-landing-theme="light"] .sl-app-theme button.bg-gradient-to-r,
 html[data-landing-theme="light"] .sl-app-theme a.bg-gradient-to-r {background:#246BFD!important;color:white!important;}
+
+
+/* Shared component tokens for compact appearance control. */
+.sl-app-theme {
+  --sl-surface:#151F30;
+  --sl-surface-muted:#1D2C40;
+  --sl-text:#F0F5FF;
+  --sl-muted:#A5BBD5;
+  --sl-border:#334963;
+}
+.sl-theme-compact {position:relative;flex-shrink:0;color:var(--sl-text,#F1F5F9);}
+.sl-theme-compact-trigger {
+  display:inline-flex;align-items:center;justify-content:center;gap:2px;
+  height:36px;min-width:45px;padding:0 9px;
+  border:1px solid var(--sl-border,#334963);border-radius:999px;
+  background:var(--sl-surface,#152238);
+  color:var(--sl-text,#F1F5F9);
+  cursor:pointer;
+}
+.sl-theme-compact-trigger:hover {background:var(--sl-surface-muted,#1F3048);}
+.sl-theme-compact-trigger:focus-visible {outline:2px solid #246BFD;outline-offset:2px;}
+.sl-theme-menu {
+  position:absolute;z-index:95;top:calc(100% + 8px);right:0;
+  min-width:150px;display:grid;gap:3px;padding:6px;
+  border:1px solid var(--sl-border,#334963);border-radius:13px;
+  background:var(--sl-surface,#152238);
+  color:var(--sl-text,#F1F5F9);
+  box-shadow:0 18px 55px -22px rgba(0,0,0,.42);
+}
+.sl-theme-menu-option {
+  display:flex;align-items:center;gap:9px;min-height:39px;
+  padding:9px 12px;border-radius:9px;color:var(--sl-text,#F1F5F9);
+  font-size:13px;font-weight:650;text-align:left;
+}
+.sl-theme-menu-option:hover {background:var(--sl-surface-muted,#1F3048);}
+.sl-theme-menu-option.is-active {background:#246BFD;color:#FFF;}
+.sl-theme-menu-option:focus-visible {outline:2px solid #246BFD;outline-offset:1px;}
+/* Report motion: subtle visual hierarchy, never a flashing status or score. */
+.sl-app-theme #complete-paid-report,
+.sl-app-theme #your-improvement-plan {scroll-margin-top:90px;}
+.sl-app-theme #complete-paid-report [role="tabpanel"],
+.sl-app-theme #your-improvement-plan > section {
+  transition:border-color .24s ease,box-shadow .24s ease;
+}
+.sl-app-theme #your-improvement-plan > section:hover {
+  border-color:color-mix(in srgb,var(--sl-border) 58%,#82AEF2);
+  box-shadow:0 17px 42px -36px rgba(36,107,253,.28);
+}
+.sl-app-theme #complete-paid-report [role="tab"]:focus-visible {outline:2px solid #246BFD;outline-offset:2px;}
+html[data-landing-theme="light"] .sl-app-theme .bg-emerald-500\/10 {background-color:rgba(16,142,92,.08)!important;}
+html[data-landing-theme="light"] .sl-app-theme .bg-amber-500\/10 {background-color:rgba(192,139,48,.08)!important;}
+html[data-landing-theme="light"] .sl-app-theme .bg-rose-500\/10 {background-color:rgba(204,62,91,.08)!important;}
+@media(prefers-reduced-motion:reduce) {
+  .sl-app-theme #your-improvement-plan > section {transition:none;}
+}
