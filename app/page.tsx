@@ -418,7 +418,8 @@ export default function LandingPage() {
       window.history.pushState({ strangerLens: true, view: "scan" }, "");
     }
     await scanController.startScan(overrideUrl);
-    if (scanController.getState().errorMessage) {
+    if (scanController.getState().errorMessage || scanController.getState().backendError) {
+      trackFunnelEvent("scan_failed");
       if (typeof window !== "undefined") {
         window.history.replaceState({ strangerLens: true, view: "landing" }, "");
       }
