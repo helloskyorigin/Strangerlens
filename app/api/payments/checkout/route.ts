@@ -56,6 +56,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (storedReport.analysisMode === "heuristic") {
+      return NextResponse.json(
+        { error: "Only a limited heuristic preview was available. Please retry when AI Full Analysis is ready." },
+        { status: 422 }
+      );
+    }
+
     if (storedReport.payment?.active) {
       return NextResponse.json({ alreadyPaid: true, reportId });
     }
