@@ -42,9 +42,9 @@ for (const width of [320, 390, 1440]) {
         const preview = doc.querySelector("#complete-report-preview");
         check(!!preview, "free visitor sees complete-report preview");
         const previewText = preview?.textContent || "";
-        check(previewText.includes("Know exactly what to improve."), "full-report value is explicit");
+        check(previewText.includes("Know what to fix. And how."), "full-report value is explicit");
         check(signalNames.every(name => text.includes(name)), "every core signal has a locked premium chapter preview");
-        check(previewText.includes("What&apos;s Unclear") === false && previewText.includes("Five detailed signal explanations"), "preview describes broad paid coverage without leaking findings");
+        check(!previewText.includes(privateText) && previewText.includes("All five detailed explanations"), "preview describes paid benefits without leaking private findings");
         check(!text.includes(privateText) && !doc.querySelector("#your-improvement-plan"), "free tier never renders private premium content");
         check([...doc.querySelectorAll("button")].some(button => button.textContent?.includes("Unlock Full Analysis — $3")), "single report CTA remains $3");
         check(testMode ? text.includes("Test mode") && text.includes("No real charge")
