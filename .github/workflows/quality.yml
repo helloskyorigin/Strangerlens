@@ -55,5 +55,9 @@ jobs:
         run: npm run test:purchase-readiness
       - name: Payment and report unlock integration (local Redis, mocked Dodo)
         run: npm run test:payments
+      - name: Full report PDF entitlement and export
+        run: npm run test:pdf
+      - name: Paid report history and recovery
+        run: npm run test:history
       - name: Production build
         run: npm run build
