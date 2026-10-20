@@ -44,7 +44,7 @@ const modal = new JSDOM(renderToStaticMarkup(<PostScanUpgradeModal open
 const pricedCheckout = [...modal.querySelectorAll("button")].find(b => b.textContent?.includes("Unlock Complete Report — $3"));
 const personalReason = [...modal.querySelectorAll("p")].find(p => p.textContent?.includes("Trust scored 44/100"));
 assert.ok(pricedCheckout && personalReason, "Centered mobile offer explains a score-specific reason to unlock.");
-assert.ok(Boolean(firstMobilePayment.compareDocumentPosition(desktopDetails) & 4), "Mobile CTA comes BEFORE detailed signal breakdown.");
+assert.ok(Boolean(personalReason!.compareDocumentPosition(pricedCheckout!) & 4), "Personalized reason is visible before the single centered mobile CTA.");
 assert.ok(modal.querySelector('button[aria-label="Close and view free results"]'), "Upgrade modal remains dismissible.");
 assert.ok([...modal.querySelectorAll("button")].some(b => b.textContent?.includes("Continue with free results")), "Free route is available in mobile modal.");
 console.log("PASS: compact scan, above-signal mobile upgrade, mobile popup action order, and premium entitlement.");
