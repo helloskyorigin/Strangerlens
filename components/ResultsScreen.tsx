@@ -617,6 +617,7 @@ export default function ResultsScreen({
         {/* One clear upgrade card after the free clarity signals. */}
         {!isReportUnlocked && (
           <>
+            <div ref={mobileUpgradeRef} data-testid="full-report-upgrade-anchor">
             <CompleteReportPreview
               signals={report.signalsList}
               purchaseReadinessApplicable={showLockedPurchase}
@@ -633,6 +634,7 @@ export default function ResultsScreen({
                 }, 480);
               }}
             />
+            </div>
             {paymentError && !isPostScanOfferOpen &&
               <p role="alert" className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200">{paymentError}</p>}
           </>
