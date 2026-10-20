@@ -135,7 +135,7 @@ export default function ResultsScreen({
     try { return window.sessionStorage.getItem(`sl_post_scan_offer_v1:${postScanOfferReportId}`) !== "shown"; }
     catch { return true; }
   });
-  const mobileUpgradeRef = useRef<HTMLElement | null>(null);
+  const mobileUpgradeRef = useRef<HTMLDivElement | null>(null);
   const [showMobileUpgradeBar, setShowMobileUpgradeBar] = useState(false);
 
   const offeredReportRef = useRef<string | null>(null);
