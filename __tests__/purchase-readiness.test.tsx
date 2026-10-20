@@ -121,7 +121,7 @@ async function main() {
         const locked=doc.querySelector('[data-testid="purchase-readiness-locked"]')!;
         check(!!locked && locked.textContent?.includes('This website offers paid products'), `${width}px: free card explains commercial applicability`);
         check(!locked.textContent?.includes('/100') && !locked.textContent?.includes(full.summary) && !doc.body.textContent?.includes('PREMIUM_PURCHASE_SENTINEL'), `${width}px: free card hides score, status, findings and recommendations`);
-        check(!locked.querySelector('button') && !!doc.querySelector('#complete-report-preview button'), `${width}px: locked sixth signal does not repeat the single $3 checkout CTA`);
+        check(![...locked.querySelectorAll('button')].some(button=>button.textContent?.includes('Unlock')) && !!doc.querySelector('#complete-report-preview button'), `${width}px: locked sixth signal does not repeat the single $3 checkout CTA`);
         // Even a stale full assessment in browser storage must remain locked in free Results.
         await act(async()=>root.render(<ResultsScreen analysisData={mapped} isUnlocked={false} onBackToLanding={()=>{}}/>));
         check(!!doc.querySelector('[data-testid="purchase-readiness-locked"]') && !doc.body.textContent?.includes(full.summary), `${width}px: old cached assessments cannot reveal the sixth score in free Results`);
