@@ -29,7 +29,17 @@ jobs:
   validate:
     name: Typecheck and regression tests
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 14
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -43,5 +53,7 @@ jobs:
         run: npm test
       - name: Purchase readiness regressions
         run: npm run test:purchase-readiness
+      - name: Payment and report unlock integration (local Redis, mocked Dodo)
+        run: npm run test:payments
       - name: Production build
         run: npm run build
