@@ -966,8 +966,22 @@ export default function ResultsScreen({
           </>
         ) : null}
 
-        {/* ACTIONS */}
-        <div id="report-export-actions" className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-[#263044] scroll-mt-24">
+        {/* Compact utility actions stay separate from the single paid CTA. */}
+        <div id="report-export-actions" className="flex flex-wrap items-center justify-center gap-2 border-t border-[#263044] pt-4 scroll-mt-24">
+          {onRecheck && <button type="button" onClick={onRecheck}
+            className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[#263044] px-4 text-xs font-medium text-[#94A3B8] hover:bg-[#171F2D] hover:text-white">
+            Recheck
+          </button>}
+          <button type="button" onClick={() => setShowUtilities(v => !v)}
+            aria-expanded={showUtilities} aria-controls="recheck-comparison-panel"
+            className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[#263044] px-4 text-xs font-medium text-[#94A3B8] hover:bg-[#171F2D] hover:text-white">
+            {showUtilities ? "Hide comparison" : "Compare scores"}
+          </button>
+        </div>
+        {showUtilities && <div id="recheck-comparison-panel">
+          <RecheckComparison report={report} reportId={currentReportId} onRecheck={onRecheck}/>
+        </div>}
+        <div className="flex flex-wrap justify-center gap-2">
           <button 
             onClick={async () => {
               const card = document.createElement('div');
@@ -1058,10 +1072,10 @@ export default function ResultsScreen({
                 }
               }
             }}
-            className="flex-1 bg-[#171F2D] hover:bg-[#263044] text-white font-semibold py-3 px-6 rounded-xl text-sm transition inline-flex items-center justify-center gap-2 cursor-pointer"
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-[#263044] bg-[#171F2D] px-4 text-xs font-medium text-[#94A3B8] transition hover:text-white cursor-pointer"
           >
             <Share2 className="w-4 h-4 text-blue-400" />
-            <span>Share Result</span>
+            <span>Share</span>
           </button>
           <button 
             disabled={isGeneratingPdf}
@@ -1078,14 +1092,14 @@ export default function ResultsScreen({
                 setIsGeneratingPdf(false);
               }
             }}
-            className="flex-1 bg-[#171F2D] hover:bg-[#263044] disabled:opacity-50 text-white font-semibold py-3 px-6 rounded-xl text-sm transition inline-flex items-center justify-center gap-2 cursor-pointer"
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-[#263044] bg-[#171F2D] px-4 text-xs font-medium text-[#94A3B8] transition hover:text-white disabled:opacity-50 cursor-pointer"
           >
             {isGeneratingPdf ? (
               <Loader2 className="w-4 h-4 text-blue-400 animate-spin" />
             ) : (
               <Download className="w-4 h-4 text-blue-400" />
             )}
-            <span>{isGeneratingPdf ? "Generating PDF…" : "Download PDF"}</span>
+            <span>{isGeneratingPdf ? "Generating…" : isReportUnlocked ? "Full PDF" : "Export summary"}</span>
           </button>
         </div>
       </main>
