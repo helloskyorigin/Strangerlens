@@ -822,9 +822,9 @@ export default function LandingPage() {
                       delay: 0.46,
                       ease: EASE_OUT_EXPO,
                     }}
-                    className="mt-3.5 text-xs sm:text-[13px] text-[#94A3B8] font-medium leading-relaxed"
+                    className="sl-url-reassurance text-[#94A3B8] font-medium"
                   >
-                    No signup · No card for free scan · $3 only if you want detailed fixes
+                    Free scan · No account · Full report $3 once
                   </motion.p>
                 </div>
 
