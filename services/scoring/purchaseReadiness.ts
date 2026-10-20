@@ -30,11 +30,20 @@ function snippets({ snapshot: s, source }: PageEvidence): PurchaseEvidence[] {
 function identifiesOffering(page: PageEvidence, evidence: PurchaseEvidence[]): boolean {
   const s = page.snapshot;
   const ctas = (s.ctas || []).filter(x => x.location !== "footer").map(x => clean(x.text));
-  const buy = ctas.some(x => purchaseCta.test(x) && !/\b(?:donat|coffee|affiliate|review|guide)/i.test(x) && !negated.test(x));
-  const quote = ctas.some(x => quoteCta.test(x));
   const commercial = evidence.filter(x => !negated.test(x.text));
   const prices = commercial.some(x => positivePrice(x.text));
   const explicit = commercial.some(x => paidOffer.test(x.text));
+  // "Subscribe now" alone is normally a FREE newsletter CTA. A donation
+  // amount, ad, or unrelated price beside it must not trigger a paid report.
+  // Require an owned subscription/plan signal before treating it as purchase.
+  const pricedSubscription = explicit ||
+    (s.valueProps?.pricingSignals?.plans || []).some(x => positivePrice(clean(x.price))) ||
+    (s.bodySections || []).some(x => x.typeHint === "pricing" && positivePrice(x.textSummary));
+  const buy = ctas.some(x => purchaseCta.test(x) &&
+    !/\b(?:donat|coffee|affiliate|review|guide)/i.test(x) &&
+    !negated.test(x) &&
+    (!/\bsubscribe\b/i.test(x) || pricedSubscription));
+  const quote = ctas.some(x => quoteCta.test(x));
   const pricingSection = (s.bodySections || []).some(x => x.typeHint === "pricing" && (positivePrice(x.textSummary) || paidOffer.test(x.textSummary)));
   const planPrice = (s.valueProps?.pricingSignals?.plans || []).some(x => positivePrice(clean(x.price)));
   const isEditorial = editorial.test(`${s.meta?.title || ""} ${s.hero?.headline || ""}`);
