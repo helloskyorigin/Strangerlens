@@ -551,3 +551,27 @@ html[data-landing-theme="light"] :is(.landing-v3,.sl-app-theme) button[class*="h
   0% {filter:blur(32px) hue-rotate(0deg);opacity:.62;}
   100% {filter:blur(32px) hue-rotate(48deg);opacity:.76;}
 }
+
+
+/* Final polish: slow, calm hue travel without fast flashes or text recoloring. */
+.landing-v3 .sl-aurora {
+  animation-duration: 32s, 42s !important;
+  animation-direction: alternate, alternate !important;
+  will-change: transform, filter;
+}
+@keyframes sl-gentle-aurora-hue {
+  0% { filter: hue-rotate(-12deg) saturate(.88); }
+  50% { filter: hue-rotate(24deg) saturate(1.08); }
+  100% { filter: hue-rotate(56deg) saturate(.92); }
+}
+.landing-v3 .sl-atmosphere .sl-aurora {
+  animation-name: sl-cloud-drift, sl-gentle-aurora-hue !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .landing-v3 .sl-atmosphere .sl-aurora { animation: none !important; will-change:auto; }
+}
+.landing-v3 .sl-url-reassurance { margin-top: 6px; font-size: 11px; }
+@media (max-width: 639px) {
+  .landing-v3 .sl-url-form { max-width: 100%; }
+  .landing-v3 .sl-url-reassurance { margin-top: 5px; }
+}
