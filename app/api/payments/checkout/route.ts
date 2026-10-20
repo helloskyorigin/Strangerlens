@@ -6,7 +6,7 @@ import {
   hasReportAccess,
   isPaymentInfrastructureConfigured,
 } from "@/server/security/reportAccess";
-import { getDodoConfig, PaymentError, dodoRequest } from "@/server/payments/dodo";
+import { getDodoConfig, PaymentError, dodoRequest, assertFullReportProductPrice } from "@/server/payments/dodo";
 import {
   saveOrder,
   indexOrder,
@@ -76,9 +76,12 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ alreadyPaid: true, reportId });
       }
 
+      // Never reuse an old $5 checkout session. Dodo is the actual price source.
+      await assertFullReportProductPrice();
       const recentOrder = await getRecentOrder(config.environment, reportId);
       if (
         recentOrder &&
+        recentOrder.productId === config.productId &&
         recentOrder.checkoutUrl &&
         recentOrder.sessionId &&
         recentOrder.status !== "succeeded"
