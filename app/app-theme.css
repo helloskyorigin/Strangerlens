@@ -571,3 +571,13 @@ html[data-landing-theme="dark"] .sl-app-theme.sl-results-v7 {
 @media (prefers-reduced-motion:reduce) {
   .sl-results-v7 .sl-v7-upgrade-button {transition:none;}
 }
+
+
+/* Report status must agree with the authoritative classification. */
+.sl-results-v7 .sl-v7-status--good {color:#218262;}
+.sl-results-v7 .sl-v7-status--good .sl-v7-status-dot {background:#31A681;}
+.sl-results-v7 .sl-v7-status--weak {color:#BE5E4D;}
+.sl-results-v7 .sl-v7-status--weak .sl-v7-status-dot {background:#D17462;}
+html[data-landing-theme="dark"] .sl-results-v7 .sl-v7-status--good {color:#70D5AF;}
+html[data-landing-theme="dark"] .sl-results-v7 .sl-v7-status--caution {color:#F1C37E;}
+html[data-landing-theme="dark"] .sl-results-v7 .sl-v7-status--weak {color:#F5A696;}
