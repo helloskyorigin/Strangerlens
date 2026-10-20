@@ -33,6 +33,8 @@ export default function ClarityResultsOverview({
     const text = value.replace(/_/g, " ").trim();
     return text ? text.charAt(0).toUpperCase() + text.slice(1) : "Not available";
   };
+  const overallTone = /^(excellent|good|clear)$/i.test(report.overallStatus.trim()) ? "good"
+    : report.overallScore !== null && report.overallScore < 50 ? "weak" : "caution";
   const observation = typeof publicObservation === "string" && publicObservation.trim()
     ? publicObservation.trim() : "";
 
@@ -52,7 +54,7 @@ export default function ClarityResultsOverview({
           </div>
         </div>
         <div className="sl-v7-score-summary">
-          <span className="sl-v7-status"><span className="sl-v7-status-dot" aria-hidden="true"/>
+          <span className={`sl-v7-status sl-v7-status--${overallTone}`}><span className="sl-v7-status-dot" aria-hidden="true"/>
             {statusLabel(report.overallStatus)}
           </span>
           {report.verdict && <p>{report.verdict}</p>}
