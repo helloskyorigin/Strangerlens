@@ -30,6 +30,8 @@ const cases: Array<[string,string,boolean,string?]> = [
   ["blog", '<article><h1>Our guide to project tools</h1><p>A paid subscription costs $20/month. Here is our review of premium plans.</p><a href="/newsletter">Subscribe</a></article>', false, "Tool review blog"],
   ["unclear", '<section><h1>Build better projects</h1><p>Unlock your potential.</p><a href="/pricing">Pricing</a><a href="/signup">Get started</a></section>', false],
   ["free newsletter", '<section><h1>Developer newsletter</h1><p>Free updates every week.</p><button>Subscribe now</button></section>', false],
+  ["free newsletter with unrelated donation amount", '<section><h1>Free weekly newsletter</h1><p>Subscribe for free updates. Support our community with a $5 donation.</p><button>Subscribe now</button></section>', false],
+  ["paid subscription with named price", '<section><h1>Monthly design digest</h1><p>Our paid subscriptions cost $9 a month and include premium tutorials.</p><button>Subscribe now</button></section>', true],
   ["donation", '<section><h1>Free community resources</h1><p>Donate $5 to support us.</p><button>Buy me a coffee</button></section>', false],
   ["affiliate review", '<article><h1>Software review</h1><p>Their subscription costs $20/month.</p><a href="https://another.example/buy">Buy now</a></article>', false, "Software review"],
   ["free services", '<section><h1>Community design services</h1><p>Our design services are completely free.</p><a href="/contact">Request a quote</a></section>', false],
