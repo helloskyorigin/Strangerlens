@@ -20,6 +20,9 @@ const preview = freeDoc.querySelector('#complete-report-preview');
 const score = [...freeDoc.querySelectorAll("h2")].find(el => el.textContent?.includes("Website Clarity Score"));
 const signals = [...freeDoc.querySelectorAll("h2")].find(el => el.textContent?.includes("Your Clarity Signals"));
 assert.ok(preview && score && signals, "Score, compact signal list and single upgrade card coexist.");
+assert.ok(freeDoc.querySelector('[data-testid="full-report-upgrade-anchor"] > #complete-report-preview'),
+  "Mobile sticky $3 CTA tracks the actual visible upgrade card, not an unbound ref.");
+
 assert.ok(Boolean(score.compareDocumentPosition(signals) & 4), "Free scores follow the score.");
 assert.ok(Boolean(signals.compareDocumentPosition(preview) & 4), "One $3 paid offer follows free signals.");
 assert.ok(preview.textContent?.includes("Unlock Full Analysis — $3"), "Single premium CTA is priced correctly.");
