@@ -16,6 +16,7 @@ import {
   type CheckoutOrder,
 } from "@/server/payments/orders";
 import { paymentFailure } from "@/server/payments/http";
+import { resolveCheckoutReturnOrigin } from "@/server/payments/checkout-origin";
 
 export const dynamic = "force-dynamic";
 
@@ -96,17 +97,14 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      const referer = req.headers.get("referer");
-      let refererOrigin: string | null = null;
-      if (referer) {
-        try { refererOrigin = new URL(referer).origin; } catch {}
-      }
-      const origin =
-        req.headers.get("origin") ||
-        refererOrigin ||
-        (req.nextUrl?.origin) ||
-        process.env.NEXT_PUBLIC_APP_URL ||
-        "https://ais-dev-3kmita5xl7cdxgwm5afweq-37033593928.asia-southeast1.run.app";
+      // Only the configured canonical app URL or the server-observed request
+      // origin can receive a checkout return. Never trust Origin/Referer headers:
+      // they could send a customer's paid report return to another website.
+      // This also avoids pinning checkout to an obsolete hosting URL.
+      const origin = resolveCheckoutReturnOrigin(
+        req.nextUrl.origin,
+        process.env.NEXT_PUBLIC_APP_URL
+      );
       const orderId = randomUUID();
       const returnUrl = `${origin}/?checkout=return&reportId=${encodeURIComponent(
         reportId

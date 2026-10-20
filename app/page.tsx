@@ -177,14 +177,17 @@ export default function LandingPage() {
   const [landingSignalTooltip, setLandingSignalTooltip] = useState<string | null>(null);
 
   useEffect(() => {
-    if (analysisData?.reportId) {
-       const saved = JSON.parse(localStorage.getItem("strangerlens_reports") || "[]");
-       if (!saved.some((r: any) => r.reportId === analysisData.reportId)) {
-         saved.push({ reportId: analysisData.reportId });
-         localStorage.setItem("strangerlens_reports", JSON.stringify(saved));
-       }
-    }
-  }, [analysisData]);
+    if (!analysisData?.reportId) return;
+    // Private browsing, storage restrictions or a corrupted legacy list must
+    // never crash a successful scan or block a customer's paid report.
+    try {
+      const parsed = JSON.parse(localStorage.getItem("strangerlens_reports") || "[]");
+      const saved: Array<{ reportId: string }> = Array.isArray(parsed) ? parsed : [];
+      if (!saved.some((entry) => entry?.reportId === analysisData.reportId)) {
+        localStorage.setItem("strangerlens_reports", JSON.stringify([...saved, { reportId: analysisData.reportId }]));
+      }
+    } catch { /* Report access uses its separate server-verified token store. */ }
+  }, [analysisData?.reportId]);
 
   // FAQ accordion state — all answers closed by default
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
@@ -824,7 +827,7 @@ export default function LandingPage() {
                     }}
                     className="sl-url-reassurance text-[#94A3B8] font-medium"
                   >
-                    Free scan · No account · Full report $3 once
+                    Free scan · No signup · Full report $3
                   </motion.p>
                 </div>
 

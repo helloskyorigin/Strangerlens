@@ -8,8 +8,13 @@ import PostScanUpgradeModal from "../components/PostScanUpgradeModal";
 import ResultsScreen from "../components/ResultsScreen";
 import { mapBackendToFrontend } from "../lib/mapper";
 import { paymentAnalysis, paymentSnapshot } from "./fixtures/payment-report";
+import { escapeHtmlText } from "../lib/escape-html";
 
 const source=readFileSync("components/ResultsScreen.tsx","utf8");
+assert.equal(escapeHtmlText('<img src=x onerror="bad()" /> &'), '&lt;img src=x onerror=&quot;bad()&quot; /&gt; &amp;');
+for (const field of ["report.domain", "report.overallScoreDisplay", "report.overallStatus", "s.title", "s.status", "s.scoreDisplay"]) {
+  assert.ok(source.includes("escapeHtmlText(" + field + ")"), "Share-card HTML must escape " + field);
+}
 const popup=readFileSync("components/PostScanUpgradeModal.tsx","utf8");
 const scanRoute=readFileSync("app/api/check/route.ts","utf8");
 assert.ok(!source.includes("}, 700);"),"Fresh scan upgrade is not artificially delayed after showing results.");

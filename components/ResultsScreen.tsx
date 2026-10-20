@@ -6,6 +6,7 @@ import PremiumActionPlan from "@/components/PremiumActionPlan";
 import RecheckComparison from "@/components/RecheckComparison";
 import PostScanUpgradeModal from "@/components/PostScanUpgradeModal";
 import { trackFunnelEvent } from "@/lib/ui-funnel-events";
+import { escapeHtmlText } from "@/lib/escape-html";
 import { Share2, Download, Check, Info, X, Lock, Loader2, AlertCircle, ArrowRight, FileText } from "lucide-react";
 import { LandingThemeSwitcher } from "@/components/landing/LandingThemeSwitcher";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
@@ -987,17 +988,17 @@ export default function ResultsScreen({
                     <div style="font-size: 12px; color: #94A3B8; margin-top: 2px;">Website Clarity Diagnostic</div>
                   </div>
                   <div style="background: #171F2D; border: 1px solid #263044; padding: 6px 12px; border-radius: 9999px; font-size: 12px; color: #3B82F6; font-weight: 600;">
-                    ${report.domain}
+                    ${escapeHtmlText(report.domain)}
                   </div>
                 </div>
                 
                 <div style="background: #121824; border: 1px solid #263044; border-radius: 16px; padding: 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
                   <div>
                     <div style="font-size: 11px; text-transform: uppercase; color: #94A3B8; font-weight: 700; letter-spacing: 0.5px;">Overall Clarity Score</div>
-                    <div style="font-size: 36px; font-weight: 900; color: #FFFFFF; margin-top: 4px;">${report.overallScoreDisplay}</div>
+                    <div style="font-size: 36px; font-weight: 900; color: #FFFFFF; margin-top: 4px;">${escapeHtmlText(report.overallScoreDisplay)}</div>
                   </div>
                   <div style="text-align: right;">
-                    <div style="font-size: 14px; font-weight: 600; color: #38BDF8;">${report.overallStatus}</div>
+                    <div style="font-size: 14px; font-weight: 600; color: #38BDF8;">${escapeHtmlText(report.overallStatus)}</div>
                     <div style="font-size: 11px; color: #64748B; margin-top: 2px;">First-time visitor perspective</div>
                   </div>
                 </div>
@@ -1005,10 +1006,10 @@ export default function ResultsScreen({
                 <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
                   ${displaySignals.map(s => `
                     <div style="background: #121824; border: 1px solid #263044; border-radius: 12px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;">
-                      <span style="font-size: 14px; font-weight: 600; color: #F1F5F9;">${s.title}${s.key === "purchaseReadiness" ? ' <span style="font-size: 10px; color: #94A3B8;">(separate score)</span>' : ""}</span>
+                      <span style="font-size: 14px; font-weight: 600; color: #F1F5F9;">${escapeHtmlText(s.title)}${s.key === "purchaseReadiness" ? ' <span style="font-size: 10px; color: #94A3B8;">(separate score)</span>' : ""}</span>
                       <div style="display: flex; align-items: center; gap: 12px;">
-                        <span style="font-size: 12px; color: #94A3B8;">${s.status}</span>
-                        <span style="font-size: 14px; font-weight: 700; color: #FFFFFF; min-width: 45px; text-align: right;">${s.scoreDisplay}</span>
+                        <span style="font-size: 12px; color: #94A3B8;">${escapeHtmlText(s.status)}</span>
+                        <span style="font-size: 14px; font-weight: 700; color: #FFFFFF; min-width: 45px; text-align: right;">${escapeHtmlText(s.scoreDisplay)}</span>
                       </div>
                     </div>
                   `).join('')}
@@ -1047,7 +1048,8 @@ export default function ResultsScreen({
                   link.download = 'StrangerLens-Share.png';
                   link.href = URL.createObjectURL(blob);
                   link.click();
-                  URL.revokeObjectURL(link.href);
+                  // Revoking in the same task can cancel downloads on mobile browsers.
+                  window.setTimeout(() => URL.revokeObjectURL(link.href), 1000);
                 }, 'image/png');
               } catch (err) {
                 if (document.body.contains(card)) {

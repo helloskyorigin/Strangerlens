@@ -191,7 +191,7 @@ html[data-landing-theme="dark"] .landing-v3 .bg-slate-800 {background-color:#D7E
   transform:translate3d(0,0,0);
   opacity:.72;
   animation:sl-cloud-drift 23s ease-in-out infinite alternate,
-    sl-color-flow 64s ease-in-out infinite alternate;
+    sl-color-flow 82s ease-in-out infinite alternate;
 }
 .sl-aurora--violet {
   top:-17%;left:2%;
@@ -201,13 +201,13 @@ html[data-landing-theme="dark"] .landing-v3 .bg-slate-800 {background-color:#D7E
   top:-23%;right:1%;
   background:radial-gradient(ellipse at center,rgba(120,214,236,.53),transparent 72%);
   animation-delay:-8s,-21s;
-  animation-duration:29s,71s;
+  animation-duration:29s,87s;
 }
 .sl-aurora--peach {
   bottom:-39%;left:28%;width:49%;height:65%;
   background:radial-gradient(ellipse at center,rgba(255,191,166,.42),transparent 70%);
   animation-delay:-15s,-33s;
-  animation-duration:27s,78s;
+  animation-duration:27s,94s;
 }
 html[data-landing-theme="dark"] .sl-aurora--violet {background:radial-gradient(ellipse at center,rgba(98,79,189,.28),transparent 69%);}
 html[data-landing-theme="dark"] .sl-aurora--cyan {background:radial-gradient(ellipse at center,rgba(50,125,184,.26),transparent 72%);}

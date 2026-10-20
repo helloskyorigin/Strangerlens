@@ -1,8 +1,20 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { FULL_REPORT_USD_CENTS, validateFullReportDodoProduct } from "../server/payments/dodo";
+import { resolveCheckoutReturnOrigin } from "../server/payments/checkout-origin";
 
 assert.equal(FULL_REPORT_USD_CENTS, 300, "$3 USD must equal 300 cents.");
+assert.equal(resolveCheckoutReturnOrigin("https://strangerlens.ai.studio"), "https://strangerlens.ai.studio");
+assert.equal(resolveCheckoutReturnOrigin("https://old-deployment.run.app", "https://strangerlens.ai.studio/"),
+  "https://strangerlens.ai.studio", "Canonical domain wins after hosting migration.");
+assert.equal(resolveCheckoutReturnOrigin("http://localhost:3000"), "http://localhost:3000");
+assert.throws(() => resolveCheckoutReturnOrigin("https://strangerlens.ai.studio", "https://evil.example/redirect?token=a"));
+assert.throws(() => resolveCheckoutReturnOrigin("https://strangerlens.ai.studio", "http://evil.example"));
+assert.throws(() => resolveCheckoutReturnOrigin("javascript:alert(1)"));
+const checkoutSource=readFileSync("app/api/payments/checkout/route.ts","utf8");
+assert.ok(checkoutSource.includes("resolveCheckoutReturnOrigin("));
+assert.ok(!checkoutSource.includes('req.headers.get("origin")') && !checkoutSource.includes('req.headers.get("referer")'));
+assert.ok(!checkoutSource.includes("ais-dev-3kmita5xl7cdxgwm5afweq"), "No hardcoded old hosting redirect.");
 const price = (amount:number, currency="USD", type="one_time_price") => ({
   price:{price:amount,currency,type}, archived:false
 });
