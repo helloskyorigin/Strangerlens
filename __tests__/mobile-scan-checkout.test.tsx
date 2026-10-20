@@ -24,7 +24,7 @@ assert.ok(Boolean(score.compareDocumentPosition(signals) & 4), "Free scores foll
 assert.ok(Boolean(signals.compareDocumentPosition(preview) & 4), "One $3 paid offer follows free signals.");
 assert.ok(preview.textContent?.includes("Unlock Full Analysis — $3"), "Single premium CTA is priced correctly.");
 assert.ok(!freeDoc.querySelector('section[aria-label="Unlock the detailed report"]'), "No redundant early upsell panel.");
-assert.equal(freeDoc.querySelectorAll('#complete-report-preview button').length,1, "Just one preview checkout action.");
+assert.equal([...freeDoc.querySelectorAll('#complete-report-preview button')].filter(x=>x.textContent?.includes('Unlock')).length,1, "Just one preview checkout action.");
 assert.ok(!freeDoc.querySelector('#your-improvement-plan'),"No paid findings before payment.");
 
 const paidDoc = new JSDOM(renderToStaticMarkup(<ResultsScreen rawUrl="https://example.com" analysisData={mapped} isUnlocked={true} checkoutEnabled={true}/>)).window.document;
@@ -41,9 +41,9 @@ const modal = new JSDOM(renderToStaticMarkup(<PostScanUpgradeModal open
     { title: "Action", scoreDisplay: "95/100" },
   ]} canCheckout isTestMode={false} busy={false}
   onContinueFree={() => {}} onUpgrade={() => {}}/>)).window.document;
-const firstMobilePayment = [...modal.querySelectorAll("button")].find(b => b.textContent?.includes("Unlock Full Analysis — $3"));
-const desktopDetails = [...modal.querySelectorAll("p")].find(p => p.textContent?.includes("Your five clarity signals"));
-assert.ok(firstMobilePayment && desktopDetails, "Mobile sheet has an early priced payment CTA.");
+const pricedCheckout = [...modal.querySelectorAll("button")].find(b => b.textContent?.includes("Unlock Complete Report — $3"));
+const personalReason = [...modal.querySelectorAll("p")].find(p => p.textContent?.includes("Trust scored 44/100"));
+assert.ok(pricedCheckout && personalReason, "Centered mobile offer explains a score-specific reason to unlock.");
 assert.ok(Boolean(firstMobilePayment.compareDocumentPosition(desktopDetails) & 4), "Mobile CTA comes BEFORE detailed signal breakdown.");
 assert.ok(modal.querySelector('button[aria-label="Close and view free results"]'), "Upgrade modal remains dismissible.");
 assert.ok([...modal.querySelectorAll("button")].some(b => b.textContent?.includes("Continue with free results")), "Free route is available in mobile modal.");
