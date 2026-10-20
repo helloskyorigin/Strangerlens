@@ -1,13 +1,13 @@
 # StrangerLens payment setup
 
-The application uses Dodo hosted checkout for the single $5 report. No account signup is required. Report ownership uses a random browser-held capability; payment completion is checked on the server against the checkout session, payment metadata, product, quantity, report, and environment. Browser return parameters never grant access.
+The application uses Dodo hosted checkout for the single $3 report. No account signup is required. Report ownership uses a random browser-held capability; payment completion is checked on the server against the checkout session, payment metadata, product, quantity, report, and environment. Browser return parameters never grant access.
 
 ## Hosting configuration
 
 Add these server environment variables to the host running this repository (Cloud Run, Vercel, or another Node host), then redeploy:
 
 - `DODO_PAYMENTS_API_KEY`: Dodo secret API key.
-- `DODO_PRODUCT_ID`: the one-time $5 product from the same Dodo environment as the key. Configure the actual product price in Dodo.
+- `DODO_PRODUCT_ID`: the one-time $3 product from the same Dodo environment as the key. Configure the actual product price in Dodo.
 - `DODO_ENVIRONMENT`: `test_mode` for testing; `live_mode` only with the live key and live product.
 - `NEXT_PUBLIC_APP_URL`: your website origin, e.g. `https://strangerlens.ai.studio`. Optional; otherwise the incoming request origin is used.
 - `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`: the REST URL and read/write token of a durable Upstash Redis database. Vercel Marketplace's `KV_REST_API_URL` / `KV_REST_API_TOKEN` aliases also work.
