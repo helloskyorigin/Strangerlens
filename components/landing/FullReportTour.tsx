@@ -107,7 +107,7 @@ export default function FullReportTour({onTryFree}:{onTryFree:()=>void}){
   const reducedMotion=useReducedMotion();
   return <section id="full-report-demo" className="sl-tour-section-wrapper sl-report-showcase" aria-labelledby="sl-tour-heading">
     <div className="sl-tour-heading">
-      <span className="sl-tour-kicker"><Sparkles size={15} aria-hidden="true"/> THE $5 COMPLETE REPORT</span>
+      <span className="sl-tour-kicker"><Sparkles size={15} aria-hidden="true"/> THE $3 COMPLETE REPORT</span>
       <h2 id="sl-tour-heading">From five scores to a real improvement plan.</h2>
       <p>Explore a detailed, report-style example. See how Full Analysis connects clarity signals to findings, verified evidence when available, copy suggestions and prioritized fixes.</p>
     </div>
