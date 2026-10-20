@@ -70,7 +70,7 @@ export default function InteractiveReportPreview() {
         </section>
       </div>
       <div className="sl-demo-bottom">
-        <p>Five free core scores · Deeper findings from $3</p>
+        <p>Five free core scores · Deeper findings from $5</p>
         <span>Interactive example <ArrowUpRight size={14} aria-hidden="true"/></span>
       </div>
     </div>

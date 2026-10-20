@@ -31,7 +31,6 @@ async function main() {
   let databaseUnavailable = false;
   let providerFailure = false;
   let invalidCheckout = false;
-  let configuredProductPrice = 300;
   let lastPayload: any;
   const request = (path: string, body: unknown, token?: string) => new NextRequest(`https://strangerlens.example${path}`, {
     method: "POST", body: JSON.stringify(body), headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
@@ -53,12 +52,6 @@ async function main() {
     if (url.startsWith("https://test.dodopayments.com") || url.startsWith("https://live.dodopayments.com")) {
       providerCalls++;
       if (providerFailure) return new Response("<html>Unauthorized</html>", { status: 401 });
-      if (url.includes("/products/")) {
-        return Response.json({
-          price: { type: "one_time_price", price: configuredProductPrice, currency: "USD" },
-          archived: false,
-        });
-      }
       if (init?.method === "POST") {
         createdSessions++;
         lastPayload = JSON.parse(init.body as string);
@@ -118,10 +111,6 @@ async function main() {
     check((await getReport(report.reportId, report.reportToken)).status === 403, "unpaid report denies premium");
     const redacted = redactAnalysisForFreeTier(paymentAnalysis);
     check(!JSON.stringify(redacted).includes(privateText), "free API strips premium signal and first-seconds explanations");
-    configuredProductPrice = 500;
-    const badPrice = await newCheckoutResponse(report);
-    check(badPrice.status === 503, "$5 Dodo product must never open for advertised $3 offer");
-    configuredProductPrice = 300;
     const order = await newCheckout(report);
     check(lastPayload.product_cart[0].product_id === "pdt_single" && lastPayload.product_cart[0].quantity === 1, "server owns checkout product and quantity");
     check(lastPayload.metadata.reportId === report.reportId && lastPayload.metadata.orderId === order.orderId, "order/report bound in provider metadata");

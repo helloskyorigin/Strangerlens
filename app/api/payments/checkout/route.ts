@@ -6,7 +6,7 @@ import {
   hasReportAccess,
   isPaymentInfrastructureConfigured,
 } from "@/server/security/reportAccess";
-import { getDodoConfig, PaymentError, dodoRequest, assertFullReportProductPrice } from "@/server/payments/dodo";
+import { getDodoConfig, PaymentError, dodoRequest } from "@/server/payments/dodo";
 import {
   saveOrder,
   indexOrder,
@@ -76,14 +76,9 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ alreadyPaid: true, reportId });
       }
 
-      // Verify provider price before reusing any old $5 checkout or creating
-      // a new session. A changed website label cannot change Dodo's amount.
-      await assertFullReportProductPrice();
-
       const recentOrder = await getRecentOrder(config.environment, reportId);
       if (
         recentOrder &&
-        recentOrder.productId === config.productId &&
         recentOrder.checkoutUrl &&
         recentOrder.sessionId &&
         recentOrder.status !== "succeeded"

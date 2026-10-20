@@ -22,7 +22,7 @@ const signals = [...freeDoc.querySelectorAll("h2")].find(element => element.text
 assert.ok(card && score && signals, "Score, immediate mobile offer, and free signal list coexist.");
 assert.ok(Boolean(score.compareDocumentPosition(card) & 4), "Mobile pay offer is AFTER the overall score.");
 assert.ok(Boolean(card.compareDocumentPosition(signals) & 4), "Mobile pay offer appears BEFORE five stacked scores.");
-assert.ok(card.textContent?.includes("Unlock Complete Analysis — $3"), "First-screen mobile upgrade mentions the actual price.");
+assert.ok(card.textContent?.includes("Unlock Complete Analysis — $5"), "First-screen mobile upgrade mentions the actual price.");
 assert.ok(card.className.includes("sm:hidden"), "Early offer is mobile-only; desktop keeps prior composition.");
 assert.ok(!freeDoc.querySelector('#your-improvement-plan'), "Early offer does not leak paid findings.");
 assert.ok(freeDoc.querySelector('#complete-report-preview'), "Full report preview is still available below free scores.");
@@ -41,7 +41,7 @@ const modal = new JSDOM(renderToStaticMarkup(<PostScanUpgradeModal open
     { title: "Action", scoreDisplay: "95/100" },
   ]} canCheckout isTestMode={false} busy={false}
   onContinueFree={() => {}} onUpgrade={() => {}}/>)).window.document;
-const firstMobilePayment = [...modal.querySelectorAll("button")].find(b => b.textContent?.includes("Unlock Full Analysis — $3"));
+const firstMobilePayment = [...modal.querySelectorAll("button")].find(b => b.textContent?.includes("Unlock Full Analysis — $5"));
 const desktopDetails = [...modal.querySelectorAll("p")].find(p => p.textContent?.includes("Your five clarity signals"));
 assert.ok(firstMobilePayment && desktopDetails, "Mobile sheet has an early priced payment CTA.");
 assert.ok(Boolean(firstMobilePayment.compareDocumentPosition(desktopDetails) & 4), "Mobile CTA comes BEFORE detailed signal breakdown.");

@@ -46,7 +46,7 @@ for (const width of [320, 390, 1440]) {
         check(signalNames.every(name => previewText.includes(name)), "every core signal has a locked premium chapter preview");
         check(previewText.includes("What&apos;s Unclear") === false && previewText.includes("All five signal analyses"), "preview describes broad paid coverage without leaking findings");
         check(!text.includes(privateText) && !doc.querySelector("#your-improvement-plan"), "free tier never renders private premium content");
-        check([...doc.querySelectorAll("button")].some(button => button.textContent?.includes("Unlock My Complete Analysis — $3")), "single report CTA remains $3");
+        check([...doc.querySelectorAll("button")].some(button => button.textContent?.includes("Unlock My Complete Analysis — $5")), "single report CTA remains $5");
         check(testMode ? text.includes("Test Mode") && text.includes("No real money charged.")
           : text.includes("One-time payment · Instant access · No subscription") && !text.includes("TEST MODE"),
           "correct payment mode reassurance");

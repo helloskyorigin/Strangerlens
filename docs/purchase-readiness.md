@@ -34,7 +34,7 @@ paid offering is only available behind scripts, login, or unfetched pages.
 Free APIs return only the boolean `purchase_readiness_locked: true` applicability
 marker. No sixth-signal score, status, summary, findings, evidence or fixes are sent
 to unpaid browsers. The frontend maps this to `purchaseReadinessLocked` and displays
-a premium locked card after Action with the existing $3 checkout CTA. Full scores
+a premium locked card after Action with the existing $5 checkout CTA. Full scores
 and findings stay in the stored paid report. Free PDFs and legacy PDF fallbacks
 export only the original five signals, even if client state contains an older
 assessment. Verified premium PDFs include the applicable sixth assessment. Existing ownership and payment entitlement checks protect

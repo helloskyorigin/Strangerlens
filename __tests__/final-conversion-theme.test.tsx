@@ -31,7 +31,7 @@ const sample=renderToStaticMarkup(<PostScanUpgradeModal
   signals={[{title:"First Impression",scoreDisplay:"78/100"}]}
   canCheckout isTestMode={false} busy={false} onUpgrade={()=>{}} onContinueFree={()=>{}}/>);
 assert.ok(sample.includes('sl-upgrade-dialog'));
-assert.ok(sample.includes("Unlock Full Analysis — $3"));
+assert.ok(sample.includes("Unlock Full Analysis — $5"));
 
 const dom=new JSDOM('<!doctype html><html><body><div id="root"></div></body></html>',{
   url:"https://strangerlens.ai.studio",pretendToBeVisual:true

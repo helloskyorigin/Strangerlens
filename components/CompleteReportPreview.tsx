@@ -103,14 +103,14 @@ export default function CompleteReportPreview({
             <p className="mt-1 text-xs text-[#A4B7CF]">Five deep dives · First 5 Seconds · Priority plan · Copy-ready suggestions</p>
           </div>
           <div className="text-right">
-            <span className="text-[27px] font-bold leading-none text-white">$3</span>
+            <span className="text-[27px] font-bold leading-none text-white">$5</span>
             <p className="mt-1 text-[11px] text-[#A4B7CF]">one-time</p>
           </div>
         </div>
         <button type="button" disabled={!canCheckout || busy} onClick={onUnlock}
           className="flex min-h-[50px] w-full items-center justify-center gap-2 rounded-full bg-[#246BFD] px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 disabled:cursor-not-allowed disabled:opacity-50">
           <LockKeyhole className="h-4 w-4" aria-hidden="true" />
-          {busy ? "Opening checkout…" : "Unlock My Complete Analysis — $3"}
+          {busy ? "Opening checkout…" : "Unlock My Complete Analysis — $5"}
           {!busy && <ArrowRight className="h-4 w-4" aria-hidden="true" />}
         </button>
         <p className="mt-3 text-center text-xs text-[#92A7C0]">
