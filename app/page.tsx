@@ -755,7 +755,13 @@ export default function LandingPage() {
                         />
                         <input
                           ref={inputRef}
-                          type="text"
+                          type="url"
+                          inputMode="url"
+                          autoComplete="url"
+                          autoCapitalize="none"
+                          autoCorrect="off"
+                          spellCheck={false}
+                          enterKeyHint="go"
                           disabled={isVerifying || isPending}
                           value={url}
                           onFocus={() => {
@@ -788,7 +794,7 @@ export default function LandingPage() {
                         {isVerifying && (
                           <Loader2 className="w-4 h-4 animate-spin text-white shrink-0" />
                         )}
-                        <span>Check My Website Free →</span>
+                        <span>{isVerifying ? "Connecting to Website…" : "Check My Website Free →"}</span>
                       </button>
                     </div>
 
