@@ -121,7 +121,7 @@ async function main() {
         const locked=doc.querySelector('[data-testid="purchase-readiness-locked"]')!;
         check(!!locked && locked.textContent?.includes('This website offers paid products'), `${width}px: free card explains commercial applicability`);
         check(!locked.textContent?.includes('/100') && !locked.textContent?.includes(full.summary) && !doc.body.textContent?.includes('PREMIUM_PURCHASE_SENTINEL'), `${width}px: free card hides score, status, findings and recommendations`);
-        check(locked.querySelector('button:not([aria-label])')?.textContent==='Unlock Full Analysis — $3', `${width}px: locked card uses the existing $3 CTA`);
+        check(!locked.querySelector('button') && !!doc.querySelector('#complete-report-preview button'), `${width}px: locked sixth signal does not repeat the single $3 checkout CTA`);
         // Even a stale full assessment in browser storage must remain locked in free Results.
         await act(async()=>root.render(<ResultsScreen analysisData={mapped} isUnlocked={false} onBackToLanding={()=>{}}/>));
         check(!!doc.querySelector('[data-testid="purchase-readiness-locked"]') && !doc.body.textContent?.includes(full.summary), `${width}px: old cached assessments cannot reveal the sixth score in free Results`);
@@ -160,10 +160,10 @@ async function main() {
         };
         const checkoutData={...freeMapped,reportId:'fixture-report',reportToken:'fixture-token'};
         await act(async()=>root.render(<ResultsScreen analysisData={checkoutData} checkoutEnabled={true} onRefreshPaidReport={()=>{refreshes++;}} onBackToLanding={()=>{}}/>));
-        await act(async()=>doc.querySelector<HTMLButtonElement>('[data-testid="purchase-readiness-locked"] button:not([aria-label])')!.click());
+        await act(async()=>doc.querySelector<HTMLButtonElement>('#complete-report-preview button')!.click());
         check(checkoutCalls===1 && !!doc.querySelector('[data-testid="purchase-readiness-locked"]') && doc.body.textContent?.includes('Checkout fixture unavailable'), `${width}px: failed checkout shows error and keeps sixth assessment locked`);
         globalThis.fetch=async()=>new Response(JSON.stringify({alreadyPaid:true}),{status:200,headers:{'Content-Type':'application/json'}});
-        await act(async()=>doc.querySelector<HTMLButtonElement>('[data-testid="purchase-readiness-locked"] button:not([aria-label])')!.click());
+        await act(async()=>doc.querySelector<HTMLButtonElement>('#complete-report-preview button')!.click());
         check(refreshes===1 && !!doc.querySelector('[data-testid="purchase-readiness-locked"]'), `${width}px: already-paid checkout refreshes authorized data instead of inventing a score`);
         await act(async()=>root.render(<ResultsScreen analysisData={mapped} isUnlocked={true} onBackToLanding={()=>{}}/>));
         check(!doc.querySelector('[data-testid="purchase-readiness-locked"]') && doc.body.textContent?.includes(full.summary), `${width}px: verified full data replaces locked card`);
