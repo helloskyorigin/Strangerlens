@@ -16,19 +16,19 @@ assert.ok(!scan.includes("Verify website connection") || !scan.includes("Session
 
 const mapped = mapBackendToFrontend(structuredClone(paymentAnalysis), "https://example.com", paymentSnapshot);
 const freeDoc = new JSDOM(renderToStaticMarkup(<ResultsScreen rawUrl="https://example.com" analysisData={mapped} checkoutEnabled={true}/>)).window.document;
-const card = freeDoc.querySelector('section[aria-label="Unlock the detailed report"]');
-const score = [...freeDoc.querySelectorAll("h2")].find(element => element.textContent?.includes("Website Clarity Score"));
-const signals = [...freeDoc.querySelectorAll("h2")].find(element => element.textContent?.includes("Your Clarity Signals"));
-assert.ok(card && score && signals, "Score, immediate mobile offer, and free signal list coexist.");
-assert.ok(Boolean(score.compareDocumentPosition(card) & 4), "Mobile pay offer is AFTER the overall score.");
-assert.ok(Boolean(card.compareDocumentPosition(signals) & 4), "Mobile pay offer appears BEFORE five stacked scores.");
-assert.ok(card.textContent?.includes("Unlock Complete Analysis — $3"), "First-screen mobile upgrade mentions the actual price.");
-assert.ok(card.className.includes("sm:hidden"), "Early offer is mobile-only; desktop keeps prior composition.");
-assert.ok(!freeDoc.querySelector('#your-improvement-plan'), "Early offer does not leak paid findings.");
-assert.ok(freeDoc.querySelector('#complete-report-preview'), "Full report preview is still available below free scores.");
+const preview = freeDoc.querySelector('#complete-report-preview');
+const score = [...freeDoc.querySelectorAll("h2")].find(el => el.textContent?.includes("Website Clarity Score"));
+const signals = [...freeDoc.querySelectorAll("h2")].find(el => el.textContent?.includes("Your Clarity Signals"));
+assert.ok(preview && score && signals, "Score, compact signal list and single upgrade card coexist.");
+assert.ok(Boolean(score.compareDocumentPosition(signals) & 4), "Free scores follow the score.");
+assert.ok(Boolean(signals.compareDocumentPosition(preview) & 4), "One $3 paid offer follows free signals.");
+assert.ok(preview.textContent?.includes("Unlock Full Analysis — $3"), "Single premium CTA is priced correctly.");
+assert.ok(!freeDoc.querySelector('section[aria-label="Unlock the detailed report"]'), "No redundant early upsell panel.");
+assert.equal(freeDoc.querySelectorAll('#complete-report-preview button').length,1, "Just one preview checkout action.");
+assert.ok(!freeDoc.querySelector('#your-improvement-plan'),"No paid findings before payment.");
 
 const paidDoc = new JSDOM(renderToStaticMarkup(<ResultsScreen rawUrl="https://example.com" analysisData={mapped} isUnlocked={true} checkoutEnabled={true}/>)).window.document;
-assert.ok(!paidDoc.querySelector('section[aria-label="Unlock the detailed report"]'), "Paid accounts never see mobile upsell.");
+assert.ok(!paidDoc.querySelector('#complete-report-preview'), "Paid accounts never see the free upsell.");
 assert.ok(paidDoc.querySelector('#your-improvement-plan'), "Paid account retains full implementation workbench.");
 
 const modal = new JSDOM(renderToStaticMarkup(<PostScanUpgradeModal open
