@@ -30,7 +30,7 @@ export const SCAN_FOCUS_MESSAGES = [
 
 export const SCAN_STAGES = [
   { id: "verify", label: "Website connection verified" },
-  { id: "content", label: "Homepage content inspected" },
+  { id: "content", label: "Public website content inspected" },
   { id: "signals", label: "Five clarity signals evaluated" },
   { id: "report", label: "Your clarity report prepared" },
 ] as const;
@@ -223,7 +223,7 @@ export default function ScanScreen({
           {phase === "ready" ? "Opening your results…" :
             phase === "error" ? "You can retry this URL or check another website." :
               elapsed > 35 ? "This check is taking longer than usual. No fixed completion time is guaranteed." :
-                "Reviewing accessible public website content. Your results will open automatically."}
+                "Inspecting accessible public content. Your results will open when analysis completes."}
         </p>
         <div className="mt-5 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[10px] font-medium text-[#6D85A2]" aria-label="Five analysis dimensions">
           {SIGNALS.map((name, index) => <React.Fragment key={name}>
@@ -232,8 +232,8 @@ export default function ScanScreen({
           </React.Fragment>)}
         </div>
         <span className="sr-only" role="status" aria-live="polite">{phase === "verify" ? "Verifying website connection" :
-          phase === "read" ? "Website verified; inspecting homepage content" :
-          phase === "evaluate" ? "Homepage inspected; evaluating clarity signals" :
+          phase === "read" ? "Website verified; inspecting accessible website content" :
+          phase === "evaluate" ? "Public content inspected; evaluating clarity signals" :
           phase === "prepare" ? "Clarity signals evaluated; preparing report" :
           phase === "ready" ? "Clarity report ready" : "Website scan failed"}</span>
       </main>
