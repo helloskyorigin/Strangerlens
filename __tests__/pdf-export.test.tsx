@@ -191,10 +191,10 @@ async function main() {
       let alertMessage = ""; (globalThis as any).alert = (message: string) => { alertMessage = message; };
       root = createRoot(dom.window.document.getElementById("app")!);
       await act(async () => { root!.render(<ResultsScreen rawUrl={paid.normalizedUrl} analysisData={preview} isUnlocked={true} onBackToLanding={() => {}} />); });
-      const button = [...dom.window.document.querySelectorAll("button")].find(b => b.textContent?.includes("Download PDF"))!;
+      const button = [...dom.window.document.querySelectorAll("button")].find(b => b.textContent?.includes("Full PDF"))!;
       savedPdf = undefined; const callsBefore = pdfCalls;
       await act(async () => { button.click(); });
-      check(button.disabled && button.textContent?.includes("Generating PDF"), `${width}px download provides loading feedback`);
+      check(button.disabled && button.textContent?.includes("Generating…"), `${width}px download provides loading feedback`);
       for (let i = 0; i < 100 && !savedPdf; i++) await act(async () => { await new Promise(resolve => setTimeout(resolve, 20)); });
       check(savedPdf?.name === "StrangerLens-Full-Report.pdf" && pdfCalls > callsBefore && !button.disabled, `${width}px PDF click reauthorizes and downloads premium`);
       outage = true;
