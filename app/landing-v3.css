@@ -190,7 +190,8 @@ html[data-landing-theme="dark"] .landing-v3 .bg-slate-800 {background-color:#D7E
   filter:blur(52px);
   transform:translate3d(0,0,0);
   opacity:.72;
-  animation:sl-cloud-drift 23s ease-in-out infinite alternate;
+  animation:sl-cloud-drift 23s ease-in-out infinite alternate,
+    sl-color-flow 64s ease-in-out infinite alternate;
 }
 .sl-aurora--violet {
   top:-17%;left:2%;
@@ -199,14 +200,14 @@ html[data-landing-theme="dark"] .landing-v3 .bg-slate-800 {background-color:#D7E
 .sl-aurora--cyan {
   top:-23%;right:1%;
   background:radial-gradient(ellipse at center,rgba(120,214,236,.53),transparent 72%);
-  animation-delay:-8s;
-  animation-duration:29s;
+  animation-delay:-8s,-21s;
+  animation-duration:29s,71s;
 }
 .sl-aurora--peach {
   bottom:-39%;left:28%;width:49%;height:65%;
   background:radial-gradient(ellipse at center,rgba(255,191,166,.42),transparent 70%);
-  animation-delay:-15s;
-  animation-duration:27s;
+  animation-delay:-15s,-33s;
+  animation-duration:27s,78s;
 }
 html[data-landing-theme="dark"] .sl-aurora--violet {background:radial-gradient(ellipse at center,rgba(98,79,189,.28),transparent 69%);}
 html[data-landing-theme="dark"] .sl-aurora--cyan {background:radial-gradient(ellipse at center,rgba(50,125,184,.26),transparent 72%);}
@@ -237,6 +238,14 @@ html[data-landing-theme="dark"] .sl-signal-dot {box-shadow:0 0 13px 2px rgba(102
 html[data-landing-theme="dark"] .sl-focus-thread {stroke:#6586D3;stroke-opacity:.27;}
 html[data-landing-theme="dark"] .sl-travel-line {stroke:#8AC6FB;stroke-opacity:.37;}
 @keyframes sl-cloud-drift {from{transform:translate3d(-2%,0,0) scale(1)}to{transform:translate3d(9%,7%,0) scale(1.1)}}
+/* Gentle long-form hue transition: color shifts independently of cloud drift.
+   No JavaScript, canvas or timers; respects reduced-motion media query below. */
+@keyframes sl-color-flow {
+  0%   {filter:blur(52px) hue-rotate(0deg) saturate(1);opacity:.62;}
+  40%  {filter:blur(52px) hue-rotate(35deg) saturate(1.15);opacity:.77;}
+  75%  {filter:blur(52px) hue-rotate(-28deg) saturate(1.09);opacity:.68;}
+  100% {filter:blur(52px) hue-rotate(60deg) saturate(1.2);opacity:.74;}
+}
 @keyframes sl-dot-breathe {0%,100%{opacity:.13;transform:scale(.7)}45%{opacity:.8;transform:scale(1.23)}70%{opacity:.34;transform:scale(.9)}}
 @keyframes sl-thread-pulse {0%,100%{stroke-opacity:.10}50%{stroke-opacity:.35}}
 @keyframes sl-thread-travel {to{stroke-dashoffset:-922}}
@@ -523,4 +532,22 @@ html[data-landing-theme="light"] .sl-app-theme .sl-upgrade-dialog button[disable
 /* Dark backgrounds are not introduced by hover-only utilities in light mode. */
 html[data-landing-theme="light"] :is(.landing-v3,.sl-app-theme) button[class*="hover:bg-[#263044]"]:hover {
   background-color:#E9F0FA!important;
+}
+
+/* Short, focused URL helper; no secondary mini-feature paragraph beneath input. */
+.landing-v3 .sl-url-reassurance {
+  margin-top:9px;
+  font-size:11px;
+  letter-spacing:-.005em;
+  line-height:1.5;
+  color:var(--sl-muted);
+}
+@media(max-width:767px) {
+  .landing-v3 .sl-hero-v3 {gap:24px;}
+  .landing-v3 .sl-url-reassurance {margin-top:7px;}
+  .landing-v3 .sl-aurora {animation-name:sl-cloud-drift,sl-color-flow-mobile;}
+}
+@keyframes sl-color-flow-mobile {
+  0% {filter:blur(32px) hue-rotate(0deg);opacity:.62;}
+  100% {filter:blur(32px) hue-rotate(48deg);opacity:.76;}
 }
