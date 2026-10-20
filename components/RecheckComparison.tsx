@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { ArrowRight, ArrowUpRight, CheckCircle2, History, RotateCcw, Trash2 } from "lucide-react";
+import { History, RotateCcw, Trash2 } from "lucide-react";
 import type { CanonicalReport } from "@/lib/report-adapter";
 
 type Scores = { [key: string]: number | null };
@@ -61,9 +61,15 @@ export default function RecheckComparison({
     try{
       const all=readSnapshots();
       const existing=all[current.domain];
-      setPrior(existing && existing.reportId!==current.reportId &&
-        validScore(existing.overall)!==null ? existing :null);
+      const previousKey=`previous:${current.domain}`;
+      // Keep the preceding distinct report across remounts; opening the same
+      // report twice must not overwrite the comparison baseline.
+      const previous=existing && existing.reportId!==current.reportId
+        ? existing : all[previousKey];
+      setPrior(previous && previous.reportId!==current.reportId &&
+        validScore(previous.overall)!==null ? previous : null);
       const updated={...all,[current.domain]:current};
+      if (existing && existing.reportId!==current.reportId) updated[previousKey]=existing;
       // Store no report tokens, full URLs, page content, emails, or premium findings.
       const entries=Object.entries(updated).sort((a,b)=>(b[1]?.at||0)-(a[1]?.at||0)).slice(0,20);
       window.localStorage.setItem(STORAGE_KEY,JSON.stringify(Object.fromEntries(entries)));
@@ -121,7 +127,7 @@ export default function RecheckComparison({
         Differences in accessible page content or analysis versions can also affect scores.
       </p>
       <button type="button" onClick={()=>{
-        try{const all=readSnapshots();delete all[current.domain];window.localStorage.setItem(STORAGE_KEY,JSON.stringify(all));}catch{}
+        try{const all=readSnapshots();delete all[current.domain];delete all[`previous:${current.domain}`];window.localStorage.setItem(STORAGE_KEY,JSON.stringify(all));}catch{}
         setPrior(null);
       }} className="mt-3 inline-flex min-h-9 items-center gap-1.5 text-xs font-semibold text-[#A8BAD0] hover:text-white">
         <Trash2 size={13} aria-hidden="true"/> Clear comparison on this device
