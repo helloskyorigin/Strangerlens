@@ -755,7 +755,7 @@ export default function LandingPage() {
                         />
                         <input
                           ref={inputRef}
-                          type="url"
+                          type="text"
                           inputMode="url"
                           autoComplete="url"
                           autoCapitalize="none"
