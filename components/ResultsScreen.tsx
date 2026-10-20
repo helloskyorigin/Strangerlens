@@ -17,8 +17,6 @@ import ClaritySignalTooltip from "@/components/ClaritySignalTooltip";
 import {
   startReportCheckout,
   rememberReportAccess,
-  readReportToken,
-  readPendingCheckout,
 } from "@/lib/payment-checkout";
 
 export interface AnalysisData {
@@ -125,7 +123,6 @@ export default function ResultsScreen({
   const [earlyStatus, setEarlyStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [earlyErrorMessage, setEarlyErrorMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [verifiedUnlocked, setVerifiedUnlocked] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   // Initialize the fresh-scan offer BEFORE first Results paint. Previously
   // waiting 700ms made the report flash underneath a delayed modal.
@@ -144,7 +141,6 @@ export default function ResultsScreen({
     trackFunnelEvent("post_scan_offer_dismissed");
     setIsPostScanOfferOpen(false);
   }, []);
-  const [isVerifyingPayment, setIsVerifyingPayment] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [showUtilities, setShowUtilities] = useState(false);
 
@@ -152,7 +148,10 @@ export default function ResultsScreen({
 
   const isCheckoutAvailable = Boolean(checkoutEnabled);
 
-  const isReportUnlocked = Boolean(isUnlocked) || verifiedUnlocked;
+  // Only the payment hook can mark this report unlocked after the server has
+  // verified the payment AND supplied the protected full report.
+  const isReportUnlocked = Boolean(isUnlocked);
+  const isVerifyingPayment = paymentState === "verifying" || paymentState === "pending";
 
   // Canonical report normalized from authoritative analysis data
   const report = adaptReport(data);
@@ -202,55 +201,21 @@ export default function ResultsScreen({
       isReportUnlocked, isVerifyingPayment, paymentState]);
 
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const params = new URLSearchParams(window.location.search);
-    const checkoutParam = params.get("checkout");
-    const status = params.get("status");
-    const orderId = params.get("orderId");
-    const targetReportId = params.get("reportId") || data?.reportId || report.rawReport?.reportId;
+  // The parent payment hook is the single owner of checkout return,
+  // verification retries and restoring the server-authorized paid report.
+  // Never set an independent local paid flag on a verification response.
 
-    if ((checkoutParam === "return" || status === "success") && targetReportId && !verifiedUnlocked) {
-      const token = readReportToken(targetReportId) || data?.reportToken || report.rawReport?.reportToken;
-      const effectiveOrderId = orderId || readPendingCheckout(targetReportId)?.orderId;
-      if (!effectiveOrderId || !token) {
-        return;
-      }
-      queueMicrotask(() => setIsVerifyingPayment(true));
-      fetch("/api/payments/verify", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ orderId: effectiveOrderId, reportId: targetReportId }),
-      })
-        .then((res) => res.json())
-        .then(async (resData) => {
-          if (resData.verified) {
-            setVerifiedUnlocked(true);
-            if (onRefreshPaidReport) {
-              void onRefreshPaidReport().catch(() => {});
-            }
-            const cleanUrl = new URL(window.location.href);
-            for (const key of ["checkout", "reportId", "orderId", "status", "session_id", "checkout_id", "payment_id"]) {
-              cleanUrl.searchParams.delete(key);
-            }
-            window.history.replaceState({}, "", `${cleanUrl.pathname}${cleanUrl.search}${cleanUrl.hash}`);
-          } else {
-            setPaymentError("Payment verification pending or failed. Please refresh or contact support.");
-          }
-        })
-        .catch(() => {
-          setPaymentError("Error verifying payment with server.");
-        })
-        .finally(() => {
-          setIsVerifyingPayment(false);
-        });
-    } else if (status === "cancelled") {
-      queueMicrotask(() => setPaymentError("Checkout was cancelled. Your free report remains available."));
-    }
-  }, [report, verifiedUnlocked, data, onRefreshPaidReport]);
+  useEffect(() => {
+    if (!isReportUnlocked || paymentState !== "success") return;
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById("your-improvement-plan")?.scrollIntoView({
+        behavior: "auto", block: "start",
+      });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [isReportUnlocked, paymentState]);
+
+
 
   const shouldReduceMotion = useReducedMotion();
   const gotItButtonRef = useRef<HTMLButtonElement>(null);
@@ -370,7 +335,6 @@ export default function ResultsScreen({
       }
       const result = await startReportCheckout(targetReportId, targetReportToken);
       if (result.alreadyPaid) {
-        setVerifiedUnlocked(true);
         if (onRefreshPaidReport) {
           await onRefreshPaidReport();
         }
@@ -620,12 +584,23 @@ export default function ResultsScreen({
                 All five detailed signals, the first-five-seconds assessment, improvement plan, and copy suggestions are below.
               </p>
             </div>
-            <div className="flex shrink-0 flex-wrap gap-2">
-              <a href="#complete-paid-report" className="inline-flex min-h-11 items-center justify-center rounded-full bg-[#1E815F] px-4 text-xs font-bold text-white hover:bg-[#24936E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Explore All Five →</a>
-              <a href="#report-export-actions" className="inline-flex min-h-11 items-center justify-center rounded-full border border-[#385C62] bg-[#1A363D] px-4 text-xs font-semibold text-[#D6EDE7] hover:bg-[#23474F] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Download PDF</a>
-            </div>
+            <nav aria-label="Jump to paid report sections" className="flex shrink-0 flex-wrap gap-2">
+              <a href="#your-improvement-plan" className="inline-flex min-h-10 items-center justify-center rounded-full bg-[#1E815F] px-4 text-xs font-bold text-white hover:bg-[#24936E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Start with fixes →</a>
+              <a href="#complete-paid-report" className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#385C62] px-4 text-xs font-semibold text-[#D6EDE7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Five deep dives</a>
+              <a href="#better-copy-studio" className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#385C62] px-4 text-xs font-semibold text-[#D6EDE7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Copy Studio</a>
+              <a href="#report-export-actions" className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#385C62] px-4 text-xs font-semibold text-[#D6EDE7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Export PDF</a>
+            </nav>
           </section>
         )}
+        {paymentMessage && ["verifying", "pending", "error", "failed"].includes(paymentState) &&
+          <div role="status" aria-live="polite" className="rounded-xl border border-[#35516E] bg-[#19283B] p-4 text-sm text-[#D6E4F5]">
+            <p>{paymentMessage}</p>
+            {["pending", "error"].includes(paymentState) && onVerifyPayment &&
+              <button type="button" onClick={onVerifyPayment}
+                className="mt-2 min-h-10 rounded-full border border-[#496995] px-4 text-xs font-semibold text-[#D6E4F5]">
+                Check payment status
+              </button>}
+          </div>}
         {/* OVERALL CLARITY SCORE */}
         <section className="bg-[#121824] border border-[#263044] rounded-2xl p-5 sm:p-6 shadow-xs">
           <h2 className="text-xs sm:text-sm font-semibold text-[#94A3B8] uppercase tracking-wider mb-3">
@@ -767,6 +742,14 @@ export default function ResultsScreen({
               isTestMode={isTestMode}
               busy={loading || isVerifyingPayment}
               onUnlock={handleUnlockFullAnalysis}
+              onViewExample={() => {
+                onBackToLanding?.();
+                window.setTimeout(() => {
+                  document.getElementById("full-report-demo")?.scrollIntoView({
+                    behavior: shouldReduceMotion ? "auto" : "smooth", block: "start",
+                  });
+                }, 480);
+              }}
             />
             {paymentError && !isPostScanOfferOpen &&
               <p role="alert" className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200">{paymentError}</p>}
