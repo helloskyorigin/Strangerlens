@@ -7,7 +7,17 @@ The application uses Dodo hosted checkout for the single $3 report. No account s
 Add these server environment variables to the host running this repository (Cloud Run, Vercel, or another Node host), then redeploy:
 
 - `DODO_PAYMENTS_API_KEY`: Dodo secret API key.
-- `DODO_PRODUCT_ID`: the one-time $3 product from the same Dodo environment as the key. Configure the actual product price in Dodo.
+- `DODO_PRODUCT_ID`: the one-time **$3.00 USD** product from the same Dodo environment as the key. **Create or configure it in Dodo first**, then update this ID in hosting variables. The old $5 product ID is not compatible.
+
+### Switching from $5 to $3 safely
+
+1. Open Dodo Payments → Products. Create a **one-time** StrangerLens Full Analysis product priced at **USD $3.00 (300 cents)** in **Test Mode**, and copy its product ID.
+2. Set `DODO_PRODUCT_ID` to that ID in the Test Mode deployment. Test that `/api/payments/status` says `checkoutEnabled: true`, and complete a test checkout.
+3. Repeat with a **Live Mode** $3 product, live API key and live product ID; redeploy Google Cloud/Vercel. The repository cannot change a Dodo product by itself.
+4. The app now verifies the product's actual price and USD one-time type against Dodo before enabling or starting checkout. A $5 or mismatched product fails closed. Old pending $5 sessions will not be reused.
+5. Verify the final Dodo hosted-checkout total, since regional taxes or currency conversion can affect the amount displayed to an individual customer.
+
+Existing paid reports are unaffected; the change applies to new checkout sessions.
 - `DODO_ENVIRONMENT`: `test_mode` for testing; `live_mode` only with the live key and live product.
 - `NEXT_PUBLIC_APP_URL`: your website origin, e.g. `https://strangerlens.ai.studio`. Optional; otherwise the incoming request origin is used.
 - `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`: the REST URL and read/write token of a durable Upstash Redis database. Vercel Marketplace's `KV_REST_API_URL` / `KV_REST_API_TOKEN` aliases also work.
