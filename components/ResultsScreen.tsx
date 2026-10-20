@@ -978,9 +978,9 @@ export default function ResultsScreen({
             {showUtilities ? "Hide comparison" : "Compare scores"}
           </button>
         </div>
-        {showUtilities && <div id="recheck-comparison-panel">
+        <div id="recheck-comparison-panel" className={showUtilities ? "" : "hidden"} aria-hidden={!showUtilities}>
           <RecheckComparison report={report} reportId={currentReportId} onRecheck={onRecheck}/>
-        </div>}
+        </div>
         <div className="flex flex-wrap justify-center gap-2">
           <button 
             onClick={async () => {
