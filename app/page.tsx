@@ -54,7 +54,7 @@ interface PricingPlan {
   isPaid: boolean;
 }
 
-// PRICING CONFIG (Free and $5 One-Time Full Clarity Report)
+// PRICING CONFIG (Free and $3 One-Time Full Clarity Report)
 const PRICING_PLANS: PricingPlan[] = [
   {
     id: "free",
@@ -77,7 +77,7 @@ const PRICING_PLANS: PricingPlan[] = [
   {
     id: "complete",
     name: "Unlock Your Full Analysis",
-    price: 5,
+    price: 3,
     paymentLabel: "ONE-TIME",
     badge: "FULL ANALYSIS",
     positioning: "Actionable clarity & diagnostics.",
@@ -127,7 +127,7 @@ const FAQ_ITEMS = [
   {
     question: "What does Full Analysis cost?",
     answer:
-      "Full Analysis costs $5 per report, paid once with no subscription. Run a free preview first, then unlock five detailed signal analyses, Evidence-to-Fix findings with verified quotes when available, a Smart Priority plan, an editable Better Copy Studio, and the First 5 Seconds breakdown. Checkout availability is shown on your report.",
+      "Full Analysis costs $3 per report, paid once with no subscription. Run a free preview first, then unlock five detailed signal analyses, Evidence-to-Fix findings with verified quotes when available, a Smart Priority plan, an editable Better Copy Studio, and the First 5 Seconds breakdown. Checkout availability is shown on your report.",
   },
   {
     question: "Do I need to create an account?",
@@ -824,7 +824,7 @@ export default function LandingPage() {
                     }}
                     className="mt-3.5 text-xs sm:text-[13px] text-[#94A3B8] font-medium leading-relaxed"
                   >
-                    No signup · No card for free scan · $5 only if you want detailed fixes
+                    No signup · No card for free scan · $3 only if you want detailed fixes
                   </motion.p>
                 </div>
 
@@ -908,7 +908,7 @@ export default function LandingPage() {
                           Explore the details
                         </h3>
                         <p className="text-sm text-[#94A3B8] leading-relaxed">
-                          Unlock deep signal analyses, improvements, and First 5 Seconds with Full Analysis ($5 one-time).
+                          Unlock deep signal analyses, improvements, and First 5 Seconds with Full Analysis ($3 one-time).
                         </p>
                       </div>
                     </div>
@@ -1027,7 +1027,7 @@ export default function LandingPage() {
                   </Reveal>
                   <Reveal y={14} delay={0.12}>
                     <p className="text-[15px] sm:text-lg text-[#94A3B8] max-w-2xl mx-auto leading-relaxed font-normal">
-                      Start with a free clarity preview today. Full Analysis is a $5 one-time payment — no subscriptions.
+                      Start with a free clarity preview today. Full Analysis is a $3 one-time payment — no subscriptions.
                     </p>
                   </Reveal>
                 </div>
@@ -1092,7 +1092,7 @@ export default function LandingPage() {
                     <div className="h-full rounded-3xl p-6 sm:p-7 flex flex-col justify-between bg-[#121824] border-2 border-[#3B82F6] shadow-lg">
                       <div>
                         <h3 className="font-extrabold text-white text-xl mb-2">Full Analysis</h3>
-                        <p className="text-4xl font-extrabold text-white mb-2">$5 <span className="text-sm font-normal text-[#94A3B8]">one-time</span></p>
+                        <p className="text-4xl font-extrabold text-white mb-2">$3 <span className="text-sm font-normal text-[#94A3B8]">one-time</span></p>
                         <p className="text-sm text-[#94A3B8] mb-5">Know what to change, why it matters, and how to make your website clearer.</p>
                         <ul className="space-y-3 text-sm text-[#F1F5F9] mb-6">
                           {PRICING_PLANS[1].features.map(feature => <li key={feature} className="flex gap-2"><Check className="w-4 h-4 shrink-0 text-blue-400" />{feature}</li>)}
@@ -1521,7 +1521,7 @@ export default function LandingPage() {
                     Simple, Transparent Pricing
                   </h3>
                   <p className="text-xs sm:text-sm text-[#94A3B8] mt-0.5">
-                    Start with a free first-impression preview today. Full Analysis costs $5 per report, paid once.
+                    Start with a free first-impression preview today. Full Analysis costs $3 per report, paid once.
                   </p>
                 </div>
                 <button
