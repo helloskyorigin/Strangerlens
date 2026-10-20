@@ -46,3 +46,33 @@ export async function dodoRequest<T>(path: string, init?: RequestInit): Promise<
   if (!data) throw new PaymentError(502, "Payment provider returned an invalid response. Please try again.");
   return data as T;
 }
+
+/** The public $3 price must match the Dodo product before checkout begins. */
+export const FULL_REPORT_USD_CENTS = 300;
+
+export function validateFullReportDodoProduct(product: unknown): boolean {
+  if (!product || typeof product !== "object") return false;
+  const data = product as {
+    price?: { type?: string; price?: unknown; currency?: unknown } | number;
+    price_detail?: { type?: string; price?: unknown; currency?: unknown };
+    archived?: boolean;
+    is_active?: boolean;
+  };
+  if (data.archived === true || data.is_active === false) return false;
+  const details = data.price && typeof data.price === "object"
+    ? data.price : data.price_detail;
+  if (!details) return false;
+  return details.type === "one_time_price" &&
+    details.currency === "USD" &&
+    details.price === FULL_REPORT_USD_CENTS;
+}
+
+export async function assertFullReportProductPrice(): Promise<void> {
+  const config = getDodoConfig();
+  const product = await dodoRequest<unknown>(`/products/${encodeURIComponent(config.productId)}`, {
+    method: "GET",
+  });
+  if (!validateFullReportDodoProduct(product)) {
+    throw new PaymentError(503, "The $3 checkout product is not yet configured correctly in Dodo. No payment was started.");
+  }
+}
