@@ -425,3 +425,33 @@ html[data-landing-theme="light"] .sl-app-theme [class~='text-[#C8D8EB]'],
 html[data-landing-theme="light"] .sl-app-theme [class~='text-[#C4DDFB]'] {color:#415B78!important;}
 html[data-landing-theme="light"] .sl-app-theme [class~='text-[#D6E6FD]'] {color:#234F8D!important;}
 html[data-landing-theme="light"] .sl-app-theme .sl-recheck-section button:hover {color:#174C97!important;}
+
+
+/* V5.1 conversion surfaces: explicit light palette for nested premium previews.
+   Existing arbitrary utility mappings are exact case-sensitive class tokens. */
+html[data-landing-theme="light"] .sl-app-theme [class~='bg-[#19283B]'],
+html[data-landing-theme="light"] .sl-app-theme [class~='bg-[#19283b]'] {
+  background-color:#F1F6FF!important;
+  border-color:#D3E2F3!important;
+}
+html[data-landing-theme="light"] .sl-app-theme [class~='border-[#354962]'],
+html[data-landing-theme="light"] .sl-app-theme [class~='border-[#344760]'] {
+  border-color:#D3E2F3!important;
+}
+html[data-landing-theme="light"] .sl-app-theme [class~='text-[#B8CADF]'],
+html[data-landing-theme="light"] .sl-app-theme [class~='text-[#B7CBE0]'],
+html[data-landing-theme="light"] .sl-app-theme [class~='text-[#DCE7F2]'],
+html[data-landing-theme="light"] .sl-app-theme [class~='text-[#A9BBD3]'],
+html[data-landing-theme="light"] .sl-app-theme [class~='text-[#A8B5C9]'],
+html[data-landing-theme="light"] .sl-app-theme [class~='text-[#B4C1D1]'] {
+  color:#435D7B!important;
+}
+html[data-landing-theme="light"] .sl-app-theme [class~='text-[#9CB5D3]'] {
+  color:#4F6C91!important;
+}
+html[data-landing-theme="light"] .sl-app-theme .sl-upgrade-dialog [class~='bg-[#1B2738]'] {
+  background-color:#EDF3FC!important;
+}
+html[data-landing-theme="light"] .sl-app-theme .sl-upgrade-dialog [class~='text-[#E5ECF5]'] {
+  color:#223C5B!important;
+}
