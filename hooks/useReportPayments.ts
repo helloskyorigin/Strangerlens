@@ -62,11 +62,12 @@ export function useReportPayments(analysisData: any, scanController: { restoreSe
           clearPaymentReturnParameters();
           return;
         }
-        if (["failed", "cancelled", "refunded"].includes(result.paymentStatus)) {
+        const providerStatus = typeof result.status === "string" ? result.status : result.paymentStatus;
+        if (["failed", "cancelled", "refunded"].includes(providerStatus)) {
           clearPendingCheckout(reportId);
           clearPaymentReturnParameters();
           setPaymentState("failed");
-          setPaymentMessage(result.paymentStatus === "refunded" ? "This payment was refunded. Report access is locked." : "Payment was not completed. You can try checkout again.");
+          setPaymentMessage(providerStatus === "refunded" ? "This payment was refunded. Report access is locked." : "Payment was not completed. You can try checkout again.");
           return;
         }
         if (attempt < 4) await new Promise<void>((resolve, reject) => {
