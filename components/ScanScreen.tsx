@@ -30,7 +30,7 @@ export const SCAN_FOCUS_MESSAGES = [
 
 export const SCAN_STAGES = [
   { id: "verify", label: "Website connection verified" },
-  { id: "content", label: "Homepage content inspected" },
+  { id: "content", label: "Public website content inspected" },
   { id: "signals", label: "Five clarity signals evaluated" },
   { id: "report", label: "Your clarity report prepared" },
 ] as const;
@@ -110,7 +110,7 @@ export default function ScanScreen({
     phase === "ready" ? 4 : scanMilestone === "signals_evaluated" ? 3 :
     scanMilestone === "content_inspected" ? 2 : verifiedSite ? 1 : 0;
   const subtitle = phase === "verify" ? "Checking that your website is reachable and safe to inspect."
-    : phase === "read" ? "Extracting accessible headings, value statements and calls to action."
+    : phase === "read" ? "Reviewing accessible content, key messages and next steps."
     : phase === "evaluate" ? "Assessing how a first-time visitor might understand your message."
     : phase === "prepare" ? "Validating findings and securely preparing your free report."
     : phase === "ready" ? "Five clarity scores are ready. Discover what your website communicates."
@@ -232,8 +232,8 @@ export default function ScanScreen({
           </React.Fragment>)}
         </div>
         <span className="sr-only" role="status" aria-live="polite">{phase === "verify" ? "Verifying website connection" :
-          phase === "read" ? "Website verified; inspecting homepage content" :
-          phase === "evaluate" ? "Homepage inspected; evaluating clarity signals" :
+          phase === "read" ? "Website verified; reviewing accessible public content" :
+          phase === "evaluate" ? "Public content inspected; evaluating clarity signals" :
           phase === "prepare" ? "Clarity signals evaluated; preparing report" :
           phase === "ready" ? "Clarity report ready" : "Website scan failed"}</span>
       </main>
