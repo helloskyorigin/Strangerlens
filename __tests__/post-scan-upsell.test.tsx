@@ -28,9 +28,9 @@ const doc = offer.window.document;
 const text = doc.body.textContent || "";
 check(doc.querySelector('[role="dialog"][aria-modal="true"]'), "post-scan offer has an accessible dialog");
 check(doc.querySelector('button[aria-label="Close and view free results"]'), "modal has close button");
-check([...doc.querySelectorAll("button")].some(b => b.textContent?.includes("Continue with my free results")), "free report is accessible without purchase");
+check([...doc.querySelectorAll("button")].some(b => b.textContent?.includes("Continue with free results")), "free report is accessible without purchase");
 check([...doc.querySelectorAll("button")].some(b => b.textContent?.includes("Unlock Complete Report — $3")), "premium CTA is for the complete report at $3");
-check(modalProps.signals.every(signal => text.includes(signal.title) && text.includes(signal.scoreDisplay)), "modal lists every public signal score");
+check(text.includes("Trust") && text.includes("60/100") && !text.includes("First Impression"), "modal shows one truthful relevant public score rather than repeating all five");
 check(!text.includes(privateText), "private paid content is never placed in the popup");
 offer.window.close();
 
@@ -38,7 +38,7 @@ const hidden = renderToStaticMarkup(<PostScanUpgradeModal open={false} {...modal
 check(hidden === "", "dismissed modal renders nothing");
 const unavailable = new JSDOM(renderToStaticMarkup(<PostScanUpgradeModal open={true} {...modalProps} canCheckout={false} />));
 check(!!unavailable.window.document.querySelector('button:disabled'), "offline checkout disables paid button");
-check(unavailable.window.document.body.textContent?.includes("Your free report is ready below"), "free report survives checkout errors");
+check(unavailable.window.document.body.textContent?.includes("Your free report remains accessible"), "free report survives checkout errors");
 unavailable.window.close();
 
 const freeReport = mapBackendToFrontend(structuredClone(paymentAnalysis), "https://example.com", paymentSnapshot);
