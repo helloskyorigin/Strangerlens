@@ -5,13 +5,12 @@ import { createPortal } from "react-dom";
 import { Info } from "lucide-react";
 import type { CanonicalSignalKey } from "@/lib/report-adapter";
 
-export const CLARITY_SIGNAL_HELP: Record<CanonicalSignalKey | "purchaseReadiness", string> = {
+export const CLARITY_SIGNAL_HELP: Record<CanonicalSignalKey, string> = {
   firstImpression: "How quickly visitors understand what your website does.",
   audience: "How clearly your website communicates who it's for.",
   value: "How clearly visitors understand the benefits you offer.",
   trust: "How effectively your website communicates credibility and trustworthiness.",
   action: "How clearly visitors understand what to do next.",
-  purchaseReadiness: "How clearly your paid offer explains its value, pricing and purchase next step. This separate score does not affect your Overall Clarity Score.",
 };
 
 interface Viewport { left: number; top: number; width: number; height: number }
@@ -33,7 +32,7 @@ export function placeSignalTooltip(anchor: Anchor, height: number, viewport: Vie
 }
 
 interface Props {
-  signalKey: CanonicalSignalKey | "purchaseReadiness";
+  signalKey: CanonicalSignalKey;
   name: string;
   isOpen: boolean;
   onOpen: () => void;

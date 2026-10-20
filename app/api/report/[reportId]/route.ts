@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { paymentFailure } from "@/server/payments/http";
-import { readPurchaseReadiness } from "@/lib/purchase-readiness";
-import { assessScanCoverage } from "@/lib/scan-coverage";
 import {
   getServerReport,
   extractEntitlementTokenFromHeaders,
@@ -63,7 +61,6 @@ export async function GET(
           supportingContext: stored.supportingContext,
         }
       : stored.fullAnalysis;
-    const purchaseReadiness = readPurchaseReadiness(stored.fullAnalysis.purchase_readiness);
 
     return NextResponse.json(
       {
@@ -78,8 +75,7 @@ export async function GET(
           checkoutEnabled: entitlement.checkoutEnabled,
         },
         snapshot: stored.snapshot,
-        scanCoverage: assessScanCoverage(stored.snapshot),
-        analysis: purchaseReadiness ? { ...analysisPayload, purchase_readiness: purchaseReadiness } : analysisPayload,
+        analysis: analysisPayload,
         ...(stored.supportingContext
           ? { supportingContext: stored.supportingContext }
           : {}),

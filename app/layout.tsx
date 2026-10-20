@@ -1,41 +1,52 @@
-import type { Metadata, Viewport } from "next";
-import "./globals.css";
+import type { Metadata, Viewport } from 'next';
+import './globals.css'; // Global styles
 
 export const viewport: Viewport = {
-  themeColor: "#090D15",
-  colorScheme: "light dark",
+  themeColor: '#090D15',
+  colorScheme: 'dark',
 };
 
 export const metadata: Metadata = {
-  title: "StrangerLens — AI Website First-Impression Analyzer",
+  title: 'StrangerLens — AI Website First-Impression Analyzer',
   description: "See your website through a stranger's eyes. AI-powered website first-impression clarity analyzer evaluating visitor clarity across five signals.",
   openGraph: {
-    title: "StrangerLens — AI Website First-Impression Analyzer",
+    title: 'StrangerLens — AI Website First-Impression Analyzer',
     description: "See your website through a stranger's eyes. AI-powered website first-impression clarity analyzer evaluating visitor clarity across five signals.",
-    type: "website",
+    type: 'website',
   },
   twitter: {
-    card: "summary_large_image",
-    title: "StrangerLens — AI Website First-Impression Analyzer",
+    card: 'summary_large_image',
+    title: 'StrangerLens — AI Website First-Impression Analyzer',
     description: "See your website through a stranger's eyes. AI-powered website first-impression clarity analyzer evaluating visitor clarity across five signals.",
+  },
+  other: {
+    'color-scheme': 'dark',
   },
 };
 
-const earlyTheme = `(function(){try{
-var v=localStorage.getItem("strangerlens-theme-v3");
-var p=v==="dark"||v==="light"||v==="system"?v:"light";
-var dark=p==="dark"||(p==="system"&&window.matchMedia("(prefers-color-scheme: dark)").matches);
-document.documentElement.dataset.landingTheme=dark?"dark":"light";document.documentElement.classList.toggle("dark",dark);
-}catch(e){document.documentElement.dataset.landingTheme="light";document.documentElement.classList.remove("dark");}
-})();`;
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
-    <html lang="en" data-landing-theme="light" suppressHydrationWarning>
+    <html
+      lang="en"
+      className="dark bg-[#090D15] text-[#F1F5F9]"
+      style={{ backgroundColor: '#090D15', colorScheme: 'dark' }}
+    >
       <head>
-        <script dangerouslySetInnerHTML={{ __html: earlyTheme }} />
+        <meta name="theme-color" content="#090D15" />
+        <meta name="color-scheme" content="dark" />
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `html,body{background-color:#090D15!important;color:#F1F5F9;color-scheme:dark;}`,
+          }}
+        />
       </head>
-      <body className="min-h-screen" suppressHydrationWarning>{children}</body>
+      <body
+        className="bg-[#090D15] text-[#F1F5F9] min-h-screen"
+        style={{ backgroundColor: '#090D15', colorScheme: 'dark' }}
+        suppressHydrationWarning
+      >
+        {children}
+      </body>
     </html>
   );
 }

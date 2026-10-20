@@ -9,7 +9,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   return (
-    <div className="sl-app-theme min-h-screen w-full bg-[#090D15] text-[#F1F5F9] flex flex-col items-center justify-center p-4 text-center">
+    <div className="min-h-screen w-full bg-[#090D15] text-[#F1F5F9] flex flex-col items-center justify-center p-4 text-center">
       <div className="w-10 h-10 rounded-xl bg-[#171F2D] border border-[#263044] text-white flex items-center justify-center font-bold text-base mb-4">
         S
       </div>

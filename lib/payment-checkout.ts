@@ -37,13 +37,8 @@ export async function startReportCheckout(reportId: string, reportToken?: string
     body: JSON.stringify({ reportId }),
   });
   if (data.alreadyPaid === true) return { alreadyPaid: true as const };
-  // A string suffix alone accepts attacker-controlled evildodopayments.com.
-  // Require a canonical HTTPS Dodo hostname with no embedded credentials.
-  const rawCheckoutUrl = typeof data.checkoutUrl === "string" ? data.checkoutUrl : "";
-  const url = new URL(rawCheckoutUrl || "/", window.location.origin);
-  const trustedHost = url.hostname === "dodopayments.com" || url.hostname.endsWith(".dodopayments.com");
-  if (!rawCheckoutUrl.startsWith("https://") || url.protocol !== "https:" || !trustedHost ||
-      url.username || url.password ||
+  const url = new URL(data.checkoutUrl || "", window.location.origin);
+  if (url.protocol !== "https:" || !url.hostname.endsWith("dodopayments.com") ||
       typeof data.orderId !== "string" || typeof data.sessionId !== "string") {
     throw new Error("Payment provider did not return a valid checkout session.");
   }

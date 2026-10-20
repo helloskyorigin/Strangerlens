@@ -5,7 +5,6 @@ import type { WebsiteSnapshot } from "@/lib/content-extractor";
 import type { AnalysisData } from "@/components/ResultsScreen";
 import { isDurableStorageConfigured, paymentStore, reportKey, UNPAID_RETENTION_SECONDS, cleanEnvString } from "@/server/storage/paymentStore";
 import { getDodoConfig } from "@/server/payments/dodo";
-import { isPurchaseReadiness } from "@/lib/purchase-readiness";
 
 export interface StoredServerReport {
   reportId: string;
@@ -15,8 +14,6 @@ export interface StoredServerReport {
   tokenHash: string;
   snapshot: WebsiteSnapshot;
   fullAnalysis: FinalValidatedAnalysis;
-  /** Provenance prevents heuristic-only reports from being marketed as paid AI analysis. */
-  analysisMode?: "ai" | "heuristic";
   supportingContext?: SupportingContext;
   payment?: { paymentId: string; environment: string; orderId: string; active: boolean; verifiedAt: number };
 }
@@ -64,8 +61,6 @@ export async function saveServerReport(params: {
   domain: string;
   snapshot: WebsiteSnapshot;
   fullAnalysis: FinalValidatedAnalysis;
-  /** Provenance prevents heuristic-only reports from being marketed as paid AI analysis. */
-  analysisMode?: "ai" | "heuristic";
   supportingContext?: SupportingContext;
 }): Promise<StoredServerReport & { reportToken: string }> {
   const reportToken = `sl_ent_${crypto.randomBytes(24).toString("hex")}`;
@@ -149,9 +144,7 @@ export function computeLockedPreviewCounts(
 export function redactAnalysisForFreeTier(
   analysis: FinalValidatedAnalysis
 ): FinalValidatedAnalysis {
-  const purchaseReadinessLocked = analysis.purchase_readiness_locked === true || isPurchaseReadiness(analysis.purchase_readiness);
   return {
-    ...(purchaseReadinessLocked ? { purchase_readiness_locked: true } : {}),
     analysis_version: analysis.analysis_version,
     scoring_version: analysis.scoring_version,
     overall_score: analysis.overall_score,
@@ -227,8 +220,6 @@ export function redactFrontendDataForFreeTier(
 
   return {
     ...data,
-    purchaseReadiness: undefined,
-    purchaseReadinessLocked: data.purchaseReadinessLocked === true || isPurchaseReadiness(data.purchaseReadiness) ? true : undefined,
     firstSeconds: [],
     visitorThought: "",
     evidence: {
@@ -239,7 +230,6 @@ export function redactFrontendDataForFreeTier(
     },
     risks: Array.isArray(data.risks) ? data.risks.slice(0, 1) : [],
     otherImprovements: [],
-    premiumWorkbench: undefined,
     supportingContext: undefined,
     isFreeTierOnly: true,
     lockedPreviewCounts: lockedPreviewCounts ?? {

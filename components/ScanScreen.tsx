@@ -1,242 +1,550 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { AlertCircle, ArrowLeft, ArrowRight, Check, CheckCircle2, Circle, Globe2, LoaderCircle, RotateCcw, ScanEye, X } from "lucide-react";
-import { motion, useReducedMotion } from "motion/react";
-import { LandingThemeSwitcher } from "@/components/landing/LandingThemeSwitcher";
-import type { ScanMilestone } from "@/lib/scan-flow-controller";
+import { AlertCircle, RotateCcw, ArrowLeft, Aperture, Check } from "lucide-react";
+import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 
-interface VerifiedSite { domain: string; httpStatus: number | null }
 interface ScanScreenProps {
   rawUrl: string;
   onBackToLanding: () => void;
   onCancel?: () => void;
+  onOpenFaq?: () => void;
+  onOpenPricing?: () => void;
   onGoToResults?: () => void;
   onRetry?: () => void;
   isBackendReady?: boolean;
   isScanning?: boolean;
-  isVerifying?: boolean;
-  verifiedSite?: VerifiedSite | null;
-  scanMilestone?: ScanMilestone;
   backendError?: string | null;
-  onOpenFaq?: () => void;
-  onOpenPricing?: () => void;
 }
 
+const EASE_OUT_EXPO: [number, number, number, number] = [0.16, 1, 0.3, 1];
+
 export const SCAN_FOCUS_MESSAGES = [
-  "First-impression communication", "Audience and positioning",
-  "Value proposition", "Trust and next-step clarity",
+  "Understanding your website's message",
+  "Evaluating clarity and value",
+  "Reviewing trust and next steps",
+  "Connecting findings to page evidence",
 ] as const;
 
 export const SCAN_STAGES = [
-  { id: "verify", label: "Website connection verified" },
-  { id: "content", label: "Public website content inspected" },
-  { id: "signals", label: "Five clarity signals evaluated" },
-  { id: "report", label: "Your clarity report prepared" },
+  { id: "connect", label: "Website connected" },
+  { id: "read", label: "Website content read" },
+  { id: "evaluate", label: "Evaluating clarity" },
+  { id: "prepare", label: "Preparing results" },
 ] as const;
 
-const SIGNALS = ["First Impression", "Audience", "Value", "Trust", "Action"];
-
-function safeError(raw?: string | null): string {
-  if (!raw || typeof raw !== "string") return "We couldn't complete this website scan. Please try again.";
-  const message = raw.trim();
-  if (!message || message.length > 320 ||
-      /\b(?:API_KEY|Bearer\s|stack trace|TypeError|SyntaxError|ReferenceError|at\s+\S+\s+\()/i.test(message) ||
-      message.startsWith("{") || message.includes("\n    at ")) {
-    return "The website couldn't be analyzed right now. Try again or check another public URL.";
+/**
+ * Ensures error messages shown to the user remain concise, understandable,
+ * and never expose raw stack traces, API keys, or internal server diagnostics.
+ */
+function formatSafeErrorMessage(rawError: string | null | undefined): string {
+  if (!rawError || typeof rawError !== "string") {
+    return "We couldn’t complete the analysis for this website. Please verify the URL and try again.";
   }
-  return message;
-}
-
-function hostname(value: string): string {
-  try {
-    return new URL(/^https?:\/\//i.test(value) ? value : `https://${value}`).hostname.replace(/^www\./, "").slice(0, 90);
-  } catch {
-    return value.replace(/^https?:\/\//i, "").split("/")[0].slice(0, 90);
+  const trimmed = rawError.trim();
+  if (!trimmed) {
+    return "We couldn’t complete the analysis for this website. Please verify the URL and try again.";
   }
+
+  // Guard against accidental stack traces, raw JSON dumps, or internal key references
+  const hasInternalLeak =
+    trimmed.includes("\n    at ") ||
+    trimmed.includes("SyntaxError") ||
+    trimmed.includes("TypeError") ||
+    trimmed.includes("API_KEY") ||
+    trimmed.includes("Bearer ") ||
+    trimmed.startsWith("{") ||
+    trimmed.length > 220;
+
+  if (hasInternalLeak) {
+    return "Analysis is temporarily unavailable or the website could not be read. Please try again in a moment.";
+  }
+  return trimmed;
 }
 
 export default function ScanScreen({
-  rawUrl, onBackToLanding, onCancel, onGoToResults, onRetry,
-  isBackendReady = false, isVerifying = false, verifiedSite = null,
-  scanMilestone = "connecting", backendError = null,
+  rawUrl,
+  onBackToLanding,
+  onCancel,
+  onGoToResults,
+  onRetry,
+  isBackendReady = false,
+  backendError = null,
 }: ScanScreenProps) {
-  const reduceMotion = useReducedMotion();
-  const transitioned = useRef(false);
-  const [elapsed, setElapsed] = useState(0);
-  const phase = backendError ? "error" : isBackendReady ? "ready" :
-    isVerifying || !verifiedSite ? "verify" :
-    scanMilestone === "signals_evaluated" ? "prepare" :
-    scanMilestone === "content_inspected" ? "evaluate" : "read";
-  const domain = useMemo(() => hostname(verifiedSite?.domain || rawUrl), [verifiedSite?.domain, rawUrl]);
+  const shouldReduceMotion = useReducedMotion();
+  const hasTransitionedRef = useRef(false);
+
+  // Smooth stage tracking without cascading render effects
+  const [timerStage, setTimerStage] = useState(0);
+  const [prevRawUrl, setPrevRawUrl] = useState(rawUrl);
+
+  if (rawUrl !== prevRawUrl) {
+    setPrevRawUrl(rawUrl);
+    setTimerStage(0);
+  }
+
+  const hasError = Boolean(backendError);
+  const isActivelyScanning = !hasError && !isBackendReady;
+  const isPreparing = isBackendReady && !hasError;
+  const handleCancel = onCancel || onBackToLanding;
+
+  // The active visual stage index (0 to 3)
+  const stageIndex = isPreparing ? 3 : timerStage;
+
+  // Extract clean hostname dynamically from the actual analysis input
+  const cleanDomain = useMemo(() => {
+    const cleaned = rawUrl.trim();
+    if (!cleaned) return "";
+    try {
+      const withProtocol = /^https?:\/\//i.test(cleaned)
+        ? cleaned
+        : `https://${cleaned}`;
+      const parsed = new URL(withProtocol);
+      return parsed.hostname.replace(/^www\./i, "") || cleaned;
+    } catch {
+      return (
+        cleaned
+          .replace(/^https?:\/\//i, "")
+          .replace(/^www\./i, "")
+          .split("/")[0]
+          .split("?")[0] || cleaned
+      );
+    }
+  }, [rawUrl]);
+
+  // Sequential progression through stages 0 -> 1 -> 2 while waiting for real async response
+  useEffect(() => {
+    if (hasError || isBackendReady) return;
+
+    const timer1 = setTimeout(() => {
+      setTimerStage((prev) => Math.max(prev, 1));
+    }, 1000);
+
+    const timer2 = setTimeout(() => {
+      setTimerStage((prev) => Math.max(prev, 2));
+    }, 2400);
+
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+    };
+  }, [hasError, isBackendReady, rawUrl]);
+
+  // Dynamic time estimation tracking elapsed seconds
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+
+  if (rawUrl !== prevRawUrl) {
+    setPrevRawUrl(rawUrl);
+    setTimerStage(0);
+    setElapsedSeconds(0);
+  }
 
   useEffect(() => {
-    if (backendError || isBackendReady) return;
-    const id = window.setInterval(() => setElapsed(v => v + 1), 1000);
-    return () => window.clearInterval(id);
-  }, [backendError, isBackendReady, rawUrl]);
+    if (hasError || isBackendReady) return;
+    const interval = setInterval(() => {
+      setElapsedSeconds((prev) => prev + 1);
+    }, 1000);
 
-  // Report-ready is a real backend event; keep the reveal brief, not a forced wait.
-  useEffect(() => {
-    if (!isBackendReady || backendError || !onGoToResults || transitioned.current) return;
-    const id = window.setTimeout(() => {
-      if (!transitioned.current) {
-        transitioned.current = true;
-        onGoToResults();
+    return () => clearInterval(interval);
+  }, [hasError, isBackendReady]);
+
+  const dynamicTimeEstimate = useMemo(() => {
+    if (hasError) return null;
+    if (isPreparing) return "Finalizing your clarity report…";
+    if (elapsedSeconds >= 35) {
+      return "Taking longer than expected. We're still analyzing your website.";
+    }
+    if (stageIndex === 0) {
+      return "Estimated time: 10–20 seconds";
+    }
+    if (stageIndex === 1) {
+      return "Estimated time: 8–15 seconds";
+    }
+    if (stageIndex === 2) {
+      if (elapsedSeconds < 8) {
+        return "Estimated time: 5–10 seconds remaining";
       }
-    }, reduceMotion ? 100 : 850);
-    return () => window.clearTimeout(id);
-  }, [isBackendReady, backendError, onGoToResults, reduceMotion]);
+      return "Analyzing your website…";
+    }
+    return "Analyzing your website…";
+  }, [hasError, isPreparing, stageIndex, elapsedSeconds]);
 
-  const showReport = () => {
-    if (onGoToResults && !transitioned.current) {
-      transitioned.current = true;
-      onGoToResults();
+  // When backend is ready, visibly paint the "Preparing results" active stage,
+  // then navigate to Results screen after a smooth 0.8–1.2s visual transition (1000ms).
+  useEffect(() => {
+    if (
+      isBackendReady &&
+      !backendError &&
+      onGoToResults &&
+      !hasTransitionedRef.current
+    ) {
+      const delay = shouldReduceMotion ? 120 : 1000;
+      const transitionTimer = setTimeout(() => {
+        if (!hasTransitionedRef.current) {
+          hasTransitionedRef.current = true;
+          onGoToResults();
+        }
+      }, delay);
+
+      return () => {
+        clearTimeout(transitionTimer);
+      };
+    }
+  }, [isBackendReady, backendError, onGoToResults, shouldReduceMotion]);
+
+  const safeErrorMessage = useMemo(
+    () => (hasError ? formatSafeErrorMessage(backendError) : null),
+    [hasError, backendError]
+  );
+
+  const handleRetryAction = () => {
+    setTimerStage(0);
+    hasTransitionedRef.current = false;
+    if (onRetry) {
+      onRetry();
+    } else {
+      onBackToLanding();
     }
   };
-  const restart = () => {
-    transitioned.current = false;
-    setElapsed(0);
-    if (onRetry) onRetry();
-    else onBackToLanding();
-  };
-  const stop = () => {
-    transitioned.current = true;
-    (onCancel || onBackToLanding)();
-  };
-  // Each completion is confirmed by a backend event. Nothing auto-advances on a timer.
-  const active = phase === "verify" ? 0 : phase === "read" ? 1 :
-    phase === "evaluate" ? 2 : phase === "prepare" ? 3 :
-    phase === "ready" ? 4 : scanMilestone === "signals_evaluated" ? 3 :
-    scanMilestone === "content_inspected" ? 2 : verifiedSite ? 1 : 0;
-  const subtitle = phase === "verify" ? "Checking that your website is reachable and safe to inspect."
-    : phase === "read" ? "Extracting accessible headings, value statements and calls to action."
-    : phase === "evaluate" ? "Assessing how a first-time visitor might understand your message."
-    : phase === "prepare" ? "Validating findings and securely preparing your free report."
-    : phase === "ready" ? "Five clarity scores are ready. Discover what your website communicates."
-    : safeError(backendError);
 
   return (
-    <div className="sl-app-theme flex min-h-dvh flex-col overflow-x-hidden bg-[#090D15] text-[#F1F5F9] antialiased">
-      <header className="border-b border-[#243146]">
-        <div className="mx-auto flex h-[62px] w-full max-w-3xl items-center justify-between gap-3 px-4 sm:h-[70px] sm:px-6">
-          <button type="button" onClick={() => { transitioned.current = true; onBackToLanding(); }}
-            className="flex min-w-0 items-center gap-2.5 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
-            aria-label="Return to StrangerLens home">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] border border-[#334866] bg-[#15243C] text-[#80B6FF]">
-              <ScanEye className="h-5 w-5" strokeWidth={1.8} aria-hidden="true"/>
+    <div className="min-h-dvh bg-[#090D15] text-[#F1F5F9] font-sans antialiased selection:bg-[#3B82F6]/30 selection:text-white flex flex-col justify-between overflow-x-hidden">
+      {/* 1. HEADER: StrangerLens (left) & Cancel (right) */}
+      <header className="w-full bg-[#090D15]/90 backdrop-blur-md shrink-0 sticky top-0 z-20">
+        <div className="max-w-[1120px] mx-auto px-4 sm:px-6 md:px-8 h-[60px] sm:h-[68px] flex items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              hasTransitionedRef.current = true;
+              onBackToLanding();
+            }}
+            className="flex items-center gap-2.5 group cursor-pointer bg-transparent border-0 p-0 min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3B82F6] rounded-lg"
+            aria-label="Return to StrangerLens home"
+          >
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#121824] border border-[#263044] text-[#F1F5F9] flex items-center justify-center font-bold text-xs sm:text-sm tracking-tighter shadow-xs shrink-0 group-hover:border-[#3B82F6]/60 transition-colors">
+              S
+            </div>
+            <span className="text-base sm:text-lg font-bold tracking-tight text-[#F1F5F9] truncate">
+              StrangerLens
             </span>
-            <span className="truncate text-[15px] font-bold tracking-tight sm:text-base">StrangerLens</span>
           </button>
-          <div className="ml-auto flex items-center gap-1.5"><LandingThemeSwitcher compact />
-          <button type="button" onClick={stop}
-            className="inline-flex min-h-10 items-center gap-1.5 rounded-full px-2.5 text-xs font-medium text-[#A8B9CF] transition hover:bg-[#192438] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">
-            <X className="h-4 w-4" aria-hidden="true"/> Cancel
+
+          <button
+            type="button"
+            onClick={() => {
+              hasTransitionedRef.current = true;
+              handleCancel();
+            }}
+            className="text-xs sm:text-sm font-medium text-[#94A3B8] hover:text-[#F1F5F9] px-3.5 py-1.5 rounded-full hover:bg-[#121824] border border-transparent hover:border-[#263044] active:scale-[0.98] transition-all cursor-pointer shrink-0 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3B82F6]"
+          >
+            Cancel
           </button>
-          </div>
         </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-[620px] flex-1 flex-col justify-center px-5 py-7 sm:px-6 sm:py-12">
-        <div className="mx-auto flex max-w-full items-center gap-2 rounded-full border border-[#2D405A] bg-[#121D30] px-3.5 py-2 text-xs font-semibold text-[#C4D5EB]">
-          <Globe2 className="h-3.5 w-3.5 shrink-0 text-[#8EAFE0]" aria-hidden="true"/>
-          <span className="min-w-0 truncate" title={domain}>{domain || "Website"}</span>
-          {verifiedSite && <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-400" aria-label="Website verified"/>}
-        </div>
+      {/* 2. CENTER: Clean, minimal and professionally balanced scanning container */}
+      <main className="flex-1 w-full max-w-[480px] mx-auto px-4 sm:px-6 py-8 sm:py-12 flex flex-col items-center justify-center text-center min-w-0">
+        {/* PREMIUM FOCUS REVEAL ANIMATION: Camera-inspired focus cycle (Soft Focus -> Focusing -> Clarity -> Reset) */}
+        <motion.div
+          initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.96 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4, ease: EASE_OUT_EXPO }}
+          className="relative w-[150px] h-[150px] sm:w-[180px] sm:h-[180px] flex items-center justify-center mb-6 sm:mb-8 shrink-0 select-none"
+          aria-hidden="true"
+        >
+          {/* Phase A/C/D: Subtle ambient blue halo bloom */}
+          <motion.div
+            className={`absolute inset-4 rounded-full blur-2xl pointer-events-none ${
+              hasError ? "bg-rose-500/15" : "bg-[#3B82F6]/20"
+            }`}
+            animate={
+              isActivelyScanning && !shouldReduceMotion
+                ? {
+                    scale: [1.18, 1.08, 0.95, 0.96, 1.18],
+                    opacity: [0.3, 0.45, 0.75, 0.7, 0.3],
+                  }
+                : { scale: 1, opacity: hasError ? 0.3 : 0.45 }
+            }
+            transition={
+              isActivelyScanning && !shouldReduceMotion
+                ? {
+                    duration: 4,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    times: [0, 0.25, 0.5, 0.75, 1],
+                  }
+                : undefined
+            }
+          />
 
-        {/* Compact, distinctive focus symbol. Not a simulated website screenshot. */}
-        <div className="relative mx-auto mt-7 flex h-[116px] w-[116px] items-center justify-center sm:mt-9 sm:h-[144px] sm:w-[144px]">
-          <div className="absolute inset-0 rounded-full border border-[#304761] bg-[#111F33]"/>
-          <div className="absolute inset-[10px] rounded-full border border-dashed border-[#385777]"/>
-          {phase !== "error" && phase !== "ready" && !reduceMotion && (
-            <motion.div aria-hidden="true" className="absolute inset-[10px] rounded-full border-2 border-transparent border-t-[#67A6FC]"
-              animate={{ rotate: 360 }}
-              transition={{ duration: 3.6, repeat: Infinity, ease: "linear" }}/>
-          )}
-          <div className={`relative z-10 flex h-[62px] w-[62px] items-center justify-center rounded-[20px] border ${phase === "error"
-            ? "border-rose-500/30 bg-rose-500/10 text-rose-300"
-            : phase === "ready" ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-            : "border-blue-500/25 bg-[#1A3050] text-[#91C5FF]"}`}>
-            {phase === "error" ? <AlertCircle className="h-7 w-7" aria-hidden="true"/> :
-              phase === "ready" ? <Check className="h-7 w-7" aria-hidden="true"/> :
-              <ScanEye className="h-7 w-7" strokeWidth={1.7} aria-hidden="true"/>}
-          </div>
-        </div>
+          {/* Faint static optical guide frame (lens barrel reference) */}
+          <div
+            className={`absolute inset-[16px] sm:inset-[20px] rounded-full border pointer-events-none transition-colors duration-500 ${
+              hasError ? "border-rose-500/20" : "border-[#263044]/50"
+            }`}
+          />
 
-        <div className="mt-5 space-y-2 text-center sm:mt-7">
-          <p className="text-[10px] font-bold uppercase tracking-[.18em] text-[#82ADF0]">
-            {phase === "error" ? "SCAN INTERRUPTED" : phase === "ready" ? "SCAN COMPLETE" : "WEBSITE CLARITY ANALYSIS"}
-          </p>
-          <h1 className="text-[25px] font-bold leading-[1.15] tracking-[-.035em] text-white sm:text-[34px]">
-            {phase === "error" ? "We couldn't finish this scan."
-              : phase === "ready" ? "Your report is ready."
-              : phase === "verify" ? "Connecting to your website."
-              : phase === "read" ? "Reading what your visitors see."
-              : phase === "evaluate" ? "Seeing your website through fresh eyes."
-              : "Turning findings into your clarity report."}
-          </h1>
-          <p className="mx-auto max-w-[400px] text-[13px] leading-relaxed text-[#9DB0C9] sm:text-sm">{subtitle}</p>
-        </div>
+          {/* Precision Focus Ring: Smoothly contracts toward center (Phase B), locks in clarity (Phase C), expands out (Phase D) */}
+          <motion.div
+            className={`absolute w-[92px] h-[92px] sm:w-[108px] sm:h-[108px] rounded-full border pointer-events-none transition-colors ${
+              hasError
+                ? "border-rose-500/35"
+                : "border-[#3B82F6]/60"
+            }`}
+            animate={
+              isActivelyScanning && !shouldReduceMotion
+                ? {
+                    scale: [1.22, 1.1, 1.01, 1.01, 1.22],
+                    opacity: [0.35, 0.65, 0.95, 0.9, 0.35],
+                    boxShadow: [
+                      "0 0 0px rgba(59, 130, 246, 0)",
+                      "0 0 8px rgba(59, 130, 246, 0.2)",
+                      "0 0 16px rgba(59, 130, 246, 0.45)",
+                      "0 0 12px rgba(59, 130, 246, 0.35)",
+                      "0 0 0px rgba(59, 130, 246, 0)",
+                    ],
+                  }
+                : { scale: 1, opacity: hasError ? 0.3 : 0.85, boxShadow: "none" }
+            }
+            transition={
+              isActivelyScanning && !shouldReduceMotion
+                ? {
+                    duration: 4,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    times: [0, 0.25, 0.5, 0.75, 1],
+                  }
+                : undefined
+            }
+          >
+            {/* 4 subtle precision focus reticle ticks */}
+            {!hasError && (
+              <>
+                <span className="absolute -top-[3px] left-1/2 -translate-x-1/2 w-1 h-1 bg-[#60A5FA] rounded-full opacity-80" />
+                <span className="absolute -bottom-[3px] left-1/2 -translate-x-1/2 w-1 h-1 bg-[#60A5FA] rounded-full opacity-80" />
+                <span className="absolute top-1/2 -left-[3px] -translate-y-1/2 w-1 h-1 bg-[#60A5FA] rounded-full opacity-80" />
+                <span className="absolute top-1/2 -right-[3px] -translate-y-1/2 w-1 h-1 bg-[#60A5FA] rounded-full opacity-80" />
+              </>
+            )}
+          </motion.div>
 
-        {/* A slim real-state progress list. Each check appears only after its backend milestone. */}
-        <section aria-label="Scan progress" className="mx-auto mt-7 w-full max-w-[435px] rounded-2xl border border-[#2B3B52] bg-[#111A29] px-4 py-3.5 sm:mt-8 sm:px-5 sm:py-4">
-          <div className="space-y-3">
-            {SCAN_STAGES.map((stage, index) => {
-              const complete = phase !== "error" && (index < active || phase === "ready");
-              const running = phase !== "error" && index === active && phase !== "ready";
-              return <div key={stage.id} className="flex min-h-[25px] items-center gap-3">
-                <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${complete ? "bg-emerald-500/10 text-emerald-300" :
-                  running ? "bg-blue-500/10 text-blue-300" : "text-[#5D7491]"}`}>
-                  {complete ? <Check className="h-4 w-4" aria-hidden="true"/> :
-                    running ? <LoaderCircle className={`h-4 w-4 ${reduceMotion ? "" : "animate-spin"}`} aria-hidden="true"/> :
-                    <Circle className="h-3 w-3" aria-hidden="true"/>}
-                </span>
-                <span className={`flex-1 text-[13px] font-medium ${complete || running ? "text-[#E8F0FB]" : "text-[#7389A4]"}`}>{stage.label}</span>
-                {complete && <span className="text-[10px] font-semibold text-emerald-300">Done</span>}
-              </div>;
-            })}
-          </div>
-        </section>
+          {/* Central Lens Core: Gradually clarifies and sharpens into full focus (Phase C) */}
+          <motion.div
+            animate={
+              isActivelyScanning && !shouldReduceMotion
+                ? {
+                    scale: [0.97, 0.98, 1.0, 1.0, 0.97],
+                    opacity: [0.82, 0.92, 1, 1, 0.82],
+                    filter: [
+                      "blur(0.8px)",
+                      "blur(0.3px)",
+                      "blur(0px)",
+                      "blur(0px)",
+                      "blur(0.8px)",
+                    ],
+                  }
+                : { scale: 1, opacity: 1, filter: "blur(0px)" }
+            }
+            transition={
+              isActivelyScanning && !shouldReduceMotion
+                ? {
+                    duration: 4,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    times: [0, 0.25, 0.5, 0.75, 1],
+                  }
+                : undefined
+            }
+            className={`relative w-[68px] h-[68px] sm:w-[80px] sm:h-[80px] rounded-full flex items-center justify-center border shadow-md ${
+              hasError
+                ? "bg-[#121824] border-rose-500/40 text-rose-400"
+                : "bg-[#121824] border-[#3B82F6]/35 text-[#3B82F6] shadow-[0_0_24px_-4px_rgba(59,130,246,0.35)]"
+            }`}
+          >
+            {hasError ? (
+              <AlertCircle className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2]" />
+            ) : (
+              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#3B82F6]/10 border border-[#3B82F6]/25 flex items-center justify-center">
+                <Aperture className="w-6 h-6 sm:w-[26px] sm:h-[26px] text-[#3B82F6] stroke-[1.9]" />
+              </div>
+            )}
+          </motion.div>
+        </motion.div>
 
-        {phase === "error" && (
-          <div role="alert" className="mx-auto mt-4 w-full max-w-[435px] rounded-xl border border-rose-500/25 bg-rose-500/[.07] p-4">
-            <p className="text-sm leading-relaxed text-[#F1C5CB]">{safeError(backendError)}</p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <button onClick={restart} type="button" className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full bg-[#246BFD] px-4 text-sm font-bold text-white hover:bg-blue-600">
-                <RotateCcw className="h-4 w-4" aria-hidden="true"/> Retry analysis
-              </button>
-              <button onClick={onBackToLanding} type="button" className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-full border border-[#41516B] px-4 text-sm font-semibold text-[#D0DCEB] hover:bg-[#203149]">
-                <ArrowLeft className="h-4 w-4" aria-hidden="true"/> Change website
-              </button>
-            </div>
-          </div>
-        )}
+        {/* TITLE: Looking at your website with fresh eyes. */}
+        <motion.h1
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, ease: EASE_OUT_EXPO }}
+          className="text-2xl sm:text-3xl font-extrabold text-[#F1F5F9] tracking-tight leading-[1.25] max-w-full"
+        >
+          Looking at your
+          <br />
+          website with fresh eyes.
+        </motion.h1>
 
-        {phase === "ready" && (
-          <motion.div initial={reduceMotion ? false : { opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="mx-auto mt-4 w-full max-w-[435px]">
-            <button onClick={showReport} type="button" className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-[#246BFD] px-5 text-sm font-bold text-white hover:bg-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">
-              View My Clarity Report <ArrowRight className="h-4 w-4" aria-hidden="true"/>
-            </button>
+        {/* SUBTITLE / DOMAIN PILL: Clean target URL */}
+        {cleanDomain && (
+          <motion.div
+            initial={shouldReduceMotion ? false : { opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, delay: 0.05, ease: EASE_OUT_EXPO }}
+            className="mt-3.5 max-w-full px-3.5 py-1 rounded-full bg-[#121824] border border-[#263044]"
+          >
+            <p
+              className="text-xs sm:text-sm font-medium text-[#94A3B8] truncate max-w-[260px] sm:max-w-[380px]"
+              title={cleanDomain}
+            >
+              {cleanDomain}
+            </p>
           </motion.div>
         )}
-        <p className="mx-auto mt-4 max-w-[410px] text-center text-[11px] leading-relaxed text-[#7F94B1]">
-          {phase === "ready" ? "Opening your results…" :
-            phase === "error" ? "You can retry this URL or check another website." :
-              elapsed > 35 ? "This check is taking longer than usual. No fixed completion time is guaranteed." :
-                "Inspecting accessible public content. Your results will open when analysis completes."}
-        </p>
-        <div className="mt-5 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[10px] font-medium text-[#6D85A2]" aria-label="Five analysis dimensions">
-          {SIGNALS.map((name, index) => <React.Fragment key={name}>
-            {index > 0 && <span aria-hidden="true" className="text-[#405570]">·</span>}
-            <span>{name}</span>
-          </React.Fragment>)}
-        </div>
-        <span className="sr-only" role="status" aria-live="polite">{phase === "verify" ? "Verifying website connection" :
-          phase === "read" ? "Website verified; inspecting accessible website content" :
-          phase === "evaluate" ? "Public content inspected; evaluating clarity signals" :
-          phase === "prepare" ? "Clarity signals evaluated; preparing report" :
-          phase === "ready" ? "Clarity report ready" : "Website scan failed"}</span>
+
+        {/* SUBTLE ANIMATED PROGRESS INDICATOR */}
+        <motion.div
+          initial={shouldReduceMotion ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.35, delay: 0.08, ease: EASE_OUT_EXPO }}
+          className="w-full max-w-[260px] sm:max-w-[300px] h-[3px] bg-[#263044] relative overflow-hidden mt-6 mb-7 rounded-full"
+          role="progressbar"
+          aria-label="Analysis in progress"
+          aria-busy={isActivelyScanning}
+        >
+          {hasError ? (
+            <div className="w-full h-full bg-rose-500/80 rounded-full" />
+          ) : isBackendReady ? (
+            <div className="w-full h-full bg-[#3B82F6] rounded-full" />
+          ) : (
+            <motion.div
+              className="absolute top-0 bottom-0 w-1/2 bg-gradient-to-r from-transparent via-[#60A5FA] to-[#3B82F6] rounded-full shadow-[0_0_8px_rgba(59,130,246,0.4)]"
+              initial={{ x: "-100%" }}
+              animate={{ x: "220%" }}
+              transition={{
+                duration: 1.8,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+          )}
+        </motion.div>
+
+        {/* Single polite screen-reader status */}
+        <span className="sr-only" role="status" aria-live="polite">
+          {hasError
+            ? "Check failed"
+            : `Analysis in progress: ${SCAN_STAGES[stageIndex]?.label || "Evaluating clarity"}`}
+        </span>
+
+        {/* FOUR SCANNING STAGES CHECKLIST */}
+        {!hasError ? (
+          <div className="w-full max-w-[280px] sm:max-w-[300px] flex flex-col space-y-3.5 text-left mb-2">
+            {SCAN_STAGES.map((stage, idx) => {
+              const isCompleted = isPreparing ? idx < 3 : idx < stageIndex;
+              const isActive = isPreparing ? idx === 3 : idx === stageIndex;
+
+              return (
+                <div
+                  key={stage.id}
+                  className="flex items-center gap-3 transition-colors duration-200"
+                >
+                  {/* Status Indicator */}
+                  <div className="w-5 h-5 flex items-center justify-center shrink-0">
+                    {isCompleted ? (
+                      <div className="w-4 h-4 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center">
+                        <Check className="w-2.5 h-2.5 stroke-[2.8]" />
+                      </div>
+                    ) : isActive ? (
+                      <div className="w-4 h-4 rounded-full bg-[#3B82F6]/15 border border-[#3B82F6]/40 flex items-center justify-center relative">
+                        {!shouldReduceMotion && (
+                          <span className="animate-ping absolute inline-flex h-2.5 w-2.5 rounded-full bg-[#3B82F6] opacity-40" />
+                        )}
+                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#3B82F6]" />
+                      </div>
+                    ) : (
+                      <div className="w-4 h-4 rounded-full border border-[#263044] bg-transparent" />
+                    )}
+                  </div>
+
+                  {/* Stage Label */}
+                  <span
+                    className={`text-xs sm:text-sm tracking-wide transition-colors duration-200 ${
+                      isCompleted
+                        ? "text-[#94A3B8] font-medium"
+                        : isActive
+                        ? "text-[#F1F5F9] font-semibold"
+                        : "text-slate-500 font-normal"
+                    }`}
+                  >
+                    {stage.label}
+                  </span>
+                </div>
+              );
+            })}
+
+            {/* Dynamic Time Estimate / Status Indicator */}
+            {dynamicTimeEstimate && (
+              <motion.div
+                key={dynamicTimeEstimate}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: 3 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.25 }}
+                className="pt-2.5 mt-1 border-t border-[#263044]/40 flex items-center justify-center text-center"
+              >
+                <p className="text-xs text-[#94A3B8] font-medium tracking-wide">
+                  {dynamicTimeEstimate}
+                </p>
+              </motion.div>
+            )}
+          </div>
+        ) : null}
+
+        {/* ERROR STATE: Matches dark theme and clean button controls */}
+        <AnimatePresence>
+          {hasError && (
+            <motion.div
+              initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 4 }}
+              transition={{ duration: 0.25, ease: EASE_OUT_EXPO }}
+              className="w-full mt-2"
+            >
+              <div className="p-4 bg-[#121824] border border-rose-900/50 rounded-xl mb-4 text-left shadow-lg">
+                <p className="text-xs font-semibold tracking-wider text-rose-400 uppercase mb-1">
+                  CHECK FAILED
+                </p>
+                <p className="text-xs text-rose-200/90 leading-relaxed font-normal">
+                  {safeErrorMessage}
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center justify-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={handleRetryAction}
+                  className="flex-1 min-w-[120px] rounded-full bg-[#3B82F6] hover:bg-blue-600 active:scale-[0.98] text-white font-semibold text-xs py-2.5 px-4 transition-all inline-flex items-center justify-center gap-1.5 shadow-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3B82F6]"
+                >
+                  <RotateCcw className="w-3.5 h-3.5 shrink-0" />
+                  <span>Try again</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={onBackToLanding}
+                  className="rounded-full bg-[#121824] hover:bg-[#1A2333] border border-[#263044] text-[#F1F5F9] font-medium text-xs py-2.5 px-4 transition-all inline-flex items-center justify-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5 shrink-0" />
+                  <span>Change URL</span>
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
+
+      {/* 3. BOTTOM: The 5 clarity pillars */}
+      <footer className="w-full py-6 px-4 text-center shrink-0">
+        <p className="text-xs sm:text-[13px] text-[#94A3B8]/80 font-normal tracking-wide">
+          First Impression · Audience · Value · Trust · Action
+        </p>
+      </footer>
     </div>
   );
 }

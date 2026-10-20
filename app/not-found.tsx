@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function NotFound() {
   return (
-    <div className="sl-app-theme min-h-screen bg-[#090D15] text-[#F1F5F9] flex flex-col items-center justify-center px-4 text-center">
+    <div className="min-h-screen bg-[#090D15] text-[#F1F5F9] flex flex-col items-center justify-center px-4 text-center">
       <div className="w-12 h-12 rounded-2xl bg-[#171F2D] border border-[#263044] text-white flex items-center justify-center font-bold text-xl mb-4 shadow-sm">
         S
       </div>

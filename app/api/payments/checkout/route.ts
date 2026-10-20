@@ -6,7 +6,7 @@ import {
   hasReportAccess,
   isPaymentInfrastructureConfigured,
 } from "@/server/security/reportAccess";
-import { getDodoConfig, PaymentError, dodoRequest, assertFullReportProductPrice } from "@/server/payments/dodo";
+import { getDodoConfig, PaymentError, dodoRequest } from "@/server/payments/dodo";
 import {
   saveOrder,
   indexOrder,
@@ -16,7 +16,6 @@ import {
   type CheckoutOrder,
 } from "@/server/payments/orders";
 import { paymentFailure } from "@/server/payments/http";
-import { resolveCheckoutReturnOrigin } from "@/server/payments/checkout-origin";
 
 export const dynamic = "force-dynamic";
 
@@ -57,13 +56,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (storedReport.analysisMode === "heuristic") {
-      return NextResponse.json(
-        { error: "Only a limited heuristic preview was available. Please retry when AI Full Analysis is ready." },
-        { status: 422 }
-      );
-    }
-
     if (storedReport.payment?.active) {
       return NextResponse.json({ alreadyPaid: true, reportId });
     }
@@ -77,12 +69,9 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ alreadyPaid: true, reportId });
       }
 
-      // Never reuse an old $5 checkout session. Dodo is the actual price source.
-      await assertFullReportProductPrice();
       const recentOrder = await getRecentOrder(config.environment, reportId);
       if (
         recentOrder &&
-        recentOrder.productId === config.productId &&
         recentOrder.checkoutUrl &&
         recentOrder.sessionId &&
         recentOrder.status !== "succeeded"
@@ -97,14 +86,17 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      // Only the configured canonical app URL or the server-observed request
-      // origin can receive a checkout return. Never trust Origin/Referer headers:
-      // they could send a customer's paid report return to another website.
-      // This also avoids pinning checkout to an obsolete hosting URL.
-      const origin = resolveCheckoutReturnOrigin(
-        req.nextUrl.origin,
-        process.env.NEXT_PUBLIC_APP_URL
-      );
+      const referer = req.headers.get("referer");
+      let refererOrigin: string | null = null;
+      if (referer) {
+        try { refererOrigin = new URL(referer).origin; } catch {}
+      }
+      const origin =
+        req.headers.get("origin") ||
+        refererOrigin ||
+        (req.nextUrl?.origin) ||
+        process.env.NEXT_PUBLIC_APP_URL ||
+        "https://ais-dev-3kmita5xl7cdxgwm5afweq-37033593928.asia-southeast1.run.app";
       const orderId = randomUUID();
       const returnUrl = `${origin}/?checkout=return&reportId=${encodeURIComponent(
         reportId

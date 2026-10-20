@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { analyzeWebsite } from "@/services/ai/analyzeWebsite";
 import { extractWebsiteSnapshot } from "@/lib/content-extractor";
-import { discoverAndFetchSupportingPages, discoverAndFetchLegalPages } from "@/lib/supporting-page-fetcher";
+import { discoverAndFetchSupportingPages } from "@/lib/supporting-page-fetcher";
 import { validateAndScoreAnalysis } from "@/services/validation/analysisValidator";
 import { fetchWebsiteHomepage } from "@/lib/website-fetcher";
 import { validateUrl, checkSsrf } from "@/lib/url-validator";
@@ -91,19 +91,14 @@ export async function POST(req: NextRequest) {
       baseUrl: fetchResult.finalUrl,
     });
 
-    const [supportingPagesBundle, legalPagesBundle] = await Promise.all([
-      discoverAndFetchSupportingPages(fetchResult.html, fetchResult.finalUrl, { maxPages: 3 }),
-      discoverAndFetchLegalPages(fetchResult.html, fetchResult.finalUrl),
-    ]);
-    const pagesForAnalysis = {
-      ...supportingPagesBundle,
-      candidates: [...legalPagesBundle.candidates, ...supportingPagesBundle.candidates],
-      pages: [...legalPagesBundle.pages, ...supportingPagesBundle.pages.filter(
-        page => !legalPagesBundle.pages.some(legal => legal.finalUrl === page.finalUrl)
-      )],
-    };
-    const aiAnalysis = await analyzeWebsite(snapshot, pagesForAnalysis);
-    const validated = validateAndScoreAnalysis(aiAnalysis, snapshot, pagesForAnalysis);
+    const supportingPagesBundle = await discoverAndFetchSupportingPages(
+      fetchResult.html,
+      fetchResult.finalUrl,
+      { maxPages: 3 }
+    );
+
+    const aiAnalysis = await analyzeWebsite(snapshot, supportingPagesBundle);
+    const validated = validateAndScoreAnalysis(aiAnalysis, snapshot);
 
     const stored = await saveServerReport({
       normalizedUrl: fetchResult.finalUrl,

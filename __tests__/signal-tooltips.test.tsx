@@ -22,7 +22,7 @@ async function main() {
     Trust: "How effectively your website communicates credibility and trustworthiness.",
     Action: "How clearly visitors understand what to do next.",
   };
-  check(Object.entries(CLARITY_SIGNAL_HELP).filter(([key]) => key !== "purchaseReadiness").map(([, value]) => value).join("|") === Object.values(expected).join("|"), "all five explanations match the requested copy exactly");
+  check(Object.values(CLARITY_SIGNAL_HELP).join("|") === Object.values(expected).join("|"), "all five explanations match the requested copy exactly");
 
   // Geometry tests cover corners, narrow screens, short viewports and zoomed
   // visual viewports; jsdom itself has no layout engine.

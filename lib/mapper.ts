@@ -2,8 +2,6 @@ import { FinalValidatedAnalysis } from "@/types/validatedAnalysis";
 import { SupportingContext } from "@/types/supportingContext";
 import { WebsiteSnapshot, isNavigationOrUtilityCtaLabel } from "@/lib/content-extractor";
 import { AnalysisData } from "@/components/ResultsScreen";
-import { readPurchaseReadiness } from "@/lib/purchase-readiness";
-import { buildPremiumWorkbench } from "@/lib/premium-workbench";
 
 /**
  * Maps the backend's structured FinalValidatedAnalysis and WebsiteSnapshot
@@ -54,9 +52,12 @@ export function mapBackendToFrontend(
     return s === "needs_work" ? "Needs work" : "Unclear";
   };
 
-  // Match server-authoritative overall_status; never relabel 79/100 as Good.
-  const scoreToStatus = (_score: number): "Good" | "Needs improvement" =>
-    backendAnalysis.overall_status === "clear" ? "Good" : "Needs improvement";
+  const scoreToStatus = (score: number): "Needs improvement" | "Good" | "Needs work" | "Excellent" => {
+    if (score >= 90) return "Excellent";
+    if (score >= 75) return "Good";
+    if (score >= 50) return "Needs work";
+    return "Needs improvement";
+  };
 
   const brandName = snapshot?.navigation?.brandName || cleanDomain.split(".")[0];
   const capitalizedBrand = brandName.charAt(0).toUpperCase() + brandName.slice(1);
@@ -473,21 +474,11 @@ export function mapBackendToFrontend(
     };
   });
 
-  // Free reports have redacted signal explanations; only authenticated full
-  // payloads receive the evidence/copy/priority workbench.
-  const isFullAnalysis = Object.values(backendAnalysis.signals).some(
-    signal => typeof signal?.explanation === "string" && signal.explanation.trim().length > 0
-  );
-  const premiumWorkbench = isFullAnalysis ? buildPremiumWorkbench(backendAnalysis, snapshot) : undefined;
-
   const resolvedSupportingContext =
     supportingContextOverride ?? backendAnalysis.supportingContext;
 
-  const purchaseReadiness = readPurchaseReadiness(backendAnalysis.purchase_readiness);
   return {
     domain: cleanDomain,
-    ...(purchaseReadiness ? { purchaseReadiness } : {}),
-    ...(backendAnalysis.purchase_readiness_locked === true ? { purchaseReadinessLocked: true as const } : {}),
     score: backendAnalysis.overall_score,
     scoreStatus: scoreToStatus(backendAnalysis.overall_score),
     verdict: backendAnalysis.verdict.text,
@@ -501,7 +492,6 @@ export function mapBackendToFrontend(
     risks,
     recommendation,
     otherImprovements,
-    ...(premiumWorkbench ? { premiumWorkbench } : {}),
     ...(resolvedSupportingContext
       ? { supportingContext: resolvedSupportingContext }
       : {}),

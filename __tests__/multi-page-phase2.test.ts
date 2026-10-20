@@ -386,7 +386,7 @@ describe("Multi-Page Expansion — Phase 2 Regression & Integration Tests (Tests
             <h1>Automate revenue operations for B2B sales teams</h1>
             <a href="/signup" class="btn-primary">Start Free Trial</a>
           </main>
-          <footer><p>No additional pages linked.</p></footer>
+          <footer><a href="/privacy">Privacy Policy</a></footer>
         </body>
       </html>
     `;

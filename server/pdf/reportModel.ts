@@ -1,7 +1,6 @@
 import type { StoredServerReport } from "@/server/security/reportAccess";
 import { redactAnalysisForFreeTier } from "@/server/security/reportAccess";
 import type { PdfFinding, PdfReportModel } from "@/types/pdf-report";
-import { readPurchaseReadiness } from "@/lib/purchase-readiness";
 
 const signalDefinitions = [
   ["first_impression", "First Impression", "what_is_this"],
@@ -43,7 +42,7 @@ export function buildPdfReportModel(stored: StoredServerReport, paid: boolean): 
   const model: PdfReportModel = {
     tier: paid ? "paid" : "free", url: stored.normalizedUrl,
     analysisDate: Number.isFinite(originalDate.getTime()) ? originalDate.toISOString() : null,
-    score: score(analysis.overall_score), status: analysis.overall_status === "clear" ? "Good" : "Needs improvement", verdict: text(analysis.verdict?.text),
+    score: score(analysis.overall_score), status: status(analysis.overall_status), verdict: text(analysis.verdict?.text),
     signals: signalDefinitions.map(([key, title, firstKey]) => {
       const signal = analysis.signals?.[key];
       const first = analysis.first_seconds?.[firstKey];
@@ -64,19 +63,6 @@ export function buildPdfReportModel(stored: StoredServerReport, paid: boolean): 
     }),
     freeFindings: [], understand: [], miss: [], actions: [], evidence: [],
   };
-
-  const purchase = paid ? readPurchaseReadiness(analysis.purchase_readiness) : undefined;
-  if (purchase) {
-    model.signals.push({ title: "Purchase Readiness", score: purchase.score, status: status(purchase.status), independent: true,
-      explanation: paid ? text(purchase.details?.explanation) : "", working: paid ? purchase.details?.working || [] : [],
-      unclear: paid ? unique([...(purchase.details?.hesitations || []), ...(purchase.details?.pricingAndValueIssues || [])]) : [],
-      improvements: paid ? purchase.details?.recommendations || [] : [] });
-    model.freeFindings.push({ title: "Purchase Readiness — separate assessment", paragraphs: [purchase.summary, "Not included in the Overall Clarity Score."] });
-    if (paid) {
-      purchase.details?.copyImprovements.forEach(copy => model.actions.push({title:"Purchase CTA copy suggestion",paragraphs:[`Current wording: ${copy.current}`,`Suggested wording: ${copy.suggested}`]}));
-      if (purchase.details?.limitations.length) model.actions.push({title:"Purchase assessment scope",paragraphs:purchase.details.limitations});
-    }
-  }
 
   // These are the same findings intentionally available in the free API.
   if (text(analysis.website_message?.summary)) model.freeFindings.push({ title: "Website message", paragraphs: [text(analysis.website_message.summary)] });

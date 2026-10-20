@@ -7,7 +7,6 @@ import {
 import { getOrder } from "@/server/payments/orders";
 import { verifyCheckoutOrder } from "@/server/payments/fulfillment";
 import { paymentFailure } from "@/server/payments/http";
-import { getDodoConfig } from "@/server/payments/dodo";
 
 export const dynamic = "force-dynamic";
 
@@ -51,16 +50,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: "Order does not match report" },
         { status: 404 }
-      );
-    }
-
-    // Validate the checkout environment before the already-paid fast path.
-    // A test-mode payment must NEVER verify in a live-mode deployment.
-    if (order.environment !== getDodoConfig().environment ||
-      (storedReport.payment?.active && storedReport.payment.environment !== order.environment)) {
-      return NextResponse.json(
-        { error: "Checkout belongs to a different payment environment" },
-        { status: 409 }
       );
     }
 

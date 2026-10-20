@@ -1,7 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { mapBackendToFrontend } from "@/lib/mapper";
-import { trackFunnelEvent } from "@/lib/ui-funnel-events";
 import { clearPendingCheckout, paymentJson, readPendingCheckout, readReportToken, rememberReportAccess } from "@/lib/payment-checkout";
 
 function clearPaymentReturnParameters() {
@@ -25,7 +24,7 @@ export function useReportPayments(analysisData: any, scanController: { restoreSe
     if (result.unlocked !== true || result.reportId !== reportId || !result.analysis || !result.snapshot) throw new Error("Your full report is not available yet. Please try verification again.");
     const mapped = mapBackendToFrontend(result.analysis, result.normalizedUrl, result.snapshot, result.supportingContext);
     if (signal?.aborted) return;
-    scanController.restoreSession(result.normalizedUrl, { ...mapped, reportId, reportToken: token, isFreeTierOnly: false, ...(result.scanCoverage ? { scanCoverage: result.scanCoverage } : {}) });
+    scanController.restoreSession(result.normalizedUrl, { ...mapped, reportId, reportToken: token, isFreeTierOnly: false });
     setUnlockedReportId(reportId);
   }, [scanController]);
 
@@ -56,18 +55,16 @@ export function useReportPayments(analysisData: any, scanController: { restoreSe
           await loadPaidReport(reportId, token, controller.signal);
           if (controller.signal.aborted) return;
           clearPendingCheckout(reportId);
-          trackFunnelEvent("payment_verified");
           setPaymentState("success");
           setPaymentMessage("Payment verified. Your full analysis is unlocked.");
           clearPaymentReturnParameters();
           return;
         }
-        const providerStatus = typeof result.status === "string" ? result.status : result.paymentStatus;
-        if (["failed", "cancelled", "refunded"].includes(providerStatus)) {
+        if (["failed", "cancelled", "refunded"].includes(result.paymentStatus)) {
           clearPendingCheckout(reportId);
           clearPaymentReturnParameters();
           setPaymentState("failed");
-          setPaymentMessage(providerStatus === "refunded" ? "This payment was refunded. Report access is locked." : "Payment was not completed. You can try checkout again.");
+          setPaymentMessage(result.paymentStatus === "refunded" ? "This payment was refunded. Report access is locked." : "Payment was not completed. You can try checkout again.");
           return;
         }
         if (attempt < 4) await new Promise<void>((resolve, reject) => {
