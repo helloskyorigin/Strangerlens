@@ -15,12 +15,13 @@ assert.equal(validateFullReportDodoProduct(null),false);
 
 const files=["app/page.tsx","components/ResultsScreen.tsx","components/PostScanUpgradeModal.tsx",
   "components/CompleteReportPreview.tsx","components/landing/FullReportTour.tsx",
-  "components/landing/InteractiveReportPreview.tsx","lib/legal-config.ts","PAYMENT_SETUP.md"];
+  "components/landing/InteractiveReportPreview.tsx","lib/legal-config.ts"];
 for(const path of files){
   const s=readFileSync(path,"utf8");
   assert.ok(!/\$5\b/.test(s),`No stale $5 offer in ${path}`);
   assert.ok(s.includes("$3")||s.includes("price: 3"),`$3 price exists in ${path}`);
 }
+assert.ok(readFileSync("PAYMENT_SETUP.md","utf8").includes("$3"),"Migration documentation describes new $3 product.");
 const checkout=readFileSync("app/api/payments/checkout/route.ts","utf8");
 assert.ok(checkout.includes("await assertFullReportProductPrice()"));
 assert.ok(checkout.includes("recentOrder.productId === config.productId"),"Old pending checkout must not be reused.");
