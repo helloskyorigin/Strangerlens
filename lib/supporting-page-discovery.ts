@@ -41,6 +41,8 @@ export interface DiscoveredSupportingPageCandidate {
 
 export interface DiscoveryOptions {
   maxPages?: number;
+  /** Restrict discovery to first-party core policy links for Trust validation. */
+  onlyLegalPolicies?: boolean;
 }
 
 const TRACKING_QUERY_PARAMS = new Set([
@@ -441,9 +443,13 @@ export function isExcludedSupportingPath(
     return { excluded: true, reason: "LOCALE_ROOT_SWITCHER" };
   }
 
+  // Core legal policies are useful Trust evidence, not boilerplate traps.
+  const coreLegal = ["privacy_policy", "terms_of_service", "refund_policy"].includes(
+    classifySupportingPageCandidate(pathname, anchorText).pageType
+  );
   for (const seg of segments) {
     const cleanSeg = seg.replace(/\.(html?|php)$/i, "");
-    if (EXCLUDED_PATH_SEGMENTS.has(cleanSeg)) {
+    if (EXCLUDED_PATH_SEGMENTS.has(cleanSeg) && !(coreLegal && cleanSeg === "legal")) {
       return { excluded: true, reason: `EXCLUDED_SEGMENT:${cleanSeg}` };
     }
 
@@ -463,8 +469,8 @@ export function isExcludedSupportingPath(
       cleanSeg.startsWith("signup-") ||
       cleanSeg.startsWith("sign-in") ||
       cleanSeg.startsWith("sign-up") ||
-      cleanSeg.startsWith("privacy-") ||
-      cleanSeg.startsWith("terms-") ||
+      (!coreLegal && cleanSeg.startsWith("privacy-")) ||
+      (!coreLegal && cleanSeg.startsWith("terms-")) ||
       cleanSeg.startsWith("cookie-") ||
       cleanSeg.startsWith("blog-") ||
       cleanSeg.startsWith("wp-")
@@ -481,9 +487,6 @@ export function isExcludedSupportingPath(
     lowerText === "sign in" ||
     lowerText === "sign up" ||
     lowerText === "register" ||
-    lowerText === "privacy policy" ||
-    lowerText === "terms of service" ||
-    lowerText === "terms & conditions" ||
     lowerText === "cookie policy" ||
     lowerText === "forgot password"
   ) {
@@ -760,8 +763,15 @@ export function discoverSupportingPages(
   }
 
   const maxHtmlChars = SERVER_LIMITS.WEBSITE_MAX_HTML_CHARS;
+  // Policy links are frequently in the footer, after a very long homepage.
+  // Prefer the final bounded portion for legal-only discovery rather than
+  // silently discarding footer links outside the standard extraction window.
   const boundedHtml =
-    html.length > maxHtmlChars ? html.slice(0, maxHtmlChars) : html;
+    html.length > maxHtmlChars
+      ? options.onlyLegalPolicies
+        ? html.slice(-maxHtmlChars)
+        : html.slice(0, maxHtmlChars)
+      : html;
 
   const $ = cheerio.load(boundedHtml);
 
@@ -852,7 +862,9 @@ export function discoverSupportingPages(
   });
 
   // Sort all deduplicated candidates by relevanceScore DESC, then appearance order ASC
-  const sortedCandidates = Array.from(candidateMap.values()).sort((a, b) => {
+  const sortedCandidates = Array.from(candidateMap.values())
+    .filter((candidate) => !options.onlyLegalPolicies || candidate.categoryGroup === "legal_policies")
+    .sort((a, b) => {
     if (b.relevanceScore !== a.relevanceScore) {
       return b.relevanceScore - a.relevanceScore;
     }

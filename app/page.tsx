@@ -13,13 +13,20 @@ import {
   Shield,
   Users,
   Sparkles,
+  ShoppingBag,
 } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import ScanScreen from "@/components/ScanScreen";
+import ChromaticAtmosphere from "@/components/landing/ChromaticAtmosphere";
+import InteractiveReportPreview from "@/components/landing/InteractiveReportPreview";
+import FullReportTour from "@/components/landing/FullReportTour";
+import { LandingThemeSwitcher } from "@/components/landing/LandingThemeSwitcher";
 import ResultsScreen from "@/components/ResultsScreen";
+import ClaritySignalTooltip from "@/components/ClaritySignalTooltip";
 import { useReportPayments } from "@/hooks/useReportPayments";
 import { validateClientUrl } from "@/lib/url-client-validator";
 import { createScanFlowController } from "@/lib/scan-flow-controller";
+import { trackFunnelEvent } from "@/lib/ui-funnel-events";
 import {
   Reveal,
   StaggerContainer,
@@ -47,7 +54,7 @@ interface PricingPlan {
   isPaid: boolean;
 }
 
-// PRICING CONFIG (Free and $5 One-Time Full Clarity Report)
+// PRICING CONFIG (Free and $3 One-Time Full Clarity Report)
 const PRICING_PLANS: PricingPlan[] = [
   {
     id: "free",
@@ -56,11 +63,11 @@ const PRICING_PLANS: PricingPlan[] = [
     paymentLabel: "FREE",
     badge: null,
     positioning: "Instant clarity evaluation.",
-    description: "Discover your overall website clarity score and five signal statuses with zero friction.",
+    description: "Discover your overall website clarity score and five core signal scores. Purchase Readiness is a conditional premium signal.",
     features: [
       "Overall Website Clarity Score (0–100)",
-      "Five Clarity Signal Scores",
-      "Five Signal Statuses (Clear / Partly clear / Needs work)",
+      "Five Core Signal Scores and Statuses",
+      "Signal Statuses (Clear / Partly clear / Needs work)",
     ],
     cta: "Analyze My Website Free",
     disabledCta: "Analyze My Website Free",
@@ -70,16 +77,18 @@ const PRICING_PLANS: PricingPlan[] = [
   {
     id: "complete",
     name: "Unlock Your Full Analysis",
-    price: 5,
+    price: 3,
     paymentLabel: "ONE-TIME",
     badge: "FULL ANALYSIS",
     positioning: "Actionable clarity & diagnostics.",
     description: "Go beyond your clarity scores. Discover what's working, what's unclear, and how to improve your website.",
     features: [
-      "Detailed Signal Diagnostics",
-      "What's Working & What's Unclear",
-      "Actionable Improvements",
-      "First 5 Seconds (Understand vs Miss)",
+      "Five Detailed Signal Diagnostics",
+      "Evidence-to-Fix (verified wording when available)",
+      "Smart Priority & Action Plan",
+      "Better Copy Studio (review, edit & copy)",
+      "First 5 Seconds + Premium PDF",
+      "Purchase Readiness (when applicable)",
     ],
     cta: "Check Your Website First",
     disabledCta: "Check Your Website First",
@@ -93,7 +102,7 @@ const FAQ_ITEMS = [
   {
     question: "What does StrangerLens analyse?",
     answer:
-      "StrangerLens is an AI-powered website first-impression clarity analyzer. It evaluates website communication across five core visitor signals — First Impression, Audience, Value, Trust, and Action — using the content actually inspected from your URL.",
+      "StrangerLens is an AI-powered website first-impression clarity analyzer. It evaluates First Impression, Audience, Value, Trust, and Action using inspected website content. A sixth signal, Purchase Readiness, appears when a genuine paid offering is identified. Its separate score does not affect the Overall Clarity Score.",
   },
   {
     question: "Does StrangerLens work with any website?",
@@ -113,12 +122,12 @@ const FAQ_ITEMS = [
   {
     question: "What is included in the free analysis?",
     answer:
-      "The Free Preview ($0) gives you your Overall Website Clarity Score, five Clarity Signal Scores (First Impression, Audience, Value, Trust, Action), and five Signal Statuses with zero signup or credit card required.",
+      "The Free Preview ($0) gives you your Overall Website Clarity Score and five core signal scores and statuses with zero signup or credit card required. When paid products, subscriptions or services are identified, Purchase Readiness appears as a locked premium card. Its separate score and findings unlock with verified Full Analysis.",
   },
   {
     question: "What does Full Analysis cost?",
     answer:
-      "Full Analysis costs $5 per report, paid once with no subscription. Run a free preview first, then unlock detailed signal diagnostics, actionable improvements, and the First 5 Seconds breakdown. Checkout availability is shown on your report.",
+      "Full Analysis costs $3 per report, paid once with no subscription. Run a free preview first, then unlock five detailed signal analyses, Evidence-to-Fix findings with verified quotes when available, a Smart Priority plan, an editable Better Copy Studio, and the First 5 Seconds breakdown. Checkout availability is shown on your report.",
   },
   {
     question: "Do I need to create an account?",
@@ -130,6 +139,7 @@ const FAQ_ITEMS = [
 const NAV_ITEMS = [
   { label: "Product", href: "#product" },
   { label: "How it works", href: "#how-it-works" },
+  { label: "Full report", href: "#full-report-demo" },
   { label: "Pricing", href: "#pricing" },
   { label: "FAQ", href: "#faq" },
   { label: "My Reports", href: "/my-reports" },
@@ -151,21 +161,33 @@ export default function LandingPage() {
   }, []);
 
 
+  useEffect(() => {
+    if (isMounted && currentView === "landing") trackFunnelEvent("landing_view");
+  }, [isMounted, currentView]);
+
   // API Integration States
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
   const [isPending, setIsPending] = useState<boolean>(false);
+  const [verifiedSite, setVerifiedSite] = useState<{domain:string;httpStatus:number|null}|null>(null);
+  const [scanMilestone, setScanMilestone] = useState<import("@/lib/scan-flow-controller").ScanMilestone>("connecting");
   const [backendError, setBackendError] = useState<string | null>(null);
   const [analysisData, setAnalysisData] = useState<any>(null);
+  // Fresh-scan-only upsell: never auto-open on restoring an existing report.
+  const [postScanOfferReportId, setPostScanOfferReportId] = useState<string | null>(null);
+  const [landingSignalTooltip, setLandingSignalTooltip] = useState<string | null>(null);
 
   useEffect(() => {
-    if (analysisData?.reportId) {
-       const saved = JSON.parse(localStorage.getItem("strangerlens_reports") || "[]");
-       if (!saved.some((r: any) => r.reportId === analysisData.reportId)) {
-         saved.push({ reportId: analysisData.reportId });
-         localStorage.setItem("strangerlens_reports", JSON.stringify(saved));
-       }
-    }
-  }, [analysisData]);
+    if (!analysisData?.reportId) return;
+    // Private browsing, storage restrictions or a corrupted legacy list must
+    // never crash a successful scan or block a customer's paid report.
+    try {
+      const parsed = JSON.parse(localStorage.getItem("strangerlens_reports") || "[]");
+      const saved: Array<{ reportId: string }> = Array.isArray(parsed) ? parsed : [];
+      if (!saved.some((entry) => entry?.reportId === analysisData.reportId)) {
+        localStorage.setItem("strangerlens_reports", JSON.stringify([...saved, { reportId: analysisData.reportId }]));
+      }
+    } catch { /* Report access uses its separate server-verified token store. */ }
+  }, [analysisData?.reportId]);
 
   // FAQ accordion state — all answers closed by default
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
@@ -194,6 +216,8 @@ export default function LandingPage() {
         setCurrentView(nextState.currentView);
         setIsVerifying(nextState.isVerifying);
         setIsPending(nextState.isPending);
+        setVerifiedSite(nextState.verifiedSite);
+        setScanMilestone(nextState.scanMilestone);
         setErrorMessage(nextState.errorMessage);
         setBackendError(nextState.backendError);
         setAnalysisData(nextState.analysisData);
@@ -390,12 +414,15 @@ export default function LandingPage() {
 
   const handleAnalyze = async (e?: React.FormEvent, overrideUrl?: string) => {
     if (e) e.preventDefault();
+    trackFunnelEvent("scan_submitted");
     payments.cancelPaymentFlow();
+    setPostScanOfferReportId(null);
     if (typeof window !== "undefined") {
       window.history.pushState({ strangerLens: true, view: "scan" }, "");
     }
     await scanController.startScan(overrideUrl);
-    if (scanController.getState().errorMessage) {
+    if (scanController.getState().errorMessage || scanController.getState().backendError) {
+      trackFunnelEvent("scan_failed");
       if (typeof window !== "undefined") {
         window.history.replaceState({ strangerLens: true, view: "landing" }, "");
       }
@@ -420,14 +447,14 @@ export default function LandingPage() {
             animate={{ opacity: 1 }}
             exit={shouldReduceMotion ? {} : { opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="w-full min-h-screen flex flex-col bg-[#090D15] text-[#F1F5F9]"
+            className="landing-v3 w-full min-h-screen flex flex-col bg-[#090D15] text-[#F1F5F9]"
           >
             {/* STICKY HEADER */}
             <motion.header
               initial={shouldReduceMotion ? false : { opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, ease: EASE_OUT_EXPO }}
-              className="w-full bg-[#090D15]/85 backdrop-blur-md border-b border-[#263044] sticky top-0 z-50 transition-colors"
+              className="sl-landing-header w-full bg-[#090D15]/85 backdrop-blur-md border-b border-[#263044] sticky top-0 z-50 transition-colors"
             >
               <div className="max-w-[1180px] mx-auto px-4 sm:px-6 md:px-8 h-[64px] sm:h-[72px] flex items-center justify-between gap-2 sm:gap-4">
                 <a
@@ -454,9 +481,9 @@ export default function LandingPage() {
                 {/* Desktop Navigation */}
                 <nav
                   aria-label="Primary Navigation"
-                  className="hidden md:flex items-center gap-3 lg:gap-6 xl:gap-8 text-sm font-medium text-[#94A3B8]"
+                  className="hidden lg:flex items-center gap-3 lg:gap-6 xl:gap-8 text-sm font-medium text-[#94A3B8]"
                 >
-                  {NAV_ITEMS.map((item) => (
+                  {NAV_ITEMS.filter((item) => item.href !== "/my-reports").map((item) => (
                     <a
                       key={item.href}
                       href={item.href}
@@ -469,10 +496,11 @@ export default function LandingPage() {
                   <Link href="/my-reports" className="rounded py-1 whitespace-nowrap hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#246BFD]">My Reports</Link>
                 </nav>
 
-                <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+                <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                  <div className="hidden sm:block"><LandingThemeSwitcher /></div>
                   <button
                     onClick={scrollToInput}
-                    className="group rounded-full bg-[#246BFD] hover:bg-blue-600 active:scale-[0.97] text-white text-xs sm:text-sm font-medium px-4 sm:px-5 py-2 sm:py-2.5 transition-all duration-200 inline-flex items-center gap-1.5 shadow-md shadow-blue-500/20 cursor-pointer whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#246BFD] focus-visible:ring-offset-2"
+                    className="sl-v3-primary group rounded-full bg-[#246BFD] hover:bg-blue-600 active:scale-[0.97] text-white text-xs sm:text-sm font-medium px-4 sm:px-5 py-2 sm:py-2.5 transition-all duration-200 inline-flex items-center gap-1.5 shadow-md shadow-blue-500/20 cursor-pointer whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#246BFD] focus-visible:ring-offset-2"
                   >
                     <span>Try for free</span>
                     <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
@@ -484,7 +512,7 @@ export default function LandingPage() {
                     ref={hamburgerButtonRef}
                     type="button"
                     onClick={() => setMobileMenuOpen((prev) => !prev)}
-                    className="md:hidden w-10 h-10 rounded-xl text-[#94A3B8] hover:text-white hover:bg-[#171F2D] active:scale-95 transition-all flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#246BFD]"
+                    className="lg:hidden w-10 h-10 rounded-xl text-[#94A3B8] hover:text-white hover:bg-[#171F2D] active:scale-95 transition-all flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#246BFD]"
                     aria-label={
                       mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"
                     }
@@ -508,7 +536,7 @@ export default function LandingPage() {
                   role="dialog"
                   aria-modal="true"
                   aria-label="Mobile Navigation"
-                  className="fixed inset-0 top-[64px] sm:top-[72px] z-40 md:hidden flex flex-col"
+                  className="fixed inset-0 top-[64px] sm:top-[72px] z-40 lg:hidden flex flex-col"
                 >
                   {/* Blurred & Dimmed Backdrop */}
                   <motion.div
@@ -541,7 +569,7 @@ export default function LandingPage() {
                       ease: EASE_OUT_EXPO,
                     }}
                     onClick={(e) => e.stopPropagation()}
-                    className="relative z-10 w-full bg-[#121824]/95 backdrop-blur-2xl border-b border-[#263044] shadow-[0_24px_48px_-12px_rgba(0,0,0,0.6)] rounded-b-3xl px-5 pt-4 pb-6 overflow-y-auto max-h-[calc(100dvh-64px)] text-[#F1F5F9]"
+                    className="sl-mobile-menu relative z-10 w-full bg-[#121824]/95 backdrop-blur-2xl border-b border-[#263044] shadow-[0_24px_48px_-12px_rgba(0,0,0,0.6)] rounded-b-3xl px-5 pt-4 pb-6 overflow-y-auto max-h-[calc(100dvh-64px)] text-[#F1F5F9]"
                   >
                     <motion.nav
                       initial="hidden"
@@ -559,7 +587,7 @@ export default function LandingPage() {
                       aria-label="Mobile Navigation"
                       className="flex flex-col space-y-1"
                     >
-                      {NAV_ITEMS.map((item) => (
+                      {NAV_ITEMS.filter((item) => item.href !== "/my-reports").map((item) => (
                         <motion.a
                           key={item.href}
                           href={item.href}
@@ -578,6 +606,10 @@ export default function LandingPage() {
                           <ArrowRight className="w-4 h-4 text-[#64748B] group-hover:text-[#3B82F6] group-hover:translate-x-0.5 transition-all" />
                         </motion.a>
                       ))}
+                      <div className="flex items-center justify-between gap-3 border-t border-[#263044] px-4 py-3">
+                        <span className="text-sm font-semibold text-[#F1F5F9]">Appearance</span>
+                        <LandingThemeSwitcher />
+                      </div>
                       <Link href="/my-reports" onClick={() => setMobileMenuOpen(false)} className="flex min-h-[48px] items-center justify-between rounded-2xl px-4 py-3 text-base font-semibold text-[#F1F5F9] hover:bg-[#171F2D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#246BFD]">
                         My Reports <ArrowRight aria-hidden="true" className="h-4 w-4 text-[#64748B]" />
                       </Link>
@@ -627,8 +659,9 @@ export default function LandingPage() {
 
             <main className="flex-1 w-full max-w-[1180px] mx-auto px-4 sm:px-6 md:px-8">
               {/* HERO SECTION — Side-by-side two-column layout on desktop, stacked on mobile */}
-              <section className="pt-7 pb-11 sm:pt-12 sm:pb-16 md:pt-14 md:pb-18 lg:pt-20 lg:pb-22 grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-8 sm:gap-10 lg:gap-12 items-center">
-                <div className="w-full flex flex-col items-start text-left min-w-0">
+              <section className="sl-hero-v3 flex flex-col items-center gap-8 sm:gap-10">
+                <ChromaticAtmosphere variant="hero" />
+                <div className="sl-hero-content mx-auto w-full max-w-[920px] flex flex-col items-center text-center min-w-0">
                   {/* 1. Eyebrow with subtle blur-to-sharp entrance */}
                   <motion.div
                     initial={
@@ -644,11 +677,11 @@ export default function LandingPage() {
                     }}
                     className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold tracking-wider text-[#3B82F6] uppercase bg-[#171F2D] mb-4 sm:mb-5 border border-[#263044]"
                   >
-                    AI WEBSITE FIRST-IMPRESSION ANALYZER
+                    FOR FOUNDERS &amp; WEBSITE BUILDERS
                   </motion.div>
 
                   {/* 2. Staggered Hero Headline Lines */}
-                  <h1 className="text-[32px] min-[375px]:text-4xl sm:text-5xl lg:text-[54px] font-extrabold text-white tracking-tight leading-[1.09] mb-4 sm:mb-5 [text-wrap:balance]">
+                  <h1 className="text-[34px] min-[375px]:text-[40px] sm:text-[56px] lg:text-[72px] font-extrabold text-white tracking-tight leading-[1.09] mb-4 sm:mb-5 [text-wrap:balance]">
                     <motion.span
                       initial={shouldReduceMotion ? false : { opacity: 0, y: 14 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -659,7 +692,7 @@ export default function LandingPage() {
                       }}
                       className="block"
                     >
-                      Does Your Website
+                      You Know Your Website.
                     </motion.span>
                     <motion.span
                       initial={shouldReduceMotion ? false : { opacity: 0, y: 14 }}
@@ -671,8 +704,8 @@ export default function LandingPage() {
                       }}
                       className="block"
                     >
-                      Make Sense to a{" "}
-                      <span className="text-[#3B82F6]">Stranger?</span>
+                      But Do{" "}
+                      <span className="sl-hero-accent text-[#3B82F6]">Visitors?</span>
                     </motion.span>
                   </h1>
 
@@ -685,9 +718,9 @@ export default function LandingPage() {
                       delay: 0.3,
                       ease: EASE_OUT_EXPO,
                     }}
-                    className="text-[15px] sm:text-lg text-[#94A3B8] leading-relaxed mb-6 sm:mb-7 max-w-lg font-normal"
+                    className="text-[15px] sm:text-lg text-[#94A3B8] leading-relaxed mb-6 sm:mb-7 max-w-[640px] font-normal"
                   >
-                    See your website through a stranger&apos;s eyes. Get an AI-powered first-impression clarity review to uncover what&apos;s clear, what confuses first-time visitors, and how to improve.
+                    Find out what first-time visitors understand, what confuses them, and where your homepage could communicate more clearly. Start with five free clarity scores.
                   </motion.p>
 
                   {/* 4. URL Input Pill & Primary Hero CTA */}
@@ -704,10 +737,10 @@ export default function LandingPage() {
                       delay: 0.38,
                       ease: EASE_OUT_EXPO,
                     }}
-                    className="w-full max-w-lg"
+                    className="sl-url-form w-full max-w-[650px]"
                   >
                     <div
-                      className={`relative flex flex-col sm:flex-row md:flex-col lg:flex-row items-stretch lg:items-center bg-[#121824] rounded-3xl sm:rounded-full md:rounded-3xl lg:rounded-full border transition-all duration-200 p-2 sm:p-1.5 sm:pl-5 md:p-2 lg:p-1.5 lg:pl-5 ${
+                      className={`sl-url-frame relative flex flex-col sm:flex-row items-stretch sm:items-center bg-[#121824] rounded-3xl sm:rounded-full border transition-all duration-200 p-2 sm:p-1.5 sm:pl-5 ${
                         errorMessage || urlValidation.status === "invalid"
                           ? "border-rose-500 ring-4 ring-rose-500/20 shadow-sm"
                           : urlValidation.status === "valid"
@@ -726,14 +759,23 @@ export default function LandingPage() {
                         <input
                           ref={inputRef}
                           type="text"
+                          inputMode="url"
+                          autoComplete="url"
+                          autoCapitalize="none"
+                          autoCorrect="off"
+                          spellCheck={false}
+                          enterKeyHint="go"
                           disabled={isVerifying || isPending}
                           value={url}
-                          onFocus={() => setIsInputFocused(true)}
+                          onFocus={() => {
+                            if (!isInputFocused) trackFunnelEvent("url_input_focused");
+                            setIsInputFocused(true);
+                          }}
                           onBlur={() => setIsInputFocused(false)}
                           onChange={(e) => {
                             scanController.setUrl(e.target.value);
                           }}
-                          placeholder="https://yourwebsite.com"
+                          placeholder="yourwebsite.com"
                           className="w-full min-w-0 bg-transparent text-white placeholder:text-[#64748B] text-sm sm:text-base outline-none font-normal pr-2 disabled:opacity-75"
                           aria-label="Website URL"
                         />
@@ -743,19 +785,19 @@ export default function LandingPage() {
                         disabled={
                           isVerifying || isPending || urlValidation.status === "invalid"
                         }
-                        className={`group mt-1.5 sm:mt-0 md:mt-1.5 lg:mt-0 w-full sm:w-auto md:w-full lg:w-auto min-h-[44px] sm:min-h-[46px] px-4 sm:px-5 py-2.5 rounded-full font-semibold text-xs sm:text-[13px] flex items-center justify-center gap-1.5 shrink-0 whitespace-nowrap transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#246BFD] focus-visible:ring-offset-2 ${
+                        className={`sl-v3-primary group mt-1.5 sm:mt-0 w-full sm:w-auto min-h-[44px] sm:min-h-[46px] px-4 sm:px-5 py-2.5 rounded-full font-semibold text-xs sm:text-[13px] flex items-center justify-center gap-1.5 shrink-0 whitespace-nowrap transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#246BFD] focus-visible:ring-offset-2 ${
                           urlValidation.status === "invalid"
                             ? "bg-[#171F2D] text-[#64748B] cursor-not-allowed shadow-none border border-[#263044]"
                             : isVerifying
                             ? "bg-[#246BFD] text-white opacity-90 cursor-wait"
                             : "bg-[#246BFD] hover:bg-blue-600 active:scale-[0.98] text-white shadow-md shadow-blue-500/25"
                         }`}
-                        aria-label="Analyze My Website Free"
+                        aria-label="Check My Website Free"
                       >
                         {isVerifying && (
                           <Loader2 className="w-4 h-4 animate-spin text-white shrink-0" />
                         )}
-                        <span>Analyze My Website Free →</span>
+                        <span>{isVerifying ? "Connecting to Website…" : "Check My Website Free →"}</span>
                       </button>
                     </div>
 
@@ -783,137 +825,28 @@ export default function LandingPage() {
                       delay: 0.46,
                       ease: EASE_OUT_EXPO,
                     }}
-                    className="mt-3.5 text-xs sm:text-[13px] text-[#94A3B8] font-medium leading-relaxed"
+                    className="sl-url-reassurance text-[#94A3B8] font-medium"
                   >
-                    No signup required · AI-powered clarity review · Five clarity signals
+                    Free scan · No signup · Full report $3
                   </motion.p>
                 </div>
 
-                {/* 6. Right Column — Final Product Report Preview */}
+                {/* Real interactive example — illustrative content only. */}
                 <motion.div
-                  initial={
-                    shouldReduceMotion
-                      ? false
-                      : { opacity: 0, y: 22, scale: 0.98 }
-                  }
+                  initial={shouldReduceMotion ? false : { opacity: 0, y: 22, scale: 0.98 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{
-                    duration: 0.65,
-                    delay: 0.24,
-                    ease: EASE_OUT_EXPO,
-                  }}
-                  className="w-full min-w-0 flex justify-center md:justify-end"
-                >
-                  <div className="w-full bg-[#121824] border border-[#263044] rounded-3xl p-4 sm:p-6 shadow-[0_20px_50px_-15px_rgba(9,13,21,0.5)] text-[#F1F5F9]">
-                    {/* A. Card Header */}
-                    <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[#263044] mb-3.5">
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-7 h-7 rounded-lg bg-[#3B82F6]/15 text-[#3B82F6] flex items-center justify-center shrink-0">
-                          <Sparkles className="w-4 h-4" />
-                        </div>
-                        <div className="min-w-0">
-                          <span className="font-extrabold text-[#F1F5F9] text-sm sm:text-base tracking-tight block">
-                            Your Website Clarity
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-bold text-amber-400 bg-amber-500/10 px-2.5 sm:px-3 py-1 rounded-full shrink-0 border border-amber-500/20">
-                          Overall Score: 69/100 · Needs Improvement
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* B. Five Clarity Signals in Preview (Matching exact ResultsScreen responsive layout) */}
-                    <div className="bg-[#121824] rounded-xl overflow-hidden divide-y divide-[#263044]/70 space-y-2">
-                      {[
-                        { label: "First Impression", score: 85, status: "Clear", color: "bg-emerald-500", text: "text-emerald-400", dot: "bg-emerald-400" },
-                        { label: "Audience", score: 58, status: "Partly clear", color: "bg-amber-500", text: "text-amber-400", dot: "bg-amber-400" },
-                        { label: "Value", score: 72, status: "Understandable", color: "bg-emerald-500", text: "text-emerald-400", dot: "bg-emerald-400" },
-                        { label: "Trust", score: 30, status: "Unclear", color: "bg-rose-500", text: "text-rose-400", dot: "bg-rose-400" },
-                        { label: "Action", score: 90, status: "Clear", color: "bg-emerald-500", text: "text-emerald-400", dot: "bg-emerald-400" },
-                      ].map((sig) => (
-                        <div
-                          key={sig.label}
-                          className="bg-[#171F2D] border border-[#263044] rounded-xl p-3 sm:p-4.5 transition-colors hover:border-[#384660]"
-                        >
-                          {/* Mobile Layout (< sm) */}
-                          <div className="sm:hidden space-y-2">
-                            <div className="flex items-center justify-between">
-                              <span className="font-medium text-sm text-[#F1F5F9]">{sig.label}</span>
-                              <span className="font-semibold text-sm text-white">{sig.score}%</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <span className={`w-1.5 h-1.5 rounded-full ${sig.dot}`} aria-hidden="true" />
-                              <span className={`text-xs font-normal ${sig.text}`}>
-                                {sig.status}
-                              </span>
-                            </div>
-                            <div className="w-full h-1.5 bg-[#090D15] border border-[#263044]/40 rounded-full overflow-hidden mt-1.5">
-                              <div
-                                className={`h-full rounded-full transition-all duration-300 ${sig.color}`}
-                                style={{ width: `${Math.min(100, Math.max(0, sig.score))}%` }}
-                              />
-                            </div>
-                          </div>
-
-                          {/* Desktop Layout (>= sm) */}
-                          <div className="hidden sm:flex items-center justify-between">
-                            <span className="font-medium text-[#F1F5F9]">{sig.label}</span>
-                            <div className="flex items-center gap-4">
-                              <div className="text-right">
-                                <div className="font-semibold text-white text-sm">{sig.score}%</div>
-                                <div className={`text-xs font-medium flex items-center justify-end gap-1.5 ${sig.text}`}>
-                                  <span className={`w-1.5 h-1.5 rounded-full ${sig.dot}`} aria-hidden="true" />
-                                  <span>{sig.status}</span>
-                                </div>
-                              </div>
-                              <div className="w-20 h-1.5 bg-[#090D15] border border-[#263044]/40 rounded-full overflow-hidden">
-                                <div
-                                  className={`h-full rounded-full transition-all duration-300 ${sig.color}`}
-                                  style={{ width: `${Math.min(100, Math.max(0, sig.score))}%` }}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* C. Premium Preview Area (Why This Score, What's Working, Unclear, First 5 Seconds) */}
-                    <div className="rounded-2xl bg-[#171F2D] border border-[#263044] p-3 sm:p-3.5 space-y-2 text-xs">
-                      <div className="flex items-center justify-between font-semibold border-b border-[#263044] pb-2 text-[11px] sm:text-xs">
-                        <span className="text-[#94A3B8]">Full Analysis Sections</span>
-                        <span className="text-[#3B82F6] font-bold">$5 One-Time</span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 pt-0.5 text-[11px] sm:text-xs text-[#F1F5F9]">
-                        <div className="bg-[#121824] border border-[#263044] rounded-lg p-2 sm:p-2.5">
-                          <span className="font-bold text-[#3B82F6] block mb-0.5">Why This Score?</span>
-                          <span className="text-[#94A3B8] text-[10px] sm:text-[11px] leading-tight block">Deep signal rationale</span>
-                        </div>
-                        <div className="bg-[#121824] border border-[#263044] rounded-lg p-2 sm:p-2.5">
-                          <span className="font-bold text-emerald-400 block mb-0.5">What{"'"}s Working?</span>
-                          <span className="text-[#94A3B8] text-[10px] sm:text-[11px] leading-tight block">Strong visitor cues</span>
-                        </div>
-                        <div className="bg-[#121824] border border-[#263044] rounded-lg p-2 sm:p-2.5">
-                          <span className="font-bold text-amber-400 block mb-0.5">What{"'"}s Unclear?</span>
-                          <span className="text-[#94A3B8] text-[10px] sm:text-[11px] leading-tight block">Friction &amp; doubt points</span>
-                        </div>
-                        <div className="bg-[#121824] border border-[#263044] rounded-lg p-2 sm:p-2.5">
-                          <span className="font-bold text-[#3B82F6] block mb-0.5">First 5 Seconds</span>
-                          <span className="text-[#94A3B8] text-[10px] sm:text-[11px] leading-tight block">Understand vs Miss</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  transition={{ duration: 0.65, delay: 0.28, ease: EASE_OUT_EXPO }}
+                  className="sl-hero-content mx-auto w-full max-w-[840px]">
+                  <InteractiveReportPreview />
                 </motion.div>
               </section>
 
               {/* SECTION: HOW IT WORKS (3 Steps) */}
               <section
                 id="how-it-works"
-                className="scroll-mt-20 sm:scroll-mt-24 py-12 sm:py-14 md:py-20 border-t border-[#263044]"
+                className="sl-section-v3 scroll-mt-20 sm:scroll-mt-24 py-12 sm:py-14 md:py-20 border-t border-[#263044]"
               >
+                <ChromaticAtmosphere variant="threads" />
                 <div className="max-w-4xl mx-auto text-center mb-8 sm:mb-10 md:mb-12">
                   <Reveal y={10} blur>
                     <span className="inline-block text-[11px] font-bold tracking-widest text-[#3B82F6] uppercase bg-[#171F2D] px-3 py-1 rounded-full border border-[#263044]">
@@ -937,7 +870,7 @@ export default function LandingPage() {
                   className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 max-w-4xl mx-auto items-stretch"
                 >
                   <StaggerItem y={16} className="h-full min-w-0">
-                    <div className="h-full bg-[#121824] border border-[#263044] rounded-3xl p-6 sm:p-7 flex flex-col justify-between shadow-lg hover:border-[#384660] transition-all">
+                    <div className="sl-step-v3 h-full bg-[#121824] border border-[#263044] rounded-3xl p-6 sm:p-7 flex flex-col justify-between shadow-lg hover:border-[#384660] transition-all">
                       <div>
                         <div className="w-10 h-10 rounded-2xl bg-[#171F2D] text-[#3B82F6] border border-[#263044] flex items-center justify-center font-extrabold text-sm mb-4">
                           01
@@ -953,7 +886,7 @@ export default function LandingPage() {
                   </StaggerItem>
 
                   <StaggerItem y={16} className="h-full min-w-0">
-                    <div className="h-full bg-[#121824] border border-[#263044] rounded-3xl p-6 sm:p-7 flex flex-col justify-between shadow-lg hover:border-[#384660] transition-all">
+                    <div className="sl-step-v3 h-full bg-[#121824] border border-[#263044] rounded-3xl p-6 sm:p-7 flex flex-col justify-between shadow-lg hover:border-[#384660] transition-all">
                       <div>
                         <div className="w-10 h-10 rounded-2xl bg-[#171F2D] text-[#3B82F6] border border-[#263044] flex items-center justify-center font-extrabold text-sm mb-4">
                           02
@@ -962,14 +895,14 @@ export default function LandingPage() {
                           Get free clarity signals
                         </h3>
                         <p className="text-sm text-[#94A3B8] leading-relaxed">
-                          Discover your overall score and five first-impression signals evaluating core communication.
+                          Discover your overall score and five core signals. Unlock Purchase Readiness with Full Analysis when a paid offering is identified.
                         </p>
                       </div>
                     </div>
                   </StaggerItem>
 
                   <StaggerItem y={16} className="h-full min-w-0">
-                    <div className="h-full bg-[#121824] border border-[#263044] rounded-3xl p-6 sm:p-7 flex flex-col justify-between shadow-lg hover:border-[#384660] transition-all">
+                    <div className="sl-step-v3 h-full bg-[#121824] border border-[#263044] rounded-3xl p-6 sm:p-7 flex flex-col justify-between shadow-lg hover:border-[#384660] transition-all">
                       <div>
                         <div className="w-10 h-10 rounded-2xl bg-[#171F2D] text-[#3B82F6] border border-[#263044] flex items-center justify-center font-extrabold text-sm mb-4">
                           03
@@ -978,7 +911,7 @@ export default function LandingPage() {
                           Explore the details
                         </h3>
                         <p className="text-sm text-[#94A3B8] leading-relaxed">
-                          Unlock deep signal analyses, improvements, and First 5 Seconds with Full Analysis ($5 one-time).
+                          Unlock deep signal analyses, improvements, and First 5 Seconds with Full Analysis ($3 one-time).
                         </p>
                       </div>
                     </div>
@@ -986,7 +919,7 @@ export default function LandingPage() {
                 </StaggerContainer>
               </section>
 
-              {/* SECTION: FIVE CLARITY SIGNALS (Compact & Sleek) */}
+              {/* SECTION: SIX SIGNALS (Purchase Readiness is conditional) */}
               <section
                 id="product"
                 className="scroll-mt-20 sm:scroll-mt-24 py-10 sm:py-12 md:py-16 border-t border-[#263044]"
@@ -994,24 +927,24 @@ export default function LandingPage() {
                 <div className="max-w-4xl mx-auto text-center mb-6 sm:mb-8">
                   <Reveal y={10} blur>
                     <span className="inline-block text-[11px] font-bold tracking-widest text-[#3B82F6] uppercase bg-[#171F2D] px-3 py-1 rounded-full border border-[#263044]">
-                      FIVE CLARITY SIGNALS
+                      UP TO SIX SIGNALS
                     </span>
                   </Reveal>
                   <Reveal y={14} delay={0.06}>
                     <h2 className="text-2xl min-[375px]:text-3xl sm:text-4xl font-extrabold text-white tracking-tight mt-3 mb-2 [text-wrap:balance]">
-                      Five signals. One clearer picture.
+                      Six signals. One clearer picture.
                     </h2>
                   </Reveal>
                   <Reveal y={14} delay={0.12}>
                     <p className="text-sm sm:text-base text-[#94A3B8] max-w-2xl mx-auto leading-relaxed font-normal">
-                      Every signal evaluates how your website communicates essential visitor expectations.
+                      Five core clarity signals, plus Purchase Readiness for websites with paid products, plans or services. The sixth score is separate from your Overall Clarity Score.
                     </p>
                   </Reveal>
                 </div>
 
                 <StaggerContainer
                   staggerDelay={0.06}
-                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-3.5 max-w-6xl mx-auto items-stretch"
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-3.5 max-w-6xl mx-auto items-stretch"
                 >
                   {[
                     {
@@ -1039,6 +972,11 @@ export default function LandingPage() {
                       desc: "Is the next step clear?",
                       icon: ArrowRight,
                     },
+                    {
+                      title: "PURCHASE READINESS",
+                      desc: "Are the reasons to pay, pricing and purchase next step clear?",
+                      icon: ShoppingBag,
+                    },
                   ].map((card, idx) => {
                     const IconComponent = card.icon;
                     return (
@@ -1048,12 +986,16 @@ export default function LandingPage() {
                             <div className="w-8 h-8 rounded-xl bg-[#171F2D] border border-[#263044] text-[#3B82F6] flex items-center justify-center mb-3 transition-transform duration-200 group-hover:scale-105 group-hover:bg-[#1C2638]">
                               <IconComponent className="w-4 h-4" />
                             </div>
-                            <h3 className="font-extrabold text-white text-xs tracking-wider uppercase mb-1">
-                              {card.title}
+                            <h3 className="font-extrabold text-white text-xs tracking-wider uppercase mb-1 inline-flex items-start gap-1.5">
+                              <span>{card.title}</span>
+                              {card.title === "PURCHASE READINESS" && <ClaritySignalTooltip signalKey="purchaseReadiness" name="Purchase Readiness" isOpen={landingSignalTooltip === "feature"}
+                                onOpen={() => setLandingSignalTooltip("feature")}
+                                onClose={() => setLandingSignalTooltip(current => current === "feature" ? null : current)} />}
                             </h3>
                             <p className="text-xs text-[#94A3B8] leading-relaxed">
                               {card.desc}
                             </p>
+                            {card.title === "PURCHASE READINESS" && <p className="mt-2 text-[11px] font-medium text-blue-400">Premium · For paid offerings only</p>}
                           </div>
                         </div>
                       </StaggerItem>
@@ -1061,6 +1003,14 @@ export default function LandingPage() {
                   })}
                 </StaggerContainer>
               </section>
+
+              {/* Complete paid report demonstration, entirely illustrative. */}
+              <div className="sl-section-v3 border-t border-[#263044]">
+                <ChromaticAtmosphere variant="threads" />
+                <Reveal y={14}>
+                  <FullReportTour onTryFree={scrollToInput} />
+                </Reveal>
+              </div>
 
               {/* SECTION: PRICING */}
               <section
@@ -1080,7 +1030,7 @@ export default function LandingPage() {
                   </Reveal>
                   <Reveal y={14} delay={0.12}>
                     <p className="text-[15px] sm:text-lg text-[#94A3B8] max-w-2xl mx-auto leading-relaxed font-normal">
-                      Start with a free clarity preview today. Full Analysis is a $5 one-time payment — no subscriptions.
+                      Start with a free clarity preview today. Full Analysis is a $3 one-time payment — no subscriptions.
                     </p>
                   </Reveal>
                 </div>
@@ -1100,7 +1050,7 @@ export default function LandingPage() {
                           Instant clarity evaluation.
                         </p>
                         <p className="text-xs sm:text-[13px] text-[#94A3B8] leading-relaxed mb-5">
-                          Discover your overall website clarity score and five signal statuses with zero friction.
+                          Discover your overall website clarity score and five core signal scores. Purchase Readiness is a conditional premium signal.
                         </p>
 
                         <div className="flex items-baseline gap-2 mb-5 pb-4 border-b border-[#263044] tabular-nums">
@@ -1119,8 +1069,8 @@ export default function LandingPage() {
                           <ul className="space-y-2.5 text-sm text-[#F1F5F9]">
                             {[
                               "Overall Website Clarity Score (0–100)",
-                              "Five Clarity Signal Scores",
-                              "Five Signal Statuses (Clear / Partly clear / Needs work)",
+                              "Five Core Signal Scores and Statuses",
+                              "Signal Statuses (Clear / Partly clear / Needs work)",
                             ].map((feat, i) => (
                               <li key={i} className="flex items-start gap-2.5">
                                 <Check className="w-4 h-4 shrink-0 mt-0.5 text-emerald-400" />
@@ -1145,7 +1095,7 @@ export default function LandingPage() {
                     <div className="h-full rounded-3xl p-6 sm:p-7 flex flex-col justify-between bg-[#121824] border-2 border-[#3B82F6] shadow-lg">
                       <div>
                         <h3 className="font-extrabold text-white text-xl mb-2">Full Analysis</h3>
-                        <p className="text-4xl font-extrabold text-white mb-2">$5 <span className="text-sm font-normal text-[#94A3B8]">one-time</span></p>
+                        <p className="text-4xl font-extrabold text-white mb-2">$3 <span className="text-sm font-normal text-[#94A3B8]">one-time</span></p>
                         <p className="text-sm text-[#94A3B8] mb-5">Know what to change, why it matters, and how to make your website clearer.</p>
                         <ul className="space-y-3 text-sm text-[#F1F5F9] mb-6">
                           {PRICING_PLANS[1].features.map(feature => <li key={feature} className="flex gap-2"><Check className="w-4 h-4 shrink-0 text-blue-400" />{feature}</li>)}
@@ -1275,9 +1225,10 @@ export default function LandingPage() {
               </section>
 
               {/* FINAL CTA & FOOTER */}
-              <section className="pt-11 pb-8 sm:pt-14 sm:pb-10 md:pt-20 md:pb-12 border-t border-[#263044] text-center">
+              <section className="sl-section-v3 pt-11 pb-8 sm:pt-14 sm:pb-10 md:pt-20 md:pb-12 border-t border-[#263044] text-center">
                 <Reveal y={18}>
-                  <div className="max-w-4xl mx-auto rounded-3xl bg-gradient-to-b from-[#121824] to-[#171F2D] border border-[#263044] p-7 sm:p-10 md:p-14 mb-8 sm:mb-10 shadow-2xl">
+                  <div className="sl-final-v3 max-w-4xl mx-auto rounded-3xl bg-gradient-to-b from-[#121824] to-[#171F2D] border border-[#263044] p-7 sm:p-10 md:p-14 mb-8 sm:mb-10 shadow-2xl">
+                    <ChromaticAtmosphere variant="cta" />
                     <h2 className="text-2xl min-[375px]:text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-3.5 [text-wrap:balance]">
                       Does Your Website Make Sense to a Stranger?
                     </h2>
@@ -1286,7 +1237,7 @@ export default function LandingPage() {
                     </p>
                     <button
                       onClick={scrollToInput}
-                      className="group rounded-full bg-[#246BFD] hover:bg-blue-600 active:scale-[0.98] text-white font-medium px-7 sm:px-8 py-3.5 sm:py-4 inline-flex items-center gap-2 shadow-md shadow-blue-500/25 transition-all duration-200 cursor-pointer text-sm sm:text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#246BFD] focus-visible:ring-offset-2"
+                      className="sl-v3-primary group rounded-full bg-[#246BFD] hover:bg-blue-600 active:scale-[0.98] text-white font-medium px-7 sm:px-8 py-3.5 sm:py-4 inline-flex items-center gap-2 shadow-md shadow-blue-500/25 transition-all duration-200 cursor-pointer text-sm sm:text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#246BFD] focus-visible:ring-offset-2"
                     >
                       <span>Analyze My Website Free →</span>
                     </button>
@@ -1361,6 +1312,9 @@ export default function LandingPage() {
               rawUrl={submittedUrl}
               isBackendReady={!isPending && !isVerifying && analysisData !== null}
               isScanning={isPending || isVerifying}
+              isVerifying={isVerifying}
+              verifiedSite={verifiedSite}
+              scanMilestone={scanMilestone}
               backendError={backendError}
               onRetry={() => {
                 scanController.retryScan();
@@ -1384,6 +1338,9 @@ export default function LandingPage() {
               }}
               onOpenPricing={() => setActiveInfoModal("pricing")}
               onGoToResults={() => {
+                const freshReportId = scanController.getState().analysisData?.reportId;
+                if (typeof freshReportId === "string") trackFunnelEvent("scan_completed");
+                setPostScanOfferReportId(typeof freshReportId === "string" ? freshReportId : null);
                 scanController.completeScanToResults();
               }}
             />
@@ -1400,6 +1357,7 @@ export default function LandingPage() {
             <ResultsScreen
               rawUrl={submittedUrl}
               analysisData={analysisData || undefined}
+              postScanOfferReportId={postScanOfferReportId}
               isUnlocked={Boolean(analysisData?.reportId && payments.unlockedReportId === analysisData.reportId)}
               checkoutEnabled={payments.checkoutEnabled}
               paymentEnvironment={payments.environment}
@@ -1420,6 +1378,7 @@ export default function LandingPage() {
               }}
               onRunNewCheck={() => {
                 payments.cancelPaymentFlow();
+                setPostScanOfferReportId(null);
                 // New Check: navigate to clean URL input screen, NEVER start scanning
                 clearPersistedReportSession();
                 scanController.resetToLanding(true);
@@ -1431,6 +1390,7 @@ export default function LandingPage() {
                 }, 60);
               }}
               onRecheck={() => {
+                setPostScanOfferReportId(null);
                 // Recheck Website: explicitly start exactly ONE new scan
                 if (typeof window !== "undefined") {
                   window.history.pushState({ strangerLens: true, view: "scan" }, "");
@@ -1564,7 +1524,7 @@ export default function LandingPage() {
                     Simple, Transparent Pricing
                   </h3>
                   <p className="text-xs sm:text-sm text-[#94A3B8] mt-0.5">
-                    Start with a free first-impression preview today. Full Analysis costs $5 per report, paid once.
+                    Start with a free first-impression preview today. Full Analysis costs $3 per report, paid once.
                   </p>
                 </div>
                 <button

@@ -1,19 +1,31 @@
 "use client";
-import React, { useState, useMemo, useEffect, useRef } from "react";
-import { Link2, Clock, Share2, Download, AlertCircle, Check, Zap, Info, X, Lock, Mail, ArrowRight, Sparkles, Shield, Users, Eye, ChevronDown, Loader2 } from "lucide-react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import CompleteReportPreview from "@/components/CompleteReportPreview";
+import ClarityResultsOverview from "@/components/ClarityResultsOverview";
+import SignalReportExplorer from "@/components/SignalReportExplorer";
+import PremiumActionPlan from "@/components/PremiumActionPlan";
+import RecheckComparison from "@/components/RecheckComparison";
+import PostScanUpgradeModal from "@/components/PostScanUpgradeModal";
+import { trackFunnelEvent } from "@/lib/ui-funnel-events";
+import { escapeHtmlText } from "@/lib/escape-html";
+import { Share2, Download, Check, Info, X, Lock, Loader2, AlertCircle, ArrowRight, FileText } from "lucide-react";
+import { LandingThemeSwitcher } from "@/components/landing/LandingThemeSwitcher";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import Link from "next/link";
-import { adaptReport, SIGNAL_ID_TO_KEY } from "@/lib/report-adapter";
+import { adaptReport } from "@/lib/report-adapter";
 import { generateReportPdf } from "@/lib/pdf-generator";
+import type { PremiumWorkbench } from "@/types/premiumWorkbench";
 import ClaritySignalTooltip from "@/components/ClaritySignalTooltip";
 import {
   startReportCheckout,
   rememberReportAccess,
-  readReportToken,
-  readPendingCheckout,
 } from "@/lib/payment-checkout";
 
 export interface AnalysisData {
+  purchaseReadiness?: import("@/types/purchase-readiness").PurchaseReadiness;
+  purchaseReadinessLocked?: true;
+  scanCoverage?: { level: "sufficient" | "limited" | "unreadable"; note: string; observedCharacters: number };
+  analysisMode?: "ai" | "heuristic";
   domain: string;
   score: number;
   scoreStatus: "Needs improvement" | "Good" | "Needs work" | "Excellent";
@@ -63,6 +75,7 @@ export interface AnalysisData {
     currentDirection: string;
     strongerDirection: string;
   };
+  premiumWorkbench?: PremiumWorkbench;
   otherImprovements: Array<{
     id: string;
     title: string;
@@ -102,8 +115,8 @@ export default function ResultsScreen({
   onRecheck,
   onOpenFaq,
   onOpenPricing,
+  postScanOfferReportId = null,
 }: any) {
-  const [activeExplorerSignalId, setActiveExplorerSignalId] = useState("first-impression");
   const [activeSignalTooltip, setActiveSignalTooltip] = useState<string | null>(null);
   const [isScoreModalOpen, setIsScoreModalOpen] = useState(false);
   const [isEarlySuccessModalOpen, setIsEarlySuccessModalOpen] = useState(false);
@@ -112,74 +125,99 @@ export default function ResultsScreen({
   const [earlyStatus, setEarlyStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [earlyErrorMessage, setEarlyErrorMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [verifiedUnlocked, setVerifiedUnlocked] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
-  const [isVerifyingPayment, setIsVerifyingPayment] = useState(false);
+  // Initialize the fresh-scan offer BEFORE first Results paint. Previously
+  // waiting 700ms made the report flash underneath a delayed modal.
+  const [isPostScanOfferOpen, setIsPostScanOfferOpen] = useState(() => {
+    const fresh = Boolean(postScanOfferReportId && data?.reportId === postScanOfferReportId &&
+      checkoutEnabled && !isUnlocked && paymentState !== "pending" && paymentState !== "success");
+    if (!fresh || typeof window === "undefined") return false;
+    try { return window.sessionStorage.getItem(`sl_post_scan_offer_v1:${postScanOfferReportId}`) !== "shown"; }
+    catch { return true; }
+  });
+  const mobileUpgradeRef = useRef<HTMLDivElement | null>(null);
+  const [showMobileUpgradeBar, setShowMobileUpgradeBar] = useState(false);
+
+  const offeredReportRef = useRef<string | null>(null);
+  const closePostScanOffer = useCallback(() => {
+    trackFunnelEvent("post_scan_offer_dismissed");
+    setIsPostScanOfferOpen(false);
+  }, []);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [showUtilities, setShowUtilities] = useState(false);
 
   const isTestMode = paymentEnvironment === "test_mode";
 
   const isCheckoutAvailable = Boolean(checkoutEnabled);
 
-  const isReportUnlocked = Boolean(isUnlocked) || verifiedUnlocked;
+  // Only the payment hook can mark this report unlocked after the server has
+  // verified the payment AND supplied the protected full report.
+  const isReportUnlocked = Boolean(isUnlocked);
+  const isVerifyingPayment = paymentState === "verifying" || paymentState === "pending";
 
   // Canonical report normalized from authoritative analysis data
   const report = adaptReport(data);
-  // Tease only the public score, never the locked explanation or findings.
-  const weakestSignal = report.signalsList.reduce<(typeof report.signalsList)[number] | null>((weakest, signal) => {
-    if (signal.score === null || !Number.isFinite(signal.score) || signal.score < 0 || signal.score > 100) return weakest;
-    return weakest === null || signal.score < weakest.score! ? signal : weakest;
-  }, null);
+  const unlockedPurchase = isReportUnlocked ? report.purchaseReadiness : undefined;
+  const showLockedPurchase = !unlockedPurchase && Boolean(report.purchaseReadinessLocked || report.purchaseReadiness);
+  const displaySignals = unlockedPurchase ? [...report.signalsList, unlockedPurchase] : report.signalsList;
+  // Keep a compact $3 entry point available while mobile visitors scroll the
+  // free report. Hide it when either upgrade card is in view or the modal opens.
+  useEffect(() => {
+    if (isReportUnlocked || !isCheckoutAvailable) return;
+    const updateVisibility = () => {
+      const entry = mobileUpgradeRef.current;
+      const checkoutSection = document.getElementById("complete-report-preview");
+      if (!entry) return;
+      const entryAboveViewport = entry.getBoundingClientRect().bottom < 0;
+      const previewRect = checkoutSection?.getBoundingClientRect();
+      const previewVisible = Boolean(previewRect && previewRect.top < window.innerHeight - 65 && previewRect.bottom > 65);
+      setShowMobileUpgradeBar(entryAboveViewport && !previewVisible);
+    };
+    updateVisibility();
+    window.addEventListener("scroll", updateVisibility, { passive: true });
+    window.addEventListener("resize", updateVisibility);
+    return () => {
+      window.removeEventListener("scroll", updateVisibility);
+      window.removeEventListener("resize", updateVisibility);
+    };
+  }, [isReportUnlocked, isCheckoutAvailable, data?.reportId]);
+
+  // Offer only after a FRESH, successfully completed scan (never on restore,
+  // back navigation, a purchased report, or after returning from checkout).
+  const currentReportId: string | null = data?.reportId || report.rawReport?.reportId || null;
+  useEffect(() => {
+    if (!postScanOfferReportId || currentReportId !== postScanOfferReportId ||
+      !isCheckoutAvailable || isReportUnlocked || isVerifyingPayment ||
+      paymentState === "pending" || paymentState === "success") return;
+    if (offeredReportRef.current === currentReportId) return;
+    try {
+      if (window.sessionStorage.getItem(`sl_post_scan_offer_v1:${currentReportId}`) === "shown") return;
+    } catch { /* Private browsing may disable session storage. */ }
+    offeredReportRef.current = currentReportId;
+    try { window.sessionStorage.setItem(`sl_post_scan_offer_v1:${currentReportId}`, "shown"); } catch { /* no-op */ }
+    // A new report triggers this only once. The initial state is already open
+    // on the first client paint; effect handles report changes while mounted.
+    setIsPostScanOfferOpen(true);
+    trackFunnelEvent("post_scan_offer_shown");
+  }, [postScanOfferReportId, currentReportId, isCheckoutAvailable,
+      isReportUnlocked, isVerifyingPayment, paymentState]);
+
+
+  // The parent payment hook is the single owner of checkout return,
+  // verification retries and restoring the server-authorized paid report.
+  // Never set an independent local paid flag on a verification response.
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const params = new URLSearchParams(window.location.search);
-    const checkoutParam = params.get("checkout");
-    const status = params.get("status");
-    const orderId = params.get("orderId");
-    const targetReportId = params.get("reportId") || data?.reportId || report.rawReport?.reportId;
+    if (!isReportUnlocked || paymentState !== "success") return;
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById("your-improvement-plan")?.scrollIntoView({
+        behavior: "auto", block: "start",
+      });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [isReportUnlocked, paymentState]);
 
-    if ((checkoutParam === "return" || status === "success") && targetReportId && !verifiedUnlocked) {
-      const token = readReportToken(targetReportId) || data?.reportToken || report.rawReport?.reportToken;
-      const effectiveOrderId = orderId || readPendingCheckout(targetReportId)?.orderId;
-      if (!effectiveOrderId || !token) {
-        return;
-      }
-      queueMicrotask(() => setIsVerifyingPayment(true));
-      fetch("/api/payments/verify", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ orderId: effectiveOrderId, reportId: targetReportId }),
-      })
-        .then((res) => res.json())
-        .then(async (resData) => {
-          if (resData.verified) {
-            setVerifiedUnlocked(true);
-            if (onRefreshPaidReport) {
-              void onRefreshPaidReport().catch(() => {});
-            }
-            const cleanUrl = new URL(window.location.href);
-            for (const key of ["checkout", "reportId", "orderId", "status", "session_id", "checkout_id", "payment_id"]) {
-              cleanUrl.searchParams.delete(key);
-            }
-            window.history.replaceState({}, "", `${cleanUrl.pathname}${cleanUrl.search}${cleanUrl.hash}`);
-          } else {
-            setPaymentError("Payment verification pending or failed. Please refresh or contact support.");
-          }
-        })
-        .catch(() => {
-          setPaymentError("Error verifying payment with server.");
-        })
-        .finally(() => {
-          setIsVerifyingPayment(false);
-        });
-    } else if (status === "cancelled") {
-      queueMicrotask(() => setPaymentError("Checkout was cancelled. Your free report remains available."));
-    }
-  }, [report, verifiedUnlocked, data, onRefreshPaidReport]);
+
 
   const shouldReduceMotion = useReducedMotion();
   const gotItButtonRef = useRef<HTMLButtonElement>(null);
@@ -283,21 +321,73 @@ export default function ResultsScreen({
 
   const overallTheme = getStatusTheme(report.overallStatus);
 
-  const explorerTabs = [
-    { id: "first-impression", label: "First Impression" },
-    { id: "audience", label: "Audience" },
-    { id: "value", label: "Value" },
-    { id: "trust", label: "Trust" },
-    { id: "action", label: "Action" },
-  ];
-
-  const activeSignalKey = SIGNAL_ID_TO_KEY[activeExplorerSignalId] || "firstImpression";
-  const activeSignal = report.signals[activeSignalKey];
+  const handleUnlockFullAnalysis = async () => {
+    trackFunnelEvent("upgrade_clicked");
+    setLoading(true);
+    setPaymentError(null);
+    try {
+      const targetReportId = data?.reportId || report.rawReport?.reportId;
+      const targetReportToken = data?.reportToken || report.rawReport?.reportToken;
+      if (!targetReportId) {
+        setPaymentError("Report session missing. Please run a website scan first.");
+        return;
+      }
+      if (targetReportToken) {
+        rememberReportAccess(targetReportId, targetReportToken);
+      }
+      const result = await startReportCheckout(targetReportId, targetReportToken);
+      if (result.alreadyPaid) {
+        if (onRefreshPaidReport) {
+          await onRefreshPaidReport();
+        }
+      } else if (result.checkoutUrl) {
+        trackFunnelEvent("checkout_opened");
+        window.location.assign(result.checkoutUrl);
+      }
+    } catch (err) {
+      trackFunnelEvent("checkout_failed");
+      setPaymentError(err instanceof Error ? err.message : "Failed to open checkout.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (!data) return null;
 
   return (
-    <div id="results-content" className="min-h-screen bg-[#090D15] text-[#F1F5F9] font-sans antialiased flex flex-col">
+    <div id="results-content" className={`sl-app-theme sl-results-v7 min-h-screen bg-[#090D15] text-[#F1F5F9] font-sans antialiased flex flex-col ${!isReportUnlocked && isCheckoutAvailable ? "pb-16 sm:pb-0" : ""}`}>
+      <PostScanUpgradeModal
+        open={isPostScanOfferOpen && !isReportUnlocked && isCheckoutAvailable}
+        domain={report.domain}
+        overallScore={report.overallScoreDisplay}
+        signals={report.signalsList.map(signal => ({
+          title: signal.title, scoreDisplay: signal.scoreDisplay,
+        }))}
+        purchaseReadinessApplicable={showLockedPurchase}
+        canCheckout={isCheckoutAvailable}
+        isTestMode={isTestMode}
+        busy={loading || isVerifyingPayment}
+        paymentError={paymentError}
+        onContinueFree={closePostScanOffer}
+        onUpgrade={handleUnlockFullAnalysis}
+      />
+      {/* Mobile-only compact offer stays available while long free results scroll.
+          Never blocks the report, the checkout modal, or the main premium CTA. */}
+      {!isReportUnlocked && isCheckoutAvailable && showMobileUpgradeBar && !isPostScanOfferOpen && (
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-[#355275] bg-[#101B2B]/95 px-4 py-2.5 shadow-[0_-10px_35px_rgba(0,0,0,.45)] backdrop-blur-xl sm:hidden"
+          style={{ paddingBottom: "max(10px, env(safe-area-inset-bottom))" }}>
+          <div className="mx-auto flex max-w-md items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-white">Complete 5-signal report</p>
+              <p className="text-[11px] text-[#A6BCD5]">$3 once · Full findings &amp; fixes</p>
+            </div>
+            <button type="button" onClick={handleUnlockFullAnalysis} disabled={loading || isVerifyingPayment}
+              className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full bg-[#246BFD] px-4 text-xs font-bold text-white disabled:opacity-50">
+              {loading || isVerifyingPayment ? "Opening…" : "Unlock — $3"} <ArrowRight className="h-3.5 w-3.5" aria-hidden="true"/>
+            </button>
+          </div>
+        </div>
+      )}
       {/* EARLY ACCESS THANK YOU SUCCESS MODAL */}
       <AnimatePresence>
         {isEarlySuccessModalOpen && (
@@ -440,12 +530,13 @@ export default function ResultsScreen({
             className="flex items-center gap-2 cursor-pointer bg-transparent border-0 p-0 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
             aria-label="Return to StrangerLens home"
           >
-            <span className="font-bold text-xl tracking-tight text-white hover:text-slate-200 transition-colors">
+            <span className="font-bold text-base sm:text-xl tracking-tight text-white hover:text-slate-200 transition-colors">
               StrangerLens
             </span>
           </button>
-          <div className="flex items-center gap-2 sm:gap-5">
-            <Link href="/my-reports" className="rounded text-xs sm:text-sm font-medium text-[#94A3B8] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">My Reports</Link>
+          <div className="flex shrink-0 items-center gap-1 sm:gap-4">
+                <LandingThemeSwitcher compact />
+            <Link href="/my-reports" aria-label="My Reports" className="inline-flex min-h-10 items-center gap-1 rounded text-xs sm:text-sm font-medium text-[#94A3B8] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"><FileText className="h-4 w-4 min-[420px]:hidden" aria-hidden="true"/><span className="hidden min-[420px]:inline">My Reports</span></Link>
             <button
               type="button"
               onClick={onRunNewCheck || onBackToLanding}
@@ -462,121 +553,108 @@ export default function ResultsScreen({
 
       {/* MAIN CONTENT */}
       <main className="flex-1 w-full max-w-[1000px] mx-auto px-4 py-6 sm:py-10 space-y-8 sm:space-y-12">
-        {/* OVERALL CLARITY SCORE */}
-        <section className="bg-[#121824] border border-[#263044] rounded-2xl p-5 sm:p-6 shadow-xs">
-          <h2 className="text-xs sm:text-sm font-semibold text-[#94A3B8] uppercase tracking-wider mb-3">
-            Website Clarity Score
-          </h2>
-          <div className="space-y-1.5">
-            <div className="text-4xl sm:text-5xl font-bold text-white tracking-tight">
-              {report.overallScoreDisplay}
+        {data?.analysisMode === "heuristic" && (
+          <section role="note" aria-label="Limited heuristic preview" className="rounded-2xl border border-amber-500/30 bg-[#30271A] p-4 sm:p-5">
+            <p className="text-sm font-bold text-amber-200">Limited preview · AI analysis unavailable</p>
+            <p className="mt-1 text-xs leading-relaxed text-[#E5D3AD]">
+              AI analysis wasn't available for this scan, so these scores are basic rules-based indicators.
+              A complete $3 AI report cannot be purchased from this preview. Please retry when the AI service is available.
+            </p>
+            {onRecheck && <button type="button" onClick={onRecheck}
+              className="mt-3 min-h-10 rounded-full border border-amber-500/35 px-4 text-xs font-bold text-amber-200 hover:bg-amber-500/10">
+              Retry for full AI analysis
+            </button>}
+          </section>
+        )}
+        {data?.scanCoverage?.level === "limited" && (
+          <section role="note" aria-label="Limited website inspection" className="flex items-start gap-3 rounded-2xl border border-amber-500/25 bg-[#2D2619] p-4 text-[#E9D7B1] sm:p-5">
+            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-300" aria-hidden="true" />
+            <div>
+              <p className="text-sm font-bold">Limited static-page coverage</p>
+              <p className="mt-1 text-xs leading-relaxed text-[#D8C8A9]">{data.scanCoverage.note}</p>
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className={`w-2 h-2 rounded-full ${overallTheme.dot}`} aria-hidden="true" />
-              <span className={`text-sm sm:text-base font-medium ${overallTheme.text}`}>
-                {formatStatusText(report.overallStatus)}
-              </span>
+          </section>
+        )}
+        {isReportUnlocked && (
+          <section aria-label="Full analysis unlocked" className="flex flex-col gap-4 rounded-2xl border border-emerald-500/25 bg-[#132A30] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+            <div>
+              <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-emerald-300">
+                <Check className="h-4 w-4" aria-hidden="true" /> Full Analysis Unlocked
+              </p>
+              <h2 className="mt-2 text-xl font-bold tracking-tight text-white">Your complete clarity report is ready.</h2>
+              <p className="mt-1 max-w-lg text-sm leading-relaxed text-[#B8D0CC]">
+                All five detailed signals, the first-five-seconds assessment, improvement plan, and copy suggestions are below.
+              </p>
             </div>
-          </div>
-          <div className="mt-4 pt-3.5 border-t border-[#263044]/70">
-            <button
-              type="button"
-              onClick={() => setIsScoreModalOpen(true)}
-              className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-blue-400 hover:text-blue-300 font-medium transition cursor-pointer"
-            >
-              <Info className="w-3.5 h-3.5" />
-              <span>How scoring works</span>
-            </button>
-          </div>
-        </section>
+            <nav aria-label="Jump to paid report sections" className="flex shrink-0 flex-wrap gap-2">
+              <a href="#your-improvement-plan" className="inline-flex min-h-10 items-center justify-center rounded-full bg-[#1E815F] px-4 text-xs font-bold text-white hover:bg-[#24936E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Start with fixes →</a>
+              <a href="#complete-paid-report" className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#385C62] px-4 text-xs font-semibold text-[#D6EDE7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Five deep dives</a>
+              <a href="#better-copy-studio" className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#385C62] px-4 text-xs font-semibold text-[#D6EDE7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Copy Studio</a>
+              <a href="#report-export-actions" className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#385C62] px-4 text-xs font-semibold text-[#D6EDE7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Export PDF</a>
+            </nav>
+          </section>
+        )}
+        {paymentMessage && ["verifying", "pending", "error", "failed"].includes(paymentState) &&
+          <div role="status" aria-live="polite" className="rounded-xl border border-[#35516E] bg-[#19283B] p-4 text-sm text-[#D6E4F5]">
+            <p>{paymentMessage}</p>
+            {["pending", "error"].includes(paymentState) && onVerifyPayment &&
+              <button type="button" onClick={onVerifyPayment}
+                className="mt-2 min-h-10 rounded-full border border-[#496995] px-4 text-xs font-semibold text-[#D6E4F5]">
+                Check payment status
+              </button>}
+          </div>}
+        <ClarityResultsOverview
+          report={report}
+          isUnlocked={isReportUnlocked}
+          showLockedPurchase={showLockedPurchase}
+          unlockedPurchase={unlockedPurchase}
+          publicObservation={Array.isArray(data?.evidence?.missingFindings)
+            && typeof data.evidence.missingFindings[0] === "string"
+            ? data.evidence.missingFindings[0] : undefined}
+          onExplainScore={() => setIsScoreModalOpen(true)}
+        />
 
-        {/* 1. FREE: FIVE CLARITY SIGNALS */}
-        <section>
-          <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6 text-[#F1F5F9]">Your Clarity Signals</h2>
-          <div className="bg-[#121824] border border-[#263044] rounded-xl overflow-hidden divide-y divide-[#263044]/70">
-            {report.signalsList.map((signal) => {
-              const theme = getStatusTheme(signal.status, signal.badgeType);
-              return (
-                <div key={signal.id} className="p-4 sm:p-4.5 transition-colors">
-                  {/* Mobile Layout (< sm) */}
-                  <div className="sm:hidden space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="inline-flex items-center gap-1.5">
-                        <span className="font-medium text-sm text-[#F1F5F9]">{signal.title}</span>
-                        <ClaritySignalTooltip signalKey={signal.key} name={signal.title} isOpen={activeSignalTooltip === `mobile-${signal.id}`}
-                          onOpen={() => setActiveSignalTooltip(`mobile-${signal.id}`)}
-                          onClose={() => setActiveSignalTooltip(current => current === `mobile-${signal.id}` ? null : current)} />
-                      </span>
-                      <span className="font-semibold text-sm text-white">{signal.scoreDisplay}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <span className={`w-1.5 h-1.5 rounded-full ${theme.dot}`} aria-hidden="true" />
-                      <span className={`text-xs font-normal ${theme.text}`}>
-                        {formatStatusText(signal.status)}
-                      </span>
-                    </div>
-                    <div className="w-full h-1.5 bg-[#171F2D] border border-[#263044]/40 rounded-full overflow-hidden mt-1.5">
-                      <div
-                        className={`h-full rounded-full transition-all duration-300 ${theme.bg}`}
-                        style={{ width: `${Math.min(100, Math.max(0, signal.score ?? 0))}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Desktop Layout (>= sm) */}
-                  <div className="hidden sm:flex items-center justify-between">
-                    <span className="inline-flex items-center gap-1.5">
-                      <span className="font-medium text-[#F1F5F9]">{signal.title}</span>
-                      <ClaritySignalTooltip signalKey={signal.key} name={signal.title} isOpen={activeSignalTooltip === `desktop-${signal.id}`}
-                        onOpen={() => setActiveSignalTooltip(`desktop-${signal.id}`)}
-                        onClose={() => setActiveSignalTooltip(current => current === `desktop-${signal.id}` ? null : current)} />
-                    </span>
-                    <div className="flex items-center gap-4">
-                      <div className="text-right">
-                        <div className="font-semibold text-white text-sm">{signal.scoreDisplay}</div>
-                        <div className={`text-xs font-medium flex items-center justify-end gap-1.5 ${theme.text}`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${theme.dot}`} aria-hidden="true" />
-                          <span>{formatStatusText(signal.status)}</span>
-                        </div>
-                      </div>
-                      <div className="w-20 h-1.5 bg-[#171F2D] border border-[#263044]/40 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full rounded-full transition-all duration-300 ${theme.bg}`}
-                          style={{ width: `${Math.min(100, Math.max(0, signal.score ?? 0))}%` }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
+        {/* One clear upgrade card after the free clarity signals. */}
+        {!isReportUnlocked && (
+          <>
+            <div ref={mobileUpgradeRef} data-testid="full-report-upgrade-anchor">
+            <CompleteReportPreview
+              signals={report.signalsList}
+              purchaseReadinessApplicable={showLockedPurchase}
+              canCheckout={isCheckoutAvailable}
+              isTestMode={isTestMode}
+              busy={loading || isVerifyingPayment}
+              onUnlock={handleUnlockFullAnalysis}
+              onViewExample={() => {
+                onBackToLanding?.();
+                window.setTimeout(() => {
+                  document.getElementById("full-report-demo")?.scrollIntoView({
+                    behavior: shouldReduceMotion ? "auto" : "smooth", block: "start",
+                  });
+                }, 480);
+              }}
+            />
+            </div>
+            {paymentError && !isPostScanOfferOpen &&
+              <p role="alert" className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200">{paymentError}</p>}
+          </>
+        )}
 
         {/* EARLY ACCESS SECTION */}
-        {!isReportUnlocked && (
+        {!isReportUnlocked && !isCheckoutAvailable && (
           <section className="bg-[#121824] border border-[#263044] rounded-2xl p-6 sm:p-8 text-center shadow-lg relative overflow-hidden">
             <div className="absolute top-0 right-0 transform translate-x-4 -translate-y-4 w-32 h-32 bg-blue-500/5 rounded-full blur-2xl pointer-events-none" />
             <div className="relative z-10 max-w-lg mx-auto">
               <span className="inline-block text-[11px] font-bold tracking-widest text-[#3B82F6] uppercase bg-[#171F2D] px-3 py-1 rounded-full border border-[#263044] mb-3 shadow-xs">
                 {isTestMode ? "TEST MODE" : isCheckoutAvailable ? "FULL ANALYSIS" : "EARLY ACCESS"}
               </span>
-              <h2 className="text-xl sm:text-2xl font-bold leading-tight mb-3 text-white">Your Score Is Just the Beginning.</h2>
+              <h2 className="text-xl sm:text-2xl font-bold leading-tight mb-3 text-white">Your Complete Five-Signal Report</h2>
               <div className="text-base sm:text-lg font-bold text-white mb-3">
-                $5 <span className="text-xs sm:text-sm text-[#94A3B8] font-normal">· One-time payment</span>
+                $3 <span className="text-xs sm:text-sm text-[#94A3B8] font-normal">· One-time payment</span>
               </div>
               <p className="text-[#94A3B8] text-sm mb-2 max-w-md mx-auto leading-relaxed">
-                You know your clarity score. Now discover WHY it scored that way — and exactly what to improve.
+                The full report explores all five signals in depth, from existing strengths to actionable improvements. Your free scores stay available.
               </p>
-              {weakestSignal && (
-                <div className="mt-5 rounded-xl border border-blue-500/20 bg-[#171F2D]/70 p-4 sm:p-5 text-left" aria-label="Your lowest-scoring clarity signal">
-                  <p className="text-sm sm:text-base font-semibold leading-relaxed text-[#F1F5F9] break-words">
-                    {weakestSignal.title} <span className="text-blue-400 tabular-nums whitespace-nowrap">— {weakestSignal.score}/100</span>
-                  </p>
-                  <p className="mt-2 text-sm leading-relaxed text-[#CBD5E1]">What&apos;s behind this score, and how can you improve it?</p>
-                  <p className="mt-1.5 text-xs sm:text-sm leading-relaxed text-[#94A3B8]">Unlock the detailed explanation and recommended improvements.</p>
-                </div>
-              )}
               {isCheckoutAvailable ? (
                 <div className="mt-6 space-y-4">
                   {paymentError && (
@@ -587,40 +665,13 @@ export default function ResultsScreen({
                   <button
                     type="button"
                     disabled={loading || isVerifyingPayment}
-                    onClick={async () => {
-                      setLoading(true);
-                      setPaymentError(null);
-                      try {
-                        const targetReportId = data?.reportId || report.rawReport?.reportId;
-                        const targetReportToken = data?.reportToken || report.rawReport?.reportToken;
-                        if (!targetReportId) {
-                          setPaymentError("Report session missing. Please run a website scan first.");
-                          return;
-                        }
-                        if (targetReportToken) {
-                          rememberReportAccess(targetReportId, targetReportToken);
-                        }
-                        const result = await startReportCheckout(targetReportId, targetReportToken);
-                        if (result.alreadyPaid) {
-                          setVerifiedUnlocked(true);
-                          if (onRefreshPaidReport) {
-                            await onRefreshPaidReport();
-                          }
-                        } else if (result.checkoutUrl) {
-                          window.location.assign(result.checkoutUrl);
-                        }
-                      } catch (err) {
-                        setPaymentError(err instanceof Error ? err.message : "Failed to open checkout.");
-                      } finally {
-                        setLoading(false);
-                      }
-                    }}
+                    onClick={handleUnlockFullAnalysis}
                     className="w-full bg-[#246BFD] hover:bg-blue-600 active:scale-[0.98] disabled:opacity-60 text-white font-semibold py-3.5 px-6 rounded-full text-sm transition-all shadow-md shadow-blue-500/25 cursor-pointer inline-flex items-center justify-center gap-2"
                   >
                     {loading || isVerifyingPayment ? (
                       <span>Processing...</span>
                     ) : (
-                      <span>Unlock Full Analysis — $5</span>
+                      <span>Unlock Full Analysis — $3</span>
                     )}
                   </button>
                   <p className={`text-xs leading-relaxed font-medium ${isTestMode ? "text-amber-400/90" : "text-[#94A3B8]"}`}>
@@ -726,167 +777,13 @@ export default function ResultsScreen({
           </section>
         )}
 
-        {/* 4. FULL REPORT PREVIEW (WHEN LOCKED) */}
-        {!isReportUnlocked ? (
-          <section className="bg-[#121824] border border-[#263044] rounded-2xl p-6 sm:p-8">
-            <div className="mb-6">
-              <h2 className="text-lg sm:text-xl font-bold text-white mb-1.5">
-                Inside Your Full Analysis
-              </h2>
-              <p className="text-xs sm:text-sm text-[#94A3B8]">
-                A deeper look at what your website communicates — and what needs improvement.
-              </p>
-            </div>
-
-            {/* Four Compact Feature Rows */}
-            <div className="space-y-3.5">
-              {/* Feature 01 */}
-              <div className="flex items-start gap-3.5 p-3.5 sm:p-4 rounded-xl bg-[#171F2D]/70 border border-[#263044]/80">
-                <span className="shrink-0 text-xs font-mono font-bold text-[#3B82F6] bg-blue-500/10 border border-blue-500/20 px-2 py-1 rounded-md">
-                  01
-                </span>
-                <div className="space-y-0.5">
-                  <h3 className="text-sm font-semibold text-white">
-                    Why Your Website Scored This Way
-                  </h3>
-                  <p className="text-xs text-[#94A3B8] leading-relaxed">
-                    See the reasoning behind all five clarity signals.
-                  </p>
-                </div>
-              </div>
-
-              {/* Feature 02 */}
-              <div className="flex items-start gap-3.5 p-3.5 sm:p-4 rounded-xl bg-[#171F2D]/70 border border-[#263044]/80">
-                <span className="shrink-0 text-xs font-mono font-bold text-[#3B82F6] bg-blue-500/10 border border-blue-500/20 px-2 py-1 rounded-md">
-                  02
-                </span>
-                <div className="space-y-0.5">
-                  <h3 className="text-sm font-semibold text-white">
-                    What Visitors Understand — and Miss
-                  </h3>
-                  <p className="text-xs text-[#94A3B8] leading-relaxed">
-                    Understand what&apos;s working and what may cause confusion.
-                  </p>
-                </div>
-              </div>
-
-              {/* Feature 03 */}
-              <div className="flex items-start gap-3.5 p-3.5 sm:p-4 rounded-xl bg-[#171F2D]/70 border border-[#263044]/80">
-                <span className="shrink-0 text-xs font-mono font-bold text-[#3B82F6] bg-blue-500/10 border border-blue-500/20 px-2 py-1 rounded-md">
-                  03
-                </span>
-                <div className="space-y-0.5">
-                  <h3 className="text-sm font-semibold text-white">
-                    Specific Fixes You Can Make
-                  </h3>
-                  <p className="text-xs text-[#94A3B8] leading-relaxed">
-                    Get specific recommendations from your analysis.
-                  </p>
-                </div>
-              </div>
-
-              {/* Feature 04 */}
-              <div className="flex items-start gap-3.5 p-3.5 sm:p-4 rounded-xl bg-[#171F2D]/70 border border-[#263044]/80">
-                <span className="shrink-0 text-xs font-mono font-bold text-[#3B82F6] bg-blue-500/10 border border-blue-500/20 px-2 py-1 rounded-md">
-                  04
-                </span>
-                <div className="space-y-0.5">
-                  <h3 className="text-sm font-semibold text-white">
-                    What Visitors Notice First
-                  </h3>
-                  <p className="text-xs text-[#94A3B8] leading-relaxed">
-                    See what a first-time visitor may understand or miss.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 pt-4 border-t border-[#263044]/70 flex items-center justify-center gap-2 text-xs text-[#94A3B8]">
-              <Lock className="w-3.5 h-3.5 text-slate-400" />
-              <span>Unlock these details with your $5 full report.</span>
-            </div>
-          </section>
-        ) : (
+        {isReportUnlocked ? (
           <>
-            {/* PREMIUM: INTERACTIVE ANALYSIS (ONLY RENDERED WHEN FULL ANALYSIS IS UNLOCKED) */}
-            <section>
-              <h2 className="text-xl font-bold mb-6 text-white">Signal Diagnostics</h2>
-              
-              <div className="flex gap-2 mb-6 overflow-x-auto pb-2 -mx-2 px-2 scrollbar-hide">
-                {explorerTabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveExplorerSignalId(tab.id)}
-                    className={`px-4 py-2 rounded-full font-medium text-sm whitespace-nowrap transition cursor-pointer ${activeExplorerSignalId === tab.id ? "bg-blue-600 text-white" : "bg-[#121824] border border-[#263044] text-[#94A3B8]"}`}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-
-              <div className="bg-[#121824] border border-[#263044] rounded-xl p-5 sm:p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h3 className="text-lg font-bold text-white">{activeSignal.title}</h3>
-                    <div className="flex items-center gap-1.5 mt-1">
-                      <span className={`w-1.5 h-1.5 rounded-full ${getStatusTheme(activeSignal.status, activeSignal.badgeType).dot}`} aria-hidden="true" />
-                      <span className={`text-xs font-medium ${getStatusTheme(activeSignal.status, activeSignal.badgeType).text}`}>
-                        {formatStatusText(activeSignal.status)}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="text-sm font-semibold text-white">{activeSignal.scoreDisplay}</div>
-                </div>
-                
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="text-[10px] font-bold text-blue-400 mb-2 tracking-widest uppercase">Why This Score</h4>
-                    <p className="text-[#94A3B8] text-sm">
-                      {activeSignal.explanation || "Diagnostic analysis not available for this signal."}
-                    </p>
-                  </div>
-                  <div className="border-t border-[#263044]"></div>
-                  <div>
-                    <h4 className="text-[10px] font-bold text-emerald-400 mb-2 tracking-widest uppercase">What&apos;s Working</h4>
-                    {activeSignal.positiveFindings.length > 0 ? (
-                      <ul className="text-[#94A3B8] text-sm space-y-1.5">
-                        {activeSignal.positiveFindings.map((finding, i) => (
-                          <li key={i}>✓ {finding}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-[#94A3B8] text-sm">No clear positive signals detected in the initial content.</p>
-                    )}
-                  </div>
-                  <div className="border-t border-[#263044]"></div>
-                  <div>
-                    <h4 className="text-[10px] font-bold text-amber-400 mb-2 tracking-widest uppercase">What&apos;s Unclear</h4>
-                    {activeSignal.concerns.length > 0 ? (
-                      <ul className="text-[#94A3B8] text-sm space-y-1.5">
-                        {activeSignal.concerns.map((concern, i) => (
-                          <li key={i}>! {concern}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-[#94A3B8] text-sm">No significant ambiguities identified for this signal.</p>
-                    )}
-                  </div>
-                  <div className="border-t border-[#263044]"></div>
-                  <div>
-                    <h4 className="text-[10px] font-bold text-rose-400 mb-2 tracking-widest uppercase">How to Improve</h4>
-                    {activeSignal.recommendations.length > 0 ? (
-                      <ul className="text-[#94A3B8] text-sm space-y-1.5">
-                        {activeSignal.recommendations.map((rec, i) => (
-                          <li key={i}>→ {rec}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-[#94A3B8] text-sm">Maintain current messaging clarity in this area.</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </section>
+            {/* Verified paid access unlocks the complete multi-chapter analysis. */}
+            <SignalReportExplorer
+              signals={report.signalsList}
+              purchaseReadiness={unlockedPurchase}
+            />
 
             {/* FIRST 5 SECONDS */}
             <section>
@@ -925,11 +822,33 @@ export default function ResultsScreen({
                 </div>
               </div>
             </section>
-          </>
-        )}
 
-        {/* ACTIONS */}
-        <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-[#263044]">
+            <PremiumActionPlan reportId={currentReportId}
+              recommendation={data?.recommendation}
+              otherImprovements={Array.isArray(data?.otherImprovements) ? data.otherImprovements : []}
+              evidence={data?.evidence}
+              visitorThought={data?.visitorThought}
+              workbench={data?.premiumWorkbench}
+            />
+          </>
+        ) : null}
+
+        {/* Compact utility actions stay separate from the single paid CTA. */}
+        <div id="report-export-actions" className="flex flex-wrap items-center justify-center gap-2 border-t border-[#263044] pt-4 scroll-mt-24">
+          {onRecheck && <button type="button" onClick={onRecheck}
+            className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[#263044] px-4 text-xs font-medium text-[#94A3B8] hover:bg-[#171F2D] hover:text-white">
+            Recheck
+          </button>}
+          <button type="button" onClick={() => setShowUtilities(v => !v)}
+            aria-expanded={showUtilities} aria-controls="recheck-comparison-panel"
+            className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[#263044] px-4 text-xs font-medium text-[#94A3B8] hover:bg-[#171F2D] hover:text-white">
+            {showUtilities ? "Hide comparison" : "Compare scores"}
+          </button>
+        </div>
+        <div id="recheck-comparison-panel" className={showUtilities ? "" : "hidden"} aria-hidden={!showUtilities}>
+          <RecheckComparison report={report} reportId={currentReportId} onRecheck={onRecheck}/>
+        </div>
+        <div className="flex flex-wrap justify-center gap-2">
           <button 
             onClick={async () => {
               const card = document.createElement('div');
@@ -952,35 +871,35 @@ export default function ResultsScreen({
                     <div style="font-size: 12px; color: #94A3B8; margin-top: 2px;">Website Clarity Diagnostic</div>
                   </div>
                   <div style="background: #171F2D; border: 1px solid #263044; padding: 6px 12px; border-radius: 9999px; font-size: 12px; color: #3B82F6; font-weight: 600;">
-                    ${report.domain}
+                    ${escapeHtmlText(report.domain)}
                   </div>
                 </div>
                 
                 <div style="background: #121824; border: 1px solid #263044; border-radius: 16px; padding: 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
                   <div>
                     <div style="font-size: 11px; text-transform: uppercase; color: #94A3B8; font-weight: 700; letter-spacing: 0.5px;">Overall Clarity Score</div>
-                    <div style="font-size: 36px; font-weight: 900; color: #FFFFFF; margin-top: 4px;">${report.overallScoreDisplay}</div>
+                    <div style="font-size: 36px; font-weight: 900; color: #FFFFFF; margin-top: 4px;">${escapeHtmlText(report.overallScoreDisplay)}</div>
                   </div>
                   <div style="text-align: right;">
-                    <div style="font-size: 14px; font-weight: 600; color: #38BDF8;">${report.overallStatus}</div>
+                    <div style="font-size: 14px; font-weight: 600; color: #38BDF8;">${escapeHtmlText(report.overallStatus)}</div>
                     <div style="font-size: 11px; color: #64748B; margin-top: 2px;">First-time visitor perspective</div>
                   </div>
                 </div>
 
                 <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
-                  ${report.signalsList.map(s => `
+                  ${displaySignals.map(s => `
                     <div style="background: #121824; border: 1px solid #263044; border-radius: 12px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;">
-                      <span style="font-size: 14px; font-weight: 600; color: #F1F5F9;">${s.title}</span>
+                      <span style="font-size: 14px; font-weight: 600; color: #F1F5F9;">${escapeHtmlText(s.title)}${s.key === "purchaseReadiness" ? ' <span style="font-size: 10px; color: #94A3B8;">(separate score)</span>' : ""}</span>
                       <div style="display: flex; align-items: center; gap: 12px;">
-                        <span style="font-size: 12px; color: #94A3B8;">${s.status}</span>
-                        <span style="font-size: 14px; font-weight: 700; color: #FFFFFF; min-width: 45px; text-align: right;">${s.scoreDisplay}</span>
+                        <span style="font-size: 12px; color: #94A3B8;">${escapeHtmlText(s.status)}</span>
+                        <span style="font-size: 14px; font-weight: 700; color: #FFFFFF; min-width: 45px; text-align: right;">${escapeHtmlText(s.scoreDisplay)}</span>
                       </div>
                     </div>
                   `).join('')}
                 </div>
 
                 <div style="text-align: center; font-size: 11px; color: #64748B; border-top: 1px solid #263044; padding-top: 16px;">
-                  Analyzed with StrangerLens · strangerlens.ai
+                  Analyzed with StrangerLens · strangerlens.ai.studio
                 </div>
               `;
 
@@ -1012,7 +931,8 @@ export default function ResultsScreen({
                   link.download = 'StrangerLens-Share.png';
                   link.href = URL.createObjectURL(blob);
                   link.click();
-                  URL.revokeObjectURL(link.href);
+                  // Revoking in the same task can cancel downloads on mobile browsers.
+                  window.setTimeout(() => URL.revokeObjectURL(link.href), 1000);
                 }, 'image/png');
               } catch (err) {
                 if (document.body.contains(card)) {
@@ -1020,44 +940,34 @@ export default function ResultsScreen({
                 }
               }
             }}
-            className="flex-1 bg-[#171F2D] hover:bg-[#263044] text-white font-semibold py-3 px-6 rounded-xl text-sm transition inline-flex items-center justify-center gap-2 cursor-pointer"
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-[#263044] bg-[#171F2D] px-4 text-xs font-medium text-[#94A3B8] transition hover:text-white cursor-pointer"
           >
             <Share2 className="w-4 h-4 text-blue-400" />
-            <span>Share Result</span>
+            <span>Share</span>
           </button>
           <button 
             disabled={isGeneratingPdf}
             onClick={async () => {
               setIsGeneratingPdf(true);
               try {
-                const targetReportId = data?.reportId || report.rawReport?.reportId;
-                const token = readReportToken(targetReportId) || data?.reportToken || report.rawReport?.reportToken;
-                
-                const res = await fetch(`/api/report/${encodeURIComponent(targetReportId)}`, {
-                  headers: { Authorization: `Bearer ${token}` }
-                });
-                
-                if (!res.ok) throw new Error("Could not verify report access");
-                
-                const reportData = await res.json();
-                const adaptedReport = adaptReport(reportData);
-                const isUnlocked = reportData.entitlement.unlocked;
-                
-                await generateReportPdf(adaptedReport, isUnlocked);
+                // PDF export verifies its tier on /api/report/[id]/pdf. The
+                // full-report endpoint intentionally rejects free reports.
+                if (onDownloadPdf) await onDownloadPdf();
+                else await generateReportPdf(report, isReportUnlocked);
               } catch (err: any) {
                 alert(`PDF generation failed: ${err?.message || "Please try again."}`);
               } finally {
                 setIsGeneratingPdf(false);
               }
             }}
-            className="flex-1 bg-[#171F2D] hover:bg-[#263044] disabled:opacity-50 text-white font-semibold py-3 px-6 rounded-xl text-sm transition inline-flex items-center justify-center gap-2 cursor-pointer"
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-[#263044] bg-[#171F2D] px-4 text-xs font-medium text-[#94A3B8] transition hover:text-white disabled:opacity-50 cursor-pointer"
           >
             {isGeneratingPdf ? (
               <Loader2 className="w-4 h-4 text-blue-400 animate-spin" />
             ) : (
               <Download className="w-4 h-4 text-blue-400" />
             )}
-            <span>{isGeneratingPdf ? "Generating PDF…" : "Download PDF"}</span>
+            <span>{isGeneratingPdf ? "Generating…" : isReportUnlocked ? "Full PDF" : "Export summary"}</span>
           </button>
         </div>
       </main>

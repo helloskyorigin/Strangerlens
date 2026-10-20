@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { validateUrl, checkSsrf } from "@/lib/url-validator";
 import { fetchWebsiteHomepage } from "@/lib/website-fetcher";
 import { extractWebsiteSnapshot } from "@/lib/content-extractor";
+import { assessScanCoverage } from "@/lib/scan-coverage";
+import { discoverAndFetchLegalPages } from "@/lib/supporting-page-fetcher";
 import { analyzeWebsite } from "@/services/ai/analyzeWebsite";
 import { validateAndScoreAnalysis } from "@/services/validation/analysisValidator";
 import { generateSupportingPageContext } from "@/services/ai/supportingContextAnalyzer";
@@ -44,7 +46,9 @@ export async function GET() {
  * Accepts JSON payload `{ "url": "example.com" }`
  * Validates, normalizes, checks SSRF security rules, fetches website homepage, performs content extraction, runs AI analysis, and executes deterministic scoring & evidence validation.
  */
-export async function POST(req: NextRequest) {
+type BackendScanMilestone = "content_inspected" | "signals_evaluated";
+type ProgressEmitter = (stage: BackendScanMilestone) => void;
+async function runCheck(req: NextRequest, onProgress?: ProgressEmitter) {
   // 0. Rate Limiting & Concurrency Protection (Enforced before expensive processing)
   const clientIp = getClientIp(req);
   const limitCheck = checkAndAcquireRateLimit(clientIp, {
@@ -118,6 +122,9 @@ export async function POST(req: NextRequest) {
 
     // 3. Fetch Website Homepage (Use pre-scan cache if available)
     const pipelineController = new AbortController();
+    const abortOnDisconnect = () => pipelineController.abort();
+    if (req.signal.aborted) pipelineController.abort();
+    else req.signal.addEventListener("abort", abortOnDisconnect, { once: true });
     const pipelineTimer = setTimeout(
       () => pipelineController.abort(),
       SERVER_LIMITS.ANALYSIS_TOTAL_TIMEOUT_MS
@@ -169,38 +176,68 @@ export async function POST(req: NextRequest) {
       const snapshot = extractWebsiteSnapshot(fetchResult.html, {
         baseUrl: fetchResult.finalUrl,
       });
+      const coverage = assessScanCoverage(snapshot);
+      if (coverage.level === "unreadable") {
+        return NextResponse.json(
+          { success: false, error: "INSUFFICIENT_PAGE_CONTENT", message: coverage.note, scanCoverage: coverage },
+          { status: 422, headers: { "Cache-Control": "private, no-store" } }
+        );
+      }
       const snapDurationMs = Math.round(performance.now() - snapStart);
+      // This milestone is truthful: extraction and coverage validation have finished.
+      onProgress?.("content_inspected");
 
-      // 5. Concurrent Execution: Run homepage AI analysis and optional supporting-page discovery concurrently
-      //    when enabled, preventing unnecessary sequential waiting.
+      // 5. Fetch legal pages regardless of the optional multi-page feature flag.
+      // Ground the Trust assessment in actual policy pages before asking the AI.
+      // Other supporting-page analysis can run concurrently with these fetches.
       const aiStart = performance.now();
       const shouldRunSupportingPages =
         isSupportingPagesEnabled() && !pipelineController.signal.aborted;
       type SupportingResultType = Awaited<ReturnType<typeof generateSupportingPageContext>>;
-
+      const legalPagesPromise = discoverAndFetchLegalPages(
+        fetchResult.html, fetchResult.finalUrl, { signal: pipelineController.signal }
+      );
+      const extraPagesPromise: Promise<SupportingResultType> = shouldRunSupportingPages
+        ? generateSupportingPageContext(
+            snapshot, fetchResult.finalUrl, fetchResult.html,
+            { signal: pipelineController.signal }
+          ).catch((err: unknown): SupportingResultType => {
+            console.warn("[SUPP-WARN] Supporting-page context failed gracefully:",
+              err instanceof Error ? err.message : String(err));
+            return {};
+          })
+        : Promise.resolve({} as SupportingResultType);
+      const legalPages = await legalPagesPromise;
+      // Mutable holder: provenance is set by asynchronous provider selection.
+      const provenance: { mode: "ai" | "heuristic" } = { mode: "heuristic" };
+      const rawAiPromise = analyzeWebsite(snapshot, legalPages, {
+        onSource: source => { provenance.mode = source === "deterministic" ? "heuristic" : "ai"; },
+      });
       const [rawAiAnalysis, optionalSupportingResult] = await Promise.all([
-        analyzeWebsite(snapshot),
-        shouldRunSupportingPages
-          ? generateSupportingPageContext(
-              snapshot,
-              fetchResult.finalUrl,
-              fetchResult.html,
-              { signal: pipelineController.signal }
-            ).catch((err: unknown): SupportingResultType => {
-              console.warn(
-                "[SUPP-WARN] Supporting pages context failed gracefully:",
-                err instanceof Error ? err.message : String(err)
-              );
-              return {};
-            })
-          : Promise.resolve({} as SupportingResultType),
+        rawAiPromise, extraPagesPromise,
       ]);
       const aiDurationMs = Math.round(performance.now() - aiStart);
+      const analysisMode: "ai" | "heuristic" = provenance.mode;
 
-      // 6. Phase 4: Evidence Validation & Deterministic Scoring (Primary Homepage ONLY)
+      // Merge policy links with any feature-flagged product/pricing context so
+      // payment-readiness keeps the richer evidence while Trust sees legal pages.
+      const extraPages = optionalSupportingResult.supportingPagesBundle;
+      const analysisPages = {
+        ...legalPages,
+        candidates: [...legalPages.candidates, ...(extraPages?.candidates ?? [])],
+        pages: [...legalPages.pages, ...(extraPages?.pages ?? []).filter(
+          (page) => !legalPages.pages.some((legal) => legal.finalUrl === page.finalUrl)
+        )],
+      };
+
+      // 6. Deterministic evidence validation & scoring
       const scoreStart = performance.now();
-      const finalValidatedAnalysis = validateAndScoreAnalysis(rawAiAnalysis, snapshot);
+      const finalValidatedAnalysis = validateAndScoreAnalysis(
+        rawAiAnalysis, snapshot, analysisPages
+      );
       const scoreDurationMs = Math.round(performance.now() - scoreStart);
+      // Never expose scores or findings here; only the completed milestone.
+      onProgress?.("signals_evaluated");
 
       const totalDurationMs = Math.round(performance.now() - overallStart);
 
@@ -226,6 +263,7 @@ export async function POST(req: NextRequest) {
         domain: fetchResult.domain,
         snapshot,
         fullAnalysis: finalValidatedAnalysis,
+        analysisMode,
         supportingContext: optionalSupportingResult.supportingContext,
       });
 
@@ -238,12 +276,14 @@ export async function POST(req: NextRequest) {
           entitlement: {
             unlocked: false,
             tier: "free",
-            checkoutEnabled: isPaymentInfrastructureConfigured(),
-            blocker: isPaymentInfrastructureConfigured()
-              ? null
-              : PAYMENT_INFRASTRUCTURE_BLOCKER,
+            checkoutEnabled: analysisMode === "ai" && isPaymentInfrastructureConfigured(),
+            blocker: analysisMode === "heuristic"
+              ? "Only a heuristic preview was available. AI Full Analysis is not ready for purchase; please retry later."
+              : isPaymentInfrastructureConfigured() ? null : PAYMENT_INFRASTRUCTURE_BLOCKER,
           },
           lockedPreviewCounts,
+          scanCoverage: coverage,
+          analysisMode,
           snapshot,
           analysis: redactAnalysisForFreeTier(finalValidatedAnalysis),
         },
@@ -258,6 +298,7 @@ export async function POST(req: NextRequest) {
 
     } finally {
       clearTimeout(pipelineTimer);
+      req.signal.removeEventListener("abort", abortOnDisconnect);
     }
   } catch (error: unknown) {
     console.error("Error in /api/check endpoint:", error instanceof Error ? error.message : "Unknown error");
@@ -297,4 +338,52 @@ export async function POST(req: NextRequest) {
   } finally {
     releaseConcurrencySlot(clientIp, "check");
   }
+}
+
+/**
+ * Optional streaming response for first-party scanning UX.
+ * Original JSON response remains the default for existing clients and tests.
+ * NDJSON events reveal only stage identifiers; paid report content still uses
+ * existing free-tier redaction and server-side entitlement checks.
+ */
+export async function POST(req: NextRequest): Promise<Response> {
+  if (req.headers.get("x-strangerlens-progress") !== "ndjson") {
+    return runCheck(req);
+  }
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream<Uint8Array>({
+    start(controller) {
+      let closed = false;
+      const send = (value: unknown) => {
+        if (closed) return;
+        try { controller.enqueue(encoder.encode(JSON.stringify(value) + "\n")); }
+        catch { closed = true; }
+      };
+      const run = async () => {
+        try {
+          const response = await runCheck(req, stage => send({ type: "progress", stage }));
+          // Rate limiting and errors retain their logical HTTP status here.
+          // This streaming envelope itself is HTTP 200 by design.
+          const payload = await response.json();
+          send({ type: "result", status: response.status, payload });
+        } catch {
+          send({ type: "result", status: 500, payload: {
+            success: false, error: "SERVER_ERROR",
+            message: "Could not complete the website analysis. Please retry."
+          } });
+        } finally {
+          if (!closed) { closed = true; try { controller.close(); } catch { /* detached request */ } }
+        }
+      };
+      void run();
+    },
+  });
+  return new Response(stream, {
+    status: 200,
+    headers: {
+      "Content-Type": "application/x-ndjson; charset=utf-8",
+      "Cache-Control": "private, no-store",
+      "X-Content-Type-Options": "nosniff",
+    },
+  });
 }

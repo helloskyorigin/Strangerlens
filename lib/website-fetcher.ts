@@ -201,28 +201,6 @@ export async function fetchWebsiteHomepage(
         clearTimeout(timer);
         if (parentSignal) parentSignal.removeEventListener("abort", parentAbortHandler);
         
-        // Graceful fallback for protected sites (403, 401, 406, 429, 5xx)
-        if ([401, 403, 406, 429, 500, 502, 503, 504].includes(response.status)) {
-          const fallbackHtml = generateFallbackHtml(currentUrl);
-          const { domain } = normalizeUrl(currentUrl);
-          const elapsed = Math.round(performance.now() - startTime);
-          return {
-            success: true,
-            originalUrl: rawUrl,
-            normalizedUrl,
-            finalUrl: currentUrl,
-            domain,
-            status: 200,
-            statusText: "OK (Protected / Fallback Mode)",
-            contentType: "text/html",
-            contentLength: fallbackHtml.length,
-            redirectCount: redirectHistory.length,
-            redirectHistory,
-            timingMs: elapsed,
-            html: fallbackHtml,
-          };
-        }
-
         const elapsed = Math.round(performance.now() - startTime);
         return {
           success: false,
@@ -374,79 +352,34 @@ export async function fetchWebsiteHomepage(
       if (parentSignal) parentSignal.removeEventListener("abort", parentAbortHandler);
       const elapsed = Math.round(performance.now() - startTime);
 
-      // Graceful fallback for network errors, timeouts, or blocking: generate valid preview snapshot
-      const fallbackHtml = generateFallbackHtml(currentUrl);
-      const { domain } = normalizeUrl(currentUrl);
+      // Never substitute fabricated homepage HTML for an unreachable website.
+      // This is a real scan failure, not a low-scoring website.
+      const timedOut = controller.signal.aborted || parentSignal?.aborted;
       return {
-        success: true,
+        success: false,
+        error: timedOut ? "WEBSITE_FETCH_TIMEOUT" : "FETCH_FAILED",
+        message: timedOut
+          ? "Website inspection timed out. Try again or check another public page."
+          : "We couldn't retrieve readable website content. The site may block automated checks or be temporarily unavailable.",
         originalUrl: rawUrl,
         normalizedUrl,
         finalUrl: currentUrl,
-        domain,
-        status: 200,
-        statusText: "OK (Network Fallback Mode)",
-        contentType: "text/html",
-        contentLength: fallbackHtml.length,
         redirectCount: redirectHistory.length,
         redirectHistory,
         timingMs: elapsed,
-        html: fallbackHtml,
       };
     }
   }
 
-  const elapsed = Math.round(performance.now() - startTime);
-  const fallbackHtml = generateFallbackHtml(currentUrl);
-  const { domain } = normalizeUrl(currentUrl);
   return {
-    success: true,
+    success: false,
+    error: "TOO_MANY_REDIRECTS",
+    message: "The website redirected too many times to inspect safely.",
     originalUrl: rawUrl,
     normalizedUrl,
     finalUrl: currentUrl,
-    domain,
-    status: 200,
-    statusText: "OK (Redirect Fallback Mode)",
-    contentType: "text/html",
-    contentLength: fallbackHtml.length,
     redirectCount: redirectHistory.length,
     redirectHistory,
-    timingMs: elapsed,
-    html: fallbackHtml,
+    timingMs: Math.round(performance.now() - startTime),
   };
-}
-
-function generateFallbackHtml(urlStr: string): string {
-  try {
-    const parsed = new URL(urlStr);
-    const domain = parsed.hostname.replace(/^www\./i, "");
-    const siteName = domain.split(".")[0];
-    const capitalized = siteName.charAt(0).toUpperCase() + siteName.slice(1);
-    return `<!DOCTYPE html>
-<html>
-<head>
-<title>${capitalized} - Platform & Solutions</title>
-<meta name="description" content="Welcome to ${capitalized}. Discover professional services, streamlined workflows, and powerful solutions tailored for your business.">
-</head>
-<body>
-<header>
-  <nav>
-    <a href="/">Home</a>
-    <a href="/features">Features</a>
-    <a href="/pricing">Pricing</a>
-    <a href="/contact">Contact</a>
-  </nav>
-</header>
-<main>
-  <h1>Welcome to ${capitalized}</h1>
-  <p>The leading platform for modern teams and growing businesses. Streamline your workflow and achieve more with our powerful tools.</p>
-  <a href="/signup" class="btn">Get Started Free</a>
-</main>
-<footer>
-  <p>&copy; ${new Date().getFullYear()} ${capitalized}. All rights reserved.</p>
-</footer>
-</body>
-</html>`;
-  } catch {
-    return `<!DOCTYPE html><html><head><title>Website Preview</title><meta name="description" content="Professional website preview and clarity analysis."></head><body><h1>Welcome</h1><p>Discover professional solutions and services.</p><a href="/get-started">Get Started</a></body></html>`;
-  }
 }

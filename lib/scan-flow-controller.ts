@@ -1,5 +1,8 @@
 import { validateClientUrl } from "./url-client-validator";
 import { mapBackendToFrontend } from "./mapper";
+import { consumeScanProgress } from "./scan-progress-stream";
+
+export type ScanMilestone = "connecting" | "connected" | "content_inspected" | "signals_evaluated" | "report_ready";
 
 export interface ScanFlowState {
   url: string;
@@ -8,6 +11,9 @@ export interface ScanFlowState {
   isVerifying: boolean;
   isPending: boolean;
   isPreparingResults: boolean;
+  scanMilestone: ScanMilestone;
+  /** Set only when /api/check/verify actually confirmed reachability. */
+  verifiedSite: { domain: string; httpStatus: number | null } | null;
   errorMessage: string | null;
   backendError: string | null;
   analysisData: any;
@@ -30,6 +36,8 @@ export function createScanFlowController(options: ScanFlowControllerOptions = {}
     isVerifying: false,
     isPending: false,
     isPreparingResults: false,
+    scanMilestone: "connecting",
+    verifiedSite: null,
     errorMessage: null,
     backendError: null,
     analysisData: null,
@@ -67,6 +75,8 @@ export function createScanFlowController(options: ScanFlowControllerOptions = {}
   function restoreSession(rawUrl: string, analysisData: any) {
     abortCurrentRequest();
     emit({
+      scanMilestone: "report_ready",
+      verifiedSite: null,
       url: rawUrl,
       submittedUrl: rawUrl,
       currentView: "results",
@@ -82,6 +92,8 @@ export function createScanFlowController(options: ScanFlowControllerOptions = {}
   function resetToLanding(clearUrl: boolean = true) {
     abortCurrentRequest();
     emit({
+      scanMilestone: "connecting",
+      verifiedSite: null,
       url: clearUrl ? "" : (state.submittedUrl || state.url),
       submittedUrl: clearUrl ? "" : state.submittedUrl,
       currentView: "landing",
@@ -121,6 +133,8 @@ export function createScanFlowController(options: ScanFlowControllerOptions = {}
   function cancelScan() {
     abortCurrentRequest();
     emit({
+      scanMilestone: "connecting",
+      verifiedSite: null,
       url: state.submittedUrl || state.url,
       currentView: "landing",
       isVerifying: false,
@@ -177,6 +191,8 @@ export function createScanFlowController(options: ScanFlowControllerOptions = {}
       url: rawTarget,
       submittedUrl: validation.normalizedUrl,
       currentView: "scan",
+      scanMilestone: "connecting",
+      verifiedSite: null,
       isVerifying: true,
       isPending: true,
       errorMessage: null,
@@ -219,24 +235,44 @@ export function createScanFlowController(options: ScanFlowControllerOptions = {}
         verifyJson?.finalUrl || verifyJson?.normalizedUrl || validation.normalizedUrl;
       emit({
         submittedUrl: finalTargetUrl,
+        scanMilestone: "connected",
+        verifiedSite: {
+          domain: typeof verifyJson?.domain === "string" ? verifyJson.domain : new URL(finalTargetUrl).hostname,
+          httpStatus: Number.isInteger(verifyJson?.status) ? verifyJson.status : null,
+        },
         isVerifying: false,
         isPending: true,
       });
 
       const checkRes = await fetchFn("/api/check", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-strangerlens-progress": "ndjson",
+        },
         body: JSON.stringify({ url: finalTargetUrl }),
         ...(controller ? { signal: controller.signal } : {}),
       });
 
       if (currentReqId !== activeRequestId) return;
-
-      const checkJson = await checkRes.json().catch(() => null);
+      const isStream = checkRes.headers.get("content-type")?.includes("application/x-ndjson");
+      let checkJson: any = null;
+      let checkStatus = checkRes.status;
+      if (isStream) {
+        const streamed = await consumeScanProgress(checkRes, stage => {
+          if (currentReqId !== activeRequestId) return;
+          emit({ scanMilestone: stage });
+        });
+        checkJson = streamed.payload;
+        checkStatus = streamed.status;
+      } else {
+        // Compatible with older deployments, intercepted tests and API errors.
+        checkJson = await checkRes.json().catch(() => null);
+      }
       if (currentReqId !== activeRequestId) return;
 
       let resolvedAnalysisData: any = null;
-      if (checkRes.ok && checkJson) {
+      if (checkRes.ok && checkStatus >= 200 && checkStatus < 300 && checkJson) {
         if (checkJson.analysis && typeof checkJson.analysis.overall_score === "number") {
           const mapped = mapBackendToFrontend(
             checkJson.analysis,
@@ -249,6 +285,8 @@ export function createScanFlowController(options: ScanFlowControllerOptions = {}
             reportId: checkJson.reportId,
             reportToken: checkJson.reportToken,
             checkoutEnabled: checkJson.entitlement?.checkoutEnabled === true,
+            ...(checkJson.scanCoverage ? { scanCoverage: checkJson.scanCoverage } : {}),
+            ...(checkJson.analysisMode ? { analysisMode: checkJson.analysisMode } : {}),
             isFreeTierOnly: !checkJson?.entitlement?.unlocked,
             ...(checkJson.lockedPreviewCounts
               ? { lockedPreviewCounts: checkJson.lockedPreviewCounts }
@@ -259,7 +297,7 @@ export function createScanFlowController(options: ScanFlowControllerOptions = {}
         }
       }
 
-      if (!checkRes.ok || !resolvedAnalysisData) {
+      if (!checkRes.ok || checkStatus < 200 || checkStatus >= 300 || !resolvedAnalysisData) {
         const errMsg =
           checkJson?.message ||
           checkJson?.error ||
@@ -277,6 +315,7 @@ export function createScanFlowController(options: ScanFlowControllerOptions = {}
         isVerifying: false,
         isPending: false,
         isPreparingResults: true,
+        scanMilestone: "report_ready",
         backendError: null,
         analysisData: resolvedAnalysisData,
         currentView: options.deferResultsNavigation ? "scan" : "results",

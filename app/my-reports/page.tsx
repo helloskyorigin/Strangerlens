@@ -5,6 +5,7 @@ import { ArrowLeft, FileText, Download, Loader2 } from "lucide-react";
 import { generateReportPdf } from "@/lib/pdf-generator";
 import { adaptReport } from "@/lib/report-adapter";
 import { readReportToken } from "@/lib/payment-checkout";
+import { LandingThemeSwitcher } from "@/components/landing/LandingThemeSwitcher";
 
 export default function MyReportsPage() {
   const [reports, setReports] = useState<any[]>([]);
@@ -36,12 +37,15 @@ export default function MyReportsPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#090D15] text-[#F1F5F9] p-4 sm:p-8">
+    <div className="sl-app-theme min-h-screen bg-[#090D15] text-[#F1F5F9] p-4 sm:p-8">
       <div className="max-w-4xl mx-auto">
         <Link href="/" className="inline-flex items-center gap-2 text-sm text-[#94A3B8] hover:text-white mb-8">
           <ArrowLeft className="w-4 h-4" /> Back to Scanner
         </Link>
-        <h1 className="text-3xl font-extrabold text-white mb-8">My Reports</h1>
+        <div className="mb-7 flex items-center justify-between gap-3">
+          <h1 className="text-3xl font-extrabold text-white">My Reports</h1>
+          <LandingThemeSwitcher compact />
+        </div>
         
         {loading ? (
           <div className="flex justify-center py-20 text-[#94A3B8]"><Loader2 className="w-8 h-8 animate-spin" /></div>

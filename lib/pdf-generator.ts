@@ -91,7 +91,7 @@ export function buildReportPdf(model: PdfReportModel, fonts: PdfFonts): jsPDF {
   font(17, true, blue); doc.text(model.score === null ? "Unavailable" : `${model.score}/100`, width - margin, y - 1, { align: "right", baseline: "top" });
   y += 11; paragraph(`Overall status: ${model.status}`, { color: muted }); paragraph(model.verdict);
 
-  label("Five Signal Scores and Statuses");
+  label(model.signals.some(signal => signal.independent) ? "Signal Scores and Statuses" : "Five Signal Scores and Statuses");
   for (const signal of model.signals) {
     font(9);
     const statusLines = doc.splitTextToSize(cleanText(signal.status), 67) as string[];
@@ -103,16 +103,18 @@ export function buildReportPdf(model: PdfReportModel, fonts: PdfFonts): jsPDF {
     font(9, false, muted); doc.text(statusLines, margin + 68, y + 5, { baseline: "top", lineHeightFactor: 1.5 });
     font(10, true); doc.text(signal.score === null ? "N/A" : `${signal.score}/100`, width - margin - 4, y + 5, { align: "right", baseline: "top" });
     y += rowHeight + 3;
+    if (signal.independent) paragraph("Separate Purchase Readiness assessment; not included in the Overall Clarity Score.", { size: 8, color: muted });
   }
 
   if (!paid) {
     section("02", "Free-tier Findings"); findings(model.freeFindings, "No additional free-tier findings were recorded.");
   } else {
-    section("02", "Five Detailed Clarity Signals");
+    section("02", model.signals.some(signal => signal.independent) ? "Detailed Signals" : "Five Detailed Clarity Signals");
     for (const signal of model.signals) {
       ensure(35);
       paragraph(signal.title, { size: 13, bold: true, color: blue });
       paragraph(`Original score: ${signal.score === null ? "Unavailable" : `${signal.score}/100`} | Status: ${signal.status}`, { size: 9, color: muted });
+      if (signal.independent) paragraph("This separate score does not change the Overall Clarity Score.", { size: 8, color: muted });
       group("Why This Score?", signal.explanation ? [signal.explanation] : []);
       group("What's Working?", signal.working); group("What's Unclear?", signal.unclear); group("How to Improve?", signal.improvements);
       y += 4;
