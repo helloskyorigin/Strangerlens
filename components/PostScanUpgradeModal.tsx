@@ -102,7 +102,7 @@ export default function PostScanUpgradeModal({
           <button type="button" onClick={onUpgrade} disabled={!canCheckout || busy}
             className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full bg-[#246BFD] px-4 py-3 text-sm font-bold text-white transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300">
             <LockKeyhole className="h-4 w-4" aria-hidden="true"/>
-            {busy ? "Opening checkout…" : "Unlock Full Analysis — $5"}
+            {busy ? "Opening checkout…" : "Unlock Full Analysis — $3"}
             {!busy && <ArrowRight className="h-4 w-4" aria-hidden="true"/>}
           </button>
           <button ref={mobileFreeButtonRef} type="button" onClick={onContinueFree}
@@ -149,7 +149,7 @@ export default function PostScanUpgradeModal({
           <button type="button" onClick={onUpgrade} disabled={!canCheckout || busy}
             className="flex min-h-[50px] w-full items-center justify-center gap-2 rounded-full bg-[#246BFD] px-4 py-3 text-sm font-bold text-white transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300">
             <LockKeyhole className="h-4 w-4" aria-hidden="true" />
-            {busy ? "Opening checkout…" : "Unlock Complete Report — $5"}
+            {busy ? "Opening checkout…" : "Unlock Complete Report — $3"}
             {!busy && <ArrowRight className="h-4 w-4" aria-hidden="true" />}
           </button>
           <button ref={freeButtonRef} type="button" onClick={onContinueFree}
