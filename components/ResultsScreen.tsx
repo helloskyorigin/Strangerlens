@@ -146,6 +146,7 @@ export default function ResultsScreen({
   }, []);
   const [isVerifyingPayment, setIsVerifyingPayment] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [showUtilities, setShowUtilities] = useState(false);
 
   const isTestMode = paymentEnvironment === "test_mode";
 
@@ -642,8 +643,18 @@ export default function ResultsScreen({
             </div>
           </div>
           {report.verdict && <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[#B7C5D7]">{report.verdict}</p>}
+          {!isReportUnlocked && Array.isArray(data?.evidence?.missingFindings) &&
+            typeof data.evidence.missingFindings[0] === "string" && (
+              <div className="mt-4 flex items-start gap-2.5 border-t border-[#263044] pt-4">
+                <Info className="mt-0.5 h-4 w-4 shrink-0 text-blue-400" aria-hidden="true"/>
+                <div>
+                  <p className="text-xs font-semibold text-white">Key observation</p>
+                  <p className="mt-1 text-sm leading-relaxed text-[#B7C5D7]">{data.evidence.missingFindings[0]}</p>
+                </div>
+              </div>
+            )}
           <div className="mt-4 pt-3.5 border-t border-[#263044]/70">
-            <p className="mb-3 text-xs text-[#8799B1]">
+            <p className="mb-2 text-xs text-[#8799B1]">
               Based on inspected public website content, not recorded visitor sessions or conversion data.
             </p>
             <button
@@ -657,32 +668,7 @@ export default function ResultsScreen({
           </div>
         </section>
 
-        <RecheckComparison report={report} reportId={currentReportId} onRecheck={onRecheck}/>
-
-        {/* Mobile: direct $3 entry right after the free overall score.
-            The actual free scores remain available below without paying. */}
-        {!isReportUnlocked && (
-          <section ref={mobileUpgradeRef} aria-label="Unlock the detailed report"
-            className="rounded-2xl border border-[#36537B] bg-gradient-to-r from-[#142944] to-[#162136] p-4 shadow-[0_14px_32px_-23px_rgba(39,108,255,.4)] sm:hidden">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-[#8FBCFF]">Go beyond your score</p>
-                <h2 className="mt-1 text-[17px] font-bold leading-snug text-white">Understand all 5 signals.</h2>
-                <p className="mt-1 text-xs leading-relaxed text-[#B6C8E0]">Detailed findings, evidence, fixes &amp; copy suggestions.</p>
-              </div>
-              <span className="shrink-0 rounded-lg border border-[#405F83] bg-[#1F3450] px-2.5 py-1.5 text-base font-extrabold text-white">$3</span>
-            </div>
-            <button type="button" onClick={handleUnlockFullAnalysis} disabled={!isCheckoutAvailable || loading || isVerifyingPayment}
-              className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-[#246BFD] px-4 text-sm font-bold text-white transition hover:bg-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 disabled:cursor-not-allowed disabled:opacity-50">
-              {loading || isVerifyingPayment ? "Opening checkout…" : "Unlock Complete Analysis — $3"}
-              {!loading && !isVerifyingPayment && <ArrowRight className="h-4 w-4" aria-hidden="true"/>}
-            </button>
-            <p className="mt-2 text-center text-[11px] text-[#90A5C1]">
-              {isTestMode ? "Test payment only · No real charge" : "One-time payment · No subscription"}
-              {!isCheckoutAvailable && " · Checkout unavailable"}
-            </p>
-          </section>
-        )}
+        
 
         {/* 1. FREE: FIVE CLARITY SIGNALS */}
         <section>
@@ -691,9 +677,9 @@ export default function ResultsScreen({
             {displaySignals.map((signal) => {
               const theme = getStatusTheme(signal.status, signal.badgeType);
               return (
-                <div key={signal.id} className="px-3.5 py-3 sm:p-4.5 transition-colors">
+                <div key={signal.id} className="px-4 py-3 sm:px-5 sm:py-3.5 transition-colors">
                   {/* Mobile Layout (< sm) */}
-                  <div className="sm:hidden space-y-1.5">
+                  <div className="sm:hidden space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="inline-flex items-center gap-1.5">
                         <span className="font-medium text-sm text-[#F1F5F9]">{signal.title}</span>
@@ -751,7 +737,7 @@ export default function ResultsScreen({
               );
             })}
             {showLockedPurchase && (
-              <div data-testid="purchase-readiness-locked" className="p-4 sm:p-4.5 space-y-3">
+              <div data-testid="purchase-readiness-locked" className="p-4 sm:p-5 space-y-2">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="inline-flex items-center gap-1.5">
                     <span className="font-medium text-sm sm:text-base text-[#F1F5F9]">Purchase Readiness</span>
@@ -765,31 +751,15 @@ export default function ResultsScreen({
                 </div>
                 <p className="text-xs sm:text-sm leading-relaxed text-[#94A3B8]">This website offers paid products, subscriptions or services. Unlock its Purchase Readiness score and discover how clearly it helps visitors decide to buy.</p>
                 <p className="text-xs leading-relaxed text-[#64748B]">A separate assessment of pricing, value, buyer confidence and purchase next steps. Your Overall Clarity Score uses only the original five signals.</p>
-                {!isReportUnlocked ? (
-                  <>
-                    <button type="button" onClick={handleUnlockFullAnalysis} disabled={!isCheckoutAvailable || loading || isVerifyingPayment}
-                      className="w-full sm:w-auto max-w-full rounded-full bg-[#246BFD] px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-600 disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#121824]">
-                      {loading || isVerifyingPayment ? "Processing..." : "Unlock Full Analysis — $3"}
-                    </button>
-                    {!isCheckoutAvailable && <p className="text-xs text-[#94A3B8]">Checkout is currently unavailable. Please try again later.</p>}
-                  </>
-                ) : <p className="text-xs text-[#94A3B8]">Your score is awaiting the verified full report. Refresh the report to try again.</p>}
+                <p className="text-xs text-[#94A3B8]">Included in Full Analysis when applicable.</p>
               </div>
             )}
           </div>
         </section>
 
-        {/* Free scores remain visible. Premium value is a complete breakdown of ALL signals. */}
+        {/* One clear upgrade card after the free clarity signals. */}
         {!isReportUnlocked && (
           <>
-            {Array.isArray(data?.evidence?.missingFindings) &&
-              typeof data.evidence.missingFindings[0] === "string" && (
-              <section aria-label="Free first insight" className="rounded-2xl border border-[#2B4059] bg-[#152237] p-5 sm:p-6">
-                <p className="text-[11px] font-bold uppercase tracking-widest text-emerald-300">One insight from your free scan</p>
-                <p className="mt-2 text-sm leading-relaxed text-[#D4E0EE]">{data.evidence.missingFindings[0]}</p>
-                <p className="mt-2 text-xs text-[#8DA6C1]">Based on the inspected website content. The full report explains each signal in depth.</p>
-              </section>
-            )}
             <CompleteReportPreview
               signals={report.signalsList}
               purchaseReadinessApplicable={showLockedPurchase}
@@ -798,9 +768,8 @@ export default function ResultsScreen({
               busy={loading || isVerifyingPayment}
               onUnlock={handleUnlockFullAnalysis}
             />
-            {paymentError && !isPostScanOfferOpen && (
-              <p role="alert" className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200">{paymentError}</p>
-            )}
+            {paymentError && !isPostScanOfferOpen &&
+              <p role="alert" className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200">{paymentError}</p>}
           </>
         )}
 
