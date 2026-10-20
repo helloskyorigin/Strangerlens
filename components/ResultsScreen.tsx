@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import CompleteReportPreview from "@/components/CompleteReportPreview";
+import ClarityResultsOverview from "@/components/ClarityResultsOverview";
 import SignalReportExplorer from "@/components/SignalReportExplorer";
 import PremiumActionPlan from "@/components/PremiumActionPlan";
 import RecheckComparison from "@/components/RecheckComparison";
@@ -354,7 +355,7 @@ export default function ResultsScreen({
   if (!data) return null;
 
   return (
-    <div id="results-content" className={`sl-app-theme min-h-screen bg-[#090D15] text-[#F1F5F9] font-sans antialiased flex flex-col ${!isReportUnlocked && isCheckoutAvailable ? "pb-16 sm:pb-0" : ""}`}>
+    <div id="results-content" className={`sl-app-theme sl-results-v7 min-h-screen bg-[#090D15] text-[#F1F5F9] font-sans antialiased flex flex-col ${!isReportUnlocked && isCheckoutAvailable ? "pb-16 sm:pb-0" : ""}`}>
       <PostScanUpgradeModal
         open={isPostScanOfferOpen && !isReportUnlocked && isCheckoutAvailable}
         domain={report.domain}
@@ -602,136 +603,16 @@ export default function ResultsScreen({
                 Check payment status
               </button>}
           </div>}
-        {/* OVERALL CLARITY SCORE */}
-        <section className="bg-[#121824] border border-[#263044] rounded-2xl p-5 sm:p-6 shadow-xs">
-          <h2 className="text-xs sm:text-sm font-semibold text-[#94A3B8] uppercase tracking-wider mb-3">
-            Website Clarity Score
-          </h2>
-          <div className="space-y-1.5">
-            <div className="text-4xl sm:text-5xl font-bold text-white tracking-tight">
-              {report.overallScoreDisplay}
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className={`w-2 h-2 rounded-full ${overallTheme.dot}`} aria-hidden="true" />
-              <span className={`text-sm sm:text-base font-medium ${overallTheme.text}`}>
-                {formatStatusText(report.overallStatus)}
-              </span>
-            </div>
-          </div>
-          {report.verdict && <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[#B7C5D7]">{report.verdict}</p>}
-          {!isReportUnlocked && Array.isArray(data?.evidence?.missingFindings) &&
-            typeof data.evidence.missingFindings[0] === "string" && (
-              <div className="mt-4 flex items-start gap-2.5 border-t border-[#263044] pt-4">
-                <Info className="mt-0.5 h-4 w-4 shrink-0 text-blue-400" aria-hidden="true"/>
-                <div>
-                  <p className="text-xs font-semibold text-white">Key observation</p>
-                  <p className="mt-1 text-sm leading-relaxed text-[#B7C5D7]">{data.evidence.missingFindings[0]}</p>
-                </div>
-              </div>
-            )}
-          <div className="mt-4 pt-3.5 border-t border-[#263044]/70">
-            <p className="mb-2 text-xs text-[#8799B1]">
-              Based on inspected public website content, not recorded visitor sessions or conversion data.
-            </p>
-            <button
-              type="button"
-              onClick={() => setIsScoreModalOpen(true)}
-              className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-blue-400 hover:text-blue-300 font-medium transition cursor-pointer"
-            >
-              <Info className="w-3.5 h-3.5" />
-              <span>How scoring works</span>
-            </button>
-          </div>
-        </section>
-
-        
-
-        {/* 1. FREE: FIVE CLARITY SIGNALS */}
-        <section>
-          <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6 text-[#F1F5F9]">Your Clarity Signals</h2>
-          <div className="bg-[#121824] border border-[#263044] rounded-xl overflow-hidden divide-y divide-[#263044]/70">
-            {displaySignals.map((signal) => {
-              const theme = getStatusTheme(signal.status, signal.badgeType);
-              return (
-                <div key={signal.id} className="px-4 py-3 sm:px-5 sm:py-3.5 transition-colors">
-                  {/* Mobile Layout (< sm) */}
-                  <div className="sm:hidden space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="inline-flex items-center gap-1.5">
-                        <span className="font-medium text-sm text-[#F1F5F9]">{signal.title}</span>
-                        <ClaritySignalTooltip signalKey={signal.key} name={signal.title} isOpen={activeSignalTooltip === `mobile-${signal.id}`}
-                          onOpen={() => setActiveSignalTooltip(`mobile-${signal.id}`)}
-                          onClose={() => setActiveSignalTooltip(current => current === `mobile-${signal.id}` ? null : current)} />
-                      </span>
-                      <span className="font-semibold text-sm text-white">{signal.scoreDisplay}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <span className={`w-1.5 h-1.5 rounded-full ${theme.dot}`} aria-hidden="true" />
-                      <span className={`text-xs font-normal ${theme.text}`}>
-                        {formatStatusText(signal.status)}
-                      </span>
-                    </div>
-                    <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-[#171F2D] border border-[#263044]/40">
-                      <div
-                        className={`h-full rounded-full transition-all duration-300 ${theme.bg}`}
-                        style={{ width: `${Math.min(100, Math.max(0, signal.score ?? 0))}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Desktop Layout (>= sm) */}
-                  <div className="hidden sm:flex items-center justify-between">
-                    <span className="inline-flex items-center gap-1.5">
-                      <span className="font-medium text-[#F1F5F9]">{signal.title}</span>
-                      <ClaritySignalTooltip signalKey={signal.key} name={signal.title} isOpen={activeSignalTooltip === `desktop-${signal.id}`}
-                        onOpen={() => setActiveSignalTooltip(`desktop-${signal.id}`)}
-                        onClose={() => setActiveSignalTooltip(current => current === `desktop-${signal.id}` ? null : current)} />
-                    </span>
-                    <div className="flex items-center gap-4">
-                      <div className="text-right">
-                        <div className="font-semibold text-white text-sm">{signal.scoreDisplay}</div>
-                        <div className={`text-xs font-medium flex items-center justify-end gap-1.5 ${theme.text}`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${theme.dot}`} aria-hidden="true" />
-                          <span>{formatStatusText(signal.status)}</span>
-                        </div>
-                      </div>
-                      <div className="w-20 h-1.5 bg-[#171F2D] border border-[#263044]/40 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full rounded-full transition-all duration-300 ${theme.bg}`}
-                          style={{ width: `${Math.min(100, Math.max(0, signal.score ?? 0))}%` }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  {signal.key === "purchaseReadiness" && report.purchaseReadiness && (
-                    <div className="mt-3 border-t border-[#263044]/70 pt-3 space-y-2">
-                      <p className="text-xs text-[#64748B]">Separate score · Not included in Overall Clarity Score</p>
-                      <p className="text-xs sm:text-sm leading-relaxed text-[#94A3B8]">{report.purchaseReadiness.summary}</p>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-            {showLockedPurchase && (
-              <div data-testid="purchase-readiness-locked" className="p-4 sm:p-5 space-y-2">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="inline-flex items-center gap-1.5">
-                    <span className="font-medium text-sm sm:text-base text-[#F1F5F9]">Purchase Readiness</span>
-                    <ClaritySignalTooltip signalKey="purchaseReadiness" name="Purchase Readiness" isOpen={activeSignalTooltip === "locked-purchase"}
-                      onOpen={() => setActiveSignalTooltip("locked-purchase")}
-                      onClose={() => setActiveSignalTooltip(current => current === "locked-purchase" ? null : current)} />
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/20 bg-blue-500/10 px-2.5 py-1 text-[11px] font-semibold text-blue-400">
-                    <Lock className="h-3 w-3" aria-hidden="true" />Premium
-                  </span>
-                </div>
-                <p className="text-xs sm:text-sm leading-relaxed text-[#94A3B8]">This website offers paid products, subscriptions or services. Unlock its Purchase Readiness score and discover how clearly it helps visitors decide to buy.</p>
-                <p className="text-xs leading-relaxed text-[#64748B]">A separate assessment of pricing, value, buyer confidence and purchase next steps. Your Overall Clarity Score uses only the original five signals.</p>
-                <p className="text-xs text-[#94A3B8]">Included in Full Analysis when applicable.</p>
-              </div>
-            )}
-          </div>
-        </section>
+        <ClarityResultsOverview
+          report={report}
+          isUnlocked={isReportUnlocked}
+          showLockedPurchase={showLockedPurchase}
+          unlockedPurchase={unlockedPurchase}
+          publicObservation={Array.isArray(data?.evidence?.missingFindings)
+            && typeof data.evidence.missingFindings[0] === "string"
+            ? data.evidence.missingFindings[0] : undefined}
+          onExplainScore={() => setIsScoreModalOpen(true)}
+        />
 
         {/* One clear upgrade card after the free clarity signals. */}
         {!isReportUnlocked && (
