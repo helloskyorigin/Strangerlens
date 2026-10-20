@@ -63,5 +63,5 @@ const atmosphere=readFileSync("app/landing-v3.css","utf8");
 assert.ok(atmosphere.includes("@keyframes sl-color-flow"));
 assert.ok(atmosphere.includes("prefers-reduced-motion:reduce"));
 const landing=readFileSync("app/page.tsx","utf8");
-assert.ok(landing.includes("Free scan · No account · Full report $3 once"));
+assert.ok(landing.includes("Free scan · No signup · Full report $3"));
 console.log("PASS: personalized public-score upgrade, paid-only report gating, compact landing and slow accessible aurora.");
