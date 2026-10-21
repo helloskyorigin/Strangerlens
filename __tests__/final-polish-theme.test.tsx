@@ -16,7 +16,7 @@ assert.ok(hero.includes('sl-aurora--violet') && hero.includes('sl-aurora--cyan')
 assert.ok(!hero.includes("sl-signal-dot") && !threads.includes("sl-signal-dot"), "No tiny ambient dots on any surface.");
 assert.equal((threads.match(/class="sl-focus-thread"/g)||[]).length,10);
 const brand=renderToStaticMarkup(<BrandMark className="h-8 w-8"/>);
-assert.ok(brand.includes("viewBox") && brand.includes("currentColor"), "Scalable monochrome brand mark.");
+assert.ok(brand.includes("viewBox") && brand.includes("#A9F2FF"), "Scalable colorful branded clarity mark.");
 const scan=renderToStaticMarkup(<ScanScreen rawUrl="https://example.com" isVerifying onBackToLanding={()=>{}}/>);
 assert.ok(scan.includes("BrandMark") || scan.includes('sl-brand-mark'), "Scan header shares the new logo.");
 assert.ok(!scan.includes("Five clarity signals evaluated") && !scan.includes('aria-label="Five analysis dimensions"'));

@@ -6,6 +6,7 @@ import { generateReportPdf } from "@/lib/pdf-generator";
 import { adaptReport } from "@/lib/report-adapter";
 import { readReportToken } from "@/lib/payment-checkout";
 import { LandingThemeSwitcher } from "@/components/landing/LandingThemeSwitcher";
+import BrandMark from "@/components/BrandMark";
 
 export default function MyReportsPage() {
   const [reports, setReports] = useState<any[]>([]);
@@ -43,7 +44,7 @@ export default function MyReportsPage() {
           <ArrowLeft className="w-4 h-4" /> Back to Scanner
         </Link>
         <div className="mb-7 flex items-center justify-between gap-3">
-          <h1 className="text-3xl font-extrabold text-white">My Reports</h1>
+          <div className="flex items-center gap-3"><BrandMark className="h-9 w-9"/><h1 className="text-2xl sm:text-3xl font-extrabold text-white">My Reports</h1></div>
           <LandingThemeSwitcher compact />
         </div>
         

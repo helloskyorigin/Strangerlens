@@ -472,11 +472,11 @@ export default function LandingPage() {
                   <Link href="/my-reports" className="rounded py-1 whitespace-nowrap hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#246BFD]">My Reports</Link>
                 </nav>
 
-                <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-                  <div className="hidden sm:block"><LandingThemeSwitcher /></div>
+                <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+                  <LandingThemeSwitcher />
                   <button
                     onClick={scrollToInput}
-                    className="sl-v3-primary group rounded-full bg-[#246BFD] hover:bg-blue-600 active:scale-[0.97] text-white text-xs sm:text-sm font-medium px-4 sm:px-5 py-2 sm:py-2.5 transition-all duration-200 inline-flex items-center gap-1.5 shadow-md shadow-blue-500/20 cursor-pointer whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#246BFD] focus-visible:ring-offset-2"
+                    className="sl-v3-primary group hidden min-[420px]:inline-flex rounded-full bg-[#246BFD] hover:bg-blue-600 active:scale-[0.97] text-white text-xs sm:text-sm font-medium px-4 sm:px-5 py-2 sm:py-2.5 transition-all duration-200 inline-flex items-center gap-1.5 shadow-md shadow-blue-500/20 cursor-pointer whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#246BFD] focus-visible:ring-offset-2"
                   >
                     <span>Try for free</span>
                     <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
@@ -582,10 +582,6 @@ export default function LandingPage() {
                           <ArrowRight className="w-4 h-4 text-[#64748B] group-hover:text-[#3B82F6] group-hover:translate-x-0.5 transition-all" />
                         </motion.a>
                       ))}
-                      <div className="flex items-center justify-between gap-3 border-t border-[#263044] px-4 py-3">
-                        <span className="text-sm font-semibold text-[#F1F5F9]">Appearance</span>
-                        <LandingThemeSwitcher />
-                      </div>
                       <Link href="/my-reports" onClick={() => setMobileMenuOpen(false)} className="flex min-h-[48px] items-center justify-between rounded-2xl px-4 py-3 text-base font-semibold text-[#F1F5F9] hover:bg-[#171F2D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#246BFD]">
                         My Reports <ArrowRight aria-hidden="true" className="h-4 w-4 text-[#64748B]" />
                       </Link>

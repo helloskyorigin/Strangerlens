@@ -1,13 +1,18 @@
 import React from "react";
 
-/** One crisp, scalable monochrome glyph on every product screen. */
+/**
+ * The StrangerLens mark: an open-ended S-shaped clarity path.
+ * A blue → violet field with a cyan endpoint, no eye or generic lock symbol.
+ * Renders as a scalable SVG and stays vivid in both themes.
+ */
 export default function BrandMark({ className = "" }: { className?: string }) {
   return (
     <span className={`sl-brand-mark ${className}`} aria-hidden="true">
-      <svg viewBox="0 0 32 32" fill="none" width="24" height="24" focusable="false">
-        <rect x="3" y="3" width="26" height="26" rx="8" stroke="currentColor" strokeWidth="1.8"/>
-        <path d="M8.5 16c2.4-3.5 4.9-5.25 7.5-5.25s5.1 1.75 7.5 5.25c-2.4 3.5-4.9 5.25-7.5 5.25S10.9 19.5 8.5 16Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/>
-        <circle cx="16" cy="16" r="2.4" fill="currentColor"/>
+      <svg viewBox="0 0 40 40" fill="none" focusable="false">
+        <path d="M29.4 11H17c-5.1 0-8.2 2.6-8.2 6.5s2.9 6.1 7.7 6.1h7.2c4.9 0 7.7 2.1 7.7 6.1s-3.1 6.4-8.2 6.4H10.6"
+          stroke="#FFFFFF" strokeWidth="3.75" strokeLinecap="round" strokeLinejoin="round" transform="translate(0 -4)"/>
+        <circle cx="30" cy="8.4" r="2.7" fill="#A9F2FF"/>
+        <path d="M9.6 30.5h10.2" stroke="#B3DDFF" strokeWidth="2" strokeLinecap="round"/>
       </svg>
     </span>
   );

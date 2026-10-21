@@ -15,10 +15,10 @@ const lines = renderToStaticMarkup(<ChromaticAtmosphere variant="threads" />);
 assert.equal((lines.match(/class="sl-focus-thread"/g) || []).length, 10, "Quiet focus-line pattern.");
 
 const preview = renderToStaticMarkup(<InteractiveReportPreview />);
-assert.equal((preview.match(/role="tab"/g) || []).length, 5, "Five interactive example signals.");
-assert.ok(preview.includes("Illustrative scores and guidance only"), "Example is honestly labeled.");
-assert.ok(preview.includes("Example Score: 69/100"), "Score is clearly labeled as example.");
-assert.ok(preview.includes("Full Analysis"), "Preview clearly communicates paid depth.");
+assert.equal((preview.match(/role="tab"/g) || []).length, 6, "Five clarity signals and one separate fictional Purchase Readiness example.");
+assert.ok(preview.includes("FICTIONAL WEBSITE") && preview.includes("Illustrative wording"), "Example is honestly labeled as fictional.");
+assert.ok(preview.includes("69") && preview.includes("Illustrative · Five core signals"), "Overall score is clearly illustrative and excludes the purchase check.");
+assert.ok(preview.includes("Every tab is open") && !preview.includes("LockKeyhole") && !preview.includes("Unlock evidence"), "Every fictional example is open.");
 
 const css = readFileSync("app/landing-v3.css", "utf8");
 for (const fragment of [
@@ -46,12 +46,14 @@ async function main() {
   const root = createRoot(dom.window.document.getElementById("app")!);
   try {
     await act(async () => { root.render(<LandingThemeSwitcher />); });
-    const buttons = dom.window.document.querySelectorAll<HTMLButtonElement>("button[aria-pressed]");
-    assert.equal(buttons.length, 3, "Light, dark and system controls exist.");
-    await act(async () => { buttons[1].click(); });
+    const themeToggle = dom.window.document.querySelector<HTMLButtonElement>('[data-testid="theme-toggle"]');
+    assert.ok(themeToggle, "One visible theme button exists.");
+    assert.equal(dom.window.document.querySelectorAll('[data-testid="theme-toggle"]').length, 1);
+    await act(async () => { themeToggle.click(); });
     assert.equal(dom.window.document.documentElement.dataset.landingTheme, "dark");
     assert.equal(dom.window.localStorage.getItem(LANDING_THEME_KEY), "dark");
-    await act(async () => { buttons[0].click(); });
+    assert.equal(themeToggle.getAttribute("aria-label"), "Switch to light mode");
+    await act(async () => { themeToggle.click(); });
     assert.equal(dom.window.document.documentElement.dataset.landingTheme, "light");
 
     await act(async () => { root.render(<InteractiveReportPreview />); });

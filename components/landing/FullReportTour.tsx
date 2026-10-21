@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ArrowRight, ArrowUpRight, Check, CheckCircle2, Eye, FileSearch, FileText, Layers3, LockKeyhole, PencilLine, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Check, CheckCircle2, Eye, FileSearch, FileText, Layers3, PencilLine, ShieldCheck, Sparkles } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 
 const SECTIONS = [
@@ -57,6 +57,11 @@ function Detail({selected}:{selected:Section}){
         <b>{signal.score}</b>
       </div>)}
     </div>
+    <div className="sl-report-purchase-sample">
+      <span className="sl-report-overline">06 · CONDITIONAL PURCHASE READINESS</span>
+      <strong>64/100 · Is the reason to upgrade clear?</strong>
+      <p>This fictional product has a paid plan. Its separate purchase check looks at pricing clarity, reasons to pay and the next step. It never changes the five-signal overall score.</p>
+    </div>
     <p className="sl-tour-footnote">Illustrative scores and findings, not an actual audit.</p>
   </div>;
   if(selected==="evidence")return <div className="sl-showcase-section">
@@ -109,12 +114,12 @@ export default function FullReportTour({onTryFree}:{onTryFree:()=>void}){
     <div className="sl-tour-heading">
       <span className="sl-tour-kicker"><Sparkles size={15} aria-hidden="true"/> THE $3 COMPLETE REPORT</span>
       <h2 id="sl-tour-heading">From a clarity score to an actionable plan.</h2>
-      <p>Explore a detailed, report-style example. See how Full Analysis connects clarity signals to findings, verified evidence when available, copy suggestions and prioritized fixes.</p>
+      <p>Explore every chapter of a fictional complete report—five core signals, conditional purchase context, page evidence, better wording and a prioritized action plan. No sample section is hidden.</p>
     </div>
     <div className="sl-tour-shell">
       <header className="sl-tour-topline">
         <div><span className="sl-tour-browserdots"><i/><i/><i/></span><span>StrangerLens / Full Clarity Report</span></div>
-        <span className="sl-tour-example-tag">INTERACTIVE SAMPLE · FICTIONAL WEBSITE</span>
+        <span className="sl-tour-example-tag">INTERACTIVE SAMPLE · ALL CHAPTERS OPEN</span>
       </header>
       <div className="sl-report-score-hero">
         <div>
@@ -154,6 +159,6 @@ export default function FullReportTour({onTryFree}:{onTryFree:()=>void}){
         <button type="button" onClick={onTryFree}>Analyze My Website Free <ArrowRight size={15} aria-hidden="true"/></button>
       </footer>
     </div>
-    <p className="sl-tour-caption">This is a fictional demonstration. Free results remain free; verified paid reports contain website-specific findings only after confirmed payment.</p>
+    <p className="sl-tour-caption">Every example tab is available to explore. These fictional observations are not your website's findings; a real website-specific full report requires verified payment.</p>
   </section>;
 }

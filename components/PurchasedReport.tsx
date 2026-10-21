@@ -58,7 +58,7 @@ export default function PurchasedReport({ reportId }: { reportId: string }) {
     }}
     onBackToLanding={() => router.push("/")} onRunNewCheck={() => router.push("/")} />;
 
-  return <div className="min-h-screen bg-[#090D15] text-[#F1F5F9]">
+  return <div className="sl-app-theme min-h-screen bg-[#090D15] text-[#F1F5F9]">
     <ReportsHeader />
     <main className="mx-auto max-w-xl px-5 py-20">
       {error ? <section role="alert" className="rounded-2xl border border-[#263044] bg-[#121824] p-7">

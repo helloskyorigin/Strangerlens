@@ -16,17 +16,17 @@ const globals = readFileSync("app/globals.css","utf8");
 assert.ok(globals.includes('app-theme.css'), "Shared app theme CSS is loaded.");
 assert.ok(css.includes('.sl-app-theme') && css.includes('html[data-landing-theme="light"]'), "Scoped light app palette exists.");
 assert.ok(css.includes('button.bg-\\[\\#246BFD\\]'), "Paid primary CTAs preserve white-on-blue contrast.");
-assert.ok(css.includes('.sl-theme-compact-trigger'), "Narrow-screen appearance menu has accessible styling.");
+assert.ok(readFileSync("app/landing-v3.css","utf8").includes(".sl-theme-quick--compact"), "One-tap mobile appearance control has compact styling.");
 
 const scanHtml = renderToStaticMarkup(<ScanScreen rawUrl="https://example.com" onBackToLanding={()=>{}} isVerifying />);
 assert.ok(scanHtml.includes('sl-app-theme'), "Scanning uses shared theme.");
-assert.ok(scanHtml.includes("Choose theme"), "Scanning provides appearance control.");
+assert.ok(scanHtml.includes("Switch to dark mode"), "Scanning provides a one-tap appearance control.");
 
 const analysis = mapBackendToFrontend(structuredClone(paymentAnalysis), "https://example.com",paymentSnapshot);
 for(const paid of [false,true]){
   const markup=renderToStaticMarkup(<ResultsScreen analysisData={analysis} rawUrl="https://example.com" checkoutEnabled={true} isUnlocked={paid}/>);
   assert.ok(markup.includes('sl-app-theme'), "Free/paid reports use shared theme.");
-  assert.ok(markup.includes("Choose theme"), "Report header has compact appearance switcher.");
+  assert.ok(markup.includes("Switch to dark mode"), "Report header has one-tap appearance switcher.");
   assert.equal(markup.includes('id="your-improvement-plan"'),paid,"Premium workbench remains gated.");
 }
 const fullTour = renderToStaticMarkup(<FullReportTour onTryFree={()=>{}}/>);
@@ -45,21 +45,20 @@ async function run(){
   const root=createRoot(dom.window.document.getElementById("app")!);
   try{
     await act(async()=>root.render(<LandingThemeSwitcher compact/>));
-    const toggle=dom.window.document.querySelector<HTMLButtonElement>("button[aria-haspopup]");
-    assert.ok(toggle,"Mobile theme control is available.");
+    const toggle=dom.window.document.querySelector<HTMLButtonElement>('[data-testid="theme-toggle"]');
+    assert.ok(toggle,"Compact one-tap theme control is available.");
     await act(async()=>toggle.click());
-    const choices=[...dom.window.document.querySelectorAll<HTMLButtonElement>(".sl-theme-menu-option")];
-    assert.equal(choices.length,3);
-    await act(async()=>choices[1].click());
     assert.equal(dom.window.document.documentElement.dataset.landingTheme,"dark");
     assert.ok(dom.window.document.documentElement.classList.contains("dark"));
     assert.equal(dom.window.localStorage.getItem(LANDING_THEME_KEY),"dark");
-    await act(async()=>root.render(<LandingThemeSwitcher/>));
-    const light=dom.window.document.querySelector<HTMLButtonElement>('button[aria-label="Light appearance"]');
-    assert.ok(light);
-    await act(async()=>light.click());
+    await act(async()=>root.render(<div><LandingThemeSwitcher/><LandingThemeSwitcher compact/></div>));
+    const synced=[...dom.window.document.querySelectorAll<HTMLButtonElement>('[data-testid="theme-toggle"]')];
+    assert.equal(synced.length,2);
+    assert.ok(synced.every(x=>x.getAttribute("aria-label")==="Switch to light mode"));
+    await act(async()=>synced[1].click());
     assert.equal(dom.window.document.documentElement.dataset.landingTheme,"light");
     assert.ok(!dom.window.document.documentElement.classList.contains("dark"));
+    assert.ok(synced.every(x=>x.getAttribute("aria-label")==="Switch to dark mode"));
     await act(async()=>root.render(<FullReportTour onTryFree={()=>{}}/>));
     const tabs=[...dom.window.document.querySelectorAll<HTMLButtonElement>('.sl-tour-tabs button[role="tab"]')];
     for(const tab of tabs){
