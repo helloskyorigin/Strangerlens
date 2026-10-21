@@ -9,6 +9,7 @@ export interface CheckoutOrder {
   createdAt: number;
   sessionId?: string;
   checkoutUrl?: string;
+  returnOrigin?: string; // Dodo return_url must point to this public app origin.
   paymentId?: string;
   status?: string;
 }

@@ -8,6 +8,10 @@ assert.equal(resolveCheckoutReturnOrigin("https://strangerlens.ai.studio"), "htt
 assert.equal(resolveCheckoutReturnOrigin("https://old-deployment.run.app", "https://strangerlens.ai.studio/"),
   "https://strangerlens.ai.studio", "Canonical domain wins after hosting migration.");
 assert.equal(resolveCheckoutReturnOrigin("http://localhost:3000"), "http://localhost:3000");
+assert.equal(resolveCheckoutReturnOrigin("https://old-cloud.run.app", "https://old-cloud.run.app", "live_mode"),
+  "https://strangerlens.ai.studio", "Live returns use the V7 canonical website.");
+assert.equal(resolveCheckoutReturnOrigin("https://staging.example", undefined, "live_mode"),
+  "https://strangerlens.ai.studio");
 assert.throws(() => resolveCheckoutReturnOrigin("https://strangerlens.ai.studio", "https://evil.example/redirect?token=a"));
 assert.throws(() => resolveCheckoutReturnOrigin("https://strangerlens.ai.studio", "http://evil.example"));
 assert.throws(() => resolveCheckoutReturnOrigin("javascript:alert(1)"));

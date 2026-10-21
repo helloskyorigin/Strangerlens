@@ -7,6 +7,7 @@ import PremiumActionPlan from "@/components/PremiumActionPlan";
 import RecheckComparison from "@/components/RecheckComparison";
 import PostScanUpgradeModal from "@/components/PostScanUpgradeModal";
 import { trackFunnelEvent } from "@/lib/ui-funnel-events";
+import { persistActiveReportSession } from "@/lib/active-report-session";
 import { escapeHtmlText } from "@/lib/escape-html";
 import { Share2, Download, Check, Info, X, Lock, Loader2, AlertCircle, ArrowRight, FileText } from "lucide-react";
 import { LandingThemeSwitcher } from "@/components/landing/LandingThemeSwitcher";
@@ -341,6 +342,8 @@ export default function ResultsScreen({
           await onRefreshPaidReport();
         }
       } else if (result.checkoutUrl) {
+        // Synchronously preserve this exact V7 report before Dodo navigation.
+        persistActiveReportSession(window.sessionStorage, rawUrl, data);
         trackFunnelEvent("checkout_opened");
         window.location.assign(result.checkoutUrl);
       }

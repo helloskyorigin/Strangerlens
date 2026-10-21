@@ -69,6 +69,9 @@ export async function POST(req: NextRequest) {
     }
 
     const config = getDodoConfig();
+    const origin = resolveCheckoutReturnOrigin(
+      req.nextUrl.origin, process.env.NEXT_PUBLIC_APP_URL, config.environment
+    );
     await limitPaymentRequests(reportId, "checkout", 10);
 
     return await withCheckoutLock(config.environment, reportId, async () => {
@@ -85,7 +88,9 @@ export async function POST(req: NextRequest) {
         recentOrder.productId === config.productId &&
         recentOrder.checkoutUrl &&
         recentOrder.sessionId &&
-        recentOrder.status !== "succeeded"
+        recentOrder.status !== "succeeded" &&
+        // Never reuse a stored live session carrying an obsolete V1 return URL.
+        (config.environment !== "live_mode" || recentOrder.returnOrigin === origin)
       ) {
         return NextResponse.json({
           alreadyPaid: false,
@@ -97,14 +102,6 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      // Only the configured canonical app URL or the server-observed request
-      // origin can receive a checkout return. Never trust Origin/Referer headers:
-      // they could send a customer's paid report return to another website.
-      // This also avoids pinning checkout to an obsolete hosting URL.
-      const origin = resolveCheckoutReturnOrigin(
-        req.nextUrl.origin,
-        process.env.NEXT_PUBLIC_APP_URL
-      );
       const orderId = randomUUID();
       const returnUrl = `${origin}/?checkout=return&reportId=${encodeURIComponent(
         reportId
@@ -151,6 +148,7 @@ export async function POST(req: NextRequest) {
         createdAt: Date.now(),
         sessionId,
         checkoutUrl,
+        returnOrigin: origin,
         status: "pending",
       };
 

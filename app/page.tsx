@@ -24,6 +24,8 @@ import { LandingThemeSwitcher } from "@/components/landing/LandingThemeSwitcher"
 import ResultsScreen from "@/components/ResultsScreen";
 import ClaritySignalTooltip from "@/components/ClaritySignalTooltip";
 import { useReportPayments } from "@/hooks/useReportPayments";
+import { readPendingCheckout } from "@/lib/payment-checkout";
+import { readActiveReportSession, persistActiveReportSession, clearActiveReportSession } from "@/lib/active-report-session";
 import { validateClientUrl } from "@/lib/url-client-validator";
 import { createScanFlowController } from "@/lib/scan-flow-controller";
 import { trackFunnelEvent } from "@/lib/ui-funnel-events";
@@ -196,15 +198,10 @@ export default function LandingPage() {
   const hamburgerButtonRef = useRef<HTMLButtonElement>(null);
   const shouldReduceMotion = useReducedMotion();
 
-  const ACTIVE_REPORT_SESSION_KEY = "strangerlens_active_report_v1";
 
   const clearPersistedReportSession = () => {
     if (typeof window === "undefined") return;
-    try {
-      window.sessionStorage.removeItem(ACTIVE_REPORT_SESSION_KEY);
-    } catch {
-      // Ignore storage errors
-    }
+    clearActiveReportSession(window.sessionStorage);
   };
 
   const [scanController] = useState(() =>
@@ -252,18 +249,9 @@ export default function LandingPage() {
 
     // Set initial history state if not present
     if (!window.history.state || !window.history.state.strangerLens) {
-      const rawSaved = window.sessionStorage.getItem(ACTIVE_REPORT_SESSION_KEY);
-      let initialView = "landing";
-      if (rawSaved) {
-        try {
-          const parsed = JSON.parse(rawSaved);
-          if (parsed && typeof parsed.analysisData?.score === "number") {
-            initialView = "results";
-          }
-        } catch {
-          // ignore
-        }
-      }
+      const params = new URLSearchParams(window.location.search);
+      const expectedId = params.get("checkout") === "return" ? params.get("reportId") : null;
+      const initialView = readActiveReportSession(window.sessionStorage, expectedId) ? "results" : "landing";
       window.history.replaceState({ strangerLens: true, view: initialView }, "");
     }
 
@@ -280,17 +268,12 @@ export default function LandingPage() {
         if (existingData) {
           scanController.navigateToResults();
         } else {
-          try {
-            const rawSaved = window.sessionStorage.getItem(ACTIVE_REPORT_SESSION_KEY);
-            if (rawSaved) {
-              const parsed = JSON.parse(rawSaved);
-              if (parsed?.analysisData && typeof parsed.analysisData.score === "number") {
-                scanController.restoreSession(parsed.rawUrl, parsed.analysisData);
-                return;
-              }
-            }
-          } catch {
-            // ignore
+          const params = new URLSearchParams(window.location.search);
+          const expectedId = params.get("checkout") === "return" ? params.get("reportId") : null;
+          const session = readActiveReportSession(window.sessionStorage, expectedId);
+          if (session) {
+            scanController.restoreSession(session.rawUrl, session.analysisData);
+            return;
           }
           scanController.navigateToLanding();
         }
@@ -310,49 +293,42 @@ export default function LandingPage() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     let rafId: number | null = null;
-    try {
-      const rawSaved = window.sessionStorage.getItem(ACTIVE_REPORT_SESSION_KEY);
-      if (!rawSaved) return;
-      const parsed = JSON.parse(rawSaved);
-      if (
-        parsed &&
-        typeof parsed === "object" &&
-        typeof parsed.rawUrl === "string" &&
-        parsed.analysisData &&
-        typeof parsed.analysisData.score === "number"
-      ) {
-        rafId = requestAnimationFrame(() => {
-          scanController.restoreSession(
-            parsed.rawUrl,
-            parsed.analysisData
-          );
-        });
-      }
-    } catch {
-      // Ignore malformed sessionStorage data
+    const params = new URLSearchParams(window.location.search);
+    const expectedId = params.get("checkout") === "return" ? params.get("reportId") : null;
+    const session = readActiveReportSession(window.sessionStorage, expectedId);
+    if (session) {
+      rafId = requestAnimationFrame(() => {
+        if (scanController.getState().currentView === "landing" &&
+            !scanController.getState().analysisData) {
+          scanController.restoreSession(session.rawUrl, session.analysisData);
+        }
+      });
     }
     return () => {
       if (rafId !== null) cancelAnimationFrame(rafId);
     };
   }, [scanController]);
 
+  // When returning via browser Back from Dodo's checkout BFCache, reload the
+  // latest app build and restore its matching V7 report without rescanning.
+  useEffect(() => {
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (!event.persisted) return;
+      const session = readActiveReportSession(window.sessionStorage);
+      if (session && readPendingCheckout(session.analysisData.reportId)) {
+        window.location.reload();
+      }
+    };
+    window.addEventListener("pageshow", onPageShow);
+    return () => window.removeEventListener("pageshow", onPageShow);
+  }, []);
+
   // Persist active report in sessionStorage while viewing results
   useEffect(() => {
     if (typeof window === "undefined") return;
-    try {
-      if (currentView === "results" && analysisData && submittedUrl) {
-        window.sessionStorage.setItem(
-          ACTIVE_REPORT_SESSION_KEY,
-          JSON.stringify({
-            rawUrl: submittedUrl,
-            analysisData,
-            savedAt: Date.now(),
-          })
-        );
-        window.history.replaceState({ strangerLens: true, view: "results" }, "");
-      }
-    } catch {
-      // Ignore storage quota errors
+    if (currentView === "results" && analysisData && submittedUrl) {
+      persistActiveReportSession(window.sessionStorage, submittedUrl, analysisData);
+      window.history.replaceState({ strangerLens: true, view: "results" }, "");
     }
   }, [currentView, analysisData, submittedUrl]);
 
@@ -417,6 +393,7 @@ export default function LandingPage() {
     trackFunnelEvent("scan_submitted");
     payments.cancelPaymentFlow();
     setPostScanOfferReportId(null);
+    clearPersistedReportSession();
     if (typeof window !== "undefined") {
       window.history.pushState({ strangerLens: true, view: "scan" }, "");
     }
