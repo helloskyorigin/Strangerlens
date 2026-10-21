@@ -153,7 +153,7 @@ export default function InteractiveReportPreview() {
         </div>
       </div>
       <div className="sl-demo-bottom">
-        <p><CheckCircle2 size={14} aria-hidden="true"/> All sample signals and fixes open · Fictional demonstration</p>
+        <p><CheckCircle2 size={14} aria-hidden="true"/> All sample signals and fixes open · Real Full Analysis $3</p>
         <a href="#full-report-demo">Explore the full report walkthrough <ArrowRight size={14} aria-hidden="true"/></a>
       </div>
     </section>
