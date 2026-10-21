@@ -202,14 +202,14 @@ export function mapBackendToFrontend(
     backendAnalysis.first_seconds.what_is_this.status === "clear" ||
     backendAnalysis.signals.first_impression.score >= 70
   ) {
-    clearFindings.push("Core product category is identifiable in the homepage content");
+    clearFindings.push("Core product category is identifiable in the inspected page content");
   }
   if (backendAnalysis.signals.first_impression.score < 70) {
     missingFindings.push(
       whatIsThisEv
         ? "Product category wording is present but requires clearer specificity in the hero section"
         : isPartialSnapshot
-        ? "Clear product category headline was not detected in the extracted homepage text"
+        ? "Clear product category headline was not detected in the extracted inspected page text"
         : "Product category requires extra scanning to identify"
     );
   }
@@ -234,7 +234,7 @@ export function mapBackendToFrontend(
   if (backendAnalysis.signals.audience.score < 70) {
     missingFindings.push(
       isPartialSnapshot
-        ? "Explicit target audience qualifier was not detected in the extracted homepage text"
+        ? "Explicit target audience qualifier was not detected in the extracted inspected page text"
         : "Target audience is not explicitly stated in hero section"
     );
   }
@@ -256,7 +256,7 @@ export function mapBackendToFrontend(
       valueEv
         ? "Value statement is present but could express a more concrete, measurable visitor outcome"
         : isPartialSnapshot
-        ? "Concrete visitor outcome was not detected in the extracted homepage text"
+        ? "Concrete visitor outcome was not detected in the extracted inspected page text"
         : "Specific visitor outcome or benefit is not concrete"
     );
   }
@@ -277,8 +277,8 @@ export function mapBackendToFrontend(
       trustEv
         ? "Initial proof is present, but stronger quantifiable credentials or customer evidence would reinforce trust"
         : isPartialSnapshot
-        ? "Customer proof points or credentials were not detected in the extracted homepage text"
-        : "Verifiable proof points, customer logos, or credentials not detected in the extracted homepage content"
+        ? "Customer proof points or credentials were not detected in the extracted inspected page text"
+        : "Verifiable proof points, customer logos, or credentials not detected in the extracted inspected page content"
     );
   }
 
@@ -301,7 +301,7 @@ export function mapBackendToFrontend(
       actionEv
         ? `Primary CTA (“${actionEv}”) is present, but next-step expectations or commitment level could be clearer`
         : isPartialSnapshot
-        ? "Primary call-to-action button was not detected in the extracted homepage text"
+        ? "Primary call-to-action button was not detected in the extracted inspected page text"
         : "Call to action has ambiguity or high friction"
     );
   }
@@ -312,7 +312,7 @@ export function mapBackendToFrontend(
 
   const evidence = {
     locationTag: snapshot?.hero?.headline
-      ? "Home page → Hero section"
+      ? "Public page → Main message"
       : "Exact section not identified",
     homepageExcerpt,
     clearFindings,

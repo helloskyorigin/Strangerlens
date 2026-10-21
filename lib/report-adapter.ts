@@ -162,7 +162,7 @@ export function adaptReport(raw: any): CanonicalReport {
   const verdictSubtext =
     typeof raw.verdictSubtext === "string"
       ? raw.verdictSubtext
-      : "Based on your homepage · First-time visitor perspective";
+      : "Based on inspected public content · First-time visitor perspective";
 
   // 3. Extract and normalize the five signals
   const firstImpression = buildCanonicalSignal("firstImpression", raw);
@@ -271,7 +271,7 @@ function buildCanonicalFirstSeconds(
   if (rawClear.length > 0) {
     for (const f of rawClear) {
       const lower = f.toLowerCase();
-      let defaultTitle = "Homepage clarity";
+      let defaultTitle = "Website clarity";
       if (lower.includes("category") || lower.includes("product") || lower.includes("what is this")) {
         defaultTitle = "Product purpose";
       } else if (lower.includes("audience") || lower.includes("who is it for")) {
@@ -719,7 +719,7 @@ function createEmptyCanonicalReport(domain: string, raw: any): CanonicalReport {
       scoreDisplay: "—/100",
       status: "Status unavailable",
       badgeType: "neutral",
-      explanation: "Diagnostic assessment based on accessible homepage content.",
+      explanation: "Diagnostic assessment based on accessible public website content.",
       positiveFindings: [],
       concerns: [],
       recommendations: [],
@@ -737,7 +737,7 @@ function createEmptyCanonicalReport(domain: string, raw: any): CanonicalReport {
     overallStatus: "Needs work",
     hasRealOverallScore: false,
     verdict: "First-time visitor clarity review.",
-    verdictSubtext: "Based on your homepage · First-time visitor perspective",
+    verdictSubtext: "Based on inspected public content · First-time visitor perspective",
     signals: emptySignals,
     signalsList: list,
     firstSeconds: {

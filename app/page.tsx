@@ -692,7 +692,7 @@ export default function LandingPage() {
                     }}
                     className="text-[15px] sm:text-lg text-[#94A3B8] leading-relaxed mb-6 sm:mb-7 max-w-[640px] font-normal"
                   >
-                    Understand the message visitors meet on your public website—from the homepage to accessible supporting and policy pages where available. Get a free clarity overview, then unlock the evidence and fixes.
+                    Understand the message visitors meet across accessible public website content, including relevant supporting and policy pages where available. Get a free clarity overview, then unlock the evidence and fixes.
                   </motion.p>
 
                   {/* 4. URL Input Pill & Primary Hero CTA */}
@@ -851,7 +851,7 @@ export default function LandingPage() {
                           Enter your website
                         </h3>
                         <p className="text-sm text-[#94A3B8] leading-relaxed">
-                          Enter a public website URL. We inspect its homepage and accessible first-party policies; relevant supporting pages add context when available.
+                          Enter a public website URL. We analyze accessible page content and first-party policies; other relevant public pages add context when available.
                         </p>
                       </div>
                     </div>

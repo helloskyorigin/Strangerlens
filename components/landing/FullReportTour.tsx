@@ -70,7 +70,7 @@ function Detail({selected}:{selected:Section}){
     <p className="sl-showcase-description">Specific observed wording and a practical change, side-by-side. Real reports don't invent missing evidence.</p>
     <div className="sl-report-evidence-grid">
       <div className="sl-report-evidence-before">
-        <span>EXAMPLE HOMEPAGE / HERO</span>
+        <span>EXAMPLE PUBLIC-PAGE MESSAGE</span>
         <blockquote>“Everything you need to work smarter.”</blockquote>
         <p>Illustrative source wording</p>
       </div>

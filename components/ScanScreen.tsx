@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { AlertCircle, ArrowLeft, ArrowRight, Check, CheckCircle2, Circle, Globe2, LoaderCircle, RotateCcw, ScanEye, X } from "lucide-react";
+import { AlertCircle, ArrowLeft, ArrowRight, Check, CheckCircle2, Circle, Globe2, LoaderCircle, RotateCcw, X } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { LandingThemeSwitcher } from "@/components/landing/LandingThemeSwitcher";
 import BrandMark from "@/components/BrandMark";
@@ -25,7 +25,7 @@ interface ScanScreenProps {
 }
 
 export const SCAN_FOCUS_MESSAGES = [
-  "Understanding what your homepage actually says",
+  "Reading the public message your visitors encounter",
   "Looking for who the offer is for and why it matters",
   "Checking visible trust cues, policies and next steps",
   "Connecting real page evidence to clearer communication",
@@ -33,12 +33,12 @@ export const SCAN_FOCUS_MESSAGES = [
 
 export const SCAN_STAGES = [
   { id: "verify", label: "Website connection verified" },
-  { id: "content", label: "Homepage content inspected" },
+  { id: "content", label: "Public website content inspected" },
   { id: "signals", label: "Communication and trust cues evaluated" },
   { id: "report", label: "Your clarity report prepared" },
 ] as const;
 
-const COVERAGE = ["Homepage message", "Visible offers", "Trust & policies", "Next steps"];
+const COVERAGE = ["Website message", "Offers & pricing", "Trust & policies", "Next steps"];
 
 function safeError(raw?: string | null): string {
   if (!raw || typeof raw !== "string") return "We couldn't complete this website scan. Please try again.";
@@ -126,9 +126,7 @@ export default function ScanScreen({
           <button type="button" onClick={() => { transitioned.current = true; onBackToLanding(); }}
             className="flex min-w-0 items-center gap-2.5 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
             aria-label="Return to StrangerLens home">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] border border-[#334866] bg-[#15243C] text-[#80B6FF]">
-              <BrandMark className="h-5 w-5" />
-            </span>
+            <BrandMark className="h-8 w-8" />
             <span className="truncate text-[15px] font-bold tracking-tight sm:text-base">StrangerLens</span>
           </button>
           <div className="ml-auto flex items-center gap-1.5"><LandingThemeSwitcher compact />
@@ -147,23 +145,28 @@ export default function ScanScreen({
           {verifiedSite && <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-400" aria-label="Website verified"/>}
         </div>
 
-        {/* Compact, distinctive focus symbol. Not a simulated website screenshot. */}
-        <div className="relative mx-auto mt-7 flex h-[116px] w-[116px] items-center justify-center sm:mt-9 sm:h-[144px] sm:w-[144px]">
+        {/* The actual StrangerLens mark leads this scan, with understated,
+            reduced-motion-safe activity rings; no eye or fake activity logs. */}
+        <div className="sl-scan-mark-stage relative mx-auto mt-7 flex h-[116px] w-[116px] items-center justify-center sm:mt-9 sm:h-[144px] sm:w-[144px]"
+          data-scan-state={phase}>
           <div className="absolute inset-0 rounded-full border border-[#304761] bg-[#111F33]"/>
-          <div className="absolute inset-[10px] rounded-full border border-dashed border-[#385777]"/>
+          <div className="absolute inset-[12px] rounded-full border border-[#345477]/70"/>
           {phase !== "error" && phase !== "ready" && !reduceMotion && (
-            <motion.div aria-hidden="true" className="absolute inset-[10px] rounded-full border-2 border-transparent border-t-[#67A6FC]"
-              animate={{ rotate: 360 }}
-              transition={{ duration: 3.6, repeat: Infinity, ease: "linear" }}/>
+            <>
+              <motion.div aria-hidden="true" className="absolute inset-[8px] rounded-full border-2 border-transparent border-t-[#69C8FF] border-r-[#755EF2]/30"
+                animate={{ rotate: 360 }} transition={{ duration: 6, repeat: Infinity, ease: "linear" }}/>
+              <motion.div aria-hidden="true" className="absolute inset-[23px] rounded-full border border-[#79A8FF]/35"
+                animate={{ scale: [1, 1.09, 1], opacity: [0.7, 0.28, 0.7] }}
+                transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}/>
+            </>
           )}
-          <div className={`relative z-10 flex h-[62px] w-[62px] items-center justify-center rounded-[20px] border ${phase === "error"
-            ? "border-rose-500/30 bg-rose-500/10 text-rose-300"
-            : phase === "ready" ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-            : "border-blue-500/25 bg-[#1A3050] text-[#91C5FF]"}`}>
-            {phase === "error" ? <AlertCircle className="h-7 w-7" aria-hidden="true"/> :
-              phase === "ready" ? <Check className="h-7 w-7" aria-hidden="true"/> :
-              <ScanEye className="h-7 w-7" strokeWidth={1.7} aria-hidden="true"/>}
-          </div>
+          <motion.div className="relative z-10"
+            animate={reduceMotion || phase === "error" || phase === "ready" ? {} : { y: [0, -3, 0], scale: [1, 1.035, 1] }}
+            transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}>
+            <BrandMark className="h-[65px] w-[65px] shadow-[0_15px_38px_-17px_rgba(80,128,250,.85)] sm:h-[75px] sm:w-[75px]" />
+          </motion.div>
+          {phase === "error" && <AlertCircle className="absolute -bottom-1 -right-1 z-20 h-6 w-6 rounded-full bg-[#111F33] p-1 text-rose-300" aria-label="Scan interrupted"/>}
+          {phase === "ready" && <Check className="absolute -bottom-1 -right-1 z-20 h-6 w-6 rounded-full bg-[#111F33] p-1 text-emerald-300" aria-label="Scan complete"/>}
         </div>
 
         <div className="mt-5 space-y-2 text-center sm:mt-7">
@@ -232,7 +235,7 @@ export default function ScanScreen({
           {phase === "ready" ? "Opening your results…" :
             phase === "error" ? "You can retry this URL or check another website." :
               elapsed > 35 ? "This check is taking longer than usual. No fixed completion time is guaranteed." :
-                "We inspect the submitted homepage, accessible first-party legal pages, and other relevant public pages when available."}
+                "We examine accessible public website content and first-party policies, with relevant supporting pages when available."}
         </p>
         <div className="mt-5 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[10px] font-medium text-[#6D85A2]" aria-label="Areas inspected when available">
           {COVERAGE.map((name, index) => <React.Fragment key={name}>

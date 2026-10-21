@@ -3,6 +3,7 @@
 import React, { useState, type KeyboardEvent } from "react";
 import { AlertCircle, ArrowRight, BookOpenText, CheckCircle2, SearchCheck, Wrench } from "lucide-react";
 import { CLARITY_REPORT_CHAPTERS } from "@/lib/clarity-report-chapters";
+import PurchaseReadinessDeepDive from "@/components/PurchaseReadinessDeepDive";
 import type { CanonicalPurchaseSignal, CanonicalSignal } from "@/lib/report-adapter";
 
 interface SignalReportExplorerProps {
@@ -140,6 +141,9 @@ export default function SignalReportExplorer({
             </p>}
           </div>
 
+          {purchaseDetails
+            ? <div className="px-5 sm:px-6"><PurchaseReadinessDeepDive details={purchaseDetails}/></div>
+            : (
           <div className="divide-y divide-[#27364A] px-5 sm:px-6">
             <div className="py-5">
               <h4 className="mb-2 flex items-center gap-2 text-sm font-bold text-white">
@@ -170,48 +174,10 @@ export default function SignalReportExplorer({
               <FindingList items={activeSignal.recommendations}
                 empty="No additional changes were recommended for this signal in the available analysis." />
             </div>
-            {purchaseDetails && (
-              <div className="space-y-5 py-5">
-                <p className="text-xs leading-relaxed text-[#91A7BE]">Purchase Readiness is separate from the Overall Clarity Score.</p>
-                {purchaseDetails.pricingAndValueIssues.length > 0 && (
-                  <div>
-                    <h4 className="mb-2 text-sm font-bold text-white">Pricing and Value Communication</h4>
-                    <FindingList items={purchaseDetails.pricingAndValueIssues} empty="No pricing issues recorded." />
-                  </div>
-                )}
-                {purchaseDetails.copyImprovements.length > 0 && (
-                  <div>
-                    <h4 className="mb-3 text-sm font-bold text-white">Suggested Purchase CTA Copy</h4>
-                    <div className="space-y-3">
-                      {purchaseDetails.copyImprovements.map((copy, index) => (
-                        <div key={index} className="rounded-xl bg-[#1B2A3E] p-3.5 text-sm">
-                          <p className="text-[#94A9C0]">Current: {copy.current}</p>
-                          <p className="mt-2 font-semibold text-white">Suggested: {copy.suggested}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {purchaseDetails.evidence.length > 0 && (
-                  <div>
-                    <h4 className="mb-3 text-sm font-bold text-white">Observed Website Evidence</h4>
-                    {purchaseDetails.evidence.map((ev, index) => (
-                      <blockquote key={index} className="mb-3 border-l-2 border-blue-500/40 pl-3 text-sm leading-relaxed text-[#C3D0E0]">
-                        <p>“{ev.text}”</p>
-                        <cite className="mt-1 block break-all text-xs not-italic text-[#8FA4BC]">{ev.source}</cite>
-                      </blockquote>
-                    ))}
-                  </div>
-                )}
-                {purchaseDetails.limitations.length > 0 && (
-                  <div>
-                    <h4 className="mb-2 text-sm font-semibold text-white">Inspection Limitations</h4>
-                    <FindingList items={purchaseDetails.limitations} empty="No additional limitations recorded." />
-                  </div>
-                )}
-              </div>
-            )}
+
           </div>
+
+            )}
 
           {nextChapter && (
             <button type="button" onClick={() => setSelectedKey(nextChapter.key)}

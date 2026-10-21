@@ -592,6 +592,9 @@ export default function ResultsScreen({
             <nav aria-label="Jump to paid report sections" className="flex shrink-0 flex-wrap gap-2">
               <a href="#your-improvement-plan" className="inline-flex min-h-10 items-center justify-center rounded-full bg-[#1E815F] px-4 text-xs font-bold text-white hover:bg-[#24936E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Start with fixes →</a>
               <a href="#complete-paid-report" className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#385C62] px-4 text-xs font-semibold text-[#D6EDE7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Signal deep dives</a>
+              {unlockedPurchase && <a href="#complete-paid-report" onClick={() => document.getElementById("chapter-tab-purchaseReadiness")?.click()}
+                className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#3D6FA0] bg-[#1B4264] px-4 text-xs font-semibold text-[#E8F3FF] hover:bg-[#21547D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300">
+                Purchase Readiness →</a>}
               <a href="#better-copy-studio" className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#385C62] px-4 text-xs font-semibold text-[#D6EDE7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Copy Studio</a>
               <a href="#report-export-actions" className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#385C62] px-4 text-xs font-semibold text-[#D6EDE7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Export PDF</a>
             </nav>

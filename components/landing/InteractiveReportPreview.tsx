@@ -39,7 +39,7 @@ const SIGNALS = [
   {
     id:"trust", label:"Trust", score:30, status:"Needs work", Icon:ShieldCheck,
     heading:"Give the promise a reason to be believed.",
-    intro:"The homepage makes strong claims without enough visible context for a cautious visitor.",
+    intro:"The public website makes strong claims without enough visible context for a cautious visitor.",
     evidence:"“Trusted by teams everywhere.”",
     strength:"The message communicates a desire to be reliable.",
     friction:"No specific supporting evidence is shown alongside the claim.",
