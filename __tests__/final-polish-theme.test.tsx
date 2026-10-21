@@ -24,7 +24,7 @@ assert.ok(SCAN_STAGES.length === 4 && SCAN_FOCUS_MESSAGES.length === 4);
 assert.ok(SCAN_FOCUS_MESSAGES.some(x=>x.includes("policies")));
 const app=readFileSync("app/page.tsx","utf8");
 assert.ok(app.includes('<AnimatePresence mode="popLayout" initial={false}>'), "Cross-screen transitions cannot wait on an empty black frame.");
-assert.ok(app.includes("accessible supporting and policy pages where available"), "Public site scope is truthful.");
+assert.ok(app.includes("accessible public website content") && app.includes("relevant supporting and policy pages where available"), "Public site scope is truthful without narrow homepage language.");
 const css=readFileSync("app/landing-v3.css","utf8");
 const theme=readFileSync("app/app-theme.css","utf8");
 const globals=readFileSync("app/globals.css","utf8");
