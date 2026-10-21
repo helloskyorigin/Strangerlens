@@ -37,7 +37,7 @@ import {
   AnimatedHamburgerIcon,
   EASE_OUT_EXPO,
 } from "@/components/motion/Reveal";
-import { LEGAL_CONFIG } from "@/lib/legal-config";
+import { LEGAL_CONFIG , getSupportGmailComposeUrl } from "@/lib/legal-config";
 
 const BRAND_NAME = "StrangerLens";
 
@@ -1263,7 +1263,8 @@ export default function LandingPage() {
                       <div className="text-center sm:text-right text-[11px] text-[#64748B]">
                         <span>Support: </span>
                         <a
-                          href={`mailto:${LEGAL_CONFIG.supportEmail}`}
+                          href={getSupportGmailComposeUrl()}
+            target="_blank" rel="noopener noreferrer"
                           className="text-[#94A3B8] hover:text-[#3B82F6] transition-colors font-medium"
                         >
                           {LEGAL_CONFIG.supportEmail}

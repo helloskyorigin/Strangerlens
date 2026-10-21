@@ -2,7 +2,7 @@ import React from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import LegalLayout from "@/components/LegalLayout";
-import { BRAND_NAME, LEGAL_CONFIG } from "@/lib/legal-config";
+import { BRAND_NAME, LEGAL_CONFIG , getSupportGmailComposeUrl } from "@/lib/legal-config";
 
 export const metadata: Metadata = {
   title: `Refund Policy — ${BRAND_NAME}`,
@@ -66,7 +66,8 @@ export default function RefundPolicyPage() {
         <p>
           If you experience a technical delivery problem — such as a paid report failing to unlock after payment confirmation or a report failing to generate due to a technical system error — please contact our support team at{" "}
           <a
-            href={`mailto:${LEGAL_CONFIG.supportEmail}?subject=StrangerLens%20Technical%20Delivery%20Issue`}
+            href={getSupportGmailComposeUrl("StrangerLens Technical Delivery Issue")}
+            target="_blank" rel="noopener noreferrer"
             className="font-semibold text-[#3B82F6] hover:underline"
           >
             {LEGAL_CONFIG.supportEmail}
@@ -86,7 +87,8 @@ export default function RefundPolicyPage() {
         <p>
           If you believe you were charged more than once for the same order or experienced an accidental duplicate transaction, please contact us at{" "}
           <a
-            href={`mailto:${LEGAL_CONFIG.supportEmail}?subject=Duplicate%20Charge%20Inquiry`}
+            href={getSupportGmailComposeUrl("Duplicate Charge Inquiry")}
+            target="_blank" rel="noopener noreferrer"
             className="font-semibold text-[#3B82F6] hover:underline"
           >
             {LEGAL_CONFIG.supportEmail}
@@ -116,7 +118,8 @@ export default function RefundPolicyPage() {
         <p className="text-[#94A3B8]">
           Available payments and eligible billing adjustments are processed in coordination with our payment partner, <strong>{LEGAL_CONFIG.paymentProvider.plannedProvider}</strong>. For any billing, receipt, or payment support inquiries, reach out directly to our support team at{" "}
           <a
-            href={`mailto:${LEGAL_CONFIG.supportEmail}`}
+            href={getSupportGmailComposeUrl()}
+            target="_blank" rel="noopener noreferrer"
             className="font-semibold text-[#3B82F6] hover:underline"
           >
             {LEGAL_CONFIG.supportEmail}
@@ -137,7 +140,8 @@ export default function RefundPolicyPage() {
           </Link>{" "}
           page or email us directly at{" "}
           <a
-            href={`mailto:${LEGAL_CONFIG.supportEmail}`}
+            href={getSupportGmailComposeUrl()}
+            target="_blank" rel="noopener noreferrer"
             className="font-semibold text-[#3B82F6] hover:underline"
           >
             {LEGAL_CONFIG.supportEmail}

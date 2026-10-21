@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Mail, Clock, ShieldCheck, FileText, RefreshCcw, HelpCircle } from "lucide-react";
 import LegalLayout from "@/components/LegalLayout";
-import { BRAND_NAME, LEGAL_CONFIG } from "@/lib/legal-config";
+import { BRAND_NAME, LEGAL_CONFIG , getSupportGmailComposeUrl } from "@/lib/legal-config";
 
 export const metadata: Metadata = {
   title: `Contact Support — ${BRAND_NAME}`,
@@ -37,7 +37,8 @@ export default function ContactSupportPage() {
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0">
           <a
-            href={`mailto:${LEGAL_CONFIG.supportEmail}?subject=StrangerLens%20Support%20Request`}
+            href={getSupportGmailComposeUrl("StrangerLens Support Request")}
+            target="_blank" rel="noopener noreferrer"
             className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-[#246BFD] hover:bg-blue-600 text-white text-xs sm:text-sm font-bold transition-all shadow-md shadow-blue-500/20"
           >
             <Mail className="w-4 h-4 shrink-0" />
@@ -64,7 +65,8 @@ export default function ContactSupportPage() {
             </div>
             <div className="pt-2">
               <a
-                href={`mailto:${LEGAL_CONFIG.supportEmail}?subject=Report%20Access%20or%20Scan%20Help`}
+                href={getSupportGmailComposeUrl("Report Access or Scan Help")}
+            target="_blank" rel="noopener noreferrer"
                 className="text-xs font-bold text-[#3B82F6] hover:underline inline-flex items-center gap-1"
               >
                 <span>Request report assistance →</span>
@@ -88,7 +90,8 @@ export default function ContactSupportPage() {
             </div>
             <div className="pt-2">
               <a
-                href={`mailto:${LEGAL_CONFIG.supportEmail}?subject=Billing%20or%20Refund%20Request`}
+                href={getSupportGmailComposeUrl("Billing or Refund Request")}
+            target="_blank" rel="noopener noreferrer"
                 className="text-xs font-bold text-[#3B82F6] hover:underline inline-flex items-center gap-1"
               >
                 <span>Email billing support →</span>
@@ -112,7 +115,8 @@ export default function ContactSupportPage() {
             </div>
             <div className="pt-2">
               <a
-                href={`mailto:${LEGAL_CONFIG.supportEmail}?subject=Privacy%20Inquiry`}
+                href={getSupportGmailComposeUrl("Privacy Inquiry")}
+            target="_blank" rel="noopener noreferrer"
                 className="text-xs font-bold text-[#3B82F6] hover:underline inline-flex items-center gap-1"
               >
                 <span>Submit privacy inquiry →</span>
@@ -132,7 +136,8 @@ export default function ContactSupportPage() {
             </div>
             <div className="pt-2">
               <a
-                href={`mailto:${LEGAL_CONFIG.supportEmail}?subject=StrangerLens%20General%20Question`}
+                href={getSupportGmailComposeUrl("StrangerLens General Question")}
+            target="_blank" rel="noopener noreferrer"
                 className="text-xs font-bold text-[#3B82F6] hover:underline inline-flex items-center gap-1"
               >
                 <span>Send a message →</span>

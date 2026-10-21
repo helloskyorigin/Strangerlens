@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { ArrowLeft, Shield, FileText, RefreshCcw, Mail } from "lucide-react";
-import { BRAND_NAME, LEGAL_CONFIG } from "@/lib/legal-config";
+import { BRAND_NAME, LEGAL_CONFIG , getSupportGmailComposeUrl } from "@/lib/legal-config";
 import { LandingThemeSwitcher } from "@/components/landing/LandingThemeSwitcher";
 import BrandMark from "@/components/BrandMark";
 
@@ -141,7 +141,8 @@ export default function LegalLayout({
             <p className="text-xs sm:text-sm text-[#94A3B8]">
               Reach our support team directly at{" "}
               <a
-                href={`mailto:${LEGAL_CONFIG.supportEmail}`}
+                href={getSupportGmailComposeUrl()}
+            target="_blank" rel="noopener noreferrer"
                 className="font-semibold text-[#3B82F6] hover:underline"
               >
                 {LEGAL_CONFIG.supportEmail}

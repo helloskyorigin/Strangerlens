@@ -41,3 +41,18 @@ export const LEGAL_CONFIG = {
     { label: "Contact Support", href: "/contact" },
   ] as const,
 };
+
+/**
+ * Directly opens a Gmail compose draft instead of delegating to the browser's
+ * arbitrary mailto: protocol handler (which may be misconfigured).
+ * No report details or personal data are placed into the URL.
+ */
+export function getSupportGmailComposeUrl(subject?: string): string {
+  const params = new URLSearchParams({
+    view: "cm",
+    fs: "1",
+    to: LEGAL_CONFIG.supportEmail,
+  });
+  if (subject) params.set("su", subject);
+  return `https://mail.google.com/mail/?${params.toString()}`;
+}

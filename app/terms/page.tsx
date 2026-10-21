@@ -2,7 +2,7 @@ import React from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import LegalLayout from "@/components/LegalLayout";
-import { BRAND_NAME, LEGAL_CONFIG } from "@/lib/legal-config";
+import { BRAND_NAME, LEGAL_CONFIG , getSupportGmailComposeUrl } from "@/lib/legal-config";
 
 export const metadata: Metadata = {
   title: `Terms of Service — ${BRAND_NAME}`,
@@ -143,7 +143,8 @@ export default function TermsOfServicePage() {
         <p>
           Questions about these Terms can be sent to{" "}
           <a
-            href={`mailto:${LEGAL_CONFIG.supportEmail}`}
+            href={getSupportGmailComposeUrl()}
+            target="_blank" rel="noopener noreferrer"
             className="font-semibold text-[#3B82F6] hover:underline"
           >
             {LEGAL_CONFIG.supportEmail}
