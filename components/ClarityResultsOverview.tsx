@@ -79,9 +79,9 @@ export default function ClarityResultsOverview({
       <div className="sl-v7-section-head">
         <div>
           <h2 id="sl-v7-signal-title">Your Clarity Signals</h2>
-          <p>Five core clarity checks{(showLockedPurchase || unlockedPurchase) ? " · Purchase check available" : ""}</p>
+          <p>Five core communication checks{(showLockedPurchase || unlockedPurchase) ? " + a separate purchase-readiness assessment" : ""}</p>
         </div>
-        <span>{signals.length + (showLockedPurchase ? 1 : 0)} signals</span>
+        <span>{signals.length + (showLockedPurchase ? 1 : 0)} checks</span>
       </div>
       <div className="sl-v7-signal-list">
         {signals.map(signal => {

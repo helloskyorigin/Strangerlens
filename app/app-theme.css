@@ -581,3 +581,79 @@ html[data-landing-theme="dark"] .sl-app-theme.sl-results-v7 {
 html[data-landing-theme="dark"] .sl-results-v7 .sl-v7-status--good {color:#70D5AF;}
 html[data-landing-theme="dark"] .sl-results-v7 .sl-v7-status--caution {color:#F1C37E;}
 html[data-landing-theme="dark"] .sl-results-v7 .sl-v7-status--weak {color:#F5A696;}
+
+/* Cross-page interaction contrast: utility hover:text-white must not turn
+   invisible against light surfaces. Keep genuine filled CTAs white on blue. */
+html[data-landing-theme="light"] .sl-app-theme :is(a,button)[class~="hover:text-white"]:not([class~="bg-[#246BFD]"]):not([class~="bg-blue-600"]):not([class~="bg-[#1E815F]"]):hover {
+  color:#173657!important;
+}
+html[data-landing-theme="light"] .sl-app-theme :is(a,button)[class~="hover:bg-[#171F2D]"]:hover,
+html[data-landing-theme="light"] .sl-app-theme :is(a,button)[class~="hover:bg-[#1C2638]"]:hover,
+html[data-landing-theme="light"] .sl-app-theme :is(a,button)[class~="hover:bg-[#263044]"]:hover,
+html[data-landing-theme="light"] .sl-app-theme :is(a,button)[class~="hover:bg-[#203149]"]:hover {
+  background-color:#E8F0FB!important;color:#173657!important;
+}
+html[data-landing-theme="dark"] .sl-app-theme :is(a,button)[class~="hover:text-white"]:hover {
+  color:#F4F8FF!important;
+}
+html[data-landing-theme="light"] .sl-app-theme .sl-theme-menu-option.is-active,
+html[data-landing-theme="light"] .sl-app-theme .sl-theme-button.is-active {
+  background:#246BFD!important;color:#FFFFFF!important;
+}
+html[data-landing-theme="light"] .sl-app-theme input:not([type="checkbox"]):not([type="radio"]),
+html[data-landing-theme="light"] .sl-app-theme textarea {
+  color:#182941!important;caret-color:#246BFD;
+}
+html[data-landing-theme="light"] .sl-app-theme input::placeholder,
+html[data-landing-theme="light"] .sl-app-theme textarea::placeholder {color:#657B98!important;}
+/* This sales panel is intentionally distinct in either appearance;
+   content and links must keep white-on-navy contrast. */
+html[data-landing-theme="light"] .sl-results-v7 #complete-report-preview,
+html[data-landing-theme="dark"] .sl-results-v7 #complete-report-preview {
+  --sl-text:#F3F7FF;--sl-muted:#BDD2EB;
+}
+.sl-results-v7 .sl-v7-tier-compare {
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;margin-top:19px;
+}
+.sl-results-v7 .sl-v7-tier-col {
+  padding:15px;border:1px solid #3A5574;border-radius:14px;
+  background:rgba(8,27,48,.25);min-width:0;
+}
+.sl-results-v7 .sl-v7-tier-col > span {
+  display:block;font-size:10px;font-weight:800;letter-spacing:.09em;color:#B5CBE6;
+}
+.sl-results-v7 .sl-v7-tier-col > strong {
+  display:block;margin-top:9px;font-size:13px;line-height:1.4;color:#FFF;
+}
+.sl-results-v7 .sl-v7-tier-col > p {
+  margin-top:7px;font-size:12px;line-height:1.5;color:#BFD1E8;
+}
+.sl-results-v7 .sl-v7-tier-paid {background:rgba(43,113,229,.18);border-color:#5E91D3;}
+@media(max-width:560px) {
+  .sl-results-v7 .sl-v7-tier-compare {grid-template-columns:1fr;}
+}
+@media(prefers-reduced-motion:no-preference) {
+  .sl-results-v7 .sl-v7-tier-paid {transition:border-color .25s ease,box-shadow .25s ease;}
+  .sl-results-v7 .sl-v7-tier-paid:hover {border-color:#9BC4F9;box-shadow:0 6px 28px rgba(59,130,246,.16);}
+}
+/* Legal navigation retains legible active and inactive pills. */
+html[data-landing-theme="light"] .sl-app-theme nav[aria-label="Legal and support pages"] a[aria-current="page"] {
+  background:#246BFD!important;color:white!important;
+}
+html[data-landing-theme="light"] .sl-app-theme nav[aria-label="Legal and support pages"] a:not([aria-current]):hover {
+  background:#E7EFFA!important;color:#153B65!important;
+}
+
+/* Rotating scan insights are grounded descriptions, never fake activity logs. */
+.sl-app-theme .sl-scan-focus {min-height:21px;}
+@media(prefers-reduced-motion:no-preference) {
+  .sl-app-theme .sl-scan-focus {animation:sl-scan-insight-in .4s ease both;}
+  @keyframes sl-scan-insight-in {
+    from {opacity:0;transform:translateY(5px);}
+    to {opacity:1;transform:translateY(0);}
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  .sl-app-theme .sl-scan-focus {animation:none;}
+}

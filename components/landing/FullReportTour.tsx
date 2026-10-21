@@ -31,7 +31,7 @@ function Row({name,score}:{name:string;score:number}) {
 function Detail({selected}:{selected:Section}){
   if(selected==="overview")return <div className="sl-showcase-section">
     <span className="sl-report-overline">01 · FIRST IMPRESSION REPORT</span>
-    <h3>Here's what your homepage communicates.</h3>
+    <h3>Here's what your public website communicates.</h3>
     <p className="sl-showcase-description">The visitor can identify a project workspace and find the primary action, but the audience and trust message deserve more attention.</p>
     <div className="sl-report-verdict"><Sparkles size={17}/><p><strong>Main verdict:</strong> Clear starting point. Strengthen audience specificity and supporting credibility before adding more features.</p></div>
     <div className="sl-report-two-col">
@@ -44,7 +44,7 @@ function Detail({selected}:{selected:Section}){
         <p>The current headline could describe many products. A new visitor may not know who benefits most.</p>
       </div>
     </div>
-    <p className="sl-tour-footnote">Fictional homepage example. No visitor behavior has been observed or measured.</p>
+    <p className="sl-tour-footnote">Fictional public-website example. Supporting and legal pages add context only when accessible. No visitor behavior has been observed.</p>
   </div>;
   if(selected==="signals")return <div className="sl-showcase-section">
     <span className="sl-report-overline">02 · DEEP ANALYSIS / ALL FIVE SIGNALS</span>
@@ -108,7 +108,7 @@ export default function FullReportTour({onTryFree}:{onTryFree:()=>void}){
   return <section id="full-report-demo" className="sl-tour-section-wrapper sl-report-showcase" aria-labelledby="sl-tour-heading">
     <div className="sl-tour-heading">
       <span className="sl-tour-kicker"><Sparkles size={15} aria-hidden="true"/> THE $3 COMPLETE REPORT</span>
-      <h2 id="sl-tour-heading">From five scores to a real improvement plan.</h2>
+      <h2 id="sl-tour-heading">From a clarity score to an actionable plan.</h2>
       <p>Explore a detailed, report-style example. See how Full Analysis connects clarity signals to findings, verified evidence when available, copy suggestions and prioritized fixes.</p>
     </div>
     <div className="sl-tour-shell">

@@ -381,7 +381,7 @@ export default function ResultsScreen({
           style={{ paddingBottom: "max(10px, env(safe-area-inset-bottom))" }}>
           <div className="mx-auto flex max-w-md items-center justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-xs font-bold text-white">Complete 5-signal report</p>
+              <p className="text-xs font-bold text-white">Full evidence + fix plan</p>
               <p className="text-[11px] text-[#A6BCD5]">$3 once · Full findings &amp; fixes</p>
             </div>
             <button type="button" onClick={handleUnlockFullAnalysis} disabled={loading || isVerifyingPayment}
@@ -586,12 +586,12 @@ export default function ResultsScreen({
               </p>
               <h2 className="mt-2 text-xl font-bold tracking-tight text-white">Your complete clarity report is ready.</h2>
               <p className="mt-1 max-w-lg text-sm leading-relaxed text-[#B8D0CC]">
-                All five detailed signals, the first-five-seconds assessment, improvement plan, and copy suggestions are below.
+                Five deep dives, actual page evidence when available, first-five-seconds insight, prioritized fixes and editable copy are below. The purchase check is included when a paid offer was detected.
               </p>
             </div>
             <nav aria-label="Jump to paid report sections" className="flex shrink-0 flex-wrap gap-2">
               <a href="#your-improvement-plan" className="inline-flex min-h-10 items-center justify-center rounded-full bg-[#1E815F] px-4 text-xs font-bold text-white hover:bg-[#24936E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Start with fixes →</a>
-              <a href="#complete-paid-report" className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#385C62] px-4 text-xs font-semibold text-[#D6EDE7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Five deep dives</a>
+              <a href="#complete-paid-report" className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#385C62] px-4 text-xs font-semibold text-[#D6EDE7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Signal deep dives</a>
               <a href="#better-copy-studio" className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#385C62] px-4 text-xs font-semibold text-[#D6EDE7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Copy Studio</a>
               <a href="#report-export-actions" className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#385C62] px-4 text-xs font-semibold text-[#D6EDE7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Export PDF</a>
             </nav>

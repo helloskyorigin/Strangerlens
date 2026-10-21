@@ -19,8 +19,8 @@ export default function CompleteReportPreview({
 }: Props) {
   const opportunity = describePublicOpportunity(canonicalPublicScores(signals));
   const benefits = [
-    { title:"Understand every score", detail:"All five detailed explanations, strengths and clarity gaps", Icon:ListChecks },
-    { title:"See evidence and practical fixes", detail:"Observed wording when available, with Smart Priority", Icon:FileSearch },
+    { title:"Understand every score", detail:"Five deep dives into strengths, confusion and exact improvements", Icon:ListChecks },
+    { title:"See evidence and practical fixes", detail:"Evidence-to-Fix findings, a first-five-seconds assessment and Smart Priority", Icon:FileSearch },
     { title:"Improve your website copy", detail:"Review, edit and copy suggested wording", Icon:PencilLine },
     { title:"Keep your complete report", detail:"Downloadable PDF and a fix checklist", Icon:FileDown },
   ];
@@ -32,7 +32,19 @@ export default function CompleteReportPreview({
       </div>
       <div className="sl-v7-price"><strong>$3</strong><span>one-time</span></div>
     </div>
-    <p className="sl-v7-upgrade-intro">Your free scores show where your website stands. Unlock the analysis behind them and a plan for what to improve.</p>
+    <p className="sl-v7-upgrade-intro">You can see the scores for free. The full report connects those scores to specific observations, editable improvements and an order to tackle them.</p>
+    <div className="sl-v7-tier-compare" aria-label="Free preview versus complete report">
+      <div className="sl-v7-tier-col">
+        <span>YOU HAVE · FREE</span>
+        <strong>Know where you stand</strong>
+        <p>Overall score · Five core clarity scores and statuses · Purchase check locked if applicable</p>
+      </div>
+      <div className="sl-v7-tier-col sl-v7-tier-paid">
+        <span>UNLOCK · $3 ONCE</span>
+        <strong>Know exactly what to improve</strong>
+        <p>Detailed reasoning · Evidence when available · Priority fixes · Copy Studio · PDF {purchaseReadinessApplicable ? "· Purchase assessment" : ""}</p>
+      </div>
+    </div>
     <div className="sl-v7-upgrade-reason">
       <p className="sl-v7-reason-heading">{opportunity.heading}</p>
       <p>{opportunity.detail}</p>

@@ -170,7 +170,7 @@ html[data-landing-theme="dark"] .landing-v3 .bg-slate-800 {background-color:#D7E
 .sl-theme-button:hover {transform:translateY(-1px);background:var(--sl-surface-muted);}
 .sl-theme-button.is-active {background:#246BFD;color:white;}
 .sl-theme-button:focus-visible {outline:2px solid #246BFD;outline-offset:2px;}
-/* Floating color clouds and scattered dots. Absolutely positioned decorations. */
+/* Floating color fields without dots or particle clutter. */
 .sl-atmosphere {
   position:absolute;
   inset:0;
@@ -212,19 +212,6 @@ html[data-landing-theme="dark"] .landing-v3 .bg-slate-800 {background-color:#D7E
 html[data-landing-theme="dark"] .sl-aurora--violet {background:radial-gradient(ellipse at center,rgba(98,79,189,.28),transparent 69%);}
 html[data-landing-theme="dark"] .sl-aurora--cyan {background:radial-gradient(ellipse at center,rgba(50,125,184,.26),transparent 72%);}
 html[data-landing-theme="dark"] .sl-aurora--peach {background:radial-gradient(ellipse at center,rgba(151,91,146,.15),transparent 70%);}
-.sl-dot-field {position:absolute;inset:0;}
-.sl-signal-dot {
-  position:absolute;
-  display:block;
-  border-radius:50%;
-  background:#4E8BD2;
-  box-shadow:0 0 11px 1px rgba(82,136,221,.26);
-  opacity:.18;
-  animation:sl-dot-breathe 7s ease-in-out infinite;
-}
-.sl-signal-dot:nth-child(3n) {background:#9E81D8;}
-.sl-signal-dot:nth-child(5n) {background:#63CAD7;}
-html[data-landing-theme="dark"] .sl-signal-dot {box-shadow:0 0 13px 2px rgba(102,170,253,.38);}
 .sl-focus-threads {position:absolute;width:100%;height:100%;top:0;left:0;overflow:visible;opacity:.8;}
 .sl-focus-thread {
   fill:none;stroke:#8B9FDC;stroke-width:.65;stroke-opacity:.25;
@@ -311,7 +298,6 @@ html[data-landing-theme="dark"] .sl-travel-line {stroke:#8AC6FB;stroke-opacity:.
   .sl-atmosphere--hero {inset:-10px -30% 0;}
   .sl-aurora {filter:blur(32px);width:64%;height:55%;}
   .sl-aurora--peach {width:70%;bottom:-15%;left:10%;}
-  .sl-signal-dot:nth-child(n+17) {display:none;}
   .sl-demo-header {padding:15px;}
   .sl-demo-disclaimer {padding:10px 15px 0;}
   .sl-demo-layout {padding:12px;grid-template-columns:1fr;gap:11px;}
@@ -575,3 +561,57 @@ html[data-landing-theme="light"] :is(.landing-v3,.sl-app-theme) button[class*="h
   .landing-v3 .sl-url-form { max-width: 100%; }
   .landing-v3 .sl-url-reassurance { margin-top: 5px; }
 }
+
+/* Final art direction: soft, migrating color without particles.
+   Slow transform + hue shift are independent, so the gradient visibly moves. */
+.landing-v3 .sl-atmosphere .sl-aurora {
+  animation:sl-cloud-drift 32s ease-in-out infinite alternate,
+    sl-color-flow 68s ease-in-out infinite alternate!important;
+  opacity:.72;
+  will-change:transform,filter;
+}
+.landing-v3 .sl-aurora--cyan {animation-delay:-13s,-23s!important;animation-duration:39s,77s!important;}
+.landing-v3 .sl-aurora--peach {animation-delay:-9s,-35s!important;animation-duration:35s,91s!important;}
+/* Scroll-linked layer reveal when available; the non-supporting fallback
+   remains a static clipping mask over softly drifting colors. */
+@keyframes sl-scroll-veil {
+  from {opacity:.38;transform:translate3d(0,18px,0);}
+  to {opacity:1;transform:translate3d(0,0,0);}
+}
+@supports (animation-timeline:view()) {
+  .landing-v3 .sl-section-v3 > .sl-atmosphere {
+    animation:sl-scroll-veil linear both;
+    animation-timeline:view();
+    animation-range:entry 0% cover 45%;
+  }
+}
+/* Readable navigation, filter chips and footer links in LIGHT and DARK on
+   mouse hover. This explicitly excludes filled action buttons. */
+html[data-landing-theme="light"] .landing-v3 :is(a,button)[class~="hover:text-white"]:not(.sl-v3-primary):not([class~="bg-[#246BFD]"]):hover {
+  color:#172F4E!important;
+}
+html[data-landing-theme="light"] .landing-v3 :is(a,button)[class~="hover:bg-[#171F2D]"]:hover,
+html[data-landing-theme="light"] .landing-v3 :is(a,button)[class~="hover:bg-[#1C2638]"]:hover {
+  background-color:#E5EFFB!important;
+  color:#172F4E!important;
+}
+html[data-landing-theme="dark"] .landing-v3 :is(a,button)[class~="hover:text-white"]:hover {
+  color:#F5F8FF!important;
+}
+html[data-landing-theme="light"] .landing-v3 .sl-hero-v3 :is(h1,p) {
+  text-shadow:none;
+}
+.sl-brand-mark {display:inline-flex;align-items:center;justify-content:center;color:var(--sl-text,#F1F5F9);flex-shrink:0;}
+.sl-brand-mark svg {display:block;width:100%;height:100%;}
+html[data-landing-theme="light"] .sl-brand-mark {color:#16283E;}
+html[data-landing-theme="dark"] .sl-brand-mark {color:#F3F7FF;}
+@media(prefers-reduced-motion:reduce) {
+  .landing-v3 .sl-atmosphere .sl-aurora,
+  .landing-v3 .sl-section-v3 > .sl-atmosphere {
+    animation:none!important;will-change:auto;
+  }
+}
+
+/* Smooth section scroll with no background speckle and a clipped glow. */
+.landing-v3 .sl-section-v3 {position:relative;isolation:isolate;}
+.landing-v3 .sl-section-v3 > :not(.sl-atmosphere) {position:relative;z-index:1;}

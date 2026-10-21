@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowLeft, Shield, FileText, RefreshCcw, Mail } from "lucide-react";
 import { BRAND_NAME, LEGAL_CONFIG } from "@/lib/legal-config";
 import { LandingThemeSwitcher } from "@/components/landing/LandingThemeSwitcher";
+import BrandMark from "@/components/BrandMark";
 
 interface LegalLayoutProps {
   activePage: "privacy" | "terms" | "refund" | "contact";
@@ -56,9 +57,7 @@ export default function LegalLayout({
               href="/"
               className="flex items-center gap-2.5 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#246BFD] rounded-lg"
             >
-              <div className="w-8 h-8 rounded-xl bg-[#171F2D] border border-[#263044] text-white flex items-center justify-center font-bold text-sm shadow-xs group-hover:border-[#384660] group-hover:text-[#3B82F6] transition-colors">
-                S
-              </div>
+              <BrandMark className="h-8 w-8 shrink-0" />
               <span className="font-extrabold text-base sm:text-lg tracking-tight text-white">
                 {LEGAL_CONFIG.productName}
               </span>
@@ -166,9 +165,7 @@ export default function LegalLayout({
       <footer className="border-t border-[#263044] bg-[#090D15] py-8 px-4 sm:px-6 mt-12">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#94A3B8]">
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-            <div className="w-6 h-6 rounded-lg bg-[#171F2D] border border-[#263044] text-white flex items-center justify-center text-xs font-bold shrink-0">
-              S
-            </div>
+            <BrandMark className="h-6 w-6 shrink-0" />
             <span className="font-bold text-white whitespace-nowrap">
               {BRAND_NAME}
             </span>

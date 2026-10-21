@@ -9,7 +9,7 @@ export const LEGAL_CONFIG = {
     "For order receipts, payment inquiries, or report delivery questions, please email hello.skyorigin@gmail.com with your analyzed URL and order details.",
   supportResponseWindow: "Within 24–48 business hours (Monday–Friday)",
   effectiveDate: "October 16, 2026",
-  lastUpdated: "October 16, 2026",
+  lastUpdated: "October 21, 2026",
   pricing: {
     freeTier: {
       name: "Free Preview",
@@ -23,7 +23,7 @@ export const LEGAL_CONFIG = {
       price: "$3 USD",
       billingType: "One-time payment · No subscription",
       summary:
-        "Complete action breakdown. Includes prioritized 1-2-3 fix plan, detailed analysis for all five signals (Why This Score?, What's Working?, What's Unclear?, How to Improve?), plus First 5 Seconds breakdown (What a Visitor May Understand and What a Visitor May Miss).",
+        "Five detailed signal analyses with observed evidence when available, prioritized improvement plan, editable copy suggestions, First 5 Seconds assessment, Premium PDF, and Purchase Readiness when a paid offer is detected.",
     },
 
   },

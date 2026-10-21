@@ -7,7 +7,7 @@ import { BRAND_NAME, LEGAL_CONFIG } from "@/lib/legal-config";
 export const metadata: Metadata = {
   title: `Refund Policy — ${BRAND_NAME}`,
   description:
-    "Refund Policy for StrangerLens one-time digital report purchases ($5 Full Clarity Report), statutory consumer rights, and billing support.",
+    "Refund Policy for StrangerLens one-time digital report purchases ($3 Full Clarity Report), statutory consumer rights, and billing support.",
 };
 
 export default function RefundPolicyPage() {
@@ -38,7 +38,7 @@ export default function RefundPolicyPage() {
         </h2>
         <p>
           The paid offering on <strong>{LEGAL_CONFIG.productName}</strong> — the{" "}
-          <strong>$5 Full Clarity Report</strong> — is a one-time digital product purchase with no recurring subscriptions or automatic renewals.
+          <strong>$3 Full Clarity Report</strong> — is a one-time digital product purchase with no recurring subscriptions or automatic renewals.
         </p>
         <p className="text-[#94A3B8]">
           Before purchasing a paid report, you can run a <strong>Free Preview ($0)</strong> to see your overall website clarity score, five clarity signal scores (First Impression, Audience, Value, Trust, Action), and five signal statuses at no cost.

@@ -18,6 +18,7 @@ import {
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import ScanScreen from "@/components/ScanScreen";
 import ChromaticAtmosphere from "@/components/landing/ChromaticAtmosphere";
+import BrandMark from "@/components/BrandMark";
 import InteractiveReportPreview from "@/components/landing/InteractiveReportPreview";
 import FullReportTour from "@/components/landing/FullReportTour";
 import { LandingThemeSwitcher } from "@/components/landing/LandingThemeSwitcher";
@@ -416,14 +417,14 @@ export default function LandingPage() {
         <p>{activePaymentMessage}</p>
         {["pending", "error"].includes(payments.paymentState) && <button className="mt-2 text-blue-400 underline" onClick={() => payments.verifyPayment(new URLSearchParams(window.location.search).get("reportId") || undefined, new URLSearchParams(window.location.search).get("orderId") || undefined)}>Check payment status</button>}
       </div>}
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="popLayout" initial={false}>
         {activeView === "landing" ? (
           <motion.div
             key="landing"
-            initial={shouldReduceMotion ? {} : { opacity: 0 }}
+            initial={false}
             animate={{ opacity: 1 }}
             exit={shouldReduceMotion ? {} : { opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
             className="landing-v3 w-full min-h-screen flex flex-col bg-[#090D15] text-[#F1F5F9]"
           >
             {/* STICKY HEADER */}
@@ -447,9 +448,7 @@ export default function LandingPage() {
                   }}
                   className="flex items-center gap-2 sm:gap-2.5 shrink-0 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#246BFD] rounded-lg"
                 >
-                  <div className="w-8 h-8 rounded-xl bg-[#171F2D] border border-[#263044] text-white flex items-center justify-center font-bold text-sm tracking-tighter shadow-xs transition-transform duration-200 group-hover:scale-[1.04]">
-                    S
-                  </div>
+                  <BrandMark className="h-8 w-8 shrink-0 transition-transform duration-200 group-hover:scale-[1.04]" />
                   <span className="text-lg sm:text-xl font-bold tracking-tight text-white whitespace-nowrap">
                     StrangerLens
                   </span>
@@ -654,7 +653,7 @@ export default function LandingPage() {
                     }}
                     className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold tracking-wider text-[#3B82F6] uppercase bg-[#171F2D] mb-4 sm:mb-5 border border-[#263044]"
                   >
-                    FOR FOUNDERS &amp; WEBSITE BUILDERS
+                    SEE WHAT YOUR WEBSITE REALLY COMMUNICATES
                   </motion.div>
 
                   {/* 2. Staggered Hero Headline Lines */}
@@ -697,7 +696,7 @@ export default function LandingPage() {
                     }}
                     className="text-[15px] sm:text-lg text-[#94A3B8] leading-relaxed mb-6 sm:mb-7 max-w-[640px] font-normal"
                   >
-                    Find out what first-time visitors understand, what confuses them, and where your homepage could communicate more clearly. Start with five free clarity scores.
+                    Understand the message visitors meet on your public website—from the homepage to accessible supporting and policy pages where available. Get a free clarity overview, then unlock the evidence and fixes.
                   </motion.p>
 
                   {/* 4. URL Input Pill & Primary Hero CTA */}
@@ -837,7 +836,7 @@ export default function LandingPage() {
                   </Reveal>
                   <Reveal y={14} delay={0.12}>
                     <p className="text-[15px] sm:text-lg text-[#94A3B8] max-w-2xl mx-auto leading-relaxed font-normal">
-                      See your website through a stranger&apos;s eyes.
+                      Understand the public messaging visitors encounter, not just a screenshot of your hero.
                     </p>
                   </Reveal>
                 </div>
@@ -856,7 +855,7 @@ export default function LandingPage() {
                           Enter your website
                         </h3>
                         <p className="text-sm text-[#94A3B8] leading-relaxed">
-                          Add the public URL you want analyzed. No signup or account required to start.
+                          Enter a public website URL. We inspect its homepage and accessible first-party policies; relevant supporting pages add context when available.
                         </p>
                       </div>
                     </div>
@@ -1279,10 +1278,10 @@ export default function LandingPage() {
         ) : activeView === "scan" ? (
           <motion.div
             key="scan"
-            initial={shouldReduceMotion ? {} : { opacity: 0 }}
+            initial={false}
             animate={{ opacity: 1 }}
             exit={shouldReduceMotion ? {} : { opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
             className="w-full min-h-screen bg-[#090D15]"
           >
             <ScanScreen
@@ -1325,10 +1324,10 @@ export default function LandingPage() {
         ) : (
           <motion.div
             key="results"
-            initial={shouldReduceMotion ? {} : { opacity: 0 }}
+            initial={false}
             animate={{ opacity: 1 }}
             exit={shouldReduceMotion ? {} : { opacity: 0 }}
-            transition={{ duration: 0.35, ease: "easeInOut" }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
             className="w-full min-h-screen bg-[#090D15]"
           >
             <ResultsScreen

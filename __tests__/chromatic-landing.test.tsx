@@ -9,7 +9,7 @@ import InteractiveReportPreview from "../components/landing/InteractiveReportPre
 import { LandingThemeSwitcher, LANDING_THEME_KEY } from "../components/landing/LandingThemeSwitcher";
 
 const atmosphere = renderToStaticMarkup(<ChromaticAtmosphere variant="hero" />);
-assert.equal((atmosphere.match(/class="sl-signal-dot"/g) || []).length, 28, "Controlled, deterministic ambient dots.");
+assert.equal((atmosphere.match(/class="sl-signal-dot"/g) || []).length, 0, "No tiny background dots; ambient color stays clean.");
 assert.ok(atmosphere.includes("aria-hidden=\"true\""), "Animated decoration is hidden from screen readers.");
 const lines = renderToStaticMarkup(<ChromaticAtmosphere variant="threads" />);
 assert.equal((lines.match(/class="sl-focus-thread"/g) || []).length, 10, "Quiet focus-line pattern.");
@@ -24,7 +24,7 @@ const css = readFileSync("app/landing-v3.css", "utf8");
 for (const fragment of [
   'html[data-landing-theme="dark"] .landing-v3',
   'html[data-landing-theme="light"] .landing-v3 .text-white',
-  '.sl-atmosphere--hero', '.sl-signal-dot', '.sl-travel-line',
+  '.sl-atmosphere--hero', '.sl-aurora', '.sl-travel-line',
   '.sl-v3-primary:focus-visible', '@media(prefers-reduced-motion:reduce)',
 ]) assert.ok(css.includes(fragment), `V3 CSS contains ${fragment}`);
 const globalCss = readFileSync("app/globals.css", "utf8");

@@ -24,7 +24,7 @@ export default function PrivacyPolicyPage() {
           1. Overview &amp; Scope
         </h2>
         <p>
-          This Privacy Policy explains how <strong>{BRAND_NAME}</strong> (&ldquo;we&rdquo;, &ldquo;us&rdquo;, or &ldquo;our&rdquo;) collects, uses, and safeguards information when you use our website first-impression clarity analyzer, preview free clarity results, or unlock a paid $5 Full Clarity Report.
+          This Privacy Policy explains how <strong>{BRAND_NAME}</strong> (&ldquo;we&rdquo;, &ldquo;us&rdquo;, or &ldquo;our&rdquo;) collects, uses, and safeguards information when you use our website first-impression clarity analyzer, preview free clarity results, or unlock a paid $3 Full Clarity Report.
         </p>
         <p className="text-[#94A3B8]">
           We design {BRAND_NAME} around data minimization: you can run a free website first-impression review without creating an account, and we only process the data necessary to deliver your website clarity analysis and fulfill report purchases.
@@ -51,7 +51,7 @@ export default function PrivacyPolicyPage() {
               B. Email Address (Report Delivery &amp; Support)
             </h3>
             <p className="text-xs sm:text-sm text-[#94A3B8] leading-relaxed">
-              When you unlock a paid $5 Full Clarity Report or reach out to support, we collect your email address to deliver report access, order confirmations, receipts, and customer support responses.
+              When you unlock a paid $3 Full Clarity Report or reach out to support, we collect your email address to deliver report access, order confirmations, receipts, and customer support responses.
             </p>
           </div>
 
@@ -81,10 +81,10 @@ export default function PrivacyPolicyPage() {
           3. How AI Analysis Works
         </h2>
         <p>
-          When you request a website review, {LEGAL_CONFIG.productName} extracts publicly visible text elements (such as page titles, meta descriptions, headings, body copy, navigation labels, and calls to action) from the submitted public URL. This extracted text is processed solely to generate structured clarity scores across five signals (First Impression, Audience, Value, Trust, Action) and deliver actionable improvement insights.
+          When you request a website review, {LEGAL_CONFIG.productName} extracts publicly visible text elements (such as page titles, meta descriptions, headings, body copy, navigation labels, and calls to action) from the submitted public URL. This extracted text is processed to generate structured clarity scores across five core signals (First Impression, Audience, Value, Trust, Action) and deliver improvement insights. First-party privacy, terms and refund pages may also be inspected when linked and accessible; other relevant public supporting pages may provide additional context when enabled. Purchase Readiness is a sixth, separate paid assessment only when a genuine paid offering is identified.
         </p>
         <ul className="list-disc pl-5 space-y-1.5 text-[#94A3B8]">
-          <li>We evaluate website communication based only on the content actually inspected from publicly reachable pages; we do not bypass authentication, paywalls, or private intranet pages.</li>
+          <li>We evaluate website communication based only on the content actually inspected from publicly reachable pages; we do not bypass authentication, paywalls, or private intranet pages, and inaccessible pages are not treated as verified.</li>
           <li>StrangerLens is an AI-powered clarity analyzer and does not conduct real human visitor testing, accessibility compliance audits, or technical performance tests.</li>
         </ul>
       </section>
@@ -95,7 +95,7 @@ export default function PrivacyPolicyPage() {
           4. Local Browser Storage &amp; Cookies
         </h2>
         <p>
-          {LEGAL_CONFIG.productName} uses your browser&apos;s local storage (<code>localStorage</code>) on your own device to store your active report session and clarity analysis locally. Report access tokens and pending checkout references are also saved in local storage in this browser so you can return from checkout and reopen your report without rescanning. Clearing browser storage or changing browsers can remove this access; contact support with your receipt if needed.
+          {LEGAL_CONFIG.productName} uses session storage (<code>sessionStorage</code>) for the active website preview in this tab and local storage (<code>localStorage</code>) for report access references and pending checkout details. These browser records help you return from checkout and reopen your report without rescanning. The server always rechecks payment entitlement before revealing paid analysis. Clearing browser storage or changing browsers can remove this access; contact support with your receipt if needed.
         </p>
         <p className="text-xs sm:text-sm text-[#94A3B8]">
           You can clear this cached report session at any time by clearing your browser&apos;s site data for {LEGAL_CONFIG.productName}. We do not use third-party tracking or advertising cookies.

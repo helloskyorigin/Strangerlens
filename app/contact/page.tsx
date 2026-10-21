@@ -59,7 +59,7 @@ export default function ContactSupportPage() {
                 <span>Report Access &amp; Website Scan Help</span>
               </div>
               <p className="text-xs sm:text-sm text-[#94A3B8] leading-relaxed">
-                Trouble scanning a specific URL or accessing your unlocked $5 Full Clarity Report? Let us know the website domain and the email address you used.
+                Trouble scanning a specific URL or accessing your unlocked $3 Full Clarity Report? Let us know the website domain and the email address you used.
               </p>
             </div>
             <div className="pt-2">
@@ -127,7 +127,7 @@ export default function ContactSupportPage() {
                 <span>Product &amp; General Questions</span>
               </div>
               <p className="text-xs sm:text-sm text-[#94A3B8] leading-relaxed">
-                Have feedback on {LEGAL_CONFIG.productName}, questions about your Full Clarity Report ($5), or general product inquiries? We read every message.
+                Have feedback on {LEGAL_CONFIG.productName}, questions about your Full Clarity Report ($3), or general product inquiries? We read every message.
               </p>
             </div>
             <div className="pt-2">

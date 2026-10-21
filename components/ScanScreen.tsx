@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AlertCircle, ArrowLeft, ArrowRight, Check, CheckCircle2, Circle, Globe2, LoaderCircle, RotateCcw, ScanEye, X } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { LandingThemeSwitcher } from "@/components/landing/LandingThemeSwitcher";
+import BrandMark from "@/components/BrandMark";
 import type { ScanMilestone } from "@/lib/scan-flow-controller";
 
 interface VerifiedSite { domain: string; httpStatus: number | null }
@@ -24,18 +25,20 @@ interface ScanScreenProps {
 }
 
 export const SCAN_FOCUS_MESSAGES = [
-  "First-impression communication", "Audience and positioning",
-  "Value proposition", "Trust and next-step clarity",
+  "Understanding what your homepage actually says",
+  "Looking for who the offer is for and why it matters",
+  "Checking visible trust cues, policies and next steps",
+  "Connecting real page evidence to clearer communication",
 ] as const;
 
 export const SCAN_STAGES = [
   { id: "verify", label: "Website connection verified" },
-  { id: "content", label: "Public website content inspected" },
-  { id: "signals", label: "Five clarity signals evaluated" },
+  { id: "content", label: "Homepage content inspected" },
+  { id: "signals", label: "Communication and trust cues evaluated" },
   { id: "report", label: "Your clarity report prepared" },
 ] as const;
 
-const SIGNALS = ["First Impression", "Audience", "Value", "Trust", "Action"];
+const COVERAGE = ["Homepage message", "Visible offers", "Trust & policies", "Next steps"];
 
 function safeError(raw?: string | null): string {
   if (!raw || typeof raw !== "string") return "We couldn't complete this website scan. Please try again.";
@@ -109,11 +112,11 @@ export default function ScanScreen({
     phase === "evaluate" ? 2 : phase === "prepare" ? 3 :
     phase === "ready" ? 4 : scanMilestone === "signals_evaluated" ? 3 :
     scanMilestone === "content_inspected" ? 2 : verifiedSite ? 1 : 0;
-  const subtitle = phase === "verify" ? "Checking that your website is reachable and safe to inspect."
-    : phase === "read" ? "Extracting accessible headings, value statements and calls to action."
-    : phase === "evaluate" ? "Assessing how a first-time visitor might understand your message."
-    : phase === "prepare" ? "Validating findings and securely preparing your free report."
-    : phase === "ready" ? "Five clarity scores are ready. Discover what your website communicates."
+  const subtitle = phase === "verify" ? "Connecting securely to the public page you shared. No account required."
+    : phase === "read" ? "Reading the real headlines, offer, navigation and next steps instead of guessing."
+    : phase === "evaluate" ? "Checking who it's for, what it promises and whether visible evidence supports it. Available first-party policies inform trust."
+    : phase === "prepare" ? "Turning inspected content into a clear overview. Detailed evidence and fixes unlock in the full report."
+    : phase === "ready" ? "See what comes across clearly—and what deserves another look."
     : safeError(backendError);
 
   return (
@@ -124,7 +127,7 @@ export default function ScanScreen({
             className="flex min-w-0 items-center gap-2.5 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
             aria-label="Return to StrangerLens home">
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] border border-[#334866] bg-[#15243C] text-[#80B6FF]">
-              <ScanEye className="h-5 w-5" strokeWidth={1.8} aria-hidden="true"/>
+              <BrandMark className="h-5 w-5" />
             </span>
             <span className="truncate text-[15px] font-bold tracking-tight sm:text-base">StrangerLens</span>
           </button>
@@ -219,14 +222,20 @@ export default function ScanScreen({
             </button>
           </motion.div>
         )}
+        {(phase === "read" || phase === "evaluate" || phase === "prepare") && (
+          <p key={Math.floor(elapsed / 5) % SCAN_FOCUS_MESSAGES.length}
+            className="sl-scan-focus mx-auto mt-4 max-w-[430px] text-center text-[12px] font-medium text-[#B8D7F3]" aria-live="off">
+            {SCAN_FOCUS_MESSAGES[Math.floor(elapsed / 5) % SCAN_FOCUS_MESSAGES.length]}
+          </p>
+        )}
         <p className="mx-auto mt-4 max-w-[410px] text-center text-[11px] leading-relaxed text-[#7F94B1]">
           {phase === "ready" ? "Opening your results…" :
             phase === "error" ? "You can retry this URL or check another website." :
               elapsed > 35 ? "This check is taking longer than usual. No fixed completion time is guaranteed." :
-                "Inspecting accessible public content. Your results will open when analysis completes."}
+                "We inspect the submitted homepage, accessible first-party legal pages, and other relevant public pages when available."}
         </p>
-        <div className="mt-5 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[10px] font-medium text-[#6D85A2]" aria-label="Five analysis dimensions">
-          {SIGNALS.map((name, index) => <React.Fragment key={name}>
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[10px] font-medium text-[#6D85A2]" aria-label="Areas inspected when available">
+          {COVERAGE.map((name, index) => <React.Fragment key={name}>
             {index > 0 && <span aria-hidden="true" className="text-[#405570]">·</span>}
             <span>{name}</span>
           </React.Fragment>)}
