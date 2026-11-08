@@ -258,3 +258,29 @@ html[data-landing-theme="dark"] .sl-app-theme .sl-upgrade-dialog {
     transition:none!important;
   }
 }
+
+
+/* Dark appearance is graphite too—not the navy from the old gaming theme. */
+html[data-landing-theme="dark"] .landing-v3 .bg-\[\#090D15\] {
+  background:var(--quiet-page)!important;
+}
+html[data-landing-theme="dark"] .landing-v3 :is(
+  .bg-\[\#121824\],.bg-\[\#171F2D\],.bg-\[\#192438\],
+  .bg-\[\#1C2638\],.bg-\[\#111A29\]) {
+  background:var(--quiet-paper)!important;
+}
+html[data-landing-theme="dark"] .landing-v3 :is(
+  .border-\[\#263044\],.border-\[\#384660\]) {
+  border-color:var(--quiet-border)!important;
+}
+html[data-landing-theme] .landing-v3 :is(
+  .text-\[\#3B82F6\],.text-blue-400) {
+  color:var(--quiet-link)!important;
+}
+html[data-landing-theme="dark"] .landing-v3 :is(
+  .text-\[\#94A3B8\],.text-\[\#64748B\]) {
+  color:var(--quiet-muted)!important;
+}
+html[data-landing-theme] .landing-v3 .sl-hero-v3 .sl-hero-accent {
+  color:var(--quiet-ink)!important;
+}
