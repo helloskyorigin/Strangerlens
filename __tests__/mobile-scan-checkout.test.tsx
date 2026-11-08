@@ -21,11 +21,11 @@ const score = [...freeDoc.querySelectorAll("h2")].find(el => el.textContent?.inc
 const signals = [...freeDoc.querySelectorAll("h2")].find(el => el.textContent?.includes("Your Clarity Signals"));
 assert.ok(preview && score && signals, "Score, compact signal list and single upgrade card coexist.");
 assert.ok(freeDoc.querySelector('[data-testid="full-report-upgrade-anchor"] > #complete-report-preview'),
-  "Mobile sticky $3 CTA tracks the actual visible upgrade card, not an unbound ref.");
+  "Mobile sticky $5 CTA tracks the actual visible upgrade card, not an unbound ref.");
 
 assert.ok(Boolean(score.compareDocumentPosition(signals) & 4), "Free scores follow the score.");
-assert.ok(Boolean(signals.compareDocumentPosition(preview) & 4), "One $3 paid offer follows free signals.");
-assert.ok(preview.textContent?.includes("Unlock Full Analysis — $3"), "Single premium CTA is priced correctly.");
+assert.ok(Boolean(signals.compareDocumentPosition(preview) & 4), "One $5 paid offer follows free signals.");
+assert.ok(preview.textContent?.includes("Unlock Full Analysis — $5"), "Single premium CTA is priced correctly.");
 assert.ok(!freeDoc.querySelector('section[aria-label="Unlock the detailed report"]'), "No redundant early upsell panel.");
 assert.equal([...freeDoc.querySelectorAll('#complete-report-preview button')].filter(x=>x.textContent?.includes('Unlock')).length,1, "Just one preview checkout action.");
 assert.ok(!freeDoc.querySelector('#your-improvement-plan'),"No paid findings before payment.");
@@ -44,7 +44,7 @@ const modal = new JSDOM(renderToStaticMarkup(<PostScanUpgradeModal open
     { title: "Action", scoreDisplay: "95/100" },
   ]} canCheckout isTestMode={false} busy={false}
   onContinueFree={() => {}} onUpgrade={() => {}}/>)).window.document;
-const pricedCheckout = [...modal.querySelectorAll("button")].find(b => b.textContent?.includes("Unlock Complete Report — $3"));
+const pricedCheckout = [...modal.querySelectorAll("button")].find(b => b.textContent?.includes("Unlock Complete Report — $5"));
 const personalReason = [...modal.querySelectorAll("p")].find(p => p.textContent?.includes("Trust scored 44/100"));
 assert.ok(pricedCheckout && personalReason, "Centered mobile offer explains a score-specific reason to unlock.");
 assert.ok(Boolean(personalReason!.compareDocumentPosition(pricedCheckout!) & 4), "Personalized reason is visible before the single centered mobile CTA.");
