@@ -31,7 +31,7 @@ async function main() {
   let databaseUnavailable = false;
   let providerFailure = false;
   let invalidCheckout = false;
-  let providerProductAmount = 300;
+  let providerProductAmount = 500;
   let lastPayload: any;
   const request = (path: string, body: unknown, token?: string) => new NextRequest(`https://strangerlens.example${path}`, {
     method: "POST", body: JSON.stringify(body), headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
@@ -115,9 +115,9 @@ async function main() {
     check((await getReport(report.reportId, report.reportToken)).status === 403, "unpaid report denies premium");
     const redacted = redactAnalysisForFreeTier(paymentAnalysis);
     check(!JSON.stringify(redacted).includes(privateText), "free API strips premium signal and first-seconds explanations");
-    providerProductAmount = 500;
-    check((await newCheckoutResponse(report)).status === 503, "Old $5 product must not open a checkout advertised as $3");
     providerProductAmount = 300;
+    check((await newCheckoutResponse(report)).status === 503, "Old $3 product must not open a checkout advertised as $5");
+    providerProductAmount = 500;
     const order = await newCheckout(report);
     check(lastPayload.product_cart[0].product_id === "pdt_single" && lastPayload.product_cart[0].quantity === 1, "server owns checkout product and quantity");
     check(lastPayload.metadata.reportId === report.reportId && lastPayload.metadata.orderId === order.orderId, "order/report bound in provider metadata");
