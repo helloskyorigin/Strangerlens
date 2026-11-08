@@ -478,7 +478,7 @@ export default function LandingPage() {
                     onClick={scrollToInput}
                     className="sl-v3-primary group hidden min-[420px]:inline-flex rounded-full bg-[#246BFD] hover:bg-blue-600 active:scale-[0.97] text-white text-xs sm:text-sm font-medium px-4 sm:px-5 py-2 sm:py-2.5 transition-all duration-200 inline-flex items-center gap-1.5 shadow-md shadow-blue-500/20 cursor-pointer whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#246BFD] focus-visible:ring-offset-2"
                   >
-                    <span>Try for free</span>
+                    <span>Analyze free</span>
                     <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                   </button>
 
@@ -649,7 +649,7 @@ export default function LandingPage() {
                     }}
                     className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold tracking-wider text-[#3B82F6] uppercase bg-[#171F2D] mb-4 sm:mb-5 border border-[#263044]"
                   >
-                    SEE WHAT YOUR WEBSITE REALLY COMMUNICATES
+                    AI WEBSITE CLARITY ANALYSIS
                   </motion.div>
 
                   {/* 2. Staggered Hero Headline Lines */}
@@ -664,7 +664,7 @@ export default function LandingPage() {
                       }}
                       className="block"
                     >
-                      You Know Your Website.
+                      Your website makes sense to you.
                     </motion.span>
                     <motion.span
                       initial={shouldReduceMotion ? false : { opacity: 0, y: 14 }}
@@ -676,8 +676,8 @@ export default function LandingPage() {
                       }}
                       className="block"
                     >
-                      But Do{" "}
-                      <span className="sl-hero-accent text-[#3B82F6]">Visitors?</span>
+                      Will it make sense to{" "}
+                      <span className="sl-hero-accent text-[#3B82F6]">someone new?</span>
                     </motion.span>
                   </h1>
 
@@ -692,7 +692,7 @@ export default function LandingPage() {
                     }}
                     className="text-[15px] sm:text-lg text-[#94A3B8] leading-relaxed mb-6 sm:mb-7 max-w-[640px] font-normal"
                   >
-                    Understand the message visitors meet across accessible public website content, including relevant supporting and policy pages where available. Get a free clarity overview, then unlock the evidence and fixes.
+                    Find what your website communicates clearly, where the message needs work, and what to improve. StrangerLens analyzes accessible public website content, including relevant supporting and policy pages where available.
                   </motion.p>
 
                   {/* 4. URL Input Pill & Primary Hero CTA */}
@@ -1231,13 +1231,13 @@ export default function LandingPage() {
                         </span>
                       </div>
                       <div className="flex flex-wrap items-center justify-center gap-6">
-                        {NAV_ITEMS.map((item) => (
-                          <a
-                            key={item.href}
-                            href={item.href}
-                            onClick={(e) => handleSectionNavigate(e, item.href)}
-                            className="hover:text-white transition-colors underline-offset-4 hover:underline"
-                          >
+                        {NAV_ITEMS.map((item) => item.href.startsWith("/") ? (
+                          <Link key={item.href} href={item.href} className="hover:text-white transition-colors underline-offset-4 hover:underline">
+                            {item.label}
+                          </Link>
+                        ) : (
+                          <a key={item.href} href={item.href} onClick={(e) => handleSectionNavigate(e, item.href)}
+                            className="hover:text-white transition-colors underline-offset-4 hover:underline">
                             {item.label}
                           </a>
                         ))}
