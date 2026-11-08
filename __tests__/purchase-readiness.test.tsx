@@ -123,7 +123,7 @@ async function main() {
         const locked=doc.querySelector('[data-testid="purchase-readiness-locked"]')!;
         check(!!locked && locked.textContent?.includes('This website offers paid products'), `${width}px: free card explains commercial applicability`);
         check(!locked.textContent?.includes('/100') && !locked.textContent?.includes(full.summary) && !doc.body.textContent?.includes('PREMIUM_PURCHASE_SENTINEL'), `${width}px: free card hides score, status, findings and recommendations`);
-        check(![...locked.querySelectorAll('button')].some(button=>button.textContent?.includes('Unlock')) && !!doc.querySelector('#complete-report-preview button'), `${width}px: locked sixth signal does not repeat the single $3 checkout CTA`);
+        check(!locked.querySelector('button:not([aria-label])') && locked.textContent?.includes('Included in Full Analysis'), `${width}px: locked card replaces duplicate button with Included in Full Analysis`);
         // Even a stale full assessment in browser storage must remain locked in free Results.
         await act(async()=>root.render(<ResultsScreen analysisData={mapped} isUnlocked={false} onBackToLanding={()=>{}}/>));
         check(!!doc.querySelector('[data-testid="purchase-readiness-locked"]') && !doc.body.textContent?.includes(full.summary), `${width}px: old cached assessments cannot reveal the sixth score in free Results`);
@@ -155,17 +155,19 @@ async function main() {
         let checkoutCalls=0;
         let refreshes=0;
         globalThis.fetch=async(input,init)=>{
-          check(input==='/api/payments/checkout' && init?.method==='POST', 'new CTA reuses existing checkout endpoint only');
-          check(new Headers(init?.headers).get('Authorization')==='Bearer fixture-token' && JSON.parse(String(init?.body)).reportId==='fixture-report', 'new CTA passes original report ownership proof');
+          check(input==='/api/payments/checkout' && init?.method==='POST', 'primary CTA reuses existing checkout endpoint only');
+          check(new Headers(init?.headers).get('Authorization')==='Bearer fixture-token' && JSON.parse(String(init?.body)).reportId==='fixture-report', 'primary CTA passes original report ownership proof');
           checkoutCalls++;
           return new Response(JSON.stringify({error:'Checkout fixture unavailable'}),{status:503,headers:{'Content-Type':'application/json'}});
         };
         const checkoutData={...freeMapped,reportId:'fixture-report',reportToken:'fixture-token'};
         await act(async()=>root.render(<ResultsScreen analysisData={checkoutData} checkoutEnabled={true} onRefreshPaidReport={()=>{refreshes++;}} onBackToLanding={()=>{}}/>));
-        await act(async()=>doc.querySelector<HTMLButtonElement>('#complete-report-preview button')!.click());
+        const primaryCta=[...doc.querySelectorAll('button')].find(b=>b.textContent?.includes('Unlock Full Analysis — $5'))!;
+        check(!!primaryCta && !doc.querySelector('[data-testid="purchase-readiness-locked"] button:not([aria-label])'), `${width}px: only one primary payment CTA exists`);
+        await act(async()=>primaryCta.click());
         check(checkoutCalls===1 && !!doc.querySelector('[data-testid="purchase-readiness-locked"]') && doc.body.textContent?.includes('Checkout fixture unavailable'), `${width}px: failed checkout shows error and keeps sixth assessment locked`);
         globalThis.fetch=async()=>new Response(JSON.stringify({alreadyPaid:true}),{status:200,headers:{'Content-Type':'application/json'}});
-        await act(async()=>doc.querySelector<HTMLButtonElement>('#complete-report-preview button')!.click());
+        await act(async()=>primaryCta.click());
         check(refreshes===1 && !!doc.querySelector('[data-testid="purchase-readiness-locked"]'), `${width}px: already-paid checkout refreshes authorized data instead of inventing a score`);
         await act(async()=>root.render(<ResultsScreen analysisData={mapped} isUnlocked={true} onBackToLanding={()=>{}}/>));
         check(!doc.querySelector('[data-testid="purchase-readiness-locked"]') && doc.body.textContent?.includes(full.summary), `${width}px: verified full data replaces locked card`);

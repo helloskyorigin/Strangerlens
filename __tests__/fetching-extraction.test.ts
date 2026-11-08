@@ -321,9 +321,9 @@ describe("Phase 1 Task 4: Content Extractor & Fetch Cache Tests", () => {
       </html>
     `;
 
-    const candidates = discoverSupportingPages(homepageHtml, "https://supertool.com");
+    const candidates = discoverSupportingPages(homepageHtml, "https://supertool.com", { maxPages: 3 });
 
-    // Must strictly cap at 3 supporting pages
+    // Must strictly cap at 3 supporting pages when requested
     expect(candidates.length).toBe(3);
 
     // Pricing should be top-ranked
@@ -336,6 +336,12 @@ describe("Phase 1 Task 4: Content Extractor & Fetch Cache Tests", () => {
     expect(categoryGroups.size).toBe(3);
     expect(categoryGroups.has("pricing")).toBe(true);
     expect(categoryGroups.has("product_features")).toBe(true);
+
+    // Default discovery scans up to 5 high-signal pages with Pricing highest priority
+    const fiveCandidates = discoverSupportingPages(homepageHtml, "https://supertool.com");
+    expect(fiveCandidates.length).toBe(5);
+    expect(fiveCandidates[0].url).toBe("https://supertool.com/pricing");
+    expect(fiveCandidates[0].pageType).toBe("pricing");
   });
 
   test("Multi-Page Phase 1: Safe fetching handles partial failures, cross-domain redirects, and strips raw HTML", async () => {

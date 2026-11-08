@@ -16,7 +16,7 @@ export default function TermsOfServicePage() {
       activePage="terms"
       badge="TERMS OF SERVICE"
       title="Terms of Service"
-      subtitle="Clear terms governing your use of StrangerLens free clarity previews and one-time $5 Full Clarity Reports."
+      subtitle="Clear terms governing your use of StrangerLens free clarity previews and one-time $9 Full Clarity Reports."
     >
       {/* 1. Agreement to Terms */}
       <section className="space-y-3">

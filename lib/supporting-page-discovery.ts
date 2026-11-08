@@ -523,40 +523,9 @@ export function classifySupportingPageCandidate(
         lowerText.includes(kw)
     );
 
-  // 0. Legal Policies (Privacy, Terms, Refund)
+  // 1. Pricing & Plans (Highest Priority: essential for understanding offer, tiers, trials, guarantees)
   if (
-    matchesAny(["privacy", "privacy-policy", "privacy-statement"])
-  ) {
-    return {
-      pageType: "privacy_policy",
-      categoryGroup: "legal_policies",
-      baseScore: 98,
-    };
-  }
-
-  if (
-    matchesAny(["terms", "terms-of-service", "terms-and-conditions", "tos", "conditions", "user-agreement"])
-  ) {
-    return {
-      pageType: "terms_of_service",
-      categoryGroup: "legal_policies",
-      baseScore: 98,
-    };
-  }
-
-  if (
-    matchesAny(["refund", "refund-policy", "returns", "return-policy", "cancellation", "cancellation-policy"])
-  ) {
-    return {
-      pageType: "refund_policy",
-      categoryGroup: "legal_policies",
-      baseScore: 95,
-    };
-  }
-
-  // 1. Pricing & Plans (Highest value for understanding offer, tiers, trials, guarantees)
-  if (
-    matchesAny(["pricing", "plans", "price", "packages", "tiers", "subscriptions"])
+    matchesAny(["pricing", "plans", "price", "packages", "tiers", "subscriptions", "pro", "premium"])
   ) {
     return {
       pageType: "pricing",
@@ -593,62 +562,7 @@ export function classifySupportingPageCandidate(
     };
   }
 
-  // 4. How It Works / Workflow
-  if (
-    matchesAny([
-      "how-it-works",
-      "how it works",
-      "workflow",
-      "workflows",
-      "process",
-      "methodology",
-    ])
-  ) {
-    return {
-      pageType: "how_it_works",
-      categoryGroup: "product_features",
-      baseScore: 90,
-    };
-  }
-
-  // 5. Solutions / Enterprise / Industries / Teams (Clarifies target audience)
-  if (
-    matchesAny([
-      "solutions",
-      "solution",
-      "enterprise",
-      "teams",
-      "for-teams",
-      "industries",
-      "services",
-    ])
-  ) {
-    return {
-      pageType: "solutions",
-      categoryGroup: "audience_solutions",
-      baseScore: 86,
-    };
-  }
-
-  // 6. Use Cases / Examples
-  if (
-    matchesAny([
-      "use-cases",
-      "use cases",
-      "usecases",
-      "examples",
-      "templates",
-      "scenarios",
-    ])
-  ) {
-    return {
-      pageType: "use_cases",
-      categoryGroup: "audience_solutions",
-      baseScore: 85,
-    };
-  }
-
-  // 7. Customers / Case Studies / Stories / Testimonials (Clarifies trust & social proof)
+  // 4. Customers / Case Studies / Stories / Testimonials (Core trust & proof)
   if (
     matchesAny([
       "customers",
@@ -665,11 +579,22 @@ export function classifySupportingPageCandidate(
     return {
       pageType: "customers",
       categoryGroup: "trust_proof",
-      baseScore: 82,
+      baseScore: 90,
     };
   }
 
-  // 8. About / Company / Why Us / Mission
+  // 5. Security / Trust Center / Compliance (Core trust & proof)
+  if (
+    matchesAny(["security", "trust", "trust-center", "compliance", "safety"])
+  ) {
+    return {
+      pageType: "security",
+      categoryGroup: "trust_proof",
+      baseScore: 89,
+    };
+  }
+
+  // 6. About / Company / Why Us / Mission (Company background and trust)
   if (
     matchesAny([
       "about",
@@ -686,18 +611,62 @@ export function classifySupportingPageCandidate(
     return {
       pageType: "about",
       categoryGroup: "company_about",
-      baseScore: 76,
+      baseScore: 88,
     };
   }
 
-  // 9. Security / Trust Center / Compliance
+  // 7. How It Works / Workflow
   if (
-    matchesAny(["security", "trust", "trust-center", "compliance", "safety"])
+    matchesAny([
+      "how-it-works",
+      "how it works",
+      "workflow",
+      "workflows",
+      "process",
+      "methodology",
+    ])
   ) {
     return {
-      pageType: "security",
-      categoryGroup: "trust_proof",
-      baseScore: 72,
+      pageType: "how_it_works",
+      categoryGroup: "product_features",
+      baseScore: 86,
+    };
+  }
+
+  // 8. Solutions / Enterprise / Industries / Teams (Clarifies target audience)
+  if (
+    matchesAny([
+      "solutions",
+      "solution",
+      "enterprise",
+      "teams",
+      "for-teams",
+      "industries",
+      "services",
+    ])
+  ) {
+    return {
+      pageType: "solutions",
+      categoryGroup: "audience_solutions",
+      baseScore: 84,
+    };
+  }
+
+  // 9. Use Cases / Examples
+  if (
+    matchesAny([
+      "use-cases",
+      "use cases",
+      "usecases",
+      "examples",
+      "templates",
+      "scenarios",
+    ])
+  ) {
+    return {
+      pageType: "use_cases",
+      categoryGroup: "audience_solutions",
+      baseScore: 83,
     };
   }
 
@@ -715,7 +684,38 @@ export function classifySupportingPageCandidate(
     return {
       pageType: "docs",
       categoryGroup: "docs_integrations",
-      baseScore: 62,
+      baseScore: 80,
+    };
+  }
+
+  // 11. Legal Policies (Refund, Terms, Privacy)
+  if (
+    matchesAny(["refund", "refund-policy", "returns", "return-policy", "cancellation", "cancellation-policy"])
+  ) {
+    return {
+      pageType: "refund_policy",
+      categoryGroup: "legal_policies",
+      baseScore: 75,
+    };
+  }
+
+  if (
+    matchesAny(["terms", "terms-of-service", "terms-and-conditions", "tos", "conditions", "user-agreement"])
+  ) {
+    return {
+      pageType: "terms_of_service",
+      categoryGroup: "legal_policies",
+      baseScore: 70,
+    };
+  }
+
+  if (
+    matchesAny(["privacy", "privacy-policy", "privacy-statement"])
+  ) {
+    return {
+      pageType: "privacy_policy",
+      categoryGroup: "legal_policies",
+      baseScore: 70,
     };
   }
 

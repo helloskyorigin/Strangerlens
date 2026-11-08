@@ -6,7 +6,7 @@ interface PageEvidence { snapshot: WebsiteSnapshot; source: string }
 const clean = (value: unknown): string => typeof value === "string" ? value.replace(/\s+/g, " ").trim() : "";
 const positivePrice = (text: string) => [...text.matchAll(/(?:[$€£₹]\s*|\b(?:USD|EUR|GBP|INR)\s*)(\d[\d,]*(?:\.\d+)?)|(\d[\d,]*(?:\.\d+)?)\s*(?:USD|EUR|GBP|INR)\b/gi)]
   .some(match => Number((match[1] || match[2]).replace(/,/g, "")) > 0);
-const purchaseCta = /\b(?:buy(?:\s+now)?|add to (?:cart|bag)|checkout|purchase|order now|shop now|upgrade(?:\s+to)?|subscribe (?:now|for)|get (?:the )?(?:paid|premium|pro) (?:plan|access))\b/i;
+const purchaseCta = /\b(?:buy(?:\s+now)?|add to (?:cart|bag)|checkout|purchase|order(?:\s+now)?|shop now|upgrade(?:\s+to)?|subscribe(?:\s+(?:now|for|to))?|get\s+(?:the\s+)?(?:paid|premium|pro|growth|starter|business|team|enterprise)(?:\s+(?:plan|tier|access))?|choose\s+(?:a\s+)?(?:plan|pro|premium|growth|tier)|select\s+(?:a\s+)?(?:plan|pro|premium|growth|tier))\b/i;
 const quoteCta = /\b(?:get|request|ask for) (?:a |an )?(?:custom |free )?(?:quote|estimate|proposal)\b/i;
 const service = /\b(?:services?|consulting|consultancy|coaching|agency|design|development|photography|training|appointments?)\b/i;
 const paidOffer = /\b(?:paid (?:plans?|subscriptions?|memberships?|services?|products?)|premium (?:plans?|subscriptions?|memberships?)|pro plan|one.time (?:payment|purchase)|billed (?:monthly|annually)|subscription (?:plans?|starts?|costs?))\b/i;
@@ -19,7 +19,12 @@ function snippets({ snapshot: s, source }: PageEvidence): PurchaseEvidence[] {
   const values = [s.hero?.headline, s.hero?.subheadline,
     ...(s.valueProps?.headings || []).map(x => x.text),
     ...(s.valueProps?.featureCards || []).flatMap(x => [x.title, x.description]),
-    ...(s.valueProps?.pricingSignals?.plans || []).flatMap(x => [x.name, x.price]),
+    ...(s.valueProps?.pricingSignals?.plans || []).flatMap(x => [
+      x.name,
+      x.price,
+      ...(x.benefits || []),
+      x.cta,
+    ].filter(Boolean) as string[]),
     ...(s.bodySections || []).filter(x => x.typeHint !== "footer").flatMap(x => [x.heading, x.textSummary, ...x.bulletPoints]),
     ...(s.ctas || []).filter(x => x.location !== "footer" && x.type !== "utility").map(x => x.text),
     ...(s.trustSignals?.testimonials || []).map(x => x.quote),
@@ -82,7 +87,7 @@ export function assessPurchaseReadiness(snapshot: WebsiteSnapshot, supporting?: 
   const policies = find(/\b(?:refund|returns?|cancel(?:lation)?|money.back|secure checkout|payment methods?|support|contact us)\b/i);
   const ctas = pages.flatMap(({snapshot: s, source}) => (s.ctas || []).filter(x => x.location !== "footer" && (purchaseCta.test(x.text) || quoteCta.test(x.text)) && !negated.test(x.text))
     .map(x => ({source,text:x.text,status:"verified" as const}))).slice(0,3);
-  const clearAction = ctas.some(x => /\b(?:buy|add to (?:cart|bag)|checkout|purchase|order now|request|quote|estimate|upgrade to|subscribe for)\b/i.test(x.text));
+  const clearAction = ctas.some(x => /\b(?:buy|add to (?:cart|bag)|checkout|purchase|order(?:\s+now)?|request|quote|estimate|upgrade(?:\s+to)?|subscribe(?:\s+for)?|get\s+(?:pro|premium|growth|starter|business|team|enterprise)|choose\s+(?:a\s+)?plan)\b/i.test(x.text));
   const dimension = (key: PurchaseDimension["key"], label: string, first: PurchaseEvidence[], second: PurchaseEvidence[], yes: string, partial: string, no: string): PurchaseDimension => ({
     key, label, points: first.length ? (second.length ? 20 : 10) : 0,
     observation: first.length ? (second.length ? yes : partial) : no,

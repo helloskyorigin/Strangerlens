@@ -39,7 +39,13 @@ export interface WebsiteSnapshot {
     featureCards: Array<{ title: string; description: string }>;
     pricingSignals: {
       hasPricingPageLink: boolean;
-      plans: Array<{ name?: string; price?: string; period?: string }>;
+      plans: Array<{
+        name?: string;
+        price?: string;
+        period?: string;
+        benefits?: string[];
+        cta?: string;
+      }>;
       mentionsFreeTrial: boolean;
       mentionsGuarantee: boolean;
     };
@@ -201,6 +207,18 @@ const PRIMARY_CONVERSION_KEYWORDS = [
   "sign up",
   "register now",
   "create account",
+  "create an account",
+  "get pro",
+  "get growth",
+  "get premium",
+  "get starter",
+  "upgrade",
+  "upgrade now",
+  "choose plan",
+  "select plan",
+  "subscribe",
+  "subscribe now",
+  "start for free",
   "claim",
   "join",
   "get access",
@@ -623,24 +641,203 @@ export function extractWebsiteSnapshot(
     pageTextLower.includes("guarantee") ||
     pageTextLower.includes("risk-free");
 
-  // Extract pricing plans if visible
-  const plans: Array<{ name?: string; price?: string; period?: string }> = [];
-  const pricingCards = $(".pricing-card, .price-card, [class*='pricing'], [class*='plan']");
+  // Extract real pricing plans (dedicated card classes, Tailwind/grid sections, and plan containers)
+  const plans: Array<{
+    name?: string;
+    price?: string;
+    period?: string;
+    benefits?: string[];
+    cta?: string;
+  }> = [];
+  const seenPlanKeys = new Set<string>();
+  const knownTiers = [
+    "free",
+    "starter",
+    "basic",
+    "pro",
+    "professional",
+    "growth",
+    "plus",
+    "premium",
+    "business",
+    "enterprise",
+    "team",
+    "personal",
+    "developer",
+    "scale",
+    "standard",
+    "individual",
+    "unlimited",
+    "lifetime",
+    "solo",
+    "agency",
+    "hobby",
+  ];
+
+  const addPlanCandidate = (
+    name?: string,
+    price?: string,
+    period?: string,
+    benefits?: string[],
+    cta?: string
+  ) => {
+    const cleanName = cleanText(name);
+    const cleanPrice = cleanText(price);
+    if (!cleanName && !cleanPrice) return;
+    const dedupeKey = `${(cleanName || "plan").toLowerCase()}:${cleanPrice.toLowerCase()}`;
+    if (seenPlanKeys.has(dedupeKey)) return;
+    seenPlanKeys.add(dedupeKey);
+
+    let resolvedPeriod = period || "/month";
+    const combinedText = `${cleanPrice} ${cleanName}`.toLowerCase();
+    if (
+      combinedText.includes("/yr") ||
+      combinedText.includes("year") ||
+      combinedText.includes("annual")
+    ) {
+      resolvedPeriod = "/year";
+    } else if (
+      combinedText.includes("lifetime") ||
+      combinedText.includes("forever") ||
+      combinedText.includes("one-time")
+    ) {
+      resolvedPeriod = "lifetime";
+    } else if (
+      combinedText.includes("custom") ||
+      combinedText.includes("contact")
+    ) {
+      resolvedPeriod = "custom";
+    }
+
+    plans.push({
+      name: cleanName || "Plan",
+      price: cleanPrice || undefined,
+      period: resolvedPeriod,
+      benefits: benefits && benefits.length > 0 ? benefits.slice(0, 10) : undefined,
+      cta: cta ? cleanText(cta) : undefined,
+    });
+  };
+
+  // Pass 1: Explicit pricing card classes
+  const pricingCards = $(
+    ".pricing-card, .price-card, [class*='pricing-card'], [class*='plan-card'], [data-plan], [data-testid*='plan'], [class*='PricingCard'], [class*='pricingTable']"
+  );
 
   pricingCards.each((_, pCard) => {
     const $p = $(pCard);
-    const planName = cleanText($p.find("h2, h3, h4, .plan-name, .title").first().text());
-    const priceText = cleanText($p.find(".price, .amount, [class*='price']").first().text());
+    const planName = cleanText(
+      $p.find("h2, h3, h4, h5, .plan-name, .title, strong, [class*='title'], [class*='name']").first().text()
+    );
+    const priceText = cleanText(
+      $p.find(".price, .amount, [class*='price'], [class*='amount'], [data-price]").first().text()
+    );
+    const cardText = cleanText($p.text());
 
-    if (planName || priceText) {
-      let period = "/month";
-      if (priceText.includes("/yr") || priceText.includes("year") || priceText.includes("annual")) {
-        period = "/year";
-      } else if (priceText.toLowerCase().includes("custom") || priceText.toLowerCase().includes("contact")) {
-        period = "custom";
-      }
-      plans.push({ name: planName || "Plan", price: priceText || undefined, period });
+    let period = "/month";
+    if (/per\s+year|\/yr|\/year|annually|annual/i.test(cardText)) {
+      period = "/year";
+    } else if (/lifetime|forever|one-time/i.test(cardText)) {
+      period = "lifetime";
+    } else if (/custom|contact/i.test(cardText)) {
+      period = "custom";
     }
+
+    const benefits: string[] = [];
+    $p.find("li").each((_, li) => {
+      const bText = cleanText($(li).text());
+      if (bText && bText.length < 150) {
+        benefits.push(bText);
+      }
+    });
+
+    const cta = cleanText(
+      $p.find("a, button, [role='button']").filter((_, btn) => {
+        const bt = cleanText($(btn).text()).toLowerCase();
+        return bt.length > 2 && !bt.includes("monthly") && !bt.includes("yearly");
+      }).first().text()
+    );
+
+    addPlanCandidate(planName, priceText, period, benefits, cta);
+  });
+
+  // Pass 2: Deep inspection inside pricing sections (handles modern Tailwind/Radix/flex/grid plan cards)
+  const candidatePricingSections = $("section, div, main").filter((_, sec) => {
+    const $sec = $(sec);
+    const headingText = $sec.find("h1, h2, h3").text().toLowerCase();
+    const classId = `${$sec.attr("class") || ""} ${$sec.attr("id") || ""}`.toLowerCase();
+    return (
+      headingText.includes("pricing") ||
+      headingText.includes("plans") ||
+      headingText.includes("tiers") ||
+      classId.includes("pricing") ||
+      classId.includes("plans")
+    );
+  });
+
+  candidatePricingSections.each((_, sec) => {
+    const $sec = $(sec);
+    $sec.find("div, article").each((_, card) => {
+      const $card = $(card);
+      const text = cleanText($card.text());
+      if (text.length < 15 || text.length > 1200) return;
+
+      const priceMatch = text.match(
+        /(?:[$€£₹]\s*|\b(?:USD|EUR|GBP|INR)\s*)(\d[\d,]*(?:\.\d+)?)|(\d[\d,]*(?:\.\d+)?)\s*(?:USD|EUR|GBP|INR|\/mo|\/month|per month|\/yr|\/year)\b/i
+      );
+      if (!priceMatch) return;
+
+      let name = cleanText(
+        $card.find("h2, h3, h4, h5, [class*='name'], [class*='title'], strong").first().text()
+      );
+      if (!name || name.length > 30) {
+        for (const tier of knownTiers) {
+          const re = new RegExp(`^${tier}\\b`, "i");
+          if (re.test(text)) {
+            name = tier.charAt(0).toUpperCase() + tier.slice(1);
+            break;
+          }
+        }
+      }
+      if (!name || name.length > 30) {
+        for (const tier of knownTiers) {
+          const re = new RegExp(`\\b${tier}\\b`, "i");
+          if (re.test(text)) {
+            name = tier.charAt(0).toUpperCase() + tier.slice(1);
+            break;
+          }
+        }
+      }
+
+      if (name) {
+        let period = "/month";
+        if (/per\s+year|\/yr|\/year|annually|annual/i.test(text)) {
+          period = "/year";
+        } else if (/lifetime|forever|one-time/i.test(text)) {
+          period = "lifetime";
+        } else if (/per\s+month|\/mo|\/month|monthly/i.test(text)) {
+          period = "/month";
+        } else if (/custom|contact/i.test(text)) {
+          period = "custom";
+        }
+
+        const benefits: string[] = [];
+        $card.find("li").each((_, li) => {
+          const bText = cleanText($(li).text());
+          if (bText && bText.length < 150) {
+            benefits.push(bText);
+          }
+        });
+
+        const cta = cleanText(
+          $card.find("a, button, [role='button']").filter((_, btn) => {
+            const bt = cleanText($(btn).text()).toLowerCase();
+            return bt.length > 2 && !bt.includes("monthly") && !bt.includes("yearly") && !bt.includes("tab");
+          }).first().text()
+        );
+
+        addPlanCandidate(name, priceMatch[0], period, benefits, cta);
+      }
+    });
   });
 
   // 9. Trust & Audience Signals
@@ -729,10 +926,18 @@ export function extractWebsiteSnapshot(
 
     // Infer Section Type Hint
     let typeHint: WebsiteSnapshot["bodySections"][number]["typeHint"] = "content_block";
-    const secLower = (secHeading || "" + " " + $sec.attr("class") || "").toLowerCase();
+    const secLower = `${secHeading || ""} ${$sec.attr("class") || ""} ${$sec.attr("id") || ""}`.toLowerCase();
+    const secHeadingText = (secHeading || "").toLowerCase();
+    const hasPricingSignals =
+      secLower.includes("pricing") ||
+      secLower.includes("plan") ||
+      /\b(?:pricing|plans?|per month|\/mo|\/month|monthly|billing|tiers?)\b/i.test(secHeadingText) ||
+      /\b(free|pro|growth|premium|starter|business|team|enterprise)\b[^\d$€£₹]{0,25}[$€£₹]\s*\d+/i.test(secText);
 
     if (sectionIdx === 0 || secLower.includes("hero") || secLower.includes("banner")) {
       typeHint = "hero";
+    } else if (hasPricingSignals) {
+      typeHint = "pricing";
     } else if (secLower.includes("feature") || secLower.includes("benefit") || secLower.includes("solution")) {
       typeHint = "features";
     } else if (
@@ -742,21 +947,24 @@ export function extractWebsiteSnapshot(
       secLower.includes("customer")
     ) {
       typeHint = "social_proof";
-    } else if (secLower.includes("pricing") || secLower.includes("plan")) {
-      typeHint = "pricing";
     } else if (secLower.includes("faq") || secLower.includes("question")) {
       typeHint = "faq";
     } else if ($sec.closest("footer, .footer").length > 0 || secLower.includes("footer")) {
       typeHint = "footer";
     }
 
+    const maxSectionChars = typeHint === "pricing" ? 2500 : 800;
+    const textSummary =
+      secText.substring(0, maxSectionChars) +
+      (secText.length > maxSectionChars ? "..." : "");
+
     sectionIdx++;
     bodySections.push({
       id: `section-${sectionIdx}`,
       typeHint,
       heading: secHeading,
-      textSummary: secText.substring(0, 300) + (secText.length > 300 ? "..." : ""),
-      bulletPoints: bullets.slice(0, 6),
+      textSummary,
+      bulletPoints: bullets.slice(0, typeHint === "pricing" ? 15 : 6),
     });
   });
 

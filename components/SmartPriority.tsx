@@ -22,7 +22,7 @@ export default function SmartPriority({ priorities }: { priorities: PriorityItem
           <p className="text-[11px] font-bold uppercase tracking-widest text-blue-300">02 · Smart Priority</p>
           <h3 id="smart-priority-title" className="mt-1 text-xl font-bold text-white sm:text-2xl">Know what to do next</h3>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[#AFC0D5]">
-            A suggested order based on the report's primary recommendation, wording cues and verified evidence — not predicted conversion lift or a measured effort estimate.
+            A suggested order based on the report&apos;s primary recommendation, wording cues and verified evidence — not predicted conversion lift or a measured effort estimate.
           </p>
         </div>
       </div>

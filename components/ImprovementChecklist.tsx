@@ -10,8 +10,8 @@ export default function ImprovementChecklist({workbench,reportId}:{workbench:Pre
     try {
       const raw=reportId?localStorage.getItem(`sl:v4:fixes:${reportId}`):null;
       const parsed=raw?JSON.parse(raw):{};
-      setCompleted(parsed&&typeof parsed==="object"&&!Array.isArray(parsed)?parsed:{});
-    }catch{setCompleted({});}
+      queueMicrotask(() => setCompleted(parsed&&typeof parsed==="object"&&!Array.isArray(parsed)?parsed:{}));
+    }catch{queueMicrotask(() => setCompleted({}));}
   },[reportId]);
   const toggle=(id:string)=>{
     const next={...completed,[id]:!completed[id]};
@@ -27,7 +27,7 @@ export default function ImprovementChecklist({workbench,reportId}:{workbench:Pre
       <div>
         <p className="text-[11px] font-bold uppercase tracking-widest text-blue-300">04 · Take Action</p>
         <h3 id="fix-checklist-title" className="mt-1 flex items-center gap-2 text-xl font-bold text-white"><ClipboardCheck size={21}/> Your Fix Checklist</h3>
-        <p className="mt-1 text-xs leading-relaxed text-[#B0C2D8]">Make the change on your own website, then mark it reviewed. Checking a box doesn't edit your site.</p>
+        <p className="mt-1 text-xs leading-relaxed text-[#B0C2D8]">Make the change on your own website, then mark it reviewed. Checking a box doesn&apos;t edit your site.</p>
       </div>
       <span className="rounded-full border border-[#416286] bg-[#1B304A] px-3 py-1.5 text-xs font-bold text-[#C4DDFB]">{done}/{tasks.length} reviewed</span>
     </div>
@@ -47,6 +47,6 @@ export default function ImprovementChecklist({workbench,reportId}:{workbench:Pre
     </div>
     {done>0&&<button type="button" onClick={()=>{setCompleted({});try{if(reportId)localStorage.removeItem(`sl:v4:fixes:${reportId}`)}catch{}}}
       className="mt-3 inline-flex min-h-9 items-center gap-2 text-xs font-semibold text-[#AFC3DA] hover:text-white"><RotateCcw size={13}/> Reset checklist</button>}
-    <p className="mt-3 text-[11px] text-[#95ABC4]">Progress is stored only on this device; it doesn't change scores or promise conversion lift.</p>
+    <p className="mt-3 text-[11px] text-[#95ABC4]">Progress is stored only on this device; it doesn&apos;t change scores or promise conversion lift.</p>
   </section>;
 }

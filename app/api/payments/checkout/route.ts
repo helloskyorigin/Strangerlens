@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ alreadyPaid: true, reportId });
       }
 
-      // Never reuse an old $5 checkout session. Dodo is the actual price source.
+      // Verify current $9 product pricing. Dodo is the actual price source.
       await assertFullReportProductPrice();
       const recentOrder = await getRecentOrder(config.environment, reportId);
       if (

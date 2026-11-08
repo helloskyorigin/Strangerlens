@@ -24,7 +24,7 @@ export default function PrivacyPolicyPage() {
           1. Overview &amp; Scope
         </h2>
         <p>
-          This Privacy Policy explains how <strong>{BRAND_NAME}</strong> (&ldquo;we&rdquo;, &ldquo;us&rdquo;, or &ldquo;our&rdquo;) collects, uses, and safeguards information when you use our website first-impression clarity analyzer, preview free clarity results, or unlock a paid $3 Full Clarity Report.
+          This Privacy Policy explains how <strong>{BRAND_NAME}</strong> (&ldquo;we&rdquo;, &ldquo;us&rdquo;, or &ldquo;our&rdquo;) collects, uses, and safeguards information when you use our website first-impression clarity analyzer, preview free clarity results, or unlock a paid $9 Full Clarity Report.
         </p>
         <p className="text-[#94A3B8]">
           We design {BRAND_NAME} around data minimization: you can run a free website first-impression review without creating an account, and we only process the data necessary to deliver your website clarity analysis and fulfill report purchases.
@@ -51,7 +51,7 @@ export default function PrivacyPolicyPage() {
               B. Email Address (Report Delivery &amp; Support)
             </h3>
             <p className="text-xs sm:text-sm text-[#94A3B8] leading-relaxed">
-              When you unlock a paid $3 Full Clarity Report or reach out to support, we collect your email address to deliver report access, order confirmations, receipts, and customer support responses.
+              When you unlock a paid $9 Full Clarity Report or reach out to support, we collect your email address to deliver report access, order confirmations, receipts, and customer support responses.
             </p>
           </div>
 
