@@ -7,7 +7,7 @@ import { POST as verify } from "../app/api/payments/verify/route";
 import { POST as webhook } from "../app/api/payments/webhook/route";
 import { GET as fullReport } from "../app/api/report/[reportId]/route";
 import { GET as paymentStatus } from "../app/api/payments/status/route";
-import { saveServerReport, redactAnalysisForFreeTier } from "../server/security/reportAccess";
+import { saveServerReport, getServerReport, verifyServerEntitlement, redactAnalysisForFreeTier } from "../server/security/reportAccess";
 import { reportKey, orderKey, paymentKey } from "../server/storage/paymentStore";
 import { applyVerifiedPayment } from "../server/payments/orders";
 import { paymentAnalysis, paymentSnapshot, privateText } from "./fixtures/payment-report";
@@ -112,6 +112,11 @@ async function main() {
     const report = await createReport();
     const other = await createReport();
     check((await checkout(request("/api/payments/checkout", { reportId: report.reportId }))).status === 403, "checkout requires report ownership");
+    const storedBeforeRead = await getServerReport(report.reportId);
+    console.log("DEBUG unpaid report shape", typeof storedBeforeRead, storedBeforeRead ? Object.keys(storedBeforeRead) : null,
+      "tokenHash type", typeof storedBeforeRead?.tokenHash);
+    try { console.log("DEBUG entitlement", await verifyServerEntitlement(report.reportId, report.reportToken)); }
+    catch (diagnosticError) { console.log("DEBUG entitlement error", diagnosticError instanceof Error ? diagnosticError.stack : diagnosticError); }
     const unpaidResponse = await getReport(report.reportId, report.reportToken);
     check(unpaidResponse.status === 403, "unpaid report denies premium; actual=" + unpaidResponse.status + " body=" + (await unpaidResponse.clone().text()));
     const redacted = redactAnalysisForFreeTier(paymentAnalysis);
