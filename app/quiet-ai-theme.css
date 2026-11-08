@@ -288,3 +288,58 @@ html[data-landing-theme="dark"] .landing-v3 :is(
 html[data-landing-theme] .landing-v3 .sl-hero-v3 .sl-hero-accent {
   color:var(--quiet-ink)!important;
 }
+
+
+/* The paid-report tour is a document preview, not a glowing stats dashboard. */
+html[data-landing-theme] .landing-v3 .sl-report-showcase .sl-report-score-hero {
+  background:var(--quiet-paper)!important;
+  border-color:var(--quiet-border)!important;
+}
+html[data-landing-theme] .landing-v3 .sl-report-showcase .sl-report-signal-summary {
+  background:var(--quiet-soft)!important;
+  border-color:var(--quiet-border)!important;
+}
+html[data-landing-theme] .landing-v3 .sl-report-showcase .sl-report-meter i {
+  background:var(--quiet-ink)!important;
+}
+html[data-landing-theme] .landing-v3 .sl-report-showcase :is(
+  .sl-report-verdict,.sl-report-evidence-after,.sl-report-copy-grid>div.is-after,
+  .sl-report-finding.is-warning,.sl-report-purchase-sample,
+  .sl-tour-suggestion) {
+  background:var(--quiet-soft)!important;
+  border-color:var(--quiet-border)!important;
+}
+html[data-landing-theme] .landing-v3 .sl-report-showcase :is(
+  .sl-report-kicker,.sl-report-chapter b,.sl-report-verdict svg,
+  .sl-report-evidence-before span,.sl-report-evidence-after span,
+  .sl-report-copy-grid>div span,.sl-report-mini-tool svg,
+  .sl-tour-tag,.sl-tour-eyebrow,.sl-tour-tab.is-active svg) {
+  color:var(--quiet-link)!important;
+}
+html[data-landing-theme] .landing-v3 .sl-report-showcase :is(
+  .sl-report-pill,.sl-tour-pill,.sl-report-pill.is-fast,
+  .sl-report-pill.is-test,.sl-report-pill.is-keep) {
+  background:var(--quiet-soft)!important;
+  color:var(--quiet-muted)!important;
+  border-color:var(--quiet-border)!important;
+}
+html[data-landing-theme] .landing-v3 .sl-report-showcase .sl-tour-footer button {
+  min-height:44px; background:var(--quiet-cta)!important;
+  color:var(--quiet-on-cta)!important;
+  border:1px solid transparent!important; border-radius:12px!important;
+  box-shadow:none!important; transform:none!important;
+}
+html[data-landing-theme] .landing-v3 .sl-report-showcase .sl-tour-footer button:hover {
+  background:color-mix(in srgb,var(--quiet-cta) 89%,var(--quiet-page))!important;
+  box-shadow:none!important;transform:none!important;
+}
+html[data-landing-theme] .landing-v3 .sl-report-showcase .sl-tour-browserdots i {
+  background:var(--quiet-border)!important;
+}
+/* Tighter corners complete the calm editorial visual rhythm. */
+html[data-landing-theme] .landing-v3 :is(.sl-step-v3,.sl-report-showcase .sl-tour-shell) {
+  border-radius:17px!important;
+}
+html[data-landing-theme] .landing-v3 #pricing .rounded-3xl {
+  border-radius:18px!important;
+}
