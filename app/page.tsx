@@ -57,7 +57,7 @@ interface PricingPlan {
   isPaid: boolean;
 }
 
-// PRICING CONFIG (Free and $3 One-Time Full Clarity Report)
+// PRICING CONFIG (Free and $5 One-Time Full Clarity Report)
 const PRICING_PLANS: PricingPlan[] = [
   {
     id: "free",
@@ -80,7 +80,7 @@ const PRICING_PLANS: PricingPlan[] = [
   {
     id: "complete",
     name: "Unlock Your Full Analysis",
-    price: 3,
+    price: 5,
     paymentLabel: "ONE-TIME",
     badge: "FULL ANALYSIS",
     positioning: "Actionable clarity & diagnostics.",
@@ -130,7 +130,7 @@ const FAQ_ITEMS = [
   {
     question: "What does Full Analysis cost?",
     answer:
-      "Full Analysis costs $3 per report, paid once with no subscription. Run a free preview first, then unlock five detailed signal analyses, Evidence-to-Fix findings with verified quotes when available, a Smart Priority plan, an editable Better Copy Studio, and the First 5 Seconds breakdown. Checkout availability is shown on your report.",
+      "Full Analysis costs $5 per report, paid once with no subscription. Run a free preview first, then unlock five detailed signal analyses, Evidence-to-Fix findings with verified quotes when available, a Smart Priority plan, an editable Better Copy Studio, and the First 5 Seconds breakdown. Checkout availability is shown on your report.",
   },
   {
     question: "Do I need to create an account?",
@@ -478,7 +478,7 @@ export default function LandingPage() {
                     onClick={scrollToInput}
                     className="sl-v3-primary group hidden min-[420px]:inline-flex rounded-full bg-[#246BFD] hover:bg-blue-600 active:scale-[0.97] text-white text-xs sm:text-sm font-medium px-4 sm:px-5 py-2 sm:py-2.5 transition-all duration-200 inline-flex items-center gap-1.5 shadow-md shadow-blue-500/20 cursor-pointer whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#246BFD] focus-visible:ring-offset-2"
                   >
-                    <span>Try for free</span>
+                    <span>Analyze free</span>
                     <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                   </button>
 
@@ -649,7 +649,7 @@ export default function LandingPage() {
                     }}
                     className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold tracking-wider text-[#3B82F6] uppercase bg-[#171F2D] mb-4 sm:mb-5 border border-[#263044]"
                   >
-                    SEE WHAT YOUR WEBSITE REALLY COMMUNICATES
+                    AI WEBSITE CLARITY ANALYSIS
                   </motion.div>
 
                   {/* 2. Staggered Hero Headline Lines */}
@@ -664,7 +664,7 @@ export default function LandingPage() {
                       }}
                       className="block"
                     >
-                      You Know Your Website.
+                      Your website makes sense to you.
                     </motion.span>
                     <motion.span
                       initial={shouldReduceMotion ? false : { opacity: 0, y: 14 }}
@@ -676,8 +676,8 @@ export default function LandingPage() {
                       }}
                       className="block"
                     >
-                      But Do{" "}
-                      <span className="sl-hero-accent text-[#3B82F6]">Visitors?</span>
+                      Will it make sense to{" "}
+                      <span className="sl-hero-accent text-[#3B82F6]">someone new?</span>
                     </motion.span>
                   </h1>
 
@@ -692,7 +692,7 @@ export default function LandingPage() {
                     }}
                     className="text-[15px] sm:text-lg text-[#94A3B8] leading-relaxed mb-6 sm:mb-7 max-w-[640px] font-normal"
                   >
-                    Understand the message visitors meet across accessible public website content, including relevant supporting and policy pages where available. Get a free clarity overview, then unlock the evidence and fixes.
+                    Find what your website communicates clearly, where the message needs work, and what to improve. StrangerLens analyzes accessible public website content, including relevant supporting and policy pages where available.
                   </motion.p>
 
                   {/* 4. URL Input Pill & Primary Hero CTA */}
@@ -799,7 +799,7 @@ export default function LandingPage() {
                     }}
                     className="sl-url-reassurance text-[#94A3B8] font-medium"
                   >
-                    Free scan · No signup · Full report $3
+                    Free scan · No signup · Full report $5
                   </motion.p>
                 </div>
 
@@ -883,7 +883,7 @@ export default function LandingPage() {
                           Explore the details
                         </h3>
                         <p className="text-sm text-[#94A3B8] leading-relaxed">
-                          Unlock deep signal analyses, improvements, and First 5 Seconds with Full Analysis ($3 one-time).
+                          Unlock deep signal analyses, improvements, and First 5 Seconds with Full Analysis ($5 one-time).
                         </p>
                       </div>
                     </div>
@@ -1002,7 +1002,7 @@ export default function LandingPage() {
                   </Reveal>
                   <Reveal y={14} delay={0.12}>
                     <p className="text-[15px] sm:text-lg text-[#94A3B8] max-w-2xl mx-auto leading-relaxed font-normal">
-                      Start with a free clarity preview today. Full Analysis is a $3 one-time payment — no subscriptions.
+                      Start with a free clarity preview today. Full Analysis is a $5 one-time payment — no subscriptions.
                     </p>
                   </Reveal>
                 </div>
@@ -1067,7 +1067,7 @@ export default function LandingPage() {
                     <div className="h-full rounded-3xl p-6 sm:p-7 flex flex-col justify-between bg-[#121824] border-2 border-[#3B82F6] shadow-lg">
                       <div>
                         <h3 className="font-extrabold text-white text-xl mb-2">Full Analysis</h3>
-                        <p className="text-4xl font-extrabold text-white mb-2">$3 <span className="text-sm font-normal text-[#94A3B8]">one-time</span></p>
+                        <p className="text-4xl font-extrabold text-white mb-2">$5 <span className="text-sm font-normal text-[#94A3B8]">one-time</span></p>
                         <p className="text-sm text-[#94A3B8] mb-5">Know what to change, why it matters, and how to make your website clearer.</p>
                         <ul className="space-y-3 text-sm text-[#F1F5F9] mb-6">
                           {PRICING_PLANS[1].features.map(feature => <li key={feature} className="flex gap-2"><Check className="w-4 h-4 shrink-0 text-blue-400" />{feature}</li>)}
@@ -1231,13 +1231,13 @@ export default function LandingPage() {
                         </span>
                       </div>
                       <div className="flex flex-wrap items-center justify-center gap-6">
-                        {NAV_ITEMS.map((item) => (
-                          <a
-                            key={item.href}
-                            href={item.href}
-                            onClick={(e) => handleSectionNavigate(e, item.href)}
-                            className="hover:text-white transition-colors underline-offset-4 hover:underline"
-                          >
+                        {NAV_ITEMS.map((item) => item.href.startsWith("/") ? (
+                          <Link key={item.href} href={item.href} className="hover:text-white transition-colors underline-offset-4 hover:underline">
+                            {item.label}
+                          </Link>
+                        ) : (
+                          <a key={item.href} href={item.href} onClick={(e) => handleSectionNavigate(e, item.href)}
+                            className="hover:text-white transition-colors underline-offset-4 hover:underline">
                             {item.label}
                           </a>
                         ))}
@@ -1497,7 +1497,7 @@ export default function LandingPage() {
                     Simple, Transparent Pricing
                   </h3>
                   <p className="text-xs sm:text-sm text-[#94A3B8] mt-0.5">
-                    Start with a free first-impression preview today. Full Analysis costs $3 per report, paid once.
+                    Start with a free first-impression preview today. Full Analysis costs $5 per report, paid once.
                   </p>
                 </div>
                 <button

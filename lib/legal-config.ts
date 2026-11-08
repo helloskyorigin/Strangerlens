@@ -20,7 +20,7 @@ export const LEGAL_CONFIG = {
     },
     singleReport: {
       name: "Full Clarity Report",
-      price: "$3 USD",
+      price: "$5 USD",
       billingType: "One-time payment · No subscription",
       summary:
         "Five detailed signal analyses with observed evidence when available, prioritized improvement plan, editable copy suggestions, First 5 Seconds assessment, Premium PDF, and Purchase Readiness when a paid offer is detected.",

@@ -36,7 +36,7 @@ assert.ok(sample.includes("See an example report"));
 assert.ok(sample.includes("Five")||sample.includes("five"));
 assert.ok(sample.includes("Smart Priority"));
 assert.ok(sample.includes("editable copy")||sample.includes("edit and copy"));
-assert.ok(sample.includes("Unlock Full Analysis — $3"));
+assert.ok(sample.includes("Unlock Full Analysis — $5"));
 assert.ok(!sample.includes(privateText),"No premium findings in unpaid upgrade card.");
 const modal=renderToStaticMarkup(<PostScanUpgradeModal open domain="example.com"
   overallScore="79/100" signals={[
@@ -47,7 +47,7 @@ const modal=renderToStaticMarkup(<PostScanUpgradeModal open domain="example.com"
     {title:"Action",scoreDisplay:"90/100"}
   ]} canCheckout busy={false} isTestMode={false} onUpgrade={()=>{}} onContinueFree={()=>{}}/>);
 assert.ok(modal.includes("Trust scored 60/100"));
-assert.equal((modal.match(/Unlock Complete Report — \$3/g)||[]).length,1,"Only one payment action in the modal.");
+assert.equal((modal.match(/Unlock Complete Report — \$5/g)||[]).length,1,"Only one payment action in the modal.");
 assert.ok(modal.includes("Continue with free results"));
 assert.ok(!modal.includes(privateText));
 
@@ -63,5 +63,5 @@ const atmosphere=readFileSync("app/landing-v3.css","utf8");
 assert.ok(atmosphere.includes("@keyframes sl-color-flow"));
 assert.ok(atmosphere.includes("prefers-reduced-motion:reduce"));
 const landing=readFileSync("app/page.tsx","utf8");
-assert.ok(landing.includes("Free scan · No signup · Full report $3"));
+assert.ok(landing.includes("Free scan · No signup · Full report $5"));
 console.log("PASS: personalized public-score upgrade, paid-only report gating, compact landing and slow accessible aurora.");

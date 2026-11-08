@@ -29,7 +29,7 @@ const text = doc.body.textContent || "";
 check(doc.querySelector('[role="dialog"][aria-modal="true"]'), "post-scan offer has an accessible dialog");
 check(doc.querySelector('button[aria-label="Close and view free results"]'), "modal has close button");
 check([...doc.querySelectorAll("button")].some(b => b.textContent?.includes("Continue with free results")), "free report is accessible without purchase");
-check([...doc.querySelectorAll("button")].some(b => b.textContent?.includes("Unlock Complete Report — $3")), "premium CTA is for the complete report at $3");
+check([...doc.querySelectorAll("button")].some(b => b.textContent?.includes("Unlock Complete Report — $5")), "premium CTA is for the complete report at $5");
 check(text.includes("Trust") && text.includes("60/100") && !text.includes("First Impression"), "modal shows one truthful relevant public score rather than repeating all five");
 check(!text.includes(privateText), "private paid content is never placed in the popup");
 offer.window.close();

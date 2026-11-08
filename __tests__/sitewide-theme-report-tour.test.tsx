@@ -30,7 +30,7 @@ for(const paid of [false,true]){
   assert.equal(markup.includes('id="your-improvement-plan"'),paid,"Premium workbench remains gated.");
 }
 const fullTour = renderToStaticMarkup(<FullReportTour onTryFree={()=>{}}/>);
-assert.ok(fullTour.includes("THE $3 COMPLETE REPORT") && fullTour.includes("INTERACTIVE SAMPLE"), "Full walkthrough is clearly labeled as illustrative.");
+assert.ok(fullTour.includes("THE $5 COMPLETE REPORT") && fullTour.includes("INTERACTIVE SAMPLE"), "Full walkthrough is clearly labeled as illustrative.");
 assert.equal((fullTour.match(/role="tab"/g)||[]).length,5, "All five report chapters are demonstrated.");
 assert.ok(fullTour.includes("Evidence → Fix") && fullTour.includes("Copy Studio") && fullTour.includes("Smart Priority"));
 

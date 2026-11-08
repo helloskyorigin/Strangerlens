@@ -9,10 +9,9 @@ import InteractiveReportPreview from "../components/landing/InteractiveReportPre
 import { LandingThemeSwitcher, LANDING_THEME_KEY } from "../components/landing/LandingThemeSwitcher";
 
 const atmosphere = renderToStaticMarkup(<ChromaticAtmosphere variant="hero" />);
-assert.equal((atmosphere.match(/class="sl-signal-dot"/g) || []).length, 0, "No tiny background dots; ambient color stays clean.");
-assert.ok(atmosphere.includes("aria-hidden=\"true\""), "Animated decoration is hidden from screen readers.");
+assert.equal(atmosphere, "", "Marketing hero has no decorative aurora.");
 const lines = renderToStaticMarkup(<ChromaticAtmosphere variant="threads" />);
-assert.equal((lines.match(/class="sl-focus-thread"/g) || []).length, 10, "Quiet focus-line pattern.");
+assert.equal(lines, "", "No animated line paths remain.");
 
 const preview = renderToStaticMarkup(<InteractiveReportPreview />);
 assert.equal((preview.match(/role="tab"/g) || []).length, 6, "Five clarity signals and one separate fictional Purchase Readiness example.");
@@ -28,7 +27,7 @@ for (const fragment of [
   '.sl-v3-primary:focus-visible', '@media(prefers-reduced-motion:reduce)',
 ]) assert.ok(css.includes(fragment), `V3 CSS contains ${fragment}`);
 const globalCss = readFileSync("app/globals.css", "utf8");
-assert.ok(globalCss.includes('landing-v3.css'), "Landing styling loaded.");
+assert.ok(globalCss.includes('landing-v3.css') && globalCss.includes('quiet-ai-theme.css'), "Neutral redesign overrides legacy landing styles.");
 assert.ok(!globalCss.includes("html.light .text-white"), "Unsafe global inversion removed.");
 
 const dom = new JSDOM('<!doctype html><html><body><div id="app"></div></body></html>', {
@@ -63,7 +62,7 @@ async function main() {
       assert.equal(tab.getAttribute("aria-selected"), "true");
       assert.equal(dom.window.document.querySelector('[role="tabpanel"]')?.getAttribute("aria-labelledby"), tab.id);
     }
-    console.log("PASS: chromatic landing theme switch, interactive sample, illustration honesty and motion safety.");
+    console.log("PASS: quiet landing appearance, interactive sample, illustration honesty and motion safety.");
   } finally {
     await act(async () => root.unmount());
     dom.window.close();

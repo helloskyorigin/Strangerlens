@@ -161,7 +161,7 @@ export default function ResultsScreen({
   const unlockedPurchase = isReportUnlocked ? report.purchaseReadiness : undefined;
   const showLockedPurchase = !unlockedPurchase && Boolean(report.purchaseReadinessLocked || report.purchaseReadiness);
   const displaySignals = unlockedPurchase ? [...report.signalsList, unlockedPurchase] : report.signalsList;
-  // Keep a compact $3 entry point available while mobile visitors scroll the
+  // Keep a compact $5 entry point available while mobile visitors scroll the
   // free report. Hide it when either upgrade card is in view or the modal opens.
   useEffect(() => {
     if (isReportUnlocked || !isCheckoutAvailable) return;
@@ -382,11 +382,11 @@ export default function ResultsScreen({
           <div className="mx-auto flex max-w-md items-center justify-between gap-3">
             <div className="min-w-0">
               <p className="text-xs font-bold text-white">Full evidence + fix plan</p>
-              <p className="text-[11px] text-[#A6BCD5]">$3 once · Full findings &amp; fixes</p>
+              <p className="text-[11px] text-[#A6BCD5]">$5 once · Full findings &amp; fixes</p>
             </div>
             <button type="button" onClick={handleUnlockFullAnalysis} disabled={loading || isVerifyingPayment}
               className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full bg-[#246BFD] px-4 text-xs font-bold text-white disabled:opacity-50">
-              {loading || isVerifyingPayment ? "Opening…" : "Unlock — $3"} <ArrowRight className="h-3.5 w-3.5" aria-hidden="true"/>
+              {loading || isVerifyingPayment ? "Opening…" : "Unlock — $5"} <ArrowRight className="h-3.5 w-3.5" aria-hidden="true"/>
             </button>
           </div>
         </div>
@@ -561,7 +561,7 @@ export default function ResultsScreen({
             <p className="text-sm font-bold text-amber-200">Limited preview · AI analysis unavailable</p>
             <p className="mt-1 text-xs leading-relaxed text-[#E5D3AD]">
               AI analysis wasn't available for this scan, so these scores are basic rules-based indicators.
-              A complete $3 AI report cannot be purchased from this preview. Please retry when the AI service is available.
+              A complete $5 AI report cannot be purchased from this preview. Please retry when the AI service is available.
             </p>
             {onRecheck && <button type="button" onClick={onRecheck}
               className="mt-3 min-h-10 rounded-full border border-amber-500/35 px-4 text-xs font-bold text-amber-200 hover:bg-amber-500/10">
@@ -656,7 +656,7 @@ export default function ResultsScreen({
               </span>
               <h2 className="text-xl sm:text-2xl font-bold leading-tight mb-3 text-white">Your Complete Five-Signal Report</h2>
               <div className="text-base sm:text-lg font-bold text-white mb-3">
-                $3 <span className="text-xs sm:text-sm text-[#94A3B8] font-normal">· One-time payment</span>
+                $5 <span className="text-xs sm:text-sm text-[#94A3B8] font-normal">· One-time payment</span>
               </div>
               <p className="text-[#94A3B8] text-sm mb-2 max-w-md mx-auto leading-relaxed">
                 The full report explores all five signals in depth, from existing strengths to actionable improvements. Your free scores stay available.
@@ -677,7 +677,7 @@ export default function ResultsScreen({
                     {loading || isVerifyingPayment ? (
                       <span>Processing...</span>
                     ) : (
-                      <span>Unlock Full Analysis — $3</span>
+                      <span>Unlock Full Analysis — $5</span>
                     )}
                   </button>
                   <p className={`text-xs leading-relaxed font-medium ${isTestMode ? "text-amber-400/90" : "text-[#94A3B8]"}`}>

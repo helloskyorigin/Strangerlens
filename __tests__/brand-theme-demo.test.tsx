@@ -11,10 +11,11 @@ import ReportsHeader from "../components/ReportsHeader";
 import { LandingThemeSwitcher, LANDING_THEME_KEY } from "../components/landing/LandingThemeSwitcher";
 
 const logo=renderToStaticMarkup(<BrandMark className="h-8 w-8"/>);
-assert.ok(logo.includes('viewBox="0 0 40 40"') && logo.includes("#A9F2FF"), "Distinctive scalable two-tone S mark");
-assert.ok(readFileSync("app/landing-v3.css","utf8").includes("#1CAFE9") &&
-  readFileSync("app/landing-v3.css","utf8").includes("#6849D8"),"Colored gradient identity, not monochrome");
-assert.ok(readFileSync("app/icon.svg","utf8").includes("linearGradient"),"Favicon uses the same blue-violet identity");
+assert.ok(logo.includes('viewBox="0 0 40 40"') && logo.includes("currentColor") && !logo.includes("#A9F2FF"), "Distinctive monochrome S mark");
+assert.ok(readFileSync("app/quiet-ai-theme.css","utf8").includes("--quiet-ink:#1C1D20") &&
+  readFileSync("app/quiet-ai-theme.css","utf8").includes("box-shadow:none!important"),"Quiet AI theme replaces ornamental glow");
+assert.ok(!readFileSync("app/icon.svg","utf8").includes("linearGradient") &&
+  readFileSync("app/icon.svg","utf8").includes("#1B1C1F"),"Favicon uses graphite monochrome identity");
 
 const staticSample=renderToStaticMarkup(<InteractiveReportPreview/>);
 assert.equal((staticSample.match(/role="tab"/g)||[]).length,6,"Five core analyses and one optional purchase sample are all present");
