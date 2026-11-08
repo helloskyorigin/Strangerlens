@@ -14,9 +14,13 @@ html[data-landing-theme="dark"] {
   --quiet-border:#393B40; --quiet-cta:#F0F0ED; --quiet-on-cta:#18191B;
   --quiet-link:#B4C5D3;
 }
+html[data-landing-theme] {
+  background:var(--quiet-page)!important;
+  color:var(--quiet-ink)!important;
+}
 html[data-landing-theme] body {
   background:var(--quiet-page)!important;
-  color:var(--quiet-ink);
+  color:var(--quiet-ink)!important;
 }
 html[data-landing-theme] :is(.landing-v3,.sl-app-theme) {
   --sl-page:var(--quiet-page); --sl-surface:var(--quiet-paper);
