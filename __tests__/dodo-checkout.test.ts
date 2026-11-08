@@ -112,7 +112,8 @@ async function main() {
     const report = await createReport();
     const other = await createReport();
     check((await checkout(request("/api/payments/checkout", { reportId: report.reportId }))).status === 403, "checkout requires report ownership");
-    check((await getReport(report.reportId, report.reportToken)).status === 403, "unpaid report denies premium");
+    const unpaidResponse = await getReport(report.reportId, report.reportToken);
+    check(unpaidResponse.status === 403, "unpaid report denies premium; actual=" + unpaidResponse.status + " body=" + (await unpaidResponse.clone().text()));
     const redacted = redactAnalysisForFreeTier(paymentAnalysis);
     check(!JSON.stringify(redacted).includes(privateText), "free API strips premium signal and first-seconds explanations");
     providerProductAmount = 300;
