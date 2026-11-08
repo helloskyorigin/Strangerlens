@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "./landing-v3.css";
 @import "./app-theme.css";
+@import "./quiet-ai-theme.css";
 
 :root {
   color-scheme: dark;
