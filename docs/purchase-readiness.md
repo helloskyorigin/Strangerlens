@@ -35,7 +35,7 @@ Free APIs return only the boolean `purchase_readiness_locked: true` applicabilit
 marker. No sixth-signal score, status, summary, findings, evidence or fixes are sent
 to unpaid browsers. The frontend maps this to `purchaseReadinessLocked` and displays
 a premium locked card after Action marked "Included in Full Analysis". The single
-primary payment CTA remains in the main Full Analysis section below, where one $9 payment unlocks all premium features. Full scores
+primary payment CTA remains in the main Full Analysis section below, where one $5 payment unlocks all premium features. Full scores
 and findings stay in the stored paid report. Free PDFs and legacy PDF fallbacks
 export only the original five signals, even if client state contains an older
 assessment. Verified premium PDFs include the applicable sixth assessment. Existing ownership and payment entitlement checks protect

@@ -112,7 +112,7 @@ export default function FullReportTour({onTryFree}:{onTryFree:()=>void}){
   const reducedMotion=useReducedMotion();
   return <section id="full-report-demo" className="sl-tour-section-wrapper sl-report-showcase" aria-labelledby="sl-tour-heading">
     <div className="sl-tour-heading">
-      <span className="sl-tour-kicker"><Sparkles size={15} aria-hidden="true"/> THE $9 COMPLETE REPORT</span>
+      <span className="sl-tour-kicker"><Sparkles size={15} aria-hidden="true"/> THE $5 COMPLETE REPORT</span>
       <h2 id="sl-tour-heading">From a clarity score to an actionable plan.</h2>
       <p>Explore every chapter of a fictional complete report—five core signals, conditional purchase context, page evidence, better wording and a prioritized action plan. No sample section is hidden.</p>
     </div>
