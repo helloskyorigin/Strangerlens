@@ -60,11 +60,11 @@ const SIGNALS = [
     id:"purchase", label:"Purchase Readiness", score:64, status:"Opportunity", Icon:ShoppingBag,
     heading:"A clear price needs a clear reason to pay.",
     intro:"This fictional sample sells team plans, so a separate purchase assessment is included.",
-    evidence:"“Pro plans from $9 / month.”",
+    evidence:"“Pro plans from $12 / month.”",
     strength:"A starting price helps set expectations.",
     friction:"The visible pricing claim doesn't explain which team benefits warrant upgrading.",
     fix:"Pair each paid tier with concrete inclusions and a precise next step.",
-    rewrite:"Pro · $9/mo · Add team permissions and project reporting."
+    rewrite:"Pro · $12/mo · Add team permissions and project reporting."
   }
 ] as const;
 type SignalId = (typeof SIGNALS)[number]["id"];
@@ -153,7 +153,7 @@ export default function InteractiveReportPreview() {
         </div>
       </div>
       <div className="sl-demo-bottom">
-        <p><CheckCircle2 size={14} aria-hidden="true"/> All sample signals and fixes open · Real Full Analysis $9</p>
+        <p><CheckCircle2 size={14} aria-hidden="true"/> All sample signals and fixes open · Real Full Analysis $5</p>
         <a href="#full-report-demo">Explore the full report walkthrough <ArrowRight size={14} aria-hidden="true"/></a>
       </div>
     </section>
