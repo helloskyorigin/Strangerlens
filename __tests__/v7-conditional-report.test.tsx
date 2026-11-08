@@ -23,7 +23,7 @@ assert.ok(free.querySelector(".sl-v7-intro h1"), "V7 report opens with website-s
 assert.ok(free.querySelector(".sl-v7-score") && free.querySelector(".sl-v7-signal-list"), "Strong score and grouped signals");
 assert.equal(free.querySelectorAll('[data-signal]').length,5,"Only five core signals on non-commercial websites");
 assert.ok(!free.body.textContent?.includes("Purchase Readiness"),"No purchase card or claim for a free/unknown website");
-assert.ok(free.querySelector("#complete-report-preview"),"One visible $3 premium offer follows all core signals");
+assert.ok(free.querySelector("#complete-report-preview"),"One visible $5 premium offer follows all core signals");
 assert.ok(!free.body.textContent?.includes(privateText),"Unpaid page does not expose private diagnostic content");
 const locked=render(commercial);
 assert.equal(locked.querySelectorAll('[data-signal]').length,5);

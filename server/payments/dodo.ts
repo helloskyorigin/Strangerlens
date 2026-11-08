@@ -47,8 +47,8 @@ export async function dodoRequest<T>(path: string, init?: RequestInit): Promise<
   return data as T;
 }
 
-/** The public $3 price must match the Dodo product before checkout begins. */
-export const FULL_REPORT_USD_CENTS = 300;
+/** The public $5 price must match the Dodo product before checkout begins. */
+export const FULL_REPORT_USD_CENTS = 500;
 
 export function validateFullReportDodoProduct(product: unknown): boolean {
   if (!product || typeof product !== "object") return false;
@@ -73,6 +73,6 @@ export async function assertFullReportProductPrice(): Promise<void> {
     method: "GET",
   });
   if (!validateFullReportDodoProduct(product)) {
-    throw new PaymentError(503, "The $3 checkout product is not yet configured correctly in Dodo. No payment was started.");
+    throw new PaymentError(503, "The $5 checkout product is not yet configured correctly in Dodo. No payment was started.");
   }
 }
