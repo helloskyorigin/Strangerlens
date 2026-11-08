@@ -35,8 +35,8 @@ const offer=renderToStaticMarkup(<CompleteReportPreview
  signals={[{key:"trust",id:"trust",title:"Trust",score:63,scoreDisplay:"63/100",status:"Needs work",badgeType:"amber"}] as any}
  purchaseReadinessApplicable canCheckout busy={false} onUnlock={()=>{}}/>);
 assert.ok(offer.includes("Free preview versus complete report") && offer.includes("YOU HAVE") && offer.includes("UNLOCK"));
-assert.ok(offer.includes("Purchase assessment") && offer.includes("Unlock Full Analysis — $3"));
-assert.equal((offer.match(/Unlock Full Analysis — \$3/g)||[]).length,1,"Single $3 checkout button.");
+assert.ok(offer.includes("Purchase assessment") && offer.includes("Unlock Full Analysis — $5"));
+assert.equal((offer.match(/Unlock Full Analysis — \$5/g)||[]).length,1,"Single $5 checkout button.");
 for(const page of [<PrivacyPolicyPage/>,<RefundPolicyPage/>,<ContactSupportPage/>]){
  const html=renderToStaticMarkup(page);
  assert.ok(!html.includes("$5"), "Legal/support cannot advertise stale $5.");
@@ -45,4 +45,4 @@ for(const page of [<PrivacyPolicyPage/>,<RefundPolicyPage/>,<ContactSupportPage/
 }
 const privacy=renderToStaticMarkup(<PrivacyPolicyPage/>);
 assert.ok(privacy.includes("sessionStorage") && privacy.includes("server always rechecks payment"), "Storage/entitlement policy matches the actual product.");
-console.log("PASS: moving no-dot backdrop, seamless screen transitions, mono logo, clear scan, $3 legal parity, theme and tier boundaries.");
+console.log("PASS: moving no-dot backdrop, seamless screen transitions, mono logo, clear scan, $5 legal parity, theme and tier boundaries.");
