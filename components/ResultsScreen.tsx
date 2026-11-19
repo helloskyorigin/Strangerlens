@@ -17,6 +17,7 @@ import { adaptReport } from "@/lib/report-adapter";
 import { generateReportPdf } from "@/lib/pdf-generator";
 import type { PremiumWorkbench } from "@/types/premiumWorkbench";
 import ClaritySignalTooltip from "@/components/ClaritySignalTooltip";
+import BrandMark from "@/components/BrandMark";
 import {
   startReportCheckout,
   rememberReportAccess,
@@ -358,7 +359,7 @@ export default function ResultsScreen({
   if (!data) return null;
 
   return (
-    <div id="results-content" className={`sl-app-theme sl-results-v7 min-h-screen bg-[#090D15] text-[#F1F5F9] font-sans antialiased flex flex-col ${!isReportUnlocked && isCheckoutAvailable ? "pb-16 sm:pb-0" : ""}`}>
+    <div id="results-content" className={`sl-app-theme sl-results-v7 min-h-screen bg-white text-[#F1F5F9] font-sans antialiased flex flex-col ${!isReportUnlocked && isCheckoutAvailable ? "pb-16 sm:pb-0" : ""}`}>
       <PostScanUpgradeModal
         open={isPostScanOfferOpen && !isReportUnlocked && isCheckoutAvailable}
         domain={report.domain}
@@ -377,7 +378,7 @@ export default function ResultsScreen({
       {/* Mobile-only compact offer stays available while long free results scroll.
           Never blocks the report, the checkout modal, or the main premium CTA. */}
       {!isReportUnlocked && isCheckoutAvailable && showMobileUpgradeBar && !isPostScanOfferOpen && (
-        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-[#355275] bg-[#101B2B]/95 px-4 py-2.5 shadow-[0_-10px_35px_rgba(0,0,0,.45)] backdrop-blur-xl sm:hidden"
+        <div className="sl-v8-mobile-upgrade fixed inset-x-0 bottom-0 z-30 border-t border-[#355275] bg-[#101B2B]/95 px-4 py-2.5 shadow-[0_-10px_35px_rgba(0,0,0,.45)] backdrop-blur-xl sm:hidden"
           style={{ paddingBottom: "max(10px, env(safe-area-inset-bottom))" }}>
           <div className="mx-auto flex max-w-md items-center justify-between gap-3">
             <div className="min-w-0">
@@ -524,33 +525,25 @@ export default function ResultsScreen({
         </div>
       )}
 
-      {/* HEADER */}
-      <header className="w-full bg-[#090D15]/95 backdrop-blur-md sticky top-0 z-30">
-        <div className="max-w-[1000px] mx-auto px-4 h-16 flex items-center justify-between">
-          <button
-            type="button"
-            onClick={onBackToLanding}
-            className="flex items-center gap-2 cursor-pointer bg-transparent border-0 p-0 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
-            aria-label="Return to StrangerLens home"
-          >
-            <span className="font-bold text-base sm:text-xl tracking-tight text-white hover:text-slate-200 transition-colors">
-              StrangerLens
-            </span>
-          </button>
-          <div className="flex shrink-0 items-center gap-1 sm:gap-4">
-                <LandingThemeSwitcher compact />
-            <Link href="/my-reports" aria-label="My Reports" className="inline-flex min-h-10 items-center gap-1 rounded text-xs sm:text-sm font-medium text-[#94A3B8] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"><FileText className="h-4 w-4 min-[420px]:hidden" aria-hidden="true"/><span className="hidden min-[420px]:inline">My Reports</span></Link>
-            <button
-              type="button"
-              onClick={onRunNewCheck || onBackToLanding}
-              className="rounded-full bg-[#171F2D] hover:bg-[#263044] text-white font-semibold px-3 sm:px-4 py-2 transition text-xs sm:text-sm cursor-pointer"
-            >
-              New Check
+      {/* FLOATING RESULTS NAV · VYLENS DESIGN LANGUAGE */}
+      <header className="sl-v8-header">
+        <div className="sl-v8-header-inner">
+          <div className="sl-v8-nav-left">
+            <button type="button" onClick={onBackToLanding} className="sl-v8-nav-brand"
+              aria-label="Return to StrangerLens home">
+              <BrandMark className="h-9 w-9" />
+              <span>StrangerLens<i>.</i></span>
+            </button>
+            <span className="sl-v8-nav-divider" aria-hidden="true" />
+            <span className="sl-v8-nav-title">Results</span>
+          </div>
+          <div className="sl-v8-nav-right">
+            <LandingThemeSwitcher compact />
+            <Link href="/my-reports" aria-label="My Reports"><FileText size={16} aria-hidden="true"/> <span>My Reports</span></Link>
+            <button type="button" onClick={onRunNewCheck || onBackToLanding} className="sl-v8-new-check">
+              New Check <ArrowRight size={16} aria-hidden="true"/>
             </button>
           </div>
-        </div>
-        <div className="max-w-[1000px] mx-auto px-4 py-2 flex items-center justify-between text-sm text-[#94A3B8]">
-          <span className="font-medium text-[#F1F5F9]">{report.domain}</span>
         </div>
       </header>
 
