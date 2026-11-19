@@ -3,6 +3,7 @@
 @import "./app-theme.css";
 @import "../components/landing/strangerlens-landing.css";
 @import "../components/legal-shell.css";
+@import "../components/scan-screen-v2.css";
 
 :root {
   color-scheme: dark;
