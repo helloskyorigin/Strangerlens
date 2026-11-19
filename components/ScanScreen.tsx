@@ -145,8 +145,8 @@ export default function ScanScreen({
         </div>
       </header>
 
-      <main id="scan-content" className="sl-scan-main max-w-[620px]">
-        <div className="sl-scan-intro">
+      <main id="scan-content" className="sl-scan-main">
+        <div className="sl-scan-intro max-w-[620px]">
           <div className="sl-scan-eyebrow"><span/> A DIFFERENT PERSPECTIVE</div>
           <h1>{currentStep}</h1>
           <p>{description}</p>
