@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ArrowDownRight, ArrowRight, ArrowUpRight, CheckCircle2, Eye, Info, LockKeyhole, ScanSearch, Sparkles } from "lucide-react";
+import { ArrowDownRight, ArrowRight, ArrowUpRight, CheckCircle2, Eye, Info, LockKeyhole, ScanSearch } from "lucide-react";
 import type { CanonicalReport, CanonicalSignal, CanonicalPurchaseSignal } from "@/lib/report-adapter";
 import ClaritySignalTooltip from "@/components/ClaritySignalTooltip";
 
@@ -67,7 +67,7 @@ export default function ClarityResultsOverview({
     <section id="report-first-look" className="sl-v7-score sl-v8-overview" aria-labelledby="sl-v7-score-title">
       <div className="sl-v8-overview-main">
         <div className="sl-v8-score-panel">
-          <span id="sl-v7-score-title" className="sl-v7-eyebrow">Website Clarity Score</span>
+          <h2 id="sl-v7-score-title" className="sl-v7-eyebrow">Website Clarity Score</h2>
           <div className="sl-v7-score-number">{report.overallScore === null ? "—" : report.overallScore}<span>/100</span></div>
           <span className={"sl-v7-status sl-v7-status--" + overallTone}>
             <span className="sl-v7-status-dot" aria-hidden="true" /> {statusLabel(report.overallStatus)}
@@ -128,7 +128,8 @@ export default function ClarityResultsOverview({
               <span className="sl-v8-signal-index">{String(index + 1).padStart(2, "0")}</span>
               <span className="sl-v7-signal-name">
                 {signal.title}
-                {renderTooltip(signal, "desktop")}
+                <span className="sl-v8-tooltip-desktop hidden sm:inline-flex">{renderTooltip(signal, "desktop")}</span>
+                <span className="sl-v8-tooltip-mobile sm:hidden">{renderTooltip(signal, "mobile")}</span>
               </span>
               <strong className="sl-v8-signal-score">{signal.scoreDisplay}</strong>
             </div>
