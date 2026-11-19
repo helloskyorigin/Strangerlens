@@ -9,7 +9,7 @@ export const LEGAL_CONFIG = {
     "For order receipts, payment inquiries, or report delivery questions, please email hello.skyorigin@gmail.com with your analyzed URL and order details.",
   supportResponseWindow: "Within 24–48 business hours (Monday–Friday)",
   effectiveDate: "October 16, 2026",
-  lastUpdated: "October 21, 2026",
+  lastUpdated: "November 19, 2026",
   pricing: {
     freeTier: {
       name: "Free Preview",
