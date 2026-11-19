@@ -8,6 +8,9 @@ on:
       - "components/legal-shell.css"
       - "components/LegalLayout.tsx"
       - "components/BrandMark.tsx"
+      - "components/ScanScreen.tsx"
+      - "components/scan-screen-v2.css"
+      - "__tests__/scan-v2-ux.test.tsx"
       - "app/**"
       - ".github/workflows/landing-build.yml"
   workflow_dispatch:
@@ -33,5 +36,7 @@ jobs:
         run: npm install --no-audit --no-fund --ignore-scripts
       - name: TypeScript
         run: npm run typecheck
+      - name: Scan screen behavior checks
+        run: node --import tsx __tests__/scan-v2-ux.test.tsx
       - name: Production build
         run: npm run build
