@@ -9,6 +9,10 @@ on:
       - "components/LegalLayout.tsx"
       - "components/BrandMark.tsx"
       - "components/ScanScreen.tsx"
+      - "components/ClarityResultsOverview.tsx"
+      - "components/ResultsScreen.tsx"
+      - "components/results-lime-v8.css"
+      - "__tests__/results-lime-v8.test.tsx"
       - "components/scan-screen-v2.css"
       - "__tests__/scan-v2-ux.test.tsx"
       - "__tests__/analysis-desk-ui.test.tsx"
@@ -41,5 +45,7 @@ jobs:
         run: |
           node --import tsx __tests__/scan-v2-ux.test.tsx
           node --import tsx __tests__/analysis-desk-ui.test.tsx
+      - name: Results UX and paid-access boundary checks
+        run: node --import tsx __tests__/results-lime-v8.test.tsx
       - name: Production build
         run: npm run build
