@@ -11,6 +11,7 @@ on:
       - "components/ScanScreen.tsx"
       - "components/scan-screen-v2.css"
       - "__tests__/scan-v2-ux.test.tsx"
+      - "__tests__/analysis-desk-ui.test.tsx"
       - "app/**"
       - ".github/workflows/landing-build.yml"
   workflow_dispatch:
@@ -37,6 +38,8 @@ jobs:
       - name: TypeScript
         run: npm run typecheck
       - name: Scan screen behavior checks
-        run: node --import tsx __tests__/scan-v2-ux.test.tsx
+        run: |
+          node --import tsx __tests__/scan-v2-ux.test.tsx
+          node --import tsx __tests__/analysis-desk-ui.test.tsx
       - name: Production build
         run: npm run build
