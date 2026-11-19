@@ -13,9 +13,7 @@ import { readActiveReportSession, persistActiveReportSession, clearActiveReportS
 import { createScanFlowController } from "@/lib/scan-flow-controller";
 import { trackFunnelEvent } from "@/lib/ui-funnel-events";
 import { EASE_OUT_EXPO } from "@/components/motion/Reveal";
-import { LEGAL_CONFIG , getSupportGmailComposeUrl } from "@/lib/legal-config";
 
-const BRAND_NAME = "StrangerLens";
 
 interface PricingPlan {
   id: string;
