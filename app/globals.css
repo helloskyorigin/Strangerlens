@@ -2,6 +2,7 @@
 @import "./landing-v3.css";
 @import "./app-theme.css";
 @import "../components/landing/strangerlens-landing.css";
+@import "../components/legal-shell.css";
 
 :root {
   color-scheme: dark;
