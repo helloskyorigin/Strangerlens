@@ -2,22 +2,23 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const viewport: Viewport = {
-  themeColor: "#090D15",
+  themeColor: "#FFFFFF",
   colorScheme: "light dark",
 };
 
 export const metadata: Metadata = {
-  title: "StrangerLens — AI Website First-Impression Analyzer",
-  description: "See your website through a stranger's eyes. AI-powered website first-impression clarity analyzer evaluating visitor clarity across five signals.",
+  icons: { icon: [{ url: "/strangerlens-mark.webp", type: "image/webp" }], apple: "/strangerlens-mark.webp" },
+  title: "StrangerLens — See Your Website Through a Stranger's Eyes",
+  description: "See what your website communicates to someone new. Find unclear messaging, evidence-backed recommendations, and a better place to start.",
   openGraph: {
-    title: "StrangerLens — AI Website First-Impression Analyzer",
-    description: "See your website through a stranger's eyes. AI-powered website first-impression clarity analyzer evaluating visitor clarity across five signals.",
+    title: "StrangerLens — See Your Website Through a Stranger's Eyes",
+    description: "See what your website communicates to someone new. Find unclear messaging, evidence-backed recommendations, and a better place to start.",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "StrangerLens — AI Website First-Impression Analyzer",
-    description: "See your website through a stranger's eyes. AI-powered website first-impression clarity analyzer evaluating visitor clarity across five signals.",
+    title: "StrangerLens — See Your Website Through a Stranger's Eyes",
+    description: "See what your website communicates to someone new. Find unclear messaging, evidence-backed recommendations, and a better place to start.",
   },
 };
 
