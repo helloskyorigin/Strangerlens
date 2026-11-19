@@ -15,7 +15,7 @@ import { paymentAnalysis, paymentSnapshot } from "./fixtures/payment-report";
 const scan = renderToStaticMarkup(<ScanScreen rawUrl="https://example.com" isVerifying onBackToLanding={()=>{}}/>);
 const scanSource = readFileSync("components/ScanScreen.tsx", "utf8");
 assert.ok(!/home[ -]?page|scaneye/i.test(scanSource), "Scanning never uses the old scope wording or eye icon.");
-assert.ok(scan.includes('sl-brand-mark') && scanSource.includes("<BrandMark className=\"h-[65px]"), "Moving focus is the real site logo.");
+assert.ok(scan.includes('sl-brand-mark') && scanSource.includes("<BrandMark className=\"sl-scan-hero-logo\""), "Moving focus is the real site logo.");
 assert.ok(scanSource.includes("prefers")===false || scanSource.includes("reduceMotion"), "Logo motion honors accessibility setting.");
 assert.ok(scanSource.includes("reduceMotion") && scanSource.includes("repeat: Infinity"), "Activity animation only runs when motion is allowed.");
 assert.equal(SCAN_STAGES.length,4);
