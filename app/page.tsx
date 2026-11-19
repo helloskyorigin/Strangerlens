@@ -1,43 +1,18 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useMemo } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import {
-  Link2,
-  ArrowRight,
-  Eye,
-  Check,
-  X,
-  ChevronDown,
-  Loader2,
-  Shield,
-  Users,
-  Sparkles,
-  ShoppingBag,
-} from "lucide-react";
+import { Check, X, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import ScanScreen from "@/components/ScanScreen";
 import StrangerLensLanding from "@/components/landing/StrangerLensLanding";
-import ChromaticAtmosphere from "@/components/landing/ChromaticAtmosphere";
-import BrandMark from "@/components/BrandMark";
-import InteractiveReportPreview from "@/components/landing/InteractiveReportPreview";
-import FullReportTour from "@/components/landing/FullReportTour";
-import { LandingThemeSwitcher } from "@/components/landing/LandingThemeSwitcher";
 import ResultsScreen from "@/components/ResultsScreen";
-import ClaritySignalTooltip from "@/components/ClaritySignalTooltip";
 import { useReportPayments } from "@/hooks/useReportPayments";
 import { readPendingCheckout } from "@/lib/payment-checkout";
 import { readActiveReportSession, persistActiveReportSession, clearActiveReportSession } from "@/lib/active-report-session";
-import { validateClientUrl } from "@/lib/url-client-validator";
 import { createScanFlowController } from "@/lib/scan-flow-controller";
 import { trackFunnelEvent } from "@/lib/ui-funnel-events";
-import {
-  Reveal,
-  StaggerContainer,
-  StaggerItem,
-  AnimatedHamburgerIcon,
-  EASE_OUT_EXPO,
-} from "@/components/motion/Reveal";
+import { EASE_OUT_EXPO } from "@/components/motion/Reveal";
 import { LEGAL_CONFIG , getSupportGmailComposeUrl } from "@/lib/legal-config";
 
 const BRAND_NAME = "StrangerLens";
@@ -140,14 +115,6 @@ const FAQ_ITEMS = [
   },
 ];
 
-const NAV_ITEMS = [
-  { label: "Product", href: "#product" },
-  { label: "How it works", href: "#how-it-works" },
-  { label: "Full report", href: "#full-report-demo" },
-  { label: "Pricing", href: "#pricing" },
-  { label: "FAQ", href: "#faq" },
-  { label: "My Reports", href: "/my-reports" },
-];
 
 export default function LandingPage() {
   const [url, setUrl] = useState("");
@@ -156,7 +123,6 @@ export default function LandingPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [activeInfoModal, setActiveInfoModal] = useState<"faq" | "pricing" | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
-  const [isInputFocused, setIsInputFocused] = useState<boolean>(false);
   const [isMounted, setIsMounted] = useState<boolean>(false);
 
   useEffect(() => {
@@ -178,7 +144,6 @@ export default function LandingPage() {
   const [analysisData, setAnalysisData] = useState<any>(null);
   // Fresh-scan-only upsell: never auto-open on restoring an existing report.
   const [postScanOfferReportId, setPostScanOfferReportId] = useState<string | null>(null);
-  const [landingSignalTooltip, setLandingSignalTooltip] = useState<string | null>(null);
 
   useEffect(() => {
     if (!analysisData?.reportId) return;
@@ -335,29 +300,8 @@ export default function LandingPage() {
     }
   }, [currentView, analysisData, submittedUrl]);
 
-  const urlValidation = React.useMemo(() => validateClientUrl(url), [url]);
 
 
-
-  const handleSectionNavigate = (
-    e: React.MouseEvent<HTMLAnchorElement>,
-    href: string
-  ) => {
-    e.preventDefault();
-    if (mobileMenuOpen) {
-      setMobileMenuOpen(false);
-    }
-    const targetId = href.replace(/^#/, "");
-    const element = document.getElementById(targetId);
-    if (element) {
-      setTimeout(() => {
-        element.scrollIntoView({
-          behavior: shouldReduceMotion ? "auto" : "smooth",
-          block: "start",
-        });
-      }, mobileMenuOpen ? 120 : 0);
-    }
-  };
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
