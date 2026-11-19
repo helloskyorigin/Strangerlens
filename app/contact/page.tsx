@@ -42,7 +42,7 @@ export default function ContactSupportPage() {
             className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-[#246BFD] hover:bg-blue-600 text-white text-xs sm:text-sm font-bold transition-all shadow-md shadow-blue-500/20"
           >
             <Mail className="w-4 h-4 shrink-0" />
-            <span>Email Support Now</span>
+            <span>Contact Support</span>
           </a>
         </div>
       </section>
@@ -60,7 +60,7 @@ export default function ContactSupportPage() {
                 <span>Report Access &amp; Website Scan Help</span>
               </div>
               <p className="text-xs sm:text-sm text-[#94A3B8] leading-relaxed">
-                Trouble scanning a specific URL or accessing your unlocked $5 Full Clarity Report? Let us know the website domain and the email address you used.
+                Trouble scanning a URL or accessing your unlocked Full Clarity Report? Share the website domain and, if you purchased a report, the payment reference from your receipt when available.
               </p>
             </div>
             <div className="pt-2">
