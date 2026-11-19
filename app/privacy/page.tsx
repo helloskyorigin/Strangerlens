@@ -48,10 +48,10 @@ export default function PrivacyPolicyPage() {
 
           <div className="bg-[#171F2D] border border-[#263044] rounded-2xl p-4 sm:p-5 space-y-2">
             <h3 className="font-bold text-white text-sm sm:text-[15px]">
-              B. Email Address (Report Delivery &amp; Support)
+              B. Checkout Email &amp; Support
             </h3>
             <p className="text-xs sm:text-sm text-[#94A3B8] leading-relaxed">
-              When you unlock a paid $5 Full Clarity Report or reach out to support, we collect your email address to deliver report access, order confirmations, receipts, and customer support responses.
+              When you purchase a report, our checkout partner may collect an email address for payment processing and receipts. If you contact support, we use the email and details you provide to respond. Paid report access is verified using browser-held report credentials; this version does not automatically email report-access links.
             </p>
           </div>
 
