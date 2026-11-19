@@ -4,8 +4,8 @@ import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight, ArrowUpRight, Check, ChevronDown, CircleHelp,
-  Download, Eye, FileText, Fingerprint, Link2, ListChecks,
-  LockKeyhole, Menu, MessageSquareText, RefreshCw, SearchCheck,
+  Download, Eye, Fingerprint, Link2, ListChecks,
+  LockKeyhole, Menu, RefreshCw, SearchCheck,
   ShieldCheck, Sparkles, Target, WandSparkles, X,
 } from "lucide-react";
 import { LEGAL_CONFIG, getSupportGmailComposeUrl } from "@/lib/legal-config";
