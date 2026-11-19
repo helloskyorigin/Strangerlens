@@ -432,7 +432,7 @@ export default function LandingPage() {
             animate={{ opacity: 1 }}
             exit={shouldReduceMotion ? {} : { opacity: 0 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="w-full min-h-screen bg-[#090D15]"
+            className="w-full min-h-screen bg-white"
           >
             <ResultsScreen
               rawUrl={submittedUrl}
