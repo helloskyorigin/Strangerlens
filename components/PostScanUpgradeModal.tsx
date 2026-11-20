@@ -77,7 +77,7 @@ export default function PostScanUpgradeModal({
         Your scores are ready. Here&apos;s what&apos;s behind them.
       </h2>
       <p id="post-scan-offer-description" className="mt-3 text-sm leading-relaxed text-[#667660]">
-        Unlock detailed reasons, actionable fixes, editable copy suggestions and the complete PDF for $5.
+        Unlock detailed reasons, actionable fixes, editable copy suggestions and the complete PDF for $9.
       </p>
       <div className="mt-4 rounded-xl border border-[#DBEACC] bg-[#F5FBEF] p-3.5">
         <p className="text-sm font-semibold text-[#182516]">{opportunity.heading}</p>
@@ -94,7 +94,7 @@ export default function PostScanUpgradeModal({
         <button type="button" onClick={onUpgrade} disabled={!canCheckout || busy}
           className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-[#111510] px-4 py-3 text-sm font-bold text-white transition hover:bg-[#273523] disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8CC83A]">
           <LockKeyhole className="h-4 w-4" aria-hidden="true"/>
-          {busy ? "Opening checkout…" : "Unlock Complete Report — $5"}
+          {busy ? "Opening checkout…" : "Unlock Complete Report — $9"}
           {!busy && <ArrowRight className="h-4 w-4" aria-hidden="true"/>}
         </button>
         <button ref={freeButtonRef} type="button" onClick={onContinueFree}
