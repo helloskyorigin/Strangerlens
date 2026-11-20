@@ -140,8 +140,6 @@ export default function LandingPage() {
   const [scanMilestone, setScanMilestone] = useState<import("@/lib/scan-flow-controller").ScanMilestone>("connecting");
   const [backendError, setBackendError] = useState<string | null>(null);
   const [analysisData, setAnalysisData] = useState<any>(null);
-  // Fresh-scan-only upsell: never auto-open on restoring an existing report.
-  const [postScanOfferReportId, setPostScanOfferReportId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!analysisData?.reportId) return;
@@ -337,7 +335,6 @@ export default function LandingPage() {
     if (e) e.preventDefault();
     trackFunnelEvent("scan_submitted");
     payments.cancelPaymentFlow();
-    setPostScanOfferReportId(null);
     clearPersistedReportSession();
     if (typeof window !== "undefined") {
       window.history.pushState({ strangerLens: true, view: "scan" }, "");
@@ -420,7 +417,6 @@ export default function LandingPage() {
               onGoToResults={() => {
                 const freshReportId = scanController.getState().analysisData?.reportId;
                 if (typeof freshReportId === "string") trackFunnelEvent("scan_completed");
-                setPostScanOfferReportId(typeof freshReportId === "string" ? freshReportId : null);
                 scanController.completeScanToResults();
               }}
             />
@@ -437,7 +433,6 @@ export default function LandingPage() {
             <ResultsScreen
               rawUrl={submittedUrl}
               analysisData={analysisData || undefined}
-              postScanOfferReportId={postScanOfferReportId}
               isUnlocked={Boolean(analysisData?.reportId && payments.unlockedReportId === analysisData.reportId)}
               checkoutEnabled={payments.checkoutEnabled}
               paymentEnvironment={payments.environment}
@@ -458,8 +453,7 @@ export default function LandingPage() {
               }}
               onRunNewCheck={() => {
                 payments.cancelPaymentFlow();
-                setPostScanOfferReportId(null);
-                // New Check: navigate to clean URL input screen, NEVER start scanning
+                            // New Check: navigate to clean URL input screen, NEVER start scanning
                 clearPersistedReportSession();
                 scanController.resetToLanding(true);
                 if (typeof window !== "undefined") {
@@ -470,8 +464,7 @@ export default function LandingPage() {
                 }, 60);
               }}
               onRecheck={() => {
-                setPostScanOfferReportId(null);
-                // Recheck Website: explicitly start exactly ONE new scan
+                            // Recheck Website: explicitly start exactly ONE new scan
                 if (typeof window !== "undefined") {
                   window.history.pushState({ strangerLens: true, view: "scan" }, "");
                 }
