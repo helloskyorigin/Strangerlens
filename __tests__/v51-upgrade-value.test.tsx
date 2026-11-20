@@ -47,7 +47,7 @@ const modal=renderToStaticMarkup(<PostScanUpgradeModal open domain="example.com"
     {title:"Action",scoreDisplay:"90/100"}
   ]} canCheckout busy={false} isTestMode={false} onUpgrade={()=>{}} onContinueFree={()=>{}}/>);
 assert.ok(modal.includes("Trust scored 60/100"));
-assert.equal((modal.match(/Unlock Complete Report — \$3/g)||[]).length,1,"Only one payment action in the modal.");
+assert.equal((modal.match(/Unlock Complete Report — \$5/g)||[]).length,1,"Only one payment action in the modal.");
 assert.ok(modal.includes("Continue with free results"));
 assert.ok(!modal.includes(privateText));
 
