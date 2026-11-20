@@ -132,7 +132,7 @@ export default function ResultsScreen({
 
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [pdfError, setPdfError] = useState<string | null>(null);
-  const [readyPdf, setReadyPdf] = useState<{ href: string; filename: string } | null>(null);
+  const [readyPdf, setReadyPdf] = useState<{ href: string; filename: string; reportKey: string; unlocked: boolean } | null>(null);
   const pdfObjectUrl = useRef<string | null>(null);
   useEffect(() => () => {
     if (pdfObjectUrl.current && typeof URL.revokeObjectURL === "function") {
@@ -374,7 +374,7 @@ export default function ResultsScreen({
       if (result?.blob && typeof URL.createObjectURL === "function") {
         const href = URL.createObjectURL(result.blob);
         pdfObjectUrl.current = href;
-        setReadyPdf({ href, filename: result.filename });
+        setReadyPdf({ href, filename: result.filename, reportKey: currentReportId || "", unlocked: isReportUnlocked });
       }
       if (result?.automaticSaveRequested === false && typeof URL.createObjectURL !== "function") {
         setPdfError("Your PDF was prepared, but this browser blocked the save. Open StrangerLens directly in Chrome or Safari and try again.");
@@ -399,7 +399,7 @@ export default function ResultsScreen({
           : <Download className="h-4 w-4 text-[#B9FC22]" aria-hidden="true" />}
         {isGeneratingPdf ? "Preparing PDF…" : isReportUnlocked ? "Download Full PDF" : "Download Free PDF"}
       </button>
-      {readyPdf && (
+      {readyPdf && readyPdf.reportKey === (currentReportId || "") && readyPdf.unlocked === isReportUnlocked && (
         <a href={readyPdf.href} download={readyPdf.filename} target="_blank" rel="noopener noreferrer"
           className="inline-flex min-h-11 items-center justify-center rounded-full border border-[#A8D17D] bg-white px-4 py-2 text-sm font-semibold text-[#365E24] underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8BCB36]">
           PDF ready — tap to save
