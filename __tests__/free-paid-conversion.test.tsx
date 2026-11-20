@@ -63,13 +63,13 @@ const free = new JSDOM(renderToStaticMarkup(
 assert.equal(free.querySelectorAll(".sl-v7-signal-row").length, 5, "Five free signal scores are visible.");
 assert.ok(free.querySelector(".sl-v7-score-number"), "Overall score stays visible.");
 assert.ok(free.querySelector(".sl-v8-summary-strip"), "Lowest-scoring signal remains visible.");
-assert.ok(free.querySelector("#complete-report-preview"), "On-page $5 full analysis offer exists.");
+assert.ok(free.querySelector("#complete-report-preview"), "On-page $9 full analysis offer exists.");
 assert.ok(!free.querySelector(".sl-upgrade-dialog"), "A scan never opens an automatic checkout popup.");
 assert.ok(!free.querySelector('[role="dialog"][aria-modal="true"]'), "Free results appear without a modal.");
 assert.ok(!free.querySelector("#your-improvement-plan"), "The premium plan stays locked.");
 assert.ok(!free.querySelector("#evidence-to-fix"), "Detailed source evidence stays locked.");
 assert.ok(!free.querySelector("#better-copy-studio"), "Suggested rewrites stay locked.");
-assert.ok(free.body.textContent?.includes("Unlock Full Analysis"), "The $5 upgrade action is clearly offered.");
+assert.ok(free.body.textContent?.includes("Unlock Full Analysis"), "The $9 upgrade action is clearly offered.");
 for (const secret of protectedStrings) {
   assert.ok(!free.body.textContent?.includes(secret), "Free DOM leaks protected text: " + secret);
 }
@@ -83,4 +83,4 @@ assert.ok(paid.querySelector("#smart-priority"), "Smart Priority unlocks.");
 assert.ok(paid.querySelector("#better-copy-studio"), "Better Copy Studio unlocks.");
 assert.ok(paid.body.textContent?.includes("PRIVATE_VERDICT_EXACT_CONCERN"), "Full report keeps real paid reasoning.");
 
-console.log("PASS: scores-first $0 preview, no forced popup, server+browser redaction, protected $5 report and five paid features.");
+console.log("PASS: scores-first $0 preview, no forced popup, server+browser redaction, protected $9 report and five paid features.");
