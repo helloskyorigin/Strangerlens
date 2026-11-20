@@ -83,7 +83,7 @@ const questions = [
     a: "The free preview includes an overall clarity score and scores and statuses for the five core signals. Detailed reasons, evidence, copy suggestions and fixes are part of the Full Analysis.",
   },
   {
-    q: "What is included in the $5 report?",
+    q: "What is included in the $9 report?",
     a: "Five detailed signal analyses, evidence-to-fix recommendations when source wording is available, a prioritized improvement plan, Better Copy Studio, the First 5 Seconds breakdown and a downloadable PDF. Purchase Readiness appears when applicable.",
   },
   {
@@ -100,7 +100,7 @@ const questions = [
   },
   {
     q: "Do I need an account or a subscription?",
-    a: "You can use the free preview without creating an account. Full Analysis is a $5 one-time purchase per report, not a subscription.",
+    a: "You can use the free preview without creating an account. Full Analysis is a $9 one-time purchase per report, not a subscription.",
   },
 ];
 
@@ -312,7 +312,7 @@ export default function StrangerLensLanding({
             </div>
             <div className="slr-price-card slr-price-featured">
               <span className="slr-price-label">FULL CLARITY REPORT <span className="slr-price-chip">ONE-TIME</span></span>
-              <div className="slr-price"><strong>$5</strong><span>per report</span></div>
+              <div className="slr-price"><strong>$9</strong><span>per report</span></div>
               <p className="slr-price-description">Move beyond a number. Understand what needs attention and how to improve it.</p>
               <ul><li><Check size={17} /> All detailed signal findings</li><li><Check size={17} /> Website evidence & practical recommendations</li><li><Check size={17} /> Prioritized improvement plan</li><li><Check size={17} /> Editable copy suggestions</li><li><Check size={17} /> Stranger&apos;s View & first-five-seconds breakdown</li><li><Check size={17} /> Purchase readiness when applicable</li></ul>
               <button className="slr-button slr-price-button" type="button" onClick={goToScan}>See what my website needs <ArrowUpRight size={17} /></button>
