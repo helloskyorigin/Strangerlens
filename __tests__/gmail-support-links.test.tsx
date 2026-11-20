@@ -48,12 +48,13 @@ for (const [name, element, subjects] of pages) {
   dom.window.close();
 }
 
-const footer = readFileSync("app/page.tsx", "utf8");
+const footer = readFileSync("components/landing/StrangerLensLanding.tsx", "utf8");
 assert.ok(footer.includes("href={getSupportGmailComposeUrl()}"), "Landing support email opens Gmail.");
 assert.ok(footer.includes('target="_blank" rel="noopener noreferrer"'), "External mail link is protected.");
 for (const file of [
   "components/LegalLayout.tsx", "app/contact/page.tsx", "app/privacy/page.tsx",
-  "app/terms/page.tsx", "app/refund-policy/page.tsx", "app/page.tsx"
+  "app/terms/page.tsx", "app/refund-policy/page.tsx", "app/page.tsx",
+  "components/landing/StrangerLensLanding.tsx"
 ]) {
   const source = readFileSync(file, "utf8");
   assert.ok(!source.includes("mailto:"), file + " must not use a misconfigured browser mail handler.");
