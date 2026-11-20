@@ -6,6 +6,8 @@ export interface CheckoutOrder {
   reportId: string;
   environment: "test_mode" | "live_mode";
   productId: string;
+  /** Price version at session creation. Never reuse checkout sessions from an old price. */
+  expectedAmountCents?: number;
   createdAt: number;
   sessionId?: string;
   checkoutUrl?: string;
