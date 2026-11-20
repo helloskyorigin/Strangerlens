@@ -35,7 +35,7 @@ const sample=renderToStaticMarkup(<PostScanUpgradeModal
   signals={[{title:"First Impression",scoreDisplay:"78/100"}]}
   canCheckout isTestMode={false} busy={false} onUpgrade={()=>{}} onContinueFree={()=>{}}/>);
 assert.ok(sample.includes('sl-upgrade-dialog'));
-assert.ok(sample.includes("Unlock Complete Report — $5"));
+assert.ok(sample.includes("Unlock Complete Report — $9"));
 
 const dom=new JSDOM('<!doctype html><html><body><div id="root"></div></body></html>',{
   url:"https://strangerlens.ai.studio",pretendToBeVisual:true
@@ -63,7 +63,7 @@ async function main(){
     assert.equal(dom.window.document.querySelectorAll(".sl-v7-signal-row").length, 5);
     assert.ok(dom.window.document.querySelector("#complete-report-preview"));
     assert.ok(!dom.window.document.querySelector("#your-improvement-plan"));
-    console.log("PASS: nonblocking results-first conversion with a visible $5 offer and protected details.");
+    console.log("PASS: nonblocking results-first conversion with a visible $9 offer and protected details.");
   }finally{
     await act(async()=>root.unmount());
     dom.window.close();
