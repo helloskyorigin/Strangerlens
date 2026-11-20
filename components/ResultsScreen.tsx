@@ -187,7 +187,7 @@ export default function ResultsScreen({
   useEffect(() => {
     if (!isReportUnlocked || paymentState !== "success") return;
     const frame = window.requestAnimationFrame(() => {
-      document.getElementById("your-improvement-plan")?.scrollIntoView({
+      document.getElementById("full-analysis-unlocked")?.scrollIntoView({
         behavior: "auto", block: "start",
       });
     });
@@ -626,7 +626,7 @@ export default function ResultsScreen({
           </section>
         )}
         {isReportUnlocked && (
-          <section aria-label="Full analysis unlocked" className="flex flex-col gap-4 rounded-2xl border border-[#D3E7C1] bg-[#F4FCEB] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+          <section id="full-analysis-unlocked" aria-label="Full analysis unlocked" className="scroll-mt-24 flex flex-col gap-4 rounded-2xl border border-[#D3E7C1] bg-[#F4FCEB] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
             <div>
               <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#52812B]">
                 <Check className="h-4 w-4" aria-hidden="true" /> Full Analysis Unlocked
