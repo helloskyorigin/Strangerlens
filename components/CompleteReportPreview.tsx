@@ -22,7 +22,7 @@ export default function CompleteReportPreview({
     { title:"Understand every score", detail:"Five deep dives into strengths, confusion and exact improvements", Icon:ListChecks },
     { title:"See evidence and practical fixes", detail:"Evidence-to-Fix findings, a first-five-seconds assessment and Smart Priority", Icon:FileSearch },
     { title:"Improve your website copy", detail:"Review, edit and copy suggested wording", Icon:PencilLine },
-    { title:"Keep your complete report", detail:"Downloadable PDF and a fix checklist", Icon:FileDown },
+    { title:"Take the findings with you", detail:"Download the report as a PDF when you need a copy", Icon:FileDown },
   ];
   return <section id="complete-report-preview" aria-labelledby="complete-report-title" className="sl-v7-upgrade">
     <div className="sl-v7-upgrade-head">
