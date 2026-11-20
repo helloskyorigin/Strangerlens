@@ -2,7 +2,6 @@
 import React from "react";
 import { ArrowRight, Check, Eye, FileSearch, ListChecks, LockKeyhole, PencilLine, ListOrdered } from "lucide-react";
 import type { CanonicalSignal } from "@/lib/report-adapter";
-import { canonicalPublicScores, describePublicOpportunity } from "@/lib/upgrade-offer";
 
 interface Props {
   signals: CanonicalSignal[];
@@ -13,60 +12,45 @@ interface Props {
   onUnlock: () => void;
   onViewExample?: () => void;
 }
-/** Only public scores and evergreen feature names enter the unpaid offer. */
+
+/** One compact, specific $9 offer. Never expose the paid report's findings
+ * or show an additional free-vs-paid comparison after the scores. */
 export default function CompleteReportPreview({
   signals, purchaseReadinessApplicable, canCheckout, isTestMode = false, busy, onUnlock, onViewExample,
 }: Props) {
-  const opportunity = describePublicOpportunity(canonicalPublicScores(signals));
   const benefits = [
-    { title:"Stranger's View", detail:"The first-five-seconds perspective and what a new visitor may miss", Icon:Eye },
-    { title:"Five-Signal Diagnosis", detail:"The reasoning behind each signal score", Icon:ListChecks },
-    { title:"Evidence-to-Fix", detail:"Inspected page wording and recommended changes where evidence exists", Icon:FileSearch },
-    { title:"Smart Priority", detail:"A focused order of improvements worth making first", Icon:ListOrdered },
-    { title:"Better Copy Studio", detail:"Get editable copy suggestions you can review and use", Icon:PencilLine },
+    { title: "Stranger's View", value: "See what a first-time visitor may miss in 5 seconds", Icon: Eye },
+    { title: "Five-Signal Diagnosis", value: "Understand the reasons behind your scores", Icon: ListChecks },
+    { title: "Evidence-to-Fix", value: "Connect inspected page evidence to practical changes", Icon: FileSearch },
+    { title: "Smart Priority", value: "Know which improvements deserve attention first", Icon: ListOrdered },
+    { title: "Better Copy Studio", value: "Get editable suggestions for clearer website copy", Icon: PencilLine },
   ];
-  return <section id="complete-report-preview" aria-labelledby="complete-report-title" className="sl-v7-upgrade">
+  return <section id="complete-report-preview" aria-labelledby="complete-report-title" className="sl-v7-upgrade sl-v8-compact-upgrade">
     <div className="sl-v7-upgrade-head">
       <div>
-        <p className="sl-v7-upgrade-eyebrow">COMPLETE REPORT</p>
-        <h2 id="complete-report-title">Know what to fix. And how.</h2>
+        <p className="sl-v7-upgrade-eyebrow">YOUR FULL ANALYSIS</p>
+        <h2 id="complete-report-title">Know why. Know what to fix.</h2>
+        <p className="sl-v7-upgrade-intro">Turn {signals.length || 5} scores into a focused, evidence-led improvement plan.</p>
       </div>
-      <div className="sl-v7-price"><strong>$9</strong><span>one-time</span></div>
+      <div className="sl-v7-price" aria-label="Nine US dollars, paid once"><strong>$9</strong><span>once</span></div>
     </div>
-    <p className="sl-v7-upgrade-intro">You have the scores. Now see the reasons, evidence and improvements behind them.</p>
-    <div className="sl-v7-tier-compare" aria-label="Free preview versus complete report">
-      <div className="sl-v7-tier-col">
-        <span>YOU HAVE · FREE</span>
-        <strong>Know where you stand</strong>
-        <p>Overall score · Five clarity scores and statuses · Lowest-scoring area</p>
-      </div>
-      <div className="sl-v7-tier-col sl-v7-tier-paid">
-        <span>UNLOCK · $9 ONCE</span>
-        <strong>Know exactly what to improve</strong>
-        <p>Stranger&apos;s View · Five-Signal Diagnosis · Evidence-to-Fix · Smart Priority · Better Copy Studio {purchaseReadinessApplicable ? "· Purchase Readiness bonus" : ""}</p>
-      </div>
-    </div>
-    <div className="sl-v7-upgrade-reason">
-      <p className="sl-v7-reason-heading">{opportunity.heading}</p>
-      <p>{opportunity.detail}</p>
-      <small><LockKeyhole className="h-3 w-3" aria-hidden="true"/> Detailed findings remain locked until payment.</small>
-    </div>
-    <div className="sl-v7-upgrade-benefits">
-      {benefits.map(({title,detail,Icon}) => <div key={title} className="sl-v7-upgrade-benefit">
-        <Icon className="h-4 w-4 shrink-0" aria-hidden="true"/>
-        <div><p className="sl-v7-benefit-title">{title}</p><p>{detail}</p></div>
-      </div>)}
-    </div>
-    {purchaseReadinessApplicable && <p className="sl-v7-purchase-benefit"><Check className="h-4 w-4" aria-hidden="true"/>
-      Purchase Readiness included for this commercial website
-    </p>}
+    <ul className="sl-v8-unlock-list" aria-label="Included in Full Analysis">
+      {benefits.map(({ title, value, Icon }) => <li key={title} className="sl-v8-unlock-item">
+        <span className="sl-v8-unlock-icon"><Icon size={18} aria-hidden="true"/></span>
+        <span className="sl-v8-unlock-copy"><strong>{title}</strong><span>{value}</span></span>
+      </li>)}
+      {purchaseReadinessApplicable && <li className="sl-v8-unlock-item sl-v8-unlock-bonus">
+        <span className="sl-v8-unlock-icon"><Check size={18} aria-hidden="true"/></span>
+        <span className="sl-v8-unlock-copy"><strong>Purchase Readiness · bonus</strong><span>Review clarity around the buying decision</span></span>
+      </li>}
+    </ul>
     <button type="button" disabled={!canCheckout || busy} onClick={onUnlock} className="sl-v7-upgrade-button">
       <LockKeyhole className="h-4 w-4" aria-hidden="true"/>
       {busy ? "Opening checkout…" : "Unlock Full Analysis — $9"}
       {!busy && <ArrowRight className="h-4 w-4" aria-hidden="true"/>}
     </button>
     <p className="sl-v7-upgrade-assurance">
-      {isTestMode ? "Test mode · No real charge" : "One-time payment · No subscription · PDF download included after verified payment"}
+      {isTestMode ? "Test mode · No real charge" : "One-time payment · No subscription · Full PDF included"}
     </p>
     {onViewExample && <button type="button" onClick={onViewExample} className="sl-v7-example-link">
       See an example report <ArrowRight className="ml-1 inline h-3 w-3" aria-hidden="true"/>
