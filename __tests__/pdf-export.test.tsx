@@ -42,7 +42,7 @@ async function main() {
     bold: (await readFile(new URL("../public/fonts/pdf/DejaVuSans-Bold.ttf", import.meta.url))).toString("base64"),
   };
   const request = (id: string, token?: string, query = "") => pdfData(new NextRequest(`https://strangerlens.example/api/report/${id}/pdf${query}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} }), { params: Promise.resolve({ reportId: id }) });
-  const encode = (value: any): any => typeof value === "string" && value !== "OK" ? Buffer.from(value).toString("base64") : Array.isArray(value) ? value.map(encode) : value;
+  const encode = (value: any): any => Array.isArray(value) ? value.map(encode) : value; // Mirror Upstash plain JSON replies; the SDK deserializes stored records.
   globalThis.fetch = async (input, init) => {
     const url = String(input);
     if (url.startsWith("https://pdf-test.upstash.io")) {
