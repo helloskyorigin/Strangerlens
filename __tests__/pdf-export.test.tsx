@@ -112,6 +112,9 @@ async function main() {
     check((await loadPdfExportModel(canonical)).score === 72, "tampered browser score never enters paid PDF");
     const legacy = adaptReport({ ...preview, reportId: undefined, reportToken: undefined });
     check(buildLegacyFreePdfModel(legacy).tier === "free" && !JSON.stringify(buildLegacyFreePdfModel(legacy)).includes(privateText), "legacy previews have a strict free-only whitelist even with premium client flags");
+    const untrustedLegacy = adaptReport({ ...preview, reportId: undefined, reportToken: undefined, verdict: "DO_NOT_EXPORT_THIS_PRIVATE_VERDICT" });
+    check(!JSON.stringify(buildLegacyFreePdfModel(untrustedLegacy)).includes("DO_NOT_EXPORT_THIS_PRIVATE_VERDICT"),
+      "A legacy free PDF never embeds a potentially premium verdict from client state.");
     jsPDF.API.save = function (name: string) { savedPdf = { name, pages: this.getNumberOfPages() }; return this; };
     failFonts = true;
     const fallbackPdf = await generateReportPdf(canonical, true);
