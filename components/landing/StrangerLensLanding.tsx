@@ -7,7 +7,7 @@ import {
   Download, Eye, Link2, ListChecks, LockKeyhole, Menu,
   SearchCheck, ShieldCheck, Sparkles, Target, WandSparkles, X,
 } from "lucide-react";
-import { LEGAL_CONFIG } from "@/lib/legal-config";
+import { LEGAL_CONFIG, getSupportGmailComposeUrl } from "@/lib/legal-config";
 
 interface StrangerLensLandingProps {
   url: string;
@@ -341,7 +341,7 @@ export default function StrangerLensLanding({
 
       <footer className="slr-footer slr-container">
         <div className="slr-footer-main"><a className="slr-brand" href="#top"><img src="/strangerlens-mark.webp" alt="" width={34} height={34}/><span>StrangerLens<span className="slr-brand-dot">.</span></span></a><p>A fresh perspective on what your website communicates.</p></div>
-        <div className="slr-footer-links"><Link href="/my-reports">My Reports</Link>{LEGAL_CONFIG.links.map(link => <Link href={link.href} key={link.href}>{link.label}</Link>)}</div>
+        <div className="slr-footer-links"><Link href="/my-reports">My Reports</Link>{LEGAL_CONFIG.links.map(link => <Link href={link.href} key={link.href}>{link.label}</Link>)}<a href={getSupportGmailComposeUrl()} target="_blank" rel="noopener noreferrer">Email support</a></div>
         <div className="slr-footer-bottom"><span>© {new Date().getFullYear()} StrangerLens. All rights reserved.</span><span>AI-based assessment of publicly accessible website content.</span></div>
       </footer>
     </div>
