@@ -54,6 +54,10 @@ function hashToken(token: string): string {
 }
 
 export function hasReportAccess(report: StoredServerReport, token: unknown): boolean {
+  // Missing/corrupt persisted records must fail closed instead of producing a
+  // server error or accidentally authorizing access.
+  if (!report || typeof report.tokenHash !== "string" ||
+      !/^[a-f0-9]{64}$/.test(report.tokenHash)) return false;
   if (typeof token !== "string" || !/^sl_ent_[a-f0-9]{48}$/.test(token)) return false;
   const expected = Buffer.from(report.tokenHash, "hex");
   const actual = Buffer.from(hashToken(token), "hex");
