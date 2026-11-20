@@ -9,14 +9,14 @@ export const LEGAL_CONFIG = {
     "For order receipts, payment inquiries, or report delivery questions, please email hello.skyorigin@gmail.com with your analyzed URL and order details.",
   supportResponseWindow: "Within 24–48 business hours (Monday–Friday)",
   effectiveDate: "October 16, 2026",
-  lastUpdated: "November 19, 2026",
+  lastUpdated: "November 20, 2026",
   pricing: {
     freeTier: {
       name: "Free Preview",
       price: "$0",
       billingType: "Free (No credit card or account required)",
       summary:
-        "Instant clarity diagnosis. Includes overall website clarity score, five clarity signal scores (First Impression, Audience, Value, Trust, Action), and five signal statuses.",
+        "Score-only clarity preview. Includes the overall clarity score, five signal scores and statuses (First Impression, Audience, Value, Trust, Action), and identification of the lowest-scoring area. Detailed evidence, diagnosis and fixes are available only in the paid report.",
     },
     singleReport: {
       name: "Full Clarity Report",
