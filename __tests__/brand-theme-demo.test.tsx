@@ -11,10 +11,10 @@ import ReportsHeader from "../components/ReportsHeader";
 import { LandingThemeSwitcher, LANDING_THEME_KEY } from "../components/landing/LandingThemeSwitcher";
 
 const logo=renderToStaticMarkup(<BrandMark className="h-8 w-8"/>);
-assert.ok(logo.includes('viewBox="0 0 40 40"') && logo.includes("#A9F2FF"), "Distinctive scalable two-tone S mark");
-assert.ok(readFileSync("app/landing-v3.css","utf8").includes("#1CAFE9") &&
-  readFileSync("app/landing-v3.css","utf8").includes("#6849D8"),"Colored gradient identity, not monochrome");
-assert.ok(readFileSync("app/icon.svg","utf8").includes("linearGradient"),"Favicon uses the same blue-violet identity");
+assert.ok(logo.includes("strangerlens-mark.webp") && logo.includes("sl-brand-mark"), "Approved neon-lime S mark is shared.");
+assert.ok(readFileSync("components/landing/strangerlens-landing.css","utf8").includes("#111510") &&
+  readFileSync("components/landing/strangerlens-landing.css","utf8").includes("#b9fc22"),"Current identity uses black and neon lime");
+assert.ok(readFileSync("app/layout.tsx","utf8").includes("strangerlens-mark.webp"),"Metadata uses the approved S favicon");
 
 const staticSample=renderToStaticMarkup(<InteractiveReportPreview/>);
 assert.equal((staticSample.match(/role="tab"/g)||[]).length,6,"Five core analyses and one optional purchase sample are all present");
@@ -29,7 +29,7 @@ assert.equal((tour.match(/role="tab"/g)||[]).length,5,"All five walkthrough chap
 const header=renderToStaticMarkup(<ReportsHeader/>);
 assert.ok(header.includes('data-testid="theme-toggle"') && header.includes("sl-brand-mark"),"Report history header shares sitewide logo and one-tap control");
 const landing=readFileSync("app/page.tsx","utf8");
-assert.ok(landing.includes("<LandingThemeSwitcher />") && !landing.includes('hidden sm:block"><LandingThemeSwitcher'),"Theme toggle visible in the landing header at all widths");
+assert.ok(landing.includes("<StrangerLensLanding") && readFileSync("components/landing/StrangerLensLanding.tsx","utf8").includes("slr-menu-toggle"),"Current landing provides a dedicated mobile navigation");
 
 const dom=new JSDOM('<!doctype html><html><body><div id="root"></div></body></html>',{
   url:"https://strangerlens.ai.studio",pretendToBeVisual:true
