@@ -2,6 +2,7 @@ import type { StoredServerReport } from "@/server/security/reportAccess";
 import { redactAnalysisForFreeTier } from "@/server/security/reportAccess";
 import type { PdfFinding, PdfReportModel } from "@/types/pdf-report";
 import { readPurchaseReadiness } from "@/lib/purchase-readiness";
+import { buildPremiumWorkbench } from "@/lib/premium-workbench";
 
 const signalDefinitions = [
   ["first_impression", "First Impression", "what_is_this"],
@@ -43,7 +44,8 @@ export function buildPdfReportModel(stored: StoredServerReport, paid: boolean): 
   const model: PdfReportModel = {
     tier: paid ? "paid" : "free", url: stored.normalizedUrl,
     analysisDate: Number.isFinite(originalDate.getTime()) ? originalDate.toISOString() : null,
-    score: score(analysis.overall_score), status: analysis.overall_status === "clear" ? "Good" : "Needs improvement", verdict: text(analysis.verdict?.text),
+    score: score(analysis.overall_score), status: analysis.overall_status === "clear" ? "Good" : "Needs improvement",
+    verdict: paid ? text(analysis.verdict?.text) : "This preview shows five clarity scores and statuses. Detailed reasons, verified page evidence where available and recommended fixes are included in Full Analysis ($9 one-time).",
     signals: signalDefinitions.map(([key, title, firstKey]) => {
       const signal = analysis.signals?.[key];
       const first = analysis.first_seconds?.[firstKey];
@@ -83,6 +85,38 @@ export function buildPdfReportModel(stored: StoredServerReport, paid: boolean): 
   risks.slice(0, 1).forEach(r => model.freeFindings.push({ title: text(r.title) || "Biggest issue", paragraphs: unique([text(r.description), text(r.why_it_matters)]) }));
   if (primary) model.freeFindings.push({ title: text(primary.title) || "Priority fix", paragraphs: unique([text(primary.reason), text(primary.clearer_direction || primary.suggested_direction)]) });
   if (!paid) return model;
+
+  // Keep the downloaded full report aligned with the five paid UI capabilities.
+  // Derive these sections from the stored verified analysis; never from
+  // browser-edited copy, score inference, or a second AI generation.
+  const workbench = buildPremiumWorkbench(stored.fullAnalysis, stored.snapshot);
+  const lanes: Record<string, string> = {
+    "do-first": "Do First", "quick-win": "Quick Win",
+    "worth-testing": "Worth Testing", "keep-as-is": "Keep As Is",
+  };
+  model.evidenceToFix = workbench.evidenceFixes.map(fix => ({
+    title: fix.title,
+    paragraphs: unique([
+      ...fix.evidence.flatMap(ev => [
+        `Verified source: ${ev.source}`,
+        `Inspected wording: ${ev.text}`,
+      ]),
+      !fix.sourceAvailable ? "Exact source wording was not verified for this recommendation." : "",
+      fix.reason ? `Why it matters: ${fix.reason}` : "",
+      fix.suggestedAction ? `Suggested improvement: ${fix.suggestedAction}` : "",
+    ]),
+  }));
+  model.priorities = workbench.priorities.map(item => ({
+    title: `${lanes[item.lane] || "Review"} · ${item.title}`,
+    paragraphs: unique([item.reason, item.effortNote]),
+  }));
+  model.copySuggestions = workbench.copyOpportunities.map(item => ({
+    title: item.label,
+    paragraphs: unique([
+      item.originalQuote ? `Verified original wording: ${item.originalQuote.text}` : "",
+      `Suggested wording (review before publishing): ${item.recommended}`,
+    ]),
+  }));
 
   for (const [key, value] of Object.entries(analysis.first_seconds || {})) {
     if (!text(value?.explanation)) continue;
