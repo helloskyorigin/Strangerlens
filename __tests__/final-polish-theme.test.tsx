@@ -23,7 +23,8 @@ assert.ok(!scan.includes("Five clarity signals evaluated") && !scan.includes('ar
 assert.ok(scan.includes("sl-scan-lens-scene") && !scan.includes("sl-scan-stages"), "Scan follows the single-focus VYLENS experience, not a step checklist.");
 const app=readFileSync("app/page.tsx","utf8");
 assert.ok(app.includes('<AnimatePresence mode="popLayout" initial={false}>'), "Cross-screen transitions cannot wait on an empty black frame.");
-assert.ok(app.includes("accessible public website content") && app.includes("relevant supporting and policy pages where available"), "Public site scope is truthful without narrow homepage language.");
+const currentLanding=readFileSync("components/landing/StrangerLensLanding.tsx","utf8");
+assert.ok(currentLanding.includes("inspects accessible public website content") && app.includes("public website URL"), "Current landing describes the inspected public-website scope accurately.");
 const css=readFileSync("app/landing-v3.css","utf8");
 const theme=readFileSync("app/app-theme.css","utf8");
 const globals=readFileSync("app/globals.css","utf8");
