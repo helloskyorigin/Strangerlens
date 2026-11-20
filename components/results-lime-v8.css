@@ -215,7 +215,7 @@ html[data-landing-theme="dark"] .sl-results-v7{
   background:var(--v8-page)!important;color:var(--v8-ink)!important
 }
 html[data-landing-theme="dark"] .sl-results-v7 .sl-v8-score-panel{border-color:#405337}
-html[data-landing-theme="dark"] .sl-results-v7 .sl-v8-verdict-panel,.sl-results-v7 .sl-v8-overview-main{color:var(--v8-ink)}
+html[data-landing-theme="dark"] .sl-results-v7 .sl-v8-verdict-panel,html[data-landing-theme="dark"] .sl-results-v7 .sl-v8-overview-main{color:var(--v8-ink)}
 html[data-landing-theme="dark"] .sl-results-v7 .sl-v8-summary-icon{background:#344c2b;color:#c0f08b}
 html[data-landing-theme="dark"] .sl-results-v7 .sl-v8-next-step{background:#21311e;border-color:#41513a}
 html[data-landing-theme="dark"] .sl-results-v7 .sl-v8-next-step h2{color:#f0f9eb}
@@ -224,3 +224,38 @@ html[data-landing-theme="dark"] .sl-results-v7 .sl-v7-purchase-locked{border-col
 html[data-landing-theme="dark"] .sl-results-v7 .sl-v7-meter{background:#3e4a3b}
 html[data-landing-theme="dark"] .sl-results-v7 .sl-v8-nav-brand{color:#f6f9f3}
 html[data-landing-theme="dark"] .sl-results-v7 .sl-v8-report-navigation a:first-child{background:#b9fc22;border-color:#b9fc22;color:#111510}
+
+
+/* Paid report reliability pass: keep purchase assessments inside the same lime
+   vocabulary as StrangerLens. This scope takes priority over older blue themes. */
+.sl-results-v7 .sl-purchase-deep-dive,
+html[data-landing-theme="light"] .sl-results-v7 .sl-purchase-deep-dive{
+  --pr-ink:#1D2E1A;
+  --pr-muted:#697D61;
+  --pr-panel:#F4FAED;
+  --pr-panel-soft:#E8F8D7;
+  --pr-border:#D7E7CB;
+  --pr-accent:#56852B;
+  --pr-surface:#FFFFFF;
+}
+.sl-results-v7 .sl-purchase-track span{background:#8BCB36}
+.sl-results-v7 .sl-purchase-details summary:focus-visible{outline-color:#8BCB36}
+.sl-results-v7 #complete-paid-report,
+.sl-results-v7 #strangers-view,
+.sl-results-v7 #your-improvement-plan{scroll-margin-top:115px}
+.sl-results-v7 #your-improvement-plan > section,
+.sl-results-v7 #complete-paid-report > article{min-width:0}
+.sl-results-v7 #strangers-view > .grid > div,
+.sl-results-v7 #your-improvement-plan article{min-width:0;overflow-wrap:anywhere}
+.sl-results-v7 #report-export-actions button:focus-visible{outline:3px solid #8BCB36;outline-offset:3px}
+.sl-results-v7 .sl-v8-mobile-upgrade{color:#1D2D19}
+.sl-results-v7 .sl-v8-mobile-upgrade p{color:#1D2D19!important}
+html[data-landing-theme="dark"] .sl-results-v7 .sl-purchase-deep-dive{
+  --pr-ink:#1D2E1A;--pr-muted:#697D61;--pr-panel:#F4FAED;
+  --pr-panel-soft:#E8F8D7;--pr-border:#D7E7CB;--pr-accent:#56852B;--pr-surface:#FFF;
+}
+@media(max-width:650px){
+  .sl-results-v7 #your-improvement-plan nav{gap:8px}
+  .sl-results-v7 #your-improvement-plan nav a{min-height:40px;display:inline-flex;align-items:center}
+  .sl-results-v7 #strangers-view .grid{gap:12px}
+}
