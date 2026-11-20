@@ -100,9 +100,9 @@ export default function BetterCopyStudio({ opportunities }: { opportunities: Cop
               {mode === "my-edit" ? (
                 <textarea value={edited} onChange={event => setDrafts(previous => ({...previous, [selected.id]:event.target.value.slice(0,1500)}))}
                   aria-label="Edit suggested copy" rows={5} maxLength={1500}
-                  className="mt-3 min-h-32 w-full resize-y rounded-xl border border-[#CDDCC7] bg-white p-3.5 text-sm leading-relaxed text-[#182516] outline-none focus:ring-2 focus:ring-[#8ACB3A]"/>
+                  className="mt-3 min-h-24 w-full resize-y rounded-xl border border-[#CDDCC7] bg-white p-3.5 text-sm leading-relaxed text-[#182516] outline-none focus:ring-2 focus:ring-[#8ACB3A]"/>
               ) : (
-                <div className="mt-3 min-h-32 whitespace-pre-wrap break-words rounded-xl border border-[#CEE3BA] bg-[#F3FAEC] p-4 text-sm font-medium leading-relaxed text-[#1C2B19]" style={{userSelect:"text"}}>
+                <div className="mt-3 min-h-24 whitespace-pre-wrap break-words rounded-xl border border-[#CEE3BA] bg-[#F3FAEC] p-4 text-sm font-medium leading-relaxed text-[#1C2B19]" style={{userSelect:"text"}}>
                   {activeText}
                 </div>
               )}
