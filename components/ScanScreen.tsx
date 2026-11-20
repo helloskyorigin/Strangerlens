@@ -172,7 +172,7 @@ export default function ScanScreen({
                 </div>
                 {!isReady && !reduceMotion && <span className="sl-scan-lens-beam" />}
               </div>
-              <span className="sl-scan-progress-track"><span className={isReady ? "is-ready" : ""}/></span>
+              <span className="sl-scan-progress-track"><span className={"sl-scan-progress-indicator" + (isReady ? " is-ready" : "")}/></span>
             </div>
 
             <div key={stage} className="sl-scan-copy" role="status" aria-live="polite" aria-atomic="true">
