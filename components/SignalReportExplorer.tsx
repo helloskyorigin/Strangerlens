@@ -82,7 +82,7 @@ export default function SignalReportExplorer({
         </div>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(220px,290px)_minmax(0,1fr)] lg:items-start">
+      <div className="grid min-w-0 gap-5 lg:grid-cols-[minmax(215px,280px)_minmax(0,1fr)] lg:items-start">
         <nav aria-label="Full report chapters" className="rounded-2xl border border-[#E2EADD] bg-white p-2.5 lg:sticky lg:top-24">
           <p className="px-2.5 pb-2.5 pt-1 text-[11px] font-bold uppercase tracking-[.12em] text-[#7A8D72]">Explore all chapters</p>
           <div role="tablist" aria-label="Detailed clarity chapters" aria-orientation="vertical" className="space-y-1.5">
