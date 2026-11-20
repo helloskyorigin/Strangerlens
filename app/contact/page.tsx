@@ -131,7 +131,7 @@ export default function ContactSupportPage() {
                 <span>Product &amp; General Questions</span>
               </div>
               <p className="text-xs sm:text-sm text-[#94A3B8] leading-relaxed">
-                Have feedback on {LEGAL_CONFIG.productName}, questions about your Full Clarity Report ($5), or general product inquiries? We read every message.
+                Have feedback on {LEGAL_CONFIG.productName}, questions about your Full Clarity Report ($9), or general product inquiries? We read every message.
               </p>
             </div>
             <div className="pt-2">
