@@ -284,6 +284,15 @@ describe("Phase 1 Task 4: Content Extractor & Fetch Cache Tests", () => {
     expect(classifySupportingPageCandidate("/customers", "Customer Stories").pageType).toBe("customers");
   });
 
+  test("Pricing matching does not confuse Product or Process with a Pro plan", () => {
+    const product = classifySupportingPageCandidate("/product", "Product");
+    const process = classifySupportingPageCandidate("/process", "How it works");
+    const pro = classifySupportingPageCandidate("/plans/pro", "Pro");
+    expect(product.pageType).toBe("product");
+    expect(process.pageType).toBe("how_it_works");
+    expect(pro.pageType).toBe("pricing");
+  });
+
   test("Multi-Page Phase 1: discoverSupportingPages selects at most 3 diverse, high-signal pages from homepage HTML", () => {
     const homepageHtml = `
       <!DOCTYPE html>
