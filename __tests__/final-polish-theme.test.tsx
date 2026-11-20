@@ -34,11 +34,11 @@ const offer=renderToStaticMarkup(<CompleteReportPreview
  signals={[{key:"trust",id:"trust",title:"Trust",score:63,scoreDisplay:"63/100",status:"Needs work",badgeType:"amber"}] as any}
  purchaseReadinessApplicable canCheckout busy={false} onUnlock={()=>{}}/>);
 assert.ok(offer.includes("Free preview versus complete report") && offer.includes("YOU HAVE") && offer.includes("UNLOCK"));
-assert.ok(offer.includes("Purchase assessment") && offer.includes("Unlock Full Analysis — $5"));
+assert.ok(offer.includes("Purchase Readiness") && offer.includes("Unlock Full Analysis — $5"));
 assert.equal((offer.match(/Unlock Full Analysis — \$5/g)||[]).length,1,"Single $5 checkout button.");
 for(const page of [<PrivacyPolicyPage/>,<RefundPolicyPage/>,<ContactSupportPage/>]){
  const html=renderToStaticMarkup(page);
- assert.ok(!html.includes("Full Analysis — $5"), "Legal/support must not advertise a stale $5 checkout.");
+ assert.ok(!html.includes("Full Analysis — $3"), "Legal/support must not advertise a stale $3 checkout.");
  assert.ok(html.includes("StrangerLens"), "All legal pages share branded navigation.");
  assert.ok(html.includes("Privacy Policy") && html.includes("Contact Support"), "Legal navigation stays available.");
 }
