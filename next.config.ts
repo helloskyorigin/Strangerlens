@@ -2,6 +2,8 @@ import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // Do not let the Next.js development badge obscure report content in the AI Studio mobile preview.
+  devIndicators: false,
   eslint: {
     ignoreDuringBuilds: true,
   },
