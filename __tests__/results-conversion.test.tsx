@@ -28,7 +28,7 @@ for (const width of [320, 390, 1440]) {
       Object.defineProperty(dom.window, "innerWidth", { value: width });
       const doc = dom.window.document;
       const text = doc.body.textContent || "";
-      check(doc.querySelectorAll('button[aria-label^="About "]').length === 10, "all five free signals keep info triggers in both layouts");
+      check(doc.querySelectorAll('button[aria-label^="About "]').length === 10, "all five signals keep general-info triggers in both layouts");
       check(text.includes("Your Clarity Signals") && text.includes("Website Clarity Score"), "core score UI remains visible");
       if (paid) {
         check(!doc.querySelector("#complete-report-preview"), "verified paid users do not see upsell");
@@ -43,10 +43,10 @@ for (const width of [320, 390, 1440]) {
         check(!!preview, "free visitor sees complete-report preview");
         const previewText = preview?.textContent || "";
         check(previewText.includes("Know what to fix. And how."), "full-report value is explicit");
-        check(signalNames.every(name => text.includes(name)), "every core signal has a locked premium chapter preview");
-        check(!previewText.includes(privateText) && previewText.includes("Five deep dives into strengths") && !!preview?.querySelector('[aria-label="Free preview versus complete report"]'), "preview describes paid benefits without leaking private findings");
+        check(signalNames.every(name => text.includes(name)), "every core score stays visible");
+        check(!previewText.includes(privateText) && previewText.includes("Five-Signal Diagnosis") && !!preview?.querySelector('[aria-label="Free preview versus complete report"]'), "preview describes paid benefits without leaking private findings");
         check(!text.includes(privateText) && !doc.querySelector("#your-improvement-plan"), "free tier never renders private premium content");
-        check([...doc.querySelectorAll("button")].some(button => button.textContent?.includes("Unlock Full Analysis — $3")), "single report CTA remains $3");
+        check([...doc.querySelectorAll("button")].some(button => button.textContent?.includes("Unlock Full Analysis — $5")), "single report CTA remains $5");
         check(testMode ? text.includes("Test mode") && text.includes("No real charge")
           : text.includes("One-time payment · No subscription") && !text.includes("TEST MODE"),
           "correct payment mode reassurance");
