@@ -48,7 +48,7 @@ async function main() {
   const historyRequest = (references: unknown) => history(new NextRequest("https://strangerlens.example/api/my-reports", {
     method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ references }),
   }));
-  const encode = (value: any): any => typeof value === "string" && value !== "OK" ? Buffer.from(value).toString("base64") : Array.isArray(value) ? value.map(encode) : value;
+  const encode = (value: any): any => Array.isArray(value) ? value.map(encode) : value; // Mirror Upstash plain JSON replies; the SDK deserializes stored records.
   const bridge: typeof fetch = async (input, init) => {
     const url = String(input);
     if (url.startsWith("https://history-test.upstash.io")) {
