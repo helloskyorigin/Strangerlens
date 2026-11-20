@@ -292,7 +292,7 @@ export default function StrangerLensLanding({
           <div className="slr-steps">
             <div className="slr-step"><div className="slr-step-number">01</div><div><h3>Enter your website</h3><p>Give StrangerLens a public URL to inspect.</p></div></div>
             <ArrowRight className="slr-step-arrow" size={21} aria-hidden="true" />
-            <div className="slr-step"><div className="slr-step-number">02</div><div><h3>See the outside perspective</h3><p>Review the clarity scores and what the page communicates.</p></div></div>
+            <div className="slr-step"><div className="slr-step-number">02</div><div><h3>See the outside perspective</h3><p>Review the five clarity scores and the lowest-scoring area.</p></div></div>
             <ArrowRight className="slr-step-arrow" size={21} aria-hidden="true" />
             <div className="slr-step"><div className="slr-step-number">03</div><div><h3>Go deeper when it matters</h3><p>Unlock evidence, priority fixes and clearer wording in the full report.</p></div></div>
           </div>
@@ -307,7 +307,7 @@ export default function StrangerLensLanding({
               <span className="slr-price-label">CLARITY PREVIEW</span>
               <div className="slr-price"><strong>$0</strong><span>free</span></div>
               <p className="slr-price-description">Understand how clearly your website introduces itself.</p>
-              <ul><li><Check size={17} /> Overall clarity score</li><li><Check size={17} /> Five core signal scores</li><li><Check size={17} /> Clear / partly clear / needs work statuses</li></ul>
+              <ul><li><Check size={17} /> Overall clarity score</li><li><Check size={17} /> Five core signal scores</li><li><Check size={17} /> Statuses and lowest-scoring area</li></ul>
               <button className="slr-button slr-price-button" type="button" onClick={goToScan}>Check my website <ArrowUpRight size={17} /></button>
             </div>
             <div className="slr-price-card slr-price-featured">
