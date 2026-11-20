@@ -73,12 +73,12 @@ export async function fetchPurchasedReport(reportId: string, signal?: AbortSigna
   };
 }
 
-export async function downloadPurchasedReport(reportId: string): Promise<void> {
+export async function downloadPurchasedReport(reportId: string): Promise<import("@/lib/pdf-generator").PdfDownloadResult> {
   // Recheck the server even when a card was previously marked paid. A refund
   // after listing must not permit a new premium download.
   const { data } = await fetchPurchasedReport(reportId);
   const [{ generateReportPdf }, { adaptReport }] = await Promise.all([
     import("@/lib/pdf-generator"), import("@/lib/report-adapter"),
   ]);
-  await generateReportPdf(adaptReport(data), true);
+  return generateReportPdf(adaptReport(data), true);
 }
