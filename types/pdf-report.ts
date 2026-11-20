@@ -23,4 +23,8 @@ export interface PdfReportModel {
   miss: PdfFinding[];
   actions: PdfFinding[];
   evidence: PdfFinding[];
+  /** Additional paid-only workbench content, derived from stored verified analysis. */
+  evidenceToFix?: PdfFinding[];
+  priorities?: PdfFinding[];
+  copySuggestions?: PdfFinding[];
 }
