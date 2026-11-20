@@ -4,8 +4,8 @@ import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight, ArrowUpRight, Check, ChevronDown, CircleHelp,
-  Download, Eye, FileText, Link2, ListChecks, LockKeyhole, Menu,
-  RefreshCw, SearchCheck, ShieldCheck, Sparkles, Target, WandSparkles, X,
+  Download, Eye, Link2, ListChecks, LockKeyhole, Menu,
+  SearchCheck, ShieldCheck, Sparkles, Target, WandSparkles, X,
 } from "lucide-react";
 import { LEGAL_CONFIG } from "@/lib/legal-config";
 
@@ -254,7 +254,7 @@ export default function StrangerLensLanding({
         <section id="full-report" className="slr-section slr-container">
           <div className="slr-section-heading slr-center"><span className="slr-eyebrow">INSIDE YOUR FULL ANALYSIS</span>
             <h2>Don&apos;t just find confusion.<br /><span>Know what to change.</span></h2>
-            <p>The full report connects observations to practical next steps — so the next edit isn&apos;t another guess.</p></div>
+            <p>Six focused capabilities, one clear purpose: understand your website and improve what matters.</p></div>
           <div className="slr-deep-grid">
             <article className="slr-deep-card slr-deep-primary">
               <div className="slr-deep-icon"><SearchCheck size={24}/></div><span className="slr-deep-eyebrow">01 / EVIDENCE TO FIX</span>
@@ -268,19 +268,19 @@ export default function StrangerLensLanding({
             </article>
             <article className="slr-deep-card">
               <span className="slr-deep-icon"><WandSparkles size={22}/></span><h3>Better Copy Studio</h3>
-              <p>Review and edit wording suggestions, then copy the version that fits your product.</p>
+              <p>Review, edit and copy suggested wording grounded in your offering.</p>
             </article>
             <article className="slr-deep-card">
-              <span className="slr-deep-icon"><Eye size={22}/></span><h3>The first five seconds</h3>
-              <p>See what the homepage communicates before a visitor has time to explore.</p>
+              <span className="slr-deep-icon"><Eye size={22}/></span><h3>Stranger&apos;s View</h3>
+              <p>Discover what your page communicates at first glance, including the first-five-seconds breakdown.</p>
             </article>
             <article className="slr-deep-card">
-              <span className="slr-deep-icon"><RefreshCw size={22}/></span><h3>Recheck & compare</h3>
-              <p>After making edits, run another analysis and compare clarity scores for the same site.</p>
+              <span className="slr-deep-icon"><Target size={22}/></span><h3>Five-Signal Diagnosis</h3>
+              <p>Read why each clarity signal scored as it did, what works and what to improve.</p>
             </article>
             <article className="slr-deep-card">
-              <span className="slr-deep-icon"><FileText size={22}/></span><h3>PDF & saved reports</h3>
-              <p>Keep a copy of your findings and reopen report access in the same browser.</p>
+              <span className="slr-deep-icon"><LockKeyhole size={22}/></span><h3>Purchase Readiness</h3>
+              <p>A separate buyer-decision analysis when a real paid offer is detected.</p>
             </article>
           </div>
           <div className="slr-deep-foot"><ShieldCheck size={18}/><p>Findings are based on accessible website content, not invented testimonials, measured visitor behavior or promises of more sales.</p></div>
@@ -314,9 +314,9 @@ export default function StrangerLensLanding({
               <span className="slr-price-label">FULL CLARITY REPORT <span className="slr-price-chip">ONE-TIME</span></span>
               <div className="slr-price"><strong>$5</strong><span>per report</span></div>
               <p className="slr-price-description">Move beyond a number. Understand what needs attention and how to improve it.</p>
-              <ul><li><Check size={17} /> All detailed signal findings</li><li><Check size={17} /> Website evidence & practical recommendations</li><li><Check size={17} /> Prioritized improvement plan</li><li><Check size={17} /> Editable copy suggestions</li><li><Check size={17} /> First-five-seconds breakdown & PDF</li><li><Check size={17} /> Purchase readiness when applicable</li></ul>
+              <ul><li><Check size={17} /> All detailed signal findings</li><li><Check size={17} /> Website evidence & practical recommendations</li><li><Check size={17} /> Prioritized improvement plan</li><li><Check size={17} /> Editable copy suggestions</li><li><Check size={17} /> Stranger&apos;s View & first-five-seconds breakdown</li><li><Check size={17} /> Purchase readiness when applicable</li></ul>
               <button className="slr-button slr-price-button" type="button" onClick={goToScan}>See what my website needs <ArrowUpRight size={17} /></button>
-              <small>Run the initial check, then unlock that report.</small>
+              <small>PDF download and saved report access included as utilities.</small>
             </div>
           </div>
           <p className="slr-pricing-disclosure">Digital reports are delivered on demand. <Link href="/refund-policy">Refund terms</Link> and <Link href="/terms">service terms</Link> apply.</p>
