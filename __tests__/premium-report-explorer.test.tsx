@@ -48,7 +48,7 @@ const planHtml = renderToStaticMarkup(<PremiumActionPlan
 assert.ok(planHtml.includes("Do First") && planHtml.includes("Smart Priority"));
 assert.ok(planHtml.includes("Evidence-to-Fix") && planHtml.includes("Exact source quote unavailable"));
 assert.ok(planHtml.includes("Better Copy Studio") && planHtml.includes("Organize projects for solo founders"), "Selected copy draft renders; alternative drafts appear when selected.");
-assert.ok(planHtml.includes("Content Behind the Assessment"));
+assert.ok(!planHtml.includes("Content Behind the Assessment") && !planHtml.includes("Your Fix Checklist"), "Focused paid plan shows only evidence, priority and copy tools.");
 
 const dom = new JSDOM("<!doctype html><html><body><div id=\"app\"></div></body></html>", {
   url: "https://strangerlens.example", pretendToBeVisual: true,
