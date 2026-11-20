@@ -212,7 +212,34 @@ async function main() {
       const exportError = dom.window.document.querySelector('#report-export-actions [role="alert"]');
       check(Boolean(exportError?.textContent?.includes("PDF export is temporarily unavailable")) && !button.disabled,
         `${width}px failure shows accessible inline error and restores button`);
-      outage = false; await unmount(); dom.window.close(); dom = undefined;
+      outage = false;
+      // A visitor must also be able to download the $0 score-only summary
+      // directly from the same responsive Results screen before paying.
+      const freePreviewData = {
+        ...preview,
+        reportId: free.reportId,
+        reportToken: free.reportToken,
+        isFreeTierOnly: true,
+      };
+      await act(async () => {
+        root!.render(<ResultsScreen rawUrl={free.normalizedUrl}
+          analysisData={freePreviewData} isUnlocked={false} checkoutEnabled={true}
+          onBackToLanding={() => {}} />);
+      });
+      const freeButton = [...dom.window.document.querySelectorAll("button")]
+        .find(b => b.textContent?.includes("Download Free PDF"))!;
+      check(Boolean(freeButton) && !dom.window.document.querySelector("#your-improvement-plan"),
+        `${width}px free preview offers PDF but never shows paid workbench`);
+      savedPdf = undefined;
+      const beforeFree = pdfCalls;
+      await act(async () => { freeButton.click(); });
+      for (let i = 0; i < 100 && !savedPdf; i++) {
+        await act(async () => { await new Promise(resolve => setTimeout(resolve, 20)); });
+      }
+      check(savedPdf?.name === "StrangerLens-Free-Report.pdf" &&
+        pdfCalls > beforeFree && !freeButton.disabled,
+        `${width}px free PDF action saves a server-redacted summary`);
+      await unmount(); dom.window.close(); dom = undefined;
     }
     console.log(`PASS: ${assertions} PDF/security/download assertions. Actual PDF fixtures written to ${outputDirectory}. No real payment, scan or AI request was made.`);
   } finally {
