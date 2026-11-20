@@ -121,7 +121,7 @@ async function main() {
         check(doc.body.textContent?.includes('PREMIUM_PURCHASE_SENTINEL') && doc.body.textContent?.includes('Observed Website Evidence'), `${width}px: authorized purchase tab displays original paid findings and evidence`);
       }else{
         const locked=doc.querySelector('[data-testid="purchase-readiness-locked"]')!;
-        check(!!locked && locked.textContent?.includes('This website offers paid products'), `${width}px: free card explains commercial applicability`);
+        check(!!locked && locked.textContent?.includes('Paid offer detected'), `${width}px: free card explains commercial applicability`);
         check(!locked.textContent?.includes('/100') && !locked.textContent?.includes(full.summary) && !doc.body.textContent?.includes('PREMIUM_PURCHASE_SENTINEL'), `${width}px: free card hides score, status, findings and recommendations`);
         check(!locked.querySelector('button:not([aria-label])') && locked.textContent?.includes('Included in Full Analysis'), `${width}px: locked card replaces duplicate button with Included in Full Analysis`);
         // Even a stale full assessment in browser storage must remain locked in free Results.
