@@ -24,15 +24,15 @@ const cases: Array<[string,string,boolean,string?]> = [
   ["ecommerce", '<section><h1>Handmade ceramic bowls</h1><p>Set of 4 bowls. Materials: clay.</p><p>$35 one-time purchase</p><button>Add to cart</button><p>Returns accepted within 14 days.</p></section>', true],
   ["freemium", '<section><h1>Create project plans</h1><p>Free forever plan. Upgrade to our paid plans for more projects.</p><a href="/pricing">Pricing</a><a href="/checkout">Upgrade to Pro</a></section><section id="pricing"><h2>Our plans</h2><div class="pricing-card"><h3>Free</h3><span class="price">$0</span></div><div class="pricing-card"><h3>Pro plan</h3><span class="price">₹499/month</span><p>Includes unlimited projects</p></div></section>', true],
   ["paid services", '<section><h1>Website design services</h1><p>Our consulting services deliver a project plan and design files.</p><a href="/quote">Request a quote</a></section>', true],
-  ["priced services without purchase CTA", '<section><h1>Website design services</h1><p>Packages starting at $500 per project.</p><button>Contact us</button></section>', true],
-  ["paid newsletter", '<section><h1>Expert weekly newsletter</h1><p>Our paid subscriptions cost $5 per month and include weekly reports.</p><button>Subscribe</button></section>', true],
+  ["priced services without purchase CTA", '<section><h1>Website design services</h1><p>Packages starting at $900 per project.</p><button>Contact us</button></section>', true],
+  ["paid newsletter", '<section><h1>Expert weekly newsletter</h1><p>Our paid subscriptions cost $9 per month and include weekly reports.</p><button>Subscribe</button></section>', true],
   ["free tools", '<section><h1>Free image converter</h1><p>Completely free. No paid plans, subscriptions or payments.</p><button>Convert image</button></section>', false],
   ["blog", '<article><h1>Our guide to project tools</h1><p>A paid subscription costs $20/month. Here is our review of premium plans.</p><a href="/newsletter">Subscribe</a></article>', false, "Tool review blog"],
   ["unclear", '<section><h1>Build better projects</h1><p>Unlock your potential.</p><a href="/pricing">Pricing</a><a href="/signup">Get started</a></section>', false],
   ["free newsletter", '<section><h1>Developer newsletter</h1><p>Free updates every week.</p><button>Subscribe now</button></section>', false],
-  ["free newsletter with unrelated donation amount", '<section><h1>Free weekly newsletter</h1><p>Subscribe for free updates. Support our community with a $5 donation.</p><button>Subscribe now</button></section>', false],
+  ["free newsletter with unrelated donation amount", '<section><h1>Free weekly newsletter</h1><p>Subscribe for free updates. Support our community with a $9 donation.</p><button>Subscribe now</button></section>', false],
   ["paid subscription with named price", '<section><h1>Monthly design digest</h1><p>Our paid subscriptions cost $12 a month and include premium tutorials.</p><button>Subscribe now</button></section>', true],
-  ["donation", '<section><h1>Free community resources</h1><p>Donate $5 to support us.</p><button>Buy me a coffee</button></section>', false],
+  ["donation", '<section><h1>Free community resources</h1><p>Donate $9 to support us.</p><button>Buy me a coffee</button></section>', false],
   ["affiliate review", '<article><h1>Software review</h1><p>Their subscription costs $20/month.</p><a href="https://another.example/buy">Buy now</a></article>', false, "Software review"],
   ["free services", '<section><h1>Community design services</h1><p>Our design services are completely free.</p><a href="/contact">Request a quote</a></section>', false],
   ["zero-price plan", '<section><h1>Free planning tool</h1></section><section id="pricing"><h2>Plan</h2><div class="pricing-card"><h3>Free forever</h3><span class="price">$0/month</span></div></section>', false],
@@ -162,7 +162,7 @@ async function main() {
         };
         const checkoutData={...freeMapped,reportId:'fixture-report',reportToken:'fixture-token'};
         await act(async()=>root.render(<ResultsScreen analysisData={checkoutData} checkoutEnabled={true} onRefreshPaidReport={()=>{refreshes++;}} onBackToLanding={()=>{}}/>));
-        const primaryCta=[...doc.querySelectorAll('button')].find(b=>b.textContent?.includes('Unlock Full Analysis — $5'))!;
+        const primaryCta=[...doc.querySelectorAll('button')].find(b=>b.textContent?.includes('Unlock Full Analysis — $9'))!;
         check(!!primaryCta && !doc.querySelector('[data-testid="purchase-readiness-locked"] button:not([aria-label])'), `${width}px: only one primary payment CTA exists`);
         await act(async()=>primaryCta.click());
         check(checkoutCalls===1 && !!doc.querySelector('[data-testid="purchase-readiness-locked"]') && doc.body.textContent?.includes('Checkout fixture unavailable'), `${width}px: failed checkout shows error and keeps sixth assessment locked`);
