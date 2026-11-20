@@ -145,6 +145,7 @@ export default function ResultsScreen({
     setIsPostScanOfferOpen(false);
   }, []);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [pdfError, setPdfError] = useState<string | null>(null);
 
   const isTestMode = paymentEnvironment === "test_mode";
 
@@ -357,7 +358,7 @@ export default function ResultsScreen({
   if (!data) return null;
 
   return (
-    <div id="results-content" className={`sl-app-theme sl-results-v7 min-h-screen bg-white text-[#F1F5F9] font-sans antialiased flex flex-col ${!isReportUnlocked && isCheckoutAvailable ? "pb-16 sm:pb-0" : ""}`}>
+    <div id="results-content" className={`sl-app-theme sl-results-v7 min-h-screen bg-white text-[#172116] font-sans antialiased flex flex-col ${!isReportUnlocked && isCheckoutAvailable ? "pb-16 sm:pb-0" : ""}`}>
       <PostScanUpgradeModal
         open={isPostScanOfferOpen && !isReportUnlocked && isCheckoutAvailable}
         domain={report.domain}
@@ -376,15 +377,15 @@ export default function ResultsScreen({
       {/* Mobile-only compact offer stays available while long free results scroll.
           Never blocks the report, the checkout modal, or the main premium CTA. */}
       {!isReportUnlocked && isCheckoutAvailable && showMobileUpgradeBar && !isPostScanOfferOpen && (
-        <div className="sl-v8-mobile-upgrade fixed inset-x-0 bottom-0 z-30 border-t border-[#355275] bg-[#101B2B]/95 px-4 py-2.5 shadow-[0_-10px_35px_rgba(0,0,0,.45)] backdrop-blur-xl sm:hidden"
+        <div className="sl-v8-mobile-upgrade fixed inset-x-0 bottom-0 z-30 border-t border-[#D9E5D1] bg-white/95 px-4 py-2.5 shadow-[0_-10px_35px_rgba(0,0,0,.45)] backdrop-blur-xl sm:hidden"
           style={{ paddingBottom: "max(10px, env(safe-area-inset-bottom))" }}>
           <div className="mx-auto flex max-w-md items-center justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-xs font-bold text-white">Full evidence + fix plan</p>
-              <p className="text-[11px] text-[#A6BCD5]">$5 once · Full findings &amp; fixes</p>
+              <p className="text-xs font-bold text-[#162516]">Full evidence + fix plan</p>
+              <p className="text-[11px] text-[#6B7C63]">$5 once · Full findings &amp; fixes</p>
             </div>
             <button type="button" onClick={handleUnlockFullAnalysis} disabled={loading || isVerifyingPayment}
-              className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full bg-[#246BFD] px-4 text-xs font-bold text-white disabled:opacity-50">
+              className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full bg-[#111510] px-4 text-xs font-bold text-white disabled:opacity-50">
               {loading || isVerifyingPayment ? "Opening…" : "Unlock — $5"} <ArrowRight className="h-3.5 w-3.5" aria-hidden="true"/>
             </button>
           </div>
@@ -546,7 +547,7 @@ export default function ResultsScreen({
       </header>
 
       {/* MAIN CONTENT */}
-      <main className="flex-1 w-full max-w-[1000px] mx-auto px-4 py-6 sm:py-10 space-y-8 sm:space-y-12">
+      <main className="flex-1 w-full max-w-[1080px] mx-auto px-4 py-6 sm:py-10 space-y-8 sm:space-y-12">
         {data?.analysisMode === "heuristic" && (
           <section role="note" aria-label="Limited heuristic preview" className="rounded-2xl border border-amber-500/30 bg-[#30271A] p-4 sm:p-5">
             <p className="text-sm font-bold text-amber-200">Limited preview · AI analysis unavailable</p>
@@ -570,32 +571,32 @@ export default function ResultsScreen({
           </section>
         )}
         {isReportUnlocked && (
-          <section aria-label="Full analysis unlocked" className="flex flex-col gap-4 rounded-2xl border border-emerald-500/25 bg-[#132A30] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+          <section aria-label="Full analysis unlocked" className="flex flex-col gap-4 rounded-2xl border border-[#D3E7C1] bg-[#F4FCEB] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
             <div>
-              <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-emerald-300">
+              <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#52812B]">
                 <Check className="h-4 w-4" aria-hidden="true" /> Full Analysis Unlocked
               </p>
-              <h2 className="mt-2 text-xl font-bold tracking-tight text-white">Your complete clarity report is ready.</h2>
-              <p className="mt-1 max-w-lg text-sm leading-relaxed text-[#B8D0CC]">
+              <h2 className="mt-2 text-xl font-bold tracking-tight text-[#1C2B18]">Your complete clarity report is ready.</h2>
+              <p className="mt-1 max-w-lg text-sm leading-relaxed text-[#61745B]">
                 Five deep dives, actual page evidence when available, first-five-seconds insight, prioritized fixes and editable copy are below. The purchase check is included when a paid offer was detected.
               </p>
             </div>
             <nav aria-label="Jump to paid report sections" className="flex shrink-0 flex-wrap gap-2">
-              <a href="#strangers-view" className="inline-flex min-h-10 items-center justify-center rounded-full bg-[#1E815F] px-4 text-xs font-bold text-white hover:bg-[#24936E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Stranger&apos;s View</a>
-              <a href="#complete-paid-report" className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#385C62] px-4 text-xs font-semibold text-[#D6EDE7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Signal diagnosis</a>
-              <a href="#your-improvement-plan" className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#385C62] px-4 text-xs font-semibold text-[#D6EDE7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Fixes &amp; copy</a>
+              <a href="#strangers-view" className="inline-flex min-h-10 items-center justify-center rounded-full bg-[#111510] px-4 text-xs font-bold text-white hover:bg-[#283724] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Stranger&apos;s View</a>
+              <a href="#complete-paid-report" className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#CEDFC2] px-4 text-xs font-semibold text-[#4B663F] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Signal diagnosis</a>
+              <a href="#your-improvement-plan" className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#CEDFC2] px-4 text-xs font-semibold text-[#4B663F] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Fixes &amp; copy</a>
               {unlockedPurchase && <a href="#complete-paid-report" onClick={() => document.getElementById("chapter-tab-purchaseReadiness")?.click()}
-                className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#385C62] px-4 text-xs font-semibold text-[#D6EDE7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">
+                className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#CEDFC2] px-4 text-xs font-semibold text-[#4B663F] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">
                 Purchase check</a>}
             </nav>
           </section>
         )}
         {paymentMessage && ["verifying", "pending", "error", "failed"].includes(paymentState) &&
-          <div role="status" aria-live="polite" className="rounded-xl border border-[#35516E] bg-[#19283B] p-4 text-sm text-[#D6E4F5]">
+          <div role="status" aria-live="polite" className="rounded-xl border border-[#CADFC0] bg-[#F6FCEB] p-4 text-sm text-[#4B663F]">
             <p>{paymentMessage}</p>
             {["pending", "error"].includes(paymentState) && onVerifyPayment &&
               <button type="button" onClick={onVerifyPayment}
-                className="mt-2 min-h-10 rounded-full border border-[#496995] px-4 text-xs font-semibold text-[#D6E4F5]">
+                className="mt-2 min-h-10 rounded-full border border-[#AACB90] px-4 text-xs font-semibold text-[#345924]">
                 Check payment status
               </button>}
           </div>}
@@ -776,55 +777,56 @@ export default function ResultsScreen({
         {isReportUnlocked ? (
           <>
             {/* Verified paid access unlocks the complete multi-chapter analysis. */}
-            <SignalReportExplorer
-              signals={report.signalsList}
-              purchaseReadiness={unlockedPurchase}
-            />
-
             {/* FIRST 5 SECONDS */}
             <section id="strangers-view" aria-label="Stranger's View and first-five-seconds interpretation" className="scroll-mt-24">
-              <h2 className="text-xl font-bold mb-2 text-white">Stranger&apos;s View · First 5 Seconds</h2>
-              <p className="text-[#94A3B8] text-sm mb-6">An AI interpretation of what the opening page communicates at first glance.</p>
-              <div className="grid gap-6">
-                <div className="bg-[#121824] border border-[#263044] rounded-xl p-5">
-                  <h3 className="font-bold text-emerald-400 text-xs mb-3 tracking-widest uppercase">WHAT VISITORS UNDERSTAND</h3>
+              <h2 className="text-2xl font-bold mb-2 text-[#172516]">Stranger&apos;s View · First 5 Seconds</h2>
+              <p className="text-[#6C7C64] text-sm mb-6">An AI interpretation of what the opening page communicates at first glance.</p>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="bg-white border border-[#DDE9D5] rounded-xl p-5">
+                  <h3 className="font-bold text-[#4C8124] text-xs mb-3 tracking-widest uppercase">WHAT THE PAGE MAKES CLEAR</h3>
                   {report.firstSeconds.understandItems.length > 0 ? (
                     <div className="space-y-3">
                       {report.firstSeconds.understandItems.map((item, i) => (
                         <div key={i} className="text-sm">
-                          <div className="font-semibold text-white">{item.title}</div>
-                          <div className="text-[#94A3B8] mt-0.5">{item.explanation}</div>
+                          <div className="font-semibold text-[#1B2C17]">{item.title}</div>
+                          <div className="text-[#65775E] mt-0.5">{item.explanation}</div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-[#94A3B8] text-sm">No elements detected as immediately clear on initial load.</p>
+                    <p className="text-[#65775E] text-sm">No clearly communicated strengths were identified in the inspected content.</p>
                   )}
                 </div>
-                <div className="bg-[#121824] border border-[#263044] rounded-xl p-5">
-                  <h3 className="font-bold text-amber-400 text-xs mb-3 tracking-widest uppercase">WHAT VISITORS MISS</h3>
+                <div className="bg-white border border-[#DDE9D5] rounded-xl p-5">
+                  <h3 className="font-bold text-[#9C6E20] text-xs mb-3 tracking-widest uppercase">WHAT MAY BE UNCLEAR</h3>
                   {report.firstSeconds.missItems.length > 0 ? (
                     <div className="space-y-3">
                       {report.firstSeconds.missItems.map((item, i) => (
                         <div key={i} className="text-sm">
-                          <div className="font-semibold text-white">{item.title}</div>
-                          <div className="text-[#94A3B8] mt-0.5">{item.explanation}</div>
+                          <div className="font-semibold text-[#1B2C17]">{item.title}</div>
+                          <div className="text-[#65775E] mt-0.5">{item.explanation}</div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-[#94A3B8] text-sm">No immediate comprehension blockers identified.</p>
+                    <p className="text-[#65775E] text-sm">No specific clarity blockers were recorded for this section.</p>
                   )}
                 </div>
               </div>
               {typeof data?.visitorThought === "string" && data.visitorThought.trim() && (
                 <div className="mt-4 rounded-xl border border-[#263044] bg-[#121824] p-5">
                   <h3 className="mb-2 text-xs font-bold uppercase tracking-widest text-[#B9FC22]">Simulated stranger impression</h3>
-                  <p className="text-sm leading-relaxed text-[#C9D9CE]">{data.visitorThought}</p>
-                  <p className="mt-2 text-xs text-[#8E9A8F]">AI interpretation, not a recording of a real person.</p>
+                  <p className="text-sm leading-relaxed text-[#4A6041]">{data.visitorThought}</p>
+                  <p className="mt-2 text-xs text-[#76856F]">AI interpretation, not a recording of a real person.</p>
                 </div>
               )}
             </section>
+
+            <SignalReportExplorer
+              signals={report.signalsList}
+              purchaseReadiness={unlockedPurchase}
+            />
+
 
             <PremiumActionPlan reportId={currentReportId}
               recommendation={data?.recommendation}
@@ -841,27 +843,29 @@ export default function ResultsScreen({
           <button 
             disabled={isGeneratingPdf}
             onClick={async () => {
+              setPdfError(null);
               setIsGeneratingPdf(true);
               try {
                 // PDF export verifies its tier on /api/report/[id]/pdf. The
                 // full-report endpoint intentionally rejects free reports.
                 if (onDownloadPdf) await onDownloadPdf();
                 else await generateReportPdf(report, isReportUnlocked);
-              } catch (err: any) {
-                alert(`PDF generation failed: ${err?.message || "Please try again."}`);
+              } catch {
+                setPdfError("The PDF could not be generated. Please try again.");
               } finally {
                 setIsGeneratingPdf(false);
               }
             }}
-            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-[#263044] bg-[#171F2D] px-4 text-xs font-medium text-[#94A3B8] transition hover:text-white disabled:opacity-50 cursor-pointer"
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-[#182516] bg-[#182516] px-4 text-xs font-semibold text-white transition hover:bg-[#2B3B22] disabled:opacity-50 cursor-pointer"
           >
             {isGeneratingPdf ? (
-              <Loader2 className="w-4 h-4 text-blue-400 animate-spin" />
+              <Loader2 className="w-4 h-4 text-[#B9FC22] animate-spin" />
             ) : (
-              <Download className="w-4 h-4 text-blue-400" />
+              <Download className="w-4 h-4 text-[#B9FC22]" />
             )}
             <span>{isGeneratingPdf ? "Generating…" : isReportUnlocked ? "Full PDF" : "Export summary"}</span>
           </button>
+          {pdfError && <p role="alert" className="w-full text-center text-xs text-[#A3493C]">{pdfError}</p>}
         </div>
       </main>
     </div>
