@@ -22,6 +22,8 @@ on:
       - "__tests__/premium-report-explorer.test.tsx"
       - "components/results-lime-v8.css"
       - "__tests__/results-lime-v8.test.tsx"
+      - "__tests__/results-layout-v9.test.tsx"
+      - "next.config.ts"
       - "components/scan-screen-v2.css"
       - "__tests__/scan-v2-ux.test.tsx"
       - "__tests__/analysis-desk-ui.test.tsx"
@@ -57,6 +59,7 @@ jobs:
       - name: Results UX, premium workbench and paid-access checks
         run: |
           node --import tsx __tests__/results-lime-v8.test.tsx
+          node --import tsx __tests__/results-layout-v9.test.tsx
           node --import tsx __tests__/premium-workbench.test.tsx
           node --import tsx __tests__/premium-report-explorer.test.tsx
           node --import tsx __tests__/free-paid-conversion.test.tsx
