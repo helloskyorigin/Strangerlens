@@ -1,48 +1,40 @@
 import assert from "node:assert/strict";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import ScanScreen, { SCAN_STAGES } from "../components/ScanScreen";
+import ScanScreen from "../components/ScanScreen";
 
 const props = { rawUrl: "https://example.com", onBackToLanding: () => {} };
 const render = (overrides: Record<string, unknown>) =>
   renderToStaticMarkup(<ScanScreen {...props} {...overrides} />);
 
 const connecting = render({ isVerifying: true });
-assert.ok(connecting.includes("Connecting to your website."), "Connecting headline is clear.");
-assert.ok(connecting.includes("Website connection verified"), "Connection stage has a meaningful label.");
-assert.ok(!connecting.includes("Confirmed: example.com"), "No fake completed verification.");
+assert.ok(connecting.includes("Taking a closer look."), "VYLENS centered opening message.");
+assert.ok(connecting.includes("sl-scan-lens-scene") && connecting.includes("sl-scan-lens-stage"), "Centered square scanner visual.");
+assert.ok(connecting.includes("sl-scan-lens-beam") && connecting.includes("sl-scan-progress-track"), "Sweep beam and indeterminate line.");
+assert.ok(connecting.includes("sl-scan-subject-details"), "Domain lives inside a compact subject card.");
+assert.ok(!connecting.includes("sl-scan-workspace") && !connecting.includes("sl-scan-stages"), "No two-column status desk or numbered step list.");
 assert.ok(!connecting.includes("Open my report"), "No early result CTA.");
-assert.ok(connecting.includes("max-w-[620px]"), "Desktop analysis desk has two-column structure.");
+assert.ok(!connecting.includes("aria-valuenow"), "No fabricated percent completion.");
 
 const analyzing = render({
-  isVerifying: false,
-  verifiedSite: { domain: "example.com", httpStatus: 200 },
+  isVerifying: false, verifiedSite: { domain: "example.com", httpStatus: 200 },
 });
-assert.ok(analyzing.includes("Website verified"), "Actual verification milestone is visible.");
-assert.ok(analyzing.includes("Reading your website&#x27;s message."), "Content extraction stage is represented honestly.");
-assert.ok(!analyzing.includes("Open my report"), "Analysis cannot declare ready early.");
+assert.ok(analyzing.includes("Understanding your website."), "Website-connected copy.");
+assert.ok(analyzing.includes("example.com"), "Actual website shown.");
+assert.ok(!analyzing.includes("Open my report"), "No premature result availability.");
 
-const inspected = render({isVerifying:false, verifiedSite:{domain:"example.com",httpStatus:200}, scanMilestone:"content_inspected"});
-assert.ok(inspected.includes("Looking through a stranger&#x27;s eyes."), "Backend extraction event begins evaluation.");
-const scored = render({isVerifying:false, verifiedSite:{domain:"example.com",httpStatus:200}, scanMilestone:"signals_evaluated"});
-assert.ok(scored.includes("Preparing your clarity report."), "Scoring completion begins report preparation.");
-assert.ok(!scored.includes("Open my report"), "No ready CTA before report persistence.");
+const inspected = render({verifiedSite:{domain:"example.com",httpStatus:200},scanMilestone:"content_inspected"});
+assert.ok(inspected.includes("Looking through fresh eyes."), "Copy reflects inspected backend content.");
+const scored = render({verifiedSite:{domain:"example.com",httpStatus:200},scanMilestone:"signals_evaluated"});
+assert.ok(scored.includes("Preparing your report."), "Copy reflects actual evaluated signals.");
+assert.ok(!scored.includes("Open my report"), "Backend has not declared report ready.");
 
-const ready = render({
-  isVerifying: false, isBackendReady: true,
-  verifiedSite: { domain: "example.com", httpStatus: 200 },
-});
+const ready = render({isBackendReady:true,verifiedSite:{domain:"example.com",httpStatus:200}});
 assert.ok(ready.includes("Your report is ready."));
-assert.ok(ready.includes("Open my report"), "Ready state has strong CTA.");
-assert.ok(ready.includes("Your clarity report prepared"));
+assert.ok(ready.includes("Open my report"), "Ready CTA only after real completion.");
 
-const error = render({
-  backendError: "We couldn't extract content from this website",
-  verifiedSite: { domain: "example.com", httpStatus: 200 },
-});
-assert.ok(error.includes("Try again") && error.includes("Use another URL"), "Error has actionable recovery.");
-assert.ok(!error.includes("Open my report"), "Failures never expose report CTA.");
+const error = render({backendError:"We couldn't extract content from this website"});
+assert.ok(error.includes("Try again") && error.includes("Start over"), "Error recovery stays available.");
+assert.ok(!error.includes("Open my report"), "A failed scan cannot show a report CTA.");
 
-assert.equal(SCAN_STAGES.length, 4, "Four real backend-backed scan milestones.");
-assert.ok(SCAN_STAGES.every(stage => Boolean(stage.id && stage.label)));
-console.log("PASS: serious responsive scanning workspace renders truthful verify/analyze/ready/error states.");
+console.log("PASS: VYLENS single-focus scan layout without a step-by-step checklist.");
