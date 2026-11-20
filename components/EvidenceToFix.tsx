@@ -17,7 +17,7 @@ export default function EvidenceToFix({ fixes }: { fixes: EvidenceFix[] }) {
           <p className="mt-2 text-sm leading-relaxed text-[#64765E]">Verified website wording on the left, recommended action beside it. When source evidence is missing, we say so rather than inventing a quote.</p>
         </div>
       </div>
-      {!fixes.length && <p className="rounded-xl border border-[#E2EADD] bg-[#F7FAF3] p-5 text-sm text-[#ADC0D6]">No detailed improvements were recorded for this report. The signal explorer still contains your available diagnostic guidance.</p>}
+      {!fixes.length && <p className="rounded-xl border border-[#E2EADD] bg-[#F7FAF3] p-5 text-sm text-[#52664B]">No detailed improvements were recorded for this report. The signal explorer still contains your available diagnostic guidance.</p>}
       <div className="space-y-3">
         {fixes.map((fix, index) => {
           const chapter = CLARITY_REPORT_CHAPTERS.find(ch => ch.key === fix.signalKey);
