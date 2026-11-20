@@ -39,7 +39,16 @@ const missingHtml = renderToStaticMarkup(<EvidenceToFix fixes={[{
 }]}/>);
 assert.ok(missingHtml.includes("Exact source quote unavailable"), "Missing proof is explicit.");
 const prioritiesHtml = renderToStaticMarkup(<SmartPriority priorities={workbench.priorities}/>);
-assert.ok(["Do First", "Quick Win", "Worth Testing", "Keep As Is"].every(lane => prioritiesHtml.includes(lane)));
+for (const [lane, label] of [
+  ["do-first", "Do First"], ["quick-win", "Quick Win"],
+  ["worth-testing", "Worth Testing"], ["keep-as-is", "Keep As Is"],
+] as const) {
+  assert.equal(
+    prioritiesHtml.includes(label),
+    workbench.priorities.some(item => item.lane === lane),
+    `Only nonempty priority lanes should render: ${label}`,
+  );
+}
 assert.ok(!prioritiesHtml.includes("conversion lift") || prioritiesHtml.includes("not predicted conversion lift"));
 const copyHtml = renderToStaticMarkup(<BetterCopyStudio opportunities={workbench.copyOpportunities}/>);
 assert.ok(copyHtml.includes("Suggested") && copyHtml.includes("My edit") && copyHtml.includes("Copy this version"));
