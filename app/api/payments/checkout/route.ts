@@ -6,7 +6,7 @@ import {
   hasReportAccess,
   isPaymentInfrastructureConfigured,
 } from "@/server/security/reportAccess";
-import { getDodoConfig, PaymentError, dodoRequest, assertFullReportProductPrice } from "@/server/payments/dodo";
+import { getDodoConfig, PaymentError, dodoRequest, assertFullReportProductPrice, FULL_REPORT_USD_CENTS } from "@/server/payments/dodo";
 import {
   saveOrder,
   indexOrder,
@@ -80,12 +80,13 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ alreadyPaid: true, reportId });
       }
 
-      // Verify current $5 product pricing. Dodo is the actual price source.
+      // Verify current $9 product pricing. Dodo is the actual price source.
       await assertFullReportProductPrice();
       const recentOrder = await getRecentOrder(config.environment, reportId);
       if (
         recentOrder &&
         recentOrder.productId === config.productId &&
+        recentOrder.expectedAmountCents === FULL_REPORT_USD_CENTS &&
         recentOrder.checkoutUrl &&
         recentOrder.sessionId &&
         recentOrder.status !== "succeeded" &&
@@ -145,6 +146,7 @@ export async function POST(req: NextRequest) {
         reportId,
         environment: config.environment,
         productId: config.productId,
+        expectedAmountCents: FULL_REPORT_USD_CENTS,
         createdAt: Date.now(),
         sessionId,
         checkoutUrl,
