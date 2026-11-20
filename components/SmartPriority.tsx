@@ -29,7 +29,7 @@ export default function SmartPriority({ priorities }: { priorities: PriorityItem
       {priorities.length === 0 && (
         <p className="rounded-xl border border-[#E2EADD] bg-[#F7FAF3] p-4 text-sm text-[#64765E]">No prioritized recommendations were available in this report.</p>
       )}
-      <div className="grid gap-3 md:grid-cols-2">
+      <div className="grid items-start gap-3 md:grid-cols-2">
         {LANES.filter(lane => priorities.some(item => item.lane === lane.id)).map(lane => {
           const items = priorities.filter(item => item.lane === lane.id);
           return <div key={lane.id} className="min-w-0 overflow-hidden rounded-2xl border border-[#E2EADD] bg-white">
