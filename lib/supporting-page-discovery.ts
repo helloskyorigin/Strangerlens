@@ -514,13 +514,16 @@ export function classifySupportingPageCandidate(
   const combinedPath = segments.join(" ");
   const lowerText = cleanAnchorText(anchorText).toLowerCase();
 
+  // Short pricing tokens such as "pro" are whole-word labels. Substring
+  // matching them incorrectly classified /product and /process as pricing.
+  // Keep partial matching for descriptive multi-character keywords only.
   const matchesAny = (keywords: string[]): boolean =>
     keywords.some(
       (kw) =>
         firstSeg === kw ||
-        combinedPath.includes(kw) ||
         lowerText === kw ||
-        lowerText.includes(kw)
+        (kw.length >= 4 &&
+          (combinedPath.includes(kw) || lowerText.includes(kw)))
     );
 
   // 1. Pricing & Plans (Highest Priority: essential for understanding offer, tiers, trials, guarantees)
