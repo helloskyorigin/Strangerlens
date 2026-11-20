@@ -593,9 +593,6 @@ export default function ResultsScreen({
           isUnlocked={isReportUnlocked}
           showLockedPurchase={showLockedPurchase}
           unlockedPurchase={unlockedPurchase}
-          publicObservation={Array.isArray(data?.evidence?.missingFindings)
-            && typeof data.evidence.missingFindings[0] === "string"
-            ? data.evidence.missingFindings[0] : undefined}
           onExplainScore={() => setIsScoreModalOpen(true)}
         />
 
