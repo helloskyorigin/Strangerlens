@@ -89,7 +89,11 @@ export function buildPdfReportModel(stored: StoredServerReport, paid: boolean): 
   // Keep the downloaded full report aligned with the five paid UI capabilities.
   // Derive these sections from the stored verified analysis; never from
   // browser-edited copy, score inference, or a second AI generation.
-  const workbench = buildPremiumWorkbench(stored.fullAnalysis, stored.snapshot);
+  const workbench = stored.fullAnalysis.priority_fix
+    ? buildPremiumWorkbench(stored.fullAnalysis, stored.snapshot)
+    : { evidenceFixes: [], priorities: [], copyOpportunities: [] };
+  // Partial/legacy reports can lack the primary fix. A download must still
+  // contain the available paid findings, not crash while building workbench.
   const lanes: Record<string, string> = {
     "do-first": "Do First", "quick-win": "Quick Win",
     "worth-testing": "Worth Testing", "keep-as-is": "Keep As Is",
