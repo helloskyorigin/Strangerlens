@@ -4,7 +4,7 @@ import type { PdfFinding, PdfReportModel } from "@/types/pdf-report";
 import { loadPdfExportModel } from "@/lib/pdf-download";
 
 export interface PdfFonts { regular: string; bold: string }
-let fontsPromise: Promise<PdfFonts> | undefined;
+let fontsPromise: Promise<PdfFonts | null> | undefined;
 
 function toBase64(bytes: Uint8Array): string {
   let binary = "";
@@ -12,12 +12,17 @@ function toBase64(bytes: Uint8Array): string {
   return btoa(binary);
 }
 
-async function loadFonts(): Promise<PdfFonts> {
+async function loadFonts(): Promise<PdfFonts | null> {
   if (!fontsPromise) fontsPromise = Promise.all(["DejaVuSans.ttf", "DejaVuSans-Bold.ttf"].map(async name => {
     const response = await fetch(`/fonts/pdf/${name}`, { signal: AbortSignal.timeout(20000) });
     if (!response.ok) throw new Error("The PDF fonts could not be loaded. Please check your connection and try again.");
     return toBase64(new Uint8Array(await response.arrayBuffer()));
-  })).then(([regular, bold]) => ({ regular, bold })).catch(error => { fontsPromise = undefined; throw error; });
+  })).then(([regular, bold]) => ({ regular, bold })).catch(() => {
+    // Embedded app previews, strict CSPs and offline browsers may block fonts.
+    // Use built-in PDF fonts rather than refusing both free and paid downloads.
+    fontsPromise = undefined;
+    return null;
+  });
   return fontsPromise;
 }
 
@@ -28,10 +33,13 @@ function cleanText(value: string): string {
 
 /** Every paragraph, label, URL and copy block uses line-by-line pagination.
  * No fixed-height container can clip the original report's text. */
-export function buildReportPdf(model: PdfReportModel, fonts: PdfFonts): jsPDF {
+export function buildReportPdf(model: PdfReportModel, fonts: PdfFonts | null = null): jsPDF {
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4", putOnlyUsedFonts: true, compress: true });
-  doc.addFileToVFS("DejaVuSans.ttf", fonts.regular); doc.addFont("DejaVuSans.ttf", "ReportSans", "normal");
-  doc.addFileToVFS("DejaVuSans-Bold.ttf", fonts.bold); doc.addFont("DejaVuSans-Bold.ttf", "ReportSans", "bold");
+  if (fonts) {
+    doc.addFileToVFS("DejaVuSans.ttf", fonts.regular); doc.addFont("DejaVuSans.ttf", "ReportSans", "normal");
+    doc.addFileToVFS("DejaVuSans-Bold.ttf", fonts.bold); doc.addFont("DejaVuSans-Bold.ttf", "ReportSans", "bold");
+  }
+  const pdfFont = fonts ? "ReportSans" : "helvetica";
   const width = doc.internal.pageSize.getWidth();
   const height = doc.internal.pageSize.getHeight();
   const margin = 18, contentWidth = width - margin * 2, pageTop = 28, pageBottom = height - 24;
@@ -41,7 +49,7 @@ export function buildReportPdf(model: PdfReportModel, fonts: PdfFonts): jsPDF {
   const muted: [number, number, number] = [91, 107, 128];
   const blue: [number, number, number] = [36, 107, 253];
   const font = (size = 10, bold = false, color = ink) => {
-    doc.setFont("ReportSans", bold ? "bold" : "normal"); doc.setFontSize(size); doc.setTextColor(...color);
+    doc.setFont(pdfFont, bold ? "bold" : "normal"); doc.setFontSize(size); doc.setTextColor(...color);
   };
   const ensure = (needed: number) => { if (y + needed > pageBottom) { doc.addPage(); y = pageTop; } };
   const paragraph = (value: string, options: { size?: number; bold?: boolean; color?: [number, number, number]; indent?: number; gap?: number } = {}) => {
@@ -144,10 +152,34 @@ export function buildReportPdf(model: PdfReportModel, fonts: PdfFonts): jsPDF {
   return doc;
 }
 
-/** Existing Results/My Reports signature. The frontend flag NEVER selects paid. */
-export async function generateReportPdf(report: CanonicalReport, isUnlocked: boolean): Promise<void> {
-  void isUnlocked;
-  const [model, fonts] = await Promise.all([loadPdfExportModel(report), loadFonts()]);
+/**
+ * Results and My Reports share the exact same server-authorized report tier.
+ * Return a Blob as an explicit second-chance download for browsers/webviews
+ * which suppress jsPDF's automatic save after asynchronous requests.
+ */
+export interface PdfDownloadResult {
+  filename: string;
+  blob: Blob;
+  tier: "free" | "paid";
+  automaticSaveRequested: boolean;
+}
+
+export async function generateReportPdf(report: CanonicalReport, isUnlocked: boolean): Promise<PdfDownloadResult> {
+  void isUnlocked; // Never treat a client-side flag as payment authorization.
+  const model = await loadPdfExportModel(report);
+  const fonts = await loadFonts();
   const doc = buildReportPdf(model, fonts);
-  doc.save(model.tier === "paid" ? "StrangerLens-Full-Report.pdf" : "StrangerLens-Free-Report.pdf");
+  const filename = model.tier === "paid" ? "StrangerLens-Full-Report.pdf" : "StrangerLens-Free-Report.pdf";
+  const blob = doc.output("blob");
+  if (!blob || blob.size < 400 || blob.type !== "application/pdf") {
+    throw new Error("PDF generation returned an invalid document. Please try again.");
+  }
+  let automaticSaveRequested = false;
+  try {
+    doc.save(filename);
+    automaticSaveRequested = true;
+  } catch {
+    // The ready Blob can still be offered as a manually tapped download link.
+  }
+  return { filename, blob, tier: model.tier, automaticSaveRequested };
 }
