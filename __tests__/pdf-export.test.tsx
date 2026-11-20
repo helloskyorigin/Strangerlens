@@ -87,6 +87,12 @@ async function main() {
     check(paidModel.score === paymentAnalysis.overall_score && paidModel.signals.length === 5 && paidModel.signals.every((s: any) => s.score === 72), "all six original scores remain unchanged");
     for (const title of ["First Impression", "Audience", "Value", "Trust", "Action"]) check(paidModel.signals.some((s: any) => s.title === title && s.explanation === privateText), `${title} includes actual diagnostics`);
     check(paidModel.actions.some((i: any) => i.paragraphs.some((p: string) => p.includes("Check my website"))), "paid PDF includes actual copy-ready improvement");
+    check(paidModel.priorities?.length > 0 &&
+      paidModel.copySuggestions?.some((i: any) => i.paragraphs.some((p: string) => p.includes("Check my website"))) &&
+      paidModel.evidenceToFix?.length > 0,
+      "Paid PDF includes Smart Priority, editable-copy recommendations and Evidence-to-Fix.");
+    check(!freeModel.priorities?.length && !freeModel.copySuggestions?.length && !freeModel.evidenceToFix?.length,
+      "No paid workbench details are present in the free PDF.");
     check(paidModel.evidence.some((i: any) => i.paragraphs.includes("Build clearer websites")), "paid evidence comes from verified report references");
     const categorized = structuredClone(stored);
     categorized.fullAnalysis.risks[0].category = "first_impression";
@@ -108,8 +114,10 @@ async function main() {
     check(buildLegacyFreePdfModel(legacy).tier === "free" && !JSON.stringify(buildLegacyFreePdfModel(legacy)).includes(privateText), "legacy previews have a strict free-only whitelist even with premium client flags");
     jsPDF.API.save = function (name: string) { savedPdf = { name, pages: this.getNumberOfPages() }; return this; };
     failFonts = true;
-    await assert.rejects(() => generateReportPdf(canonical, true), /fonts could not be loaded/); assertions++;
-    check(!savedPdf, "font failures do not download an incomplete PDF");
+    const fallbackPdf = await generateReportPdf(canonical, true);
+    check(savedPdf?.name === "StrangerLens-Full-Report.pdf" &&
+      fallbackPdf.blob.size > 400 && fallbackPdf.tier === "paid",
+      "Missing web fonts must fall back to a usable, correctly authorized PDF.");
     failFonts = false; await generateReportPdf(canonical, false);
     check(savedPdf?.name === "StrangerLens-Full-Report.pdf" && savedPdf.pages > 1, "only server authorization selects premium filename, regardless of frontend flag");
     savedPdf = undefined;
@@ -193,7 +201,7 @@ async function main() {
       const button = [...dom.window.document.querySelectorAll("button")].find(b => b.textContent?.includes("Full PDF"))!;
       savedPdf = undefined; const callsBefore = pdfCalls;
       await act(async () => { button.click(); });
-      check(button.disabled && button.textContent?.includes("Generating…"), `${width}px download provides loading feedback`);
+      check(button.disabled && button.textContent?.includes("Preparing PDF…"), `${width}px download provides loading feedback`);
       for (let i = 0; i < 100 && !savedPdf; i++) await act(async () => { await new Promise(resolve => setTimeout(resolve, 20)); });
       check(savedPdf?.name === "StrangerLens-Full-Report.pdf" && pdfCalls > callsBefore && !button.disabled, `${width}px PDF click reauthorizes and downloads premium`);
       outage = true;
@@ -202,7 +210,7 @@ async function main() {
         await act(async () => { await new Promise(resolve => setTimeout(resolve, 20)); });
       }
       const exportError = dom.window.document.querySelector('#report-export-actions [role="alert"]');
-      check(Boolean(exportError?.textContent?.includes("The PDF could not be generated")) && !button.disabled,
+      check(Boolean(exportError?.textContent?.includes("PDF export is temporarily unavailable")) && !button.disabled,
         `${width}px failure shows accessible inline error and restores button`);
       outage = false; await unmount(); dom.window.close(); dom = undefined;
     }
