@@ -40,6 +40,9 @@ export default function ClarityResultsOverview({
     ? available.reduce((min, s) => (s.score! < min.score! ? s : min)) : null;
   const strongest = available.length
     ? available.reduce((max, s) => (s.score! > max.score! ? s : max)) : null;
+  // A single scored signal or tied scores cannot establish a true strongest
+  // vs weakest distinction. Avoid manufacturing a ranking in those cases.
+  const hasScoreSpread = available.length > 1 && weakest?.score !== strongest?.score;
   const overallTone = /^(excellent|good|clear)$/i.test(report.overallStatus.trim()) ? "good"
     : report.overallScore !== null && report.overallScore < 50 ? "weak" : "caution";
   const observation = typeof publicObservation === "string" ? publicObservation.trim() : "";
@@ -91,15 +94,15 @@ export default function ClarityResultsOverview({
         <div className="sl-v8-summary-cell">
           <span className="sl-v8-summary-icon"><ArrowDownRight size={17}/></span>
           <div><span>WORTH A CLOSER LOOK</span>
-            <strong>{weakest ? weakest.title : "Not available"}</strong>
-            <p>{weakest ? "Lowest of the scored clarity signals" : "No signal score available"}</p>
+            <strong>{hasScoreSpread && weakest ? weakest.title : "No clear low signal"}</strong>
+            <p>{hasScoreSpread ? "Lowest of the scored clarity signals" : available.length ? "Available signals have equal scores" : "No scored signals available"}</p>
           </div>
         </div>
         <div className="sl-v8-summary-cell">
           <span className="sl-v8-summary-icon"><CheckCircle2 size={17}/></span>
           <div><span>STRONGEST SIGNAL</span>
-            <strong>{strongest ? strongest.title : "Not available"}</strong>
-            <p>{strongest ? "Highest of the scored clarity signals" : "No signal score available"}</p>
+            <strong>{hasScoreSpread && strongest ? strongest.title : "No clear high signal"}</strong>
+            <p>{hasScoreSpread ? "Highest of the scored clarity signals" : available.length ? "Review each signal on its own" : "No scored signals available"}</p>
           </div>
         </div>
         <a href="#report-clarity-signals" className="sl-v8-summary-link">
