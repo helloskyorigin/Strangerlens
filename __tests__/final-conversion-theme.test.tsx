@@ -16,9 +16,9 @@ assert.ok(!source.includes("StrangerLens-Share.png"), "Obsolete share-card gener
 assert.ok(!source.includes("document.createElement('div')"), "Results no longer assemble unsanitized image cards in the browser.");
 const popup=readFileSync("components/PostScanUpgradeModal.tsx","utf8");
 const scanRoute=readFileSync("app/api/check/route.ts","utf8");
-assert.ok(!source.includes("}, 700);"),"Fresh scan upgrade is not artificially delayed after showing results.");
-assert.ok(source.includes('useState(() => {') && source.includes('sl_post_scan_offer_v1'),
-  "Fresh scan modal is initialized before first Results paint.");
+assert.ok(!source.includes("sl_post_scan_offer_v1") && !source.includes("<PostScanUpgradeModal"),
+  "Fresh results have no automatic post-scan upgrade modal.");
+assert.ok(source.includes("<CompleteReportPreview"), "The offer is placed after the score breakdown.");
 assert.ok(popup.includes('flex items-center justify-center p-4 sm:p-6'),
   "Mobile upgrade dialog is centered instead of anchored to the bottom.");
 assert.ok(scanRoute.includes('onProgress?.("content_inspected")') &&
@@ -56,18 +56,14 @@ async function main(){
     await act(async()=>root.render(<ResultsScreen rawUrl="https://example.com"
       analysisData={report} checkoutEnabled={true}
       postScanOfferReportId="instant-offer-demo" paymentState="idle"/>));
-    assert.ok(dom.window.document.querySelector('[role="dialog"][aria-modal="true"]'),
-      "Centered upgrade modal is present immediately after results mount.");
-    const sheet=dom.window.document.querySelector(".sl-upgrade-dialog");
-    assert.ok(sheet);
-    const free=[...dom.window.document.querySelectorAll<HTMLButtonElement>("button")]
-      .find(b=>b.textContent?.includes("Continue with free results"));
-    assert.ok(free,"Free results remain one tap away.");
-    await act(async()=>free.click());
-    assert.ok(!dom.window.document.querySelector(".sl-upgrade-dialog"),
-      "Dismiss immediately reveals the existing free report.");
+    assert.ok(!dom.window.document.querySelector('[role="dialog"][aria-modal="true"]'),
+      "Free results display immediately without a blocking popup.");
     assert.ok(dom.window.document.querySelector("#results-content"));
-    console.log("PASS: instant centered post-scan popup, available free choice, and light CTA contrast.");
+    assert.ok(dom.window.document.querySelector("#report-first-look .sl-v7-score-number"));
+    assert.equal(dom.window.document.querySelectorAll(".sl-v7-signal-row").length, 5);
+    assert.ok(dom.window.document.querySelector("#complete-report-preview"));
+    assert.ok(!dom.window.document.querySelector("#your-improvement-plan"));
+    console.log("PASS: nonblocking results-first conversion with a visible $5 offer and protected details.");
   }finally{
     await act(async()=>root.unmount());
     dom.window.close();
