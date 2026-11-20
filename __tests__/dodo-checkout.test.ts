@@ -7,7 +7,7 @@ import { POST as verify } from "../app/api/payments/verify/route";
 import { POST as webhook } from "../app/api/payments/webhook/route";
 import { GET as fullReport } from "../app/api/report/[reportId]/route";
 import { GET as paymentStatus } from "../app/api/payments/status/route";
-import { saveServerReport, redactAnalysisForFreeTier } from "../server/security/reportAccess";
+import { saveServerReport, redactAnalysisForFreeTier, getServerReport, verifyServerEntitlement } from "../server/security/reportAccess";
 import { reportKey, orderKey, paymentKey } from "../server/storage/paymentStore";
 import { applyVerifiedPayment } from "../server/payments/orders";
 import { paymentAnalysis, paymentSnapshot, privateText } from "./fixtures/payment-report";
@@ -112,7 +112,23 @@ async function main() {
     const report = await createReport();
     const other = await createReport();
     check((await checkout(request("/api/payments/checkout", { reportId: report.reportId }))).status === 403, "checkout requires report ownership");
-    check((await getReport(report.reportId, report.reportToken)).status === 403, "unpaid report denies premium");
+    // Diagnose the mocked Redis/entitlement boundary without printing secrets.
+    try {
+      const storedPreview = await getServerReport(report.reportId);
+      const decision = await verifyServerEntitlement(report.reportId, report.reportToken);
+      console.info("UNPAID_ACCESS_DEBUG", {
+        exists: Boolean(storedPreview),
+        tokenHashType: typeof storedPreview?.tokenHash,
+        paymentActive: Boolean(storedPreview?.payment?.active),
+        authorized: decision.authorized,
+        reason: decision.reason,
+      });
+    } catch (error) {
+      console.error("UNPAID_ACCESS_DEBUG_ERROR", error instanceof Error ? error.stack : String(error));
+    }
+    const unpaidReportResponse = await getReport(report.reportId, report.reportToken);
+    console.info("UNPAID_ACCESS_HTTP_STATUS", unpaidReportResponse.status);
+    check(unpaidReportResponse.status === 403, "unpaid report denies premium");
     const redacted = redactAnalysisForFreeTier(paymentAnalysis);
     check(!JSON.stringify(redacted).includes(privateText), "free API strips premium signal and first-seconds explanations");
     providerProductAmount = 900;
