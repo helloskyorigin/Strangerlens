@@ -32,7 +32,7 @@ assert.equal(validateFullReportDodoProduct(null),false);
 
 const files=[
   "app/page.tsx","app/terms/page.tsx","app/refund-policy/page.tsx","app/contact/page.tsx",
-  "components/ResultsScreen.tsx","components/ClarityResultsOverview.tsx",
+  "components/ResultsScreen.tsx",
   "components/PostScanUpgradeModal.tsx","components/CompleteReportPreview.tsx",
   "components/landing/StrangerLensLanding.tsx","components/landing/FullReportTour.tsx",
   "components/landing/InteractiveReportPreview.tsx",
@@ -44,6 +44,8 @@ for(const path of files){
   assert.ok(!/\$5\b/.test(s),`No stale $5 offer in ${path}`);
   assert.ok(s.includes("$9")||s.includes("price: 9"),`$9 price exists in ${path}`);
 }
+assert.ok(!/\$[0-9]+\b/.test(readFileSync("components/ClarityResultsOverview.tsx","utf8")),
+  "Scores and signals stay clean, without a redundant checkout price beside each result.");
 assert.ok(readFileSync("PAYMENT_SETUP.md","utf8").includes("$9"),"Migration documentation describes new $9 product.");
 const checkout=readFileSync("app/api/payments/checkout/route.ts","utf8");
 assert.ok(checkout.includes("await assertFullReportProductPrice()"));
