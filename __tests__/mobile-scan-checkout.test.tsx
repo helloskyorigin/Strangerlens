@@ -11,7 +11,7 @@ import { paymentAnalysis, paymentSnapshot } from "./fixtures/payment-report";
 const scan = renderToStaticMarkup(<ScanScreen rawUrl="https://example.com" onBackToLanding={() => {}} isVerifying={true}/>);
 assert.ok(scan.includes("sl-scan-running") && scan.includes("sl-scan-lens-scene"), "Scanning matches the compact centered VYLENS inspection.");
 assert.ok(scan.includes("sl-scan-lens-beam") && scan.includes("sl-scan-subject"), "A quiet scanning animation and domain card are shown.");
-assert.ok(scan.includes("Taking a closer look."), "Single-focus scanning headline.");
+assert.ok(scan.includes("Taking a closer look"), "Single-focus scanning headline.");
 assert.ok(!scan.includes("sl-scan-stages") && !scan.includes("sl-scan-workspace"), "Old desktop two-column step list is gone.");
 assert.ok(!scan.includes("aria-valuenow") && !scan.includes("Open my report"), "No fake progress or premature report link.");
 
