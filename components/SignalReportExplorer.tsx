@@ -14,12 +14,12 @@ interface SignalReportExplorerProps {
 function FindingList({ items, empty }: { items: string[]; empty: string }) {
   const visibleItems = items.filter((item): item is string => typeof item === "string" && item.trim().length > 0);
   if (!visibleItems.length) {
-    return <p className="text-sm leading-relaxed text-[#9AACBF]">{empty}</p>;
+    return <p className="text-sm leading-relaxed text-[#667963]">{empty}</p>;
   }
   return <ul className="space-y-2.5">
     {visibleItems.map((item, i) => (
-      <li key={i} className="flex items-start gap-2.5 text-sm leading-relaxed text-[#D0DCE9]">
-        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#7D9CC4]" aria-hidden="true" />
+      <li key={i} className="flex items-start gap-2.5 text-sm leading-relaxed text-[#465B42]">
+        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#85B65B]" aria-hidden="true" />
         <span className="min-w-0 break-words">{item}</span>
       </li>
     ))}
@@ -63,18 +63,18 @@ export default function SignalReportExplorer({
 
   return (
     <section id="complete-paid-report" aria-labelledby="complete-paid-report-title" className="space-y-5 sm:space-y-6">
-      <div className="rounded-[22px] border border-blue-500/25 bg-gradient-to-br from-[#162741] via-[#111b2c] to-[#121824] p-5 sm:p-7">
-        <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-blue-300">
+      <div className="rounded-[22px] border border-[#CAE3B9] bg-[#F4FBEA] p-5 sm:p-7">
+        <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#578129]">
           <BookOpenText className="h-4 w-4" aria-hidden="true" /> Your Complete Analysis
         </span>
-        <h2 id="complete-paid-report-title" className="mt-3 text-[25px] font-bold leading-tight tracking-tight text-white sm:text-[30px]">
+        <h2 id="complete-paid-report-title" className="mt-3 text-[25px] font-bold leading-tight tracking-tight text-[#182516] sm:text-[30px]">
           Five Signals. The Full Story Behind Every Score.
         </h2>
-        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[#B9CBDF]">
+        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[#667963]">
           Explore each signal to understand what your website communicates well, where clarity could improve,
           and what actions the analysis recommends. Strong signals deserve attention too — not just your lowest score.
         </p>
-        <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-[#A4C0DC]">
+        <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-[#677B5F]">
           <span>5 detailed core chapters</span>
           <span>Evidence-aware findings</span>
           <span>Actionable next steps</span>
@@ -83,8 +83,8 @@ export default function SignalReportExplorer({
       </div>
 
       <div className="grid gap-5 lg:grid-cols-[minmax(220px,290px)_minmax(0,1fr)] lg:items-start">
-        <nav aria-label="Full report chapters" className="rounded-2xl border border-[#2B3950] bg-[#121824] p-2.5 lg:sticky lg:top-24">
-          <p className="px-2.5 pb-2.5 pt-1 text-[11px] font-bold uppercase tracking-[.12em] text-[#90A6C2]">Explore all chapters</p>
+        <nav aria-label="Full report chapters" className="rounded-2xl border border-[#E2EADD] bg-white p-2.5 lg:sticky lg:top-24">
+          <p className="px-2.5 pb-2.5 pt-1 text-[11px] font-bold uppercase tracking-[.12em] text-[#7A8D72]">Explore all chapters</p>
           <div role="tablist" aria-label="Detailed clarity chapters" aria-orientation="vertical" className="space-y-1.5">
             {fullSignals.map((signal, index) => {
               const isSelected = activeSignal.key === signal.key;
@@ -94,49 +94,49 @@ export default function SignalReportExplorer({
                   aria-selected={isSelected} tabIndex={isSelected ? 0 : -1}
                   onKeyDown={(event) => onChapterKeyDown(event, index)}
                   onClick={() => setSelectedKey(signal.key)}
-                  className={`flex min-h-[56px] w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 ${isSelected
-                    ? "border-blue-500/40 bg-[#1C3352] text-white"
-                    : "border-transparent text-[#C1D0DF] hover:border-[#354A65] hover:bg-[#1B2738]"}`}>
-                  <span className={`text-xs font-semibold tabular-nums ${isSelected ? "text-blue-300" : "text-[#6E87A5]"}`}>
+                  className={`flex min-h-[56px] w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8ACB3A] ${isSelected
+                    ? "border-[#BDE49A] bg-[#E9F8D7] text-[#182516]"
+                    : "border-transparent text-[#52634E] hover:border-[#BDDEA5] hover:bg-[#F2F9EA]"}`}>
+                  <span className={`text-xs font-semibold tabular-nums ${isSelected ? "text-[#578129]" : "text-[#809179]"}`}>
                     {String(index + 1).padStart(2, "0")}
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block text-sm font-semibold">{signal.title}</span>
                     {signal.key === "purchaseReadiness" &&
-                      <span className="block text-[10px] text-[#9AAEC7]">Independent assessment</span>}
+                      <span className="block text-[10px] text-[#809179]">Independent assessment</span>}
                   </span>
-                  <span className="shrink-0 text-xs font-bold tabular-nums text-[#A9C5E5]">{signal.scoreDisplay}</span>
+                  <span className="shrink-0 text-xs font-bold tabular-nums text-[#405837]">{signal.scoreDisplay}</span>
                 </button>
               );
             })}
           </div>
-          <p className="px-2.5 pb-1 pt-3 text-[11px] leading-relaxed text-[#7F96B1]">
+          <p className="px-2.5 pb-1 pt-3 text-[11px] leading-relaxed text-[#809179]">
             Choose a chapter to view its own findings and improvements.
           </p>
         </nav>
 
         <article id="chapter-detail-panel" role="tabpanel" aria-labelledby={`chapter-tab-${activeSignal.key}`}
-          className="min-w-0 overflow-hidden rounded-2xl border border-[#2B3950] bg-[#121824]">
-          <div className="border-b border-[#2B3950] bg-[#172235] p-5 sm:p-6">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-[#90A9C6]">
+          className="min-w-0 overflow-hidden rounded-2xl border border-[#E2EADD] bg-white">
+          <div className="border-b border-[#E2EADD] bg-[#F4FAEC] p-5 sm:p-6">
+            <p className="text-[11px] font-bold uppercase tracking-widest text-[#7A8D72]">
               {chapterIndex >= 0 ? `Chapter ${String(chapterIndex + 1).padStart(2, "0")} of 05` : "Bonus chapter · Independent score"}
             </p>
             <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
               <div>
-                <h3 className="text-2xl font-bold leading-tight text-white">{activeSignal.title}</h3>
-                <p className="mt-1 text-xs font-medium text-[#B1C7DD]">{activeSignal.status}</p>
+                <h3 className="text-2xl font-bold leading-tight text-[#182516]">{activeSignal.title}</h3>
+                <p className="mt-1 text-xs font-medium text-[#667963]">{activeSignal.status}</p>
               </div>
-              <div className="rounded-xl border border-[#3C5068] bg-[#10192A] px-4 py-2 text-xl font-bold tabular-nums text-white">
+              <div className="rounded-xl border border-[#DCE8D5] bg-[#EDFADE] px-4 py-2 text-xl font-bold tabular-nums text-[#182516]">
                 {activeSignal.scoreDisplay}
               </div>
             </div>
-            <p className="mt-3 text-sm leading-relaxed text-[#B9C8DA]">
+            <p className="mt-3 text-sm leading-relaxed text-[#667963]">
               {chapter?.question || "How clearly can a visitor evaluate the purchase decision?"}
             </p>
             {chapter && (
-              <p className="mt-1 text-xs text-[#889EB7]">{chapter.focus}</p>
+              <p className="mt-1 text-xs text-[#809179]">{chapter.focus}</p>
             )}
-            {goodScore && <p className="mt-3 text-xs font-medium text-emerald-300">
+            {goodScore && <p className="mt-3 text-xs font-medium text-[#367A28]">
               A stronger score can still reveal ideas worth preserving or refining.
             </p>}
           </div>
@@ -146,30 +146,30 @@ export default function SignalReportExplorer({
             : (
           <div className="divide-y divide-[#27364A] px-5 sm:px-6">
             <div className="py-5">
-              <h4 className="mb-2 flex items-center gap-2 text-sm font-bold text-white">
-                <SearchCheck className="h-4 w-4 text-blue-300" aria-hidden="true" /> Why This Score
+              <h4 className="mb-2 flex items-center gap-2 text-sm font-bold text-[#182516]">
+                <SearchCheck className="h-4 w-4 text-[#578129]" aria-hidden="true" /> Why This Score
               </h4>
-              <p className="text-sm leading-relaxed text-[#C3D1E0]">
+              <p className="text-sm leading-relaxed text-[#52634E]">
                 {activeSignal.explanation || "A detailed explanation was not available in the analyzed content."}
               </p>
             </div>
             <div className="py-5">
-              <h4 className="mb-3 flex items-center gap-2 text-sm font-bold text-white">
-                <CheckCircle2 className="h-4 w-4 text-emerald-400" aria-hidden="true" /> What&apos;s Working
+              <h4 className="mb-3 flex items-center gap-2 text-sm font-bold text-[#182516]">
+                <CheckCircle2 className="h-4 w-4 text-[#367A28]" aria-hidden="true" /> What&apos;s Working
               </h4>
               <FindingList items={activeSignal.positiveFindings}
                 empty="No specific strengths were recorded for this signal in the inspected content." />
             </div>
             <div className="py-5">
-              <h4 className="mb-3 flex items-center gap-2 text-sm font-bold text-white">
-                <AlertCircle className="h-4 w-4 text-amber-400" aria-hidden="true" /> What Could Be Clearer
+              <h4 className="mb-3 flex items-center gap-2 text-sm font-bold text-[#182516]">
+                <AlertCircle className="h-4 w-4 text-[#9C7123]" aria-hidden="true" /> What Could Be Clearer
               </h4>
               <FindingList items={activeSignal.concerns}
                 empty="No specific clarity gaps were recorded for this signal." />
             </div>
             <div className="py-5">
-              <h4 className="mb-3 flex items-center gap-2 text-sm font-bold text-white">
-                <Wrench className="h-4 w-4 text-blue-300" aria-hidden="true" /> How to Improve
+              <h4 className="mb-3 flex items-center gap-2 text-sm font-bold text-[#182516]">
+                <Wrench className="h-4 w-4 text-[#578129]" aria-hidden="true" /> How to Improve
               </h4>
               <FindingList items={activeSignal.recommendations}
                 empty="No additional changes were recommended for this signal in the available analysis." />
@@ -181,14 +181,14 @@ export default function SignalReportExplorer({
 
           {nextChapter && (
             <button type="button" onClick={() => setSelectedKey(nextChapter.key)}
-              className="flex w-full items-center justify-between gap-3 border-t border-[#2B3950] bg-[#162236] px-5 py-4 text-left text-sm font-semibold text-white hover:bg-[#1C2D45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-300 sm:px-6">
+              className="flex w-full items-center justify-between gap-3 border-t border-[#E2EADD] bg-[#F1F9E6] px-5 py-4 text-left text-sm font-semibold text-[#182516] hover:bg-[#E8F8D5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#8ACB3A] sm:px-6">
               <span>Next chapter: {nextChapter.title}</span>
-              <ArrowRight className="h-4 w-4 shrink-0 text-blue-300" aria-hidden="true" />
+              <ArrowRight className="h-4 w-4 shrink-0 text-[#578129]" aria-hidden="true" />
             </button>
           )}
         </article>
       </div>
-      <p className="text-xs leading-relaxed text-[#7F97B2]">
+      <p className="text-xs leading-relaxed text-[#809179]">
         These findings evaluate accessible website content and first-impression clarity. They are not recordings of actual visitor behavior or measured conversions.
       </p>
     </section>
