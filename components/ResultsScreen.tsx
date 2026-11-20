@@ -221,6 +221,8 @@ export default function ResultsScreen({
 
 
   const shouldReduceMotion = useReducedMotion();
+  const scoreCloseButtonRef = useRef<HTMLButtonElement>(null);
+  const scorePreviousFocusRef = useRef<HTMLElement | null>(null);
   const gotItButtonRef = useRef<HTMLButtonElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const modalCardRef = useRef<HTMLDivElement>(null);
@@ -255,6 +257,29 @@ export default function ResultsScreen({
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isEarlySuccessModalOpen]);
+
+  // Give the scoring explanation a keyboard-operable modal, not a dead-end
+  // overlay. Restore focus to the button that opened it when dismissed.
+  useEffect(() => {
+    if (!isScoreModalOpen) return;
+    scorePreviousFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const frame = window.requestAnimationFrame(() => scoreCloseButtonRef.current?.focus());
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setIsScoreModalOpen(false);
+      } else if (event.key === "Tab") {
+        event.preventDefault();
+        scoreCloseButtonRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("keydown", onKeyDown);
+      scorePreviousFocusRef.current?.focus();
+    };
+  }, [isScoreModalOpen]);
 
   // Prevent background scrolling while modal is open
   useEffect(() => {
@@ -513,14 +538,26 @@ export default function ResultsScreen({
         )}
       </AnimatePresence>
 
-      {/* SCORE CALCULATION MODAL */}
+      {/* ACCESSIBLE SCORE EXPLANATION */}
       {isScoreModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80">
-          <div className="bg-[#121824] border border-[#263044] rounded-2xl p-6 w-full max-w-lg">
-            <h3 className="text-xl font-bold text-white mb-4">How scoring works</h3>
-            <p className="text-[#94A3B8] text-sm mb-6">Your overall clarity score is a weighted average of your five signal scores: First Impression (25%), Audience (20%), Value (25%), Trust (15%), and Action (15%).</p>
-            <button onClick={() => setIsScoreModalOpen(false)} className="w-full bg-[#171F2D] hover:bg-[#263044] text-white font-bold py-3 rounded-lg text-sm cursor-pointer">Close</button>
-          </div>
+        <div role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setIsScoreModalOpen(false); }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[#111710]/60 p-4 backdrop-blur-sm">
+          <section role="dialog" aria-modal="true" aria-labelledby="scoring-dialog-title"
+            aria-describedby="scoring-dialog-description"
+            className="w-full max-w-lg rounded-3xl border border-[#DCE8D5] bg-white p-6 text-[#192817] shadow-2xl sm:p-8">
+            <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-[#588532]">Five-signal clarity</p>
+            <h2 id="scoring-dialog-title" className="mb-3 text-2xl font-extrabold tracking-tight">How scoring works</h2>
+            <p id="scoring-dialog-description" className="mb-5 text-sm leading-relaxed text-[#5B7055]">
+              Your overall score is a weighted average of five clarity signals: First Impression (25%),
+              Audience (20%), Value (25%), Trust (15%) and Action (15%).
+              Purchase Readiness is scored separately and never changes this total.
+              These are AI assessments of inspected content, not measured visitor behavior.
+            </p>
+            <button ref={scoreCloseButtonRef} type="button" onClick={() => setIsScoreModalOpen(false)}
+              className="min-h-11 w-full rounded-full bg-[#111510] px-4 py-3 text-sm font-bold text-white hover:bg-[#2B3826] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#91C939]">
+              Got it
+            </button>
+          </section>
         </div>
       )}
 
