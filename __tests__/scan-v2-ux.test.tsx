@@ -4,41 +4,45 @@ import { renderToStaticMarkup } from "react-dom/server";
 import ScanScreen from "../components/ScanScreen";
 
 const render = (props: Partial<React.ComponentProps<typeof ScanScreen>> = {}) =>
-  renderToStaticMarkup(
-    <ScanScreen rawUrl="https://example.com" onBackToLanding={() => {}} {...props} />
-  );
+  renderToStaticMarkup(<ScanScreen rawUrl="https://example.com" onBackToLanding={() => {}} {...props} />);
 
 const connecting = render({ isVerifying: true });
 assert.match(connecting, /sl-scan-v2/);
-assert.match(connecting, /Connecting to your website\./);
-assert.match(connecting, /Website connection verified/);
-assert.match(connecting, /aria-valuenow="0"/);
-assert.match(connecting, /Cancel scan and return home/);
+assert.match(connecting, /Taking a closer look/);
+assert.match(connecting, /STRANGERLENS IS LOOKING CLOSER/);
+assert.match(connecting, /sl-scan-lens-stage/);
+assert.match(connecting, /sl-scan-lens-beam/);
+assert.match(connecting, /sl-scan-progress-indicator/);
+assert.match(connecting, /sl-scan-subject/);
+assert.match(connecting, /example\.com/);
+assert.match(connecting, /Time spent scanning/);
+assert.match(connecting, /Exit/);
+assert.doesNotMatch(connecting, /sl-scan-stages|sl-scan-stage-icon|aria-valuenow|\/ 4|4 checks/);
 assert.doesNotMatch(connecting, /100% done|50% finished|live visitors recorded/i);
+assert.doesNotMatch(connecting, /Open my report/, "The report must not open while scanning.");
 
 const connected = render({ verifiedSite: { domain: "example.com", httpStatus: 200 }, scanMilestone: "connected" });
-assert.match(connected, /aria-valuenow="1"/);
-assert.match(connected, /Reading your website/);
-
+assert.match(connected, /Understanding your website/);
 const inspected = render({ verifiedSite: { domain: "example.com", httpStatus: 200 }, scanMilestone: "content_inspected" });
-assert.match(inspected, /aria-valuenow="2"/);
-
+assert.match(inspected, /Looking through fresh eyes/);
 const evaluated = render({ verifiedSite: { domain: "example.com", httpStatus: 200 }, scanMilestone: "signals_evaluated" });
-assert.match(evaluated, /aria-valuenow="3"/);
-assert.match(evaluated, /Preparing your clarity report/);
+assert.match(evaluated, /Preparing your report/);
+assert.doesNotMatch(evaluated, /Open my report/);
 
 const ready = render({ verifiedSite: { domain: "example.com", httpStatus: 200 }, isBackendReady: true, scanMilestone: "report_ready" });
-assert.match(ready, /aria-valuenow="4"/);
+assert.match(ready, /Your report is ready/);
 assert.match(ready, /Open my report/);
-assert.match(ready, /REPORT READY/);
+assert.match(ready, /ANALYSIS COMPLETE/);
+assert.doesNotMatch(ready, /sl-scan-lens-beam/);
+assert.doesNotMatch(ready, /Time spent scanning/);
 
 const error = render({ backendError: "Website not reachable" });
-assert.match(error, /SCAN INTERRUPTED/);
+assert.match(error, /INSPECTION PAUSED/);
 assert.match(error, /Website not reachable/);
 assert.match(error, /Try again/);
-assert.match(error, /Use another URL/);
+assert.match(error, /Start over/);
+assert.doesNotMatch(error, /Open my report/);
 
 const safe = render({ backendError: "API_KEY=secret at internalCall()" });
 assert.doesNotMatch(safe, /API_KEY=secret/);
-
-console.log("PASS: VYLENS-style StrangerLens scan states, verified milestones, action accessibility, and error safety.");
+console.log("PASS: actual VYLENS single-focus layout, backend-based scan copy, real timing, accessible recovery and report readiness.");
