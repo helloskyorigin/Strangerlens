@@ -33,7 +33,7 @@ export default function BetterCopyStudio({ opportunities }: { opportunities: Cop
     if (!selected || !activeText.trim()) return;
     try {
       await navigator.clipboard.writeText(activeText);
-      setCopied(`${selected.id}:${mode}`);
+      setCopied(`${selected.id}:${mode}:${activeText}`);
       setCopyError(false);
     } catch {
       // HTTPS/permission restrictions must never block manual copy.
@@ -108,8 +108,8 @@ export default function BetterCopyStudio({ opportunities }: { opportunities: Cop
               )}
               <button type="button" onClick={copy} disabled={!activeText.trim()}
                 className="mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-[#111510] px-4 text-sm font-bold text-white hover:bg-[#263521] disabled:cursor-not-allowed disabled:opacity-50">
-                {copied === `${selected.id}:${mode}` ? <Check className="h-4 w-4" aria-hidden="true"/> : <ClipboardCopy className="h-4 w-4" aria-hidden="true"/>}
-                {copied === `${selected.id}:${mode}` ? "Copied to clipboard" : "Copy this version"}
+                {copied === `${selected.id}:${mode}:${activeText}` ? <Check className="h-4 w-4" aria-hidden="true"/> : <ClipboardCopy className="h-4 w-4" aria-hidden="true"/>}
+                {copied === `${selected.id}:${mode}:${activeText}` ? "Copied to clipboard" : "Copy this version"}
               </button>
               {copyError && <p role="status" className="mt-2 text-xs text-[#9C7123]">Automatic copying is unavailable. Select the visible text and copy manually.</p>}
               <p className="mt-3 flex items-start gap-2 text-xs leading-relaxed text-[#74866F]">
