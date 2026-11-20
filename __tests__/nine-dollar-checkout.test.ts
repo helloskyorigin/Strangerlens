@@ -30,9 +30,14 @@ assert.equal(validateFullReportDodoProduct(price(900,"USD","recurring_price")),f
 assert.equal(validateFullReportDodoProduct({...price(900),archived:true}),false);
 assert.equal(validateFullReportDodoProduct(null),false);
 
-const files=["app/page.tsx","components/ResultsScreen.tsx","components/PostScanUpgradeModal.tsx",
-  "components/CompleteReportPreview.tsx","components/landing/FullReportTour.tsx",
-  "components/landing/InteractiveReportPreview.tsx","lib/legal-config.ts"];
+const files=[
+  "app/page.tsx","app/terms/page.tsx","app/refund-policy/page.tsx","app/contact/page.tsx",
+  "components/ResultsScreen.tsx","components/ClarityResultsOverview.tsx",
+  "components/PostScanUpgradeModal.tsx","components/CompleteReportPreview.tsx",
+  "components/landing/StrangerLensLanding.tsx","components/landing/FullReportTour.tsx",
+  "components/landing/InteractiveReportPreview.tsx",
+  "lib/legal-config.ts","PAYMENT_SETUP.md","docs/purchase-readiness.md",
+];
 for(const path of files){
   const s=readFileSync(path,"utf8");
   assert.ok(!/\$3\b/.test(s),`No stale $3 offer in ${path}`);
