@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ArrowDownRight, ArrowRight, ArrowUpRight, CheckCircle2, Eye, Info, LockKeyhole, ScanSearch } from "lucide-react";
+import { ArrowDownRight, ArrowRight, ArrowUpRight, CheckCircle2, Eye, Info, LockKeyhole } from "lucide-react";
 import type { CanonicalReport, CanonicalSignal, CanonicalPurchaseSignal } from "@/lib/report-adapter";
 import ClaritySignalTooltip from "@/components/ClaritySignalTooltip";
 
@@ -10,7 +10,6 @@ interface Props {
   isUnlocked: boolean;
   showLockedPurchase: boolean;
   unlockedPurchase?: CanonicalPurchaseSignal;
-  publicObservation?: string;
   onExplainScore: () => void;
 }
 
@@ -30,7 +29,7 @@ function statusLabel(value: string): string {
 /** Only publicly authorized report fields reach this presentation.
  * Never infer detailed paid findings from a free score or create visitor quotes. */
 export default function ClarityResultsOverview({
-  report, isUnlocked, showLockedPurchase, unlockedPurchase, publicObservation, onExplainScore,
+  report, isUnlocked, showLockedPurchase, unlockedPurchase, onExplainScore,
 }: Props) {
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
   const signals: Array<CanonicalSignal | CanonicalPurchaseSignal> =
@@ -45,7 +44,6 @@ export default function ClarityResultsOverview({
   const hasScoreSpread = available.length > 1 && weakest?.score !== strongest?.score;
   const overallTone = /^(excellent|good|clear)$/i.test(report.overallStatus.trim()) ? "good"
     : report.overallScore !== null && report.overallScore < 50 ? "weak" : "caution";
-  const observation = typeof publicObservation === "string" ? publicObservation.trim() : "";
 
   const renderTooltip = (signal: CanonicalSignal | CanonicalPurchaseSignal, mode: "mobile" | "desktop") => {
     const id = mode + "-" + signal.id;
@@ -80,31 +78,37 @@ export default function ClarityResultsOverview({
           </button>
         </div>
         <div className="sl-v8-verdict-panel">
-          <span className="sl-v7-eyebrow">THE BIG PICTURE</span>
-          <h2>What the page communicates.</h2>
-          <p>{report.verdict || "The inspected content was assessed for first-time visitor clarity."}</p>
-          {observation && !isUnlocked &&
-            <div className="sl-v7-observation">
-              <ScanSearch size={18} aria-hidden="true"/>
-              <div><strong className="sl-v7-observation-title">What stood out</strong><p>{observation}</p></div>
-            </div>}
+          <span className="sl-v7-eyebrow">{isUnlocked ? "THE BIG PICTURE" : "YOUR FREE CLARITY PREVIEW"}</span>
+          <h2>{isUnlocked ? "What the page communicates." : "See your clarity scores."}</h2>
+          <p>{isUnlocked
+            ? (report.verdict || "The inspected content was assessed for first-time visitor clarity.")
+            : "Your website was evaluated across five communication signals. See which areas score higher or lower. The detailed reasons, exact page evidence and practical fixes are in Full Analysis."}</p>
+          {!isUnlocked && (
+            <div className="sl-v7-observation" data-testid="free-report-boundary">
+              <LockKeyhole size={18} aria-hidden="true"/>
+              <div>
+                <strong className="sl-v7-observation-title">What&apos;s behind the scores?</strong>
+                <p>Open the complete report for verified page evidence when available, a priority order and better wording suggestions.</p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
-      <div className="sl-v8-summary-strip">
+      <div className={"sl-v8-summary-strip" + (!isUnlocked ? " is-free" : "")}>
         <div className="sl-v8-summary-cell">
           <span className="sl-v8-summary-icon"><ArrowDownRight size={17}/></span>
-          <div><span>WORTH A CLOSER LOOK</span>
+          <div><span>{isUnlocked ? "WORTH A CLOSER LOOK" : "YOUR LOWEST-SCORING AREA"}</span>
             <strong>{hasScoreSpread && weakest ? weakest.title : "No clear low signal"}</strong>
             <p>{hasScoreSpread ? "Lowest of the scored clarity signals" : available.length ? "Available signals have equal scores" : "No scored signals available"}</p>
           </div>
         </div>
-        <div className="sl-v8-summary-cell">
+        {isUnlocked && <div className="sl-v8-summary-cell">
           <span className="sl-v8-summary-icon"><CheckCircle2 size={17}/></span>
           <div><span>STRONGEST SIGNAL</span>
             <strong>{hasScoreSpread && strongest ? strongest.title : "No clear high signal"}</strong>
             <p>{hasScoreSpread ? "Highest of the scored clarity signals" : available.length ? "Review each signal on its own" : "No scored signals available"}</p>
           </div>
-        </div>
+        </div>}
         <a href="#report-clarity-signals" className="sl-v8-summary-link">
           Explore your signals <ArrowRight size={17} />
         </a>
@@ -151,7 +155,7 @@ export default function ClarityResultsOverview({
         {showLockedPurchase && <div data-testid="purchase-readiness-locked" className="sl-v7-purchase-locked">
           <span className="sl-v7-purchase-icon"><LockKeyhole size={19} aria-hidden="true"/></span>
           <div className="sl-v7-purchase-copy">
-            <div className="sl-v7-purchase-heading"><strong>Purchase Readiness</strong><span className="sl-v7-premium-label">06 / Full Analysis</span></div>
+            <div className="sl-v7-purchase-heading"><strong>Purchase Readiness</strong><span className="sl-v7-premium-label">Full Analysis Bonus</span></div>
             <p>This website offers paid products or services. The full report includes a separate check of how clearly the buying decision is presented.</p>
             <p className="sl-v7-purchase-detail">Pricing clarity · Buyer confidence · Purchase next steps</p>
           </div>
@@ -162,13 +166,13 @@ export default function ClarityResultsOverview({
     <section className="sl-v8-next-step" aria-label="Report next step">
       <span className="sl-v8-next-icon"><Eye size={19} aria-hidden="true"/></span>
       <div><span className="sl-v8-section-kicker">WHERE TO GO NEXT</span>
-        <h2>{isUnlocked ? "Explore your detailed findings." : "Your scores are the starting point."}</h2>
+        <h2>{isUnlocked ? "Explore your detailed findings." : "Know what to fix. And exactly how."}</h2>
         <p>{isUnlocked
           ? "Review the report chapters below for inspected evidence and practical improvements."
-          : "The full report explains the reasons behind the scores, includes page evidence when available, and suggests what to improve."}</p>
+          : "Your scores tell you where to look. Unlock the evidence, recommended fixes and replacement wording to understand what to change."}</p>
       </div>
       <a href={isUnlocked ? "#complete-paid-report" : "#complete-report-preview"}>
-        {isUnlocked ? "View full findings" : "See the full report"} <ArrowUpRight size={17} aria-hidden="true"/>
+        {isUnlocked ? "View full findings" : "Unlock Full Analysis — $5"} <ArrowUpRight size={17} aria-hidden="true"/>
       </a>
     </section>
   </>;
