@@ -371,13 +371,20 @@ export default function ResultsScreen({
       const result: PdfDownloadResult | undefined = onDownloadPdf
         ? await onDownloadPdf()
         : await generateReportPdf(report, isReportUnlocked);
+      let manualLinkReady = false;
       if (result?.blob && typeof URL.createObjectURL === "function") {
-        const href = URL.createObjectURL(result.blob);
-        pdfObjectUrl.current = href;
-        setReadyPdf({ href, filename: result.filename, reportKey: currentReportId || "", unlocked: isReportUnlocked });
+        try {
+          const href = URL.createObjectURL(result.blob);
+          pdfObjectUrl.current = href;
+          setReadyPdf({ href, filename: result.filename, reportKey: currentReportId || "", unlocked: isReportUnlocked });
+          manualLinkReady = true;
+        } catch {
+          // An unsupported blob URL must not turn a successful native save
+          // into a false failure notification.
+        }
       }
-      if (result?.automaticSaveRequested === false && typeof URL.createObjectURL !== "function") {
-        setPdfError("Your PDF was prepared, but this browser blocked the save. Open StrangerLens directly in Chrome or Safari and try again.");
+      if (result?.automaticSaveRequested === false && !manualLinkReady) {
+        setPdfError("Your PDF was prepared, but this browser blocked saving it. Open StrangerLens directly in Chrome or Safari and try again.");
       }
     } catch (error) {
       const reason = error instanceof Error ? error.message : "";
