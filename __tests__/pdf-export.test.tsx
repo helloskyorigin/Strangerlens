@@ -188,7 +188,6 @@ async function main() {
         Object.defineProperty(globalThis, key, { configurable: true, writable: true, value });
       }
       Object.defineProperty(dom.window, "innerWidth", { value: width });
-      let alertMessage = ""; (globalThis as any).alert = (message: string) => { alertMessage = message; };
       root = createRoot(dom.window.document.getElementById("app")!);
       await act(async () => { root!.render(<ResultsScreen rawUrl={paid.normalizedUrl} analysisData={preview} isUnlocked={true} onBackToLanding={() => {}} />); });
       const button = [...dom.window.document.querySelectorAll("button")].find(b => b.textContent?.includes("Full PDF"))!;
@@ -199,15 +198,18 @@ async function main() {
       check(savedPdf?.name === "StrangerLens-Full-Report.pdf" && pdfCalls > callsBefore && !button.disabled, `${width}px PDF click reauthorizes and downloads premium`);
       outage = true;
       await act(async () => { button.click(); });
-      for (let i = 0; i < 100 && !alertMessage; i++) await act(async () => { await new Promise(resolve => setTimeout(resolve, 20)); });
-      check(alertMessage.includes("PDF generation failed") && !button.disabled, `${width}px failure shows error and restores button`);
+      for (let i = 0; i < 100 && !dom.window.document.querySelector('#report-export-actions [role="alert"]'); i++) {
+        await act(async () => { await new Promise(resolve => setTimeout(resolve, 20)); });
+      }
+      const exportError = dom.window.document.querySelector('#report-export-actions [role="alert"]');
+      check(Boolean(exportError?.textContent?.includes("The PDF could not be generated")) && !button.disabled,
+        `${width}px failure shows accessible inline error and restores button`);
       outage = false; await unmount(); dom.window.close(); dom = undefined;
     }
     console.log(`PASS: ${assertions} PDF/security/download assertions. Actual PDF fixtures written to ${outputDirectory}. No real payment, scan or AI request was made.`);
   } finally {
     await unmount(); dom?.window.close();
     for (const [key, descriptor] of savedGlobals) { if (descriptor) Object.defineProperty(globalThis, key, descriptor); else delete (globalThis as any)[key]; }
-    delete (globalThis as any).alert;
     if (originalSave) jsPDF.API.save = originalSave; else delete jsPDF.API.save;
     globalThis.fetch = originalFetch; process.env = savedEnv;
     await redis.flushDb(); await redis.quit();
