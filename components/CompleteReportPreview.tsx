@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { ArrowRight, Check, FileDown, FileSearch, ListChecks, LockKeyhole, PencilLine } from "lucide-react";
+import { ArrowRight, Check, Eye, FileSearch, ListChecks, LockKeyhole, PencilLine, ListOrdered } from "lucide-react";
 import type { CanonicalSignal } from "@/lib/report-adapter";
 import { canonicalPublicScores, describePublicOpportunity } from "@/lib/upgrade-offer";
 
@@ -19,10 +19,11 @@ export default function CompleteReportPreview({
 }: Props) {
   const opportunity = describePublicOpportunity(canonicalPublicScores(signals));
   const benefits = [
-    { title:"Understand every score", detail:"Five deep dives into strengths, confusion and exact improvements", Icon:ListChecks },
-    { title:"See evidence and practical fixes", detail:"Evidence-to-Fix findings, a first-five-seconds assessment and Smart Priority", Icon:FileSearch },
-    { title:"Improve your website copy", detail:"Review, edit and copy suggested wording", Icon:PencilLine },
-    { title:"Take the findings with you", detail:"Download the report as a PDF when you need a copy", Icon:FileDown },
+    { title:"Stranger's View", detail:"The first-five-seconds perspective and what a new visitor may miss", Icon:Eye },
+    { title:"Five-Signal Diagnosis", detail:"The reasoning behind each signal score", Icon:ListChecks },
+    { title:"Evidence-to-Fix", detail:"Inspected page wording and recommended changes where evidence exists", Icon:FileSearch },
+    { title:"Smart Priority", detail:"A focused order of improvements worth making first", Icon:ListOrdered },
+    { title:"Better Copy Studio", detail:"Editable replacement wording you can copy", Icon:PencilLine },
   ];
   return <section id="complete-report-preview" aria-labelledby="complete-report-title" className="sl-v7-upgrade">
     <div className="sl-v7-upgrade-head">
@@ -32,17 +33,17 @@ export default function CompleteReportPreview({
       </div>
       <div className="sl-v7-price"><strong>$5</strong><span>one-time</span></div>
     </div>
-    <p className="sl-v7-upgrade-intro">You can see the scores for free. The full report connects those scores to specific observations, editable improvements and an order to tackle them.</p>
+    <p className="sl-v7-upgrade-intro">You have the scores. Now see the reasons, evidence and improvements behind them.</p>
     <div className="sl-v7-tier-compare" aria-label="Free preview versus complete report">
       <div className="sl-v7-tier-col">
         <span>YOU HAVE · FREE</span>
         <strong>Know where you stand</strong>
-        <p>Overall score · Five core clarity scores and statuses · Purchase check locked if applicable</p>
+        <p>Overall score · Five clarity scores and statuses · Lowest-scoring area</p>
       </div>
       <div className="sl-v7-tier-col sl-v7-tier-paid">
         <span>UNLOCK · $5 ONCE</span>
         <strong>Know exactly what to improve</strong>
-        <p>Detailed reasoning · Evidence when available · Priority fixes · Copy Studio · PDF {purchaseReadinessApplicable ? "· Purchase assessment" : ""}</p>
+        <p>Stranger&apos;s View · Five-Signal Diagnosis · Evidence-to-Fix · Smart Priority · Better Copy Studio {purchaseReadinessApplicable ? "· Purchase Readiness bonus" : ""}</p>
       </div>
     </div>
     <div className="sl-v7-upgrade-reason">
@@ -65,7 +66,7 @@ export default function CompleteReportPreview({
       {!busy && <ArrowRight className="h-4 w-4" aria-hidden="true"/>}
     </button>
     <p className="sl-v7-upgrade-assurance">
-      {isTestMode ? "Test mode · No real charge" : "One-time payment · No subscription · Access after verified payment"}
+      {isTestMode ? "Test mode · No real charge" : "One-time payment · No subscription · PDF download included after verified payment"}
     </p>
     {onViewExample && <button type="button" onClick={onViewExample} className="sl-v7-example-link">
       See an example report <ArrowRight className="ml-1 inline h-3 w-3" aria-hidden="true"/>
