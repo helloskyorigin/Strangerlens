@@ -115,7 +115,9 @@ export function buildReportPdf(model: PdfReportModel, fonts: PdfFonts | null = n
   }
 
   if (!paid) {
-    section("02", "Free-tier Findings"); findings(model.freeFindings, "No additional free-tier findings were recorded.");
+    section("02", "Your Free Clarity Preview");
+    paragraph("Your five scores show which areas may need attention. This free summary does not include exact website evidence, diagnosis, actionable fixes or copy rewrites.", { color: muted });
+    paragraph("Full Analysis ($9 one-time) includes Stranger's View, Five-Signal Diagnosis, Evidence-to-Fix, Smart Priority and Better Copy Studio.", { size: 9.5 });
   } else {
     section("02", model.signals.some(signal => signal.independent) ? "Detailed Signals" : "Five Detailed Clarity Signals");
     for (const signal of model.signals) {
@@ -133,6 +135,12 @@ export function buildReportPdf(model: PdfReportModel, fonts: PdfFonts | null = n
     if (model.visitorPerspective) { label("Recorded visitor perspective"); paragraph(model.visitorPerspective); }
     section("04", "Actionable Improvements"); findings(model.actions, "No additional actionable improvements were recorded.");
     section("05", "Available Evidence"); findings(model.evidence, "No verified website evidence was included in this report.");
+    section("06", "Evidence-to-Fix");
+    findings(model.evidenceToFix || [], "No separate evidence-to-fix recommendation was recorded.");
+    section("07", "Smart Priority");
+    findings(model.priorities || [], "No prioritized recommendations were recorded.");
+    section("08", "Better Copy Studio");
+    findings(model.copySuggestions || [], "No additional copy suggestions were recorded.");
   }
 
   // Footer/header furniture is added ONCE after pagination, preserving accurate
