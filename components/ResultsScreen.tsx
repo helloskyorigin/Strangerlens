@@ -4,12 +4,11 @@ import CompleteReportPreview from "@/components/CompleteReportPreview";
 import ClarityResultsOverview from "@/components/ClarityResultsOverview";
 import SignalReportExplorer from "@/components/SignalReportExplorer";
 import PremiumActionPlan from "@/components/PremiumActionPlan";
-import RecheckComparison from "@/components/RecheckComparison";
 import PostScanUpgradeModal from "@/components/PostScanUpgradeModal";
 import { trackFunnelEvent } from "@/lib/ui-funnel-events";
 import { persistActiveReportSession } from "@/lib/active-report-session";
 import { escapeHtmlText } from "@/lib/escape-html";
-import { Share2, Download, Check, Info, X, Lock, Loader2, AlertCircle, ArrowRight, FileText } from "lucide-react";
+import { Download, Check, Info, X, Lock, Loader2, AlertCircle, ArrowRight, FileText } from "lucide-react";
 import { LandingThemeSwitcher } from "@/components/landing/LandingThemeSwitcher";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import Link from "next/link";
@@ -146,7 +145,6 @@ export default function ResultsScreen({
     setIsPostScanOfferOpen(false);
   }, []);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
-  const [showUtilities, setShowUtilities] = useState(false);
 
   const isTestMode = paymentEnvironment === "test_mode";
 
@@ -820,6 +818,13 @@ export default function ResultsScreen({
                   )}
                 </div>
               </div>
+              {typeof data?.visitorThought === "string" && data.visitorThought.trim() && (
+                <div className="mt-4 rounded-xl border border-[#263044] bg-[#121824] p-5">
+                  <h3 className="mb-2 text-xs font-bold uppercase tracking-widest text-[#B9FC22]">Simulated stranger impression</h3>
+                  <p className="text-sm leading-relaxed text-[#C9D9CE]">{data.visitorThought}</p>
+                  <p className="mt-2 text-xs text-[#8E9A8F]">AI interpretation, not a recording of a real person.</p>
+                </div>
+              )}
             </section>
 
             <PremiumActionPlan reportId={currentReportId}
@@ -832,118 +837,8 @@ export default function ResultsScreen({
           </>
         ) : null}
 
-        {/* Compact utility actions stay separate from the single paid CTA. */}
-        <div id="report-export-actions" className="flex flex-wrap items-center justify-center gap-2 border-t border-[#263044] pt-4 scroll-mt-24">
-          {onRecheck && <button type="button" onClick={onRecheck}
-            className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[#263044] px-4 text-xs font-medium text-[#94A3B8] hover:bg-[#171F2D] hover:text-white">
-            Recheck
-          </button>}
-          <button type="button" onClick={() => setShowUtilities(v => !v)}
-            aria-expanded={showUtilities} aria-controls="recheck-comparison-panel"
-            className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[#263044] px-4 text-xs font-medium text-[#94A3B8] hover:bg-[#171F2D] hover:text-white">
-            {showUtilities ? "Hide comparison" : "Compare scores"}
-          </button>
-        </div>
-        <div id="recheck-comparison-panel" className={showUtilities ? "" : "hidden"} aria-hidden={!showUtilities}>
-          <RecheckComparison report={report} reportId={currentReportId} onRecheck={onRecheck}/>
-        </div>
-        <div className="flex flex-wrap justify-center gap-2">
-          <button 
-            onClick={async () => {
-              const card = document.createElement('div');
-              card.style.position = 'fixed';
-              card.style.top = '-9999px';
-              card.style.left = '-9999px';
-              card.style.width = '600px';
-              card.style.backgroundColor = '#090D15';
-              card.style.color = '#F1F5F9';
-              card.style.padding = '32px';
-              card.style.borderRadius = '24px';
-              card.style.fontFamily = 'system-ui, -apple-system, sans-serif';
-              card.style.border = '1px solid #263044';
-              card.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.5)';
-
-              card.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                  <div>
-                    <div style="font-size: 20px; font-weight: 800; color: #FFFFFF; letter-spacing: -0.5px;">StrangerLens</div>
-                    <div style="font-size: 12px; color: #94A3B8; margin-top: 2px;">Website Clarity Diagnostic</div>
-                  </div>
-                  <div style="background: #171F2D; border: 1px solid #263044; padding: 6px 12px; border-radius: 9999px; font-size: 12px; color: #3B82F6; font-weight: 600;">
-                    ${escapeHtmlText(report.domain)}
-                  </div>
-                </div>
-                
-                <div style="background: #121824; border: 1px solid #263044; border-radius: 16px; padding: 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-                  <div>
-                    <div style="font-size: 11px; text-transform: uppercase; color: #94A3B8; font-weight: 700; letter-spacing: 0.5px;">Overall Clarity Score</div>
-                    <div style="font-size: 36px; font-weight: 900; color: #FFFFFF; margin-top: 4px;">${escapeHtmlText(report.overallScoreDisplay)}</div>
-                  </div>
-                  <div style="text-align: right;">
-                    <div style="font-size: 14px; font-weight: 600; color: #38BDF8;">${escapeHtmlText(report.overallStatus)}</div>
-                    <div style="font-size: 11px; color: #64748B; margin-top: 2px;">First-time visitor perspective</div>
-                  </div>
-                </div>
-
-                <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
-                  ${displaySignals.map(s => `
-                    <div style="background: #121824; border: 1px solid #263044; border-radius: 12px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;">
-                      <span style="font-size: 14px; font-weight: 600; color: #F1F5F9;">${escapeHtmlText(s.title)}${s.key === "purchaseReadiness" ? ' <span style="font-size: 10px; color: #94A3B8;">(separate score)</span>' : ""}</span>
-                      <div style="display: flex; align-items: center; gap: 12px;">
-                        <span style="font-size: 12px; color: #94A3B8;">${escapeHtmlText(s.status)}</span>
-                        <span style="font-size: 14px; font-weight: 700; color: #FFFFFF; min-width: 45px; text-align: right;">${escapeHtmlText(s.scoreDisplay)}</span>
-                      </div>
-                    </div>
-                  `).join('')}
-                </div>
-
-                <div style="text-align: center; font-size: 11px; color: #64748B; border-top: 1px solid #263044; padding-top: 16px;">
-                  Analyzed with StrangerLens · strangerlens.ai.studio
-                </div>
-              `;
-
-              document.body.appendChild(card);
-
-              try {
-                const html2canvas = (await import('html2canvas')).default;
-                const canvas = await html2canvas(card, { scale: 2, useCORS: true, backgroundColor: '#090D15' });
-                document.body.removeChild(card);
-
-                canvas.toBlob(async (blob) => {
-                  if (!blob) return;
-                  const file = new File([blob], 'StrangerLens-Share.png', { type: 'image/png' });
-
-                  if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    try {
-                      await navigator.share({
-                        title: `StrangerLens Report: ${report.domain}`,
-                        text: `Website Clarity Score: ${report.overallScoreDisplay} for ${report.domain}`,
-                        files: [file],
-                      });
-                      return;
-                    } catch (err: any) {
-                      if (err.name === 'AbortError') return;
-                    }
-                  }
-
-                  const link = document.createElement('a');
-                  link.download = 'StrangerLens-Share.png';
-                  link.href = URL.createObjectURL(blob);
-                  link.click();
-                  // Revoking in the same task can cancel downloads on mobile browsers.
-                  window.setTimeout(() => URL.revokeObjectURL(link.href), 1000);
-                }, 'image/png');
-              } catch (err) {
-                if (document.body.contains(card)) {
-                  document.body.removeChild(card);
-                }
-              }
-            }}
-            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-[#263044] bg-[#171F2D] px-4 text-xs font-medium text-[#94A3B8] transition hover:text-white cursor-pointer"
-          >
-            <Share2 className="w-4 h-4 text-blue-400" />
-            <span>Share</span>
-          </button>
+        {/* Export remains available as a lightweight utility, not a diagnostic feature. */}
+        <div id="report-export-actions" className="flex flex-wrap justify-center gap-2 border-t border-[#263044] pt-5 scroll-mt-24">
           <button 
             disabled={isGeneratingPdf}
             onClick={async () => {
