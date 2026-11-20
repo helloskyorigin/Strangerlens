@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ArrowDownRight, ArrowRight, ArrowUpRight, CheckCircle2, Eye, Info, LockKeyhole } from "lucide-react";
+import { ArrowDownRight, ArrowRight, Info, LockKeyhole } from "lucide-react";
 import type { CanonicalReport, CanonicalSignal, CanonicalPurchaseSignal } from "@/lib/report-adapter";
 import ClaritySignalTooltip from "@/components/ClaritySignalTooltip";
 
@@ -15,10 +15,10 @@ interface Props {
 
 const questionBySignal: Record<string, string> = {
   firstImpression: "What is this?",
-  audience: "Is it meant for me?",
-  value: "Why does it matter?",
-  trust: "Can I trust the claims?",
-  action: "What should I do next?",
+  audience: "Is this for me?",
+  value: "What's the value?",
+  trust: "Can I trust this?",
+  action: "What do I do next?",
 };
 
 function statusLabel(value: string): string {
@@ -26,8 +26,8 @@ function statusLabel(value: string): string {
   return result ? result.charAt(0).toUpperCase() + result.slice(1) : "Not available";
 }
 
-/** Only publicly authorized report fields reach this presentation.
- * Never infer detailed paid findings from a free score or create visitor quotes. */
+/** Public score summary first, then five signals. Detailed observations,
+ * inspected quotes, specific reasons and recommendations are paid-only. */
 export default function ClarityResultsOverview({
   report, isUnlocked, showLockedPurchase, unlockedPurchase, onExplainScore,
 }: Props) {
@@ -39,8 +39,6 @@ export default function ClarityResultsOverview({
     ? available.reduce((min, s) => (s.score! < min.score! ? s : min)) : null;
   const strongest = available.length
     ? available.reduce((max, s) => (s.score! > max.score! ? s : max)) : null;
-  // A single scored signal or tied scores cannot establish a true strongest
-  // vs weakest distinction. Avoid manufacturing a ranking in those cases.
   const hasScoreSpread = available.length > 1 && weakest?.score !== strongest?.score;
   const overallTone = /^(excellent|good|clear)$/i.test(report.overallStatus.trim()) ? "good"
     : report.overallScore !== null && report.overallScore < 50 ? "weak" : "caution";
@@ -60,70 +58,41 @@ export default function ClarityResultsOverview({
     </section>
 
     <nav className="sl-v8-report-navigation" aria-label="Report sections">
-      <a href="#report-first-look"><span>01</span> First look</a>
+      <a href="#report-first-look"><span>01</span> Score</a>
       <a href="#report-clarity-signals"><span>02</span> Clarity signals</a>
-      <a href={isUnlocked ? "#complete-paid-report" : "#complete-report-preview"}><span>03</span> {isUnlocked ? "Full analysis" : "Next steps"}</a>
+      <a href={isUnlocked ? "#complete-paid-report" : "#complete-report-preview"}>
+        <span>03</span> {isUnlocked ? "Full analysis" : "Unlock fixes"}
+      </a>
     </nav>
 
     <section id="report-first-look" className="sl-v7-score sl-v8-overview" aria-labelledby="sl-v7-score-title">
-      <div className="sl-v8-overview-main">
-        <div className="sl-v8-score-panel">
+      <div className="sl-v8-score-panel">
+        <div className="sl-v8-score-header">
           <h2 id="sl-v7-score-title" className="sl-v7-eyebrow">Website Clarity Score</h2>
+          <span className="sl-v8-score-access">{isUnlocked ? "Full report" : "Free result"}</span>
+        </div>
+        <div className="sl-v8-score-mainline">
           <div className="sl-v7-score-number">{report.overallScore === null ? "—" : report.overallScore}<span>/100</span></div>
-          <span className={"sl-v7-status sl-v7-status--" + overallTone}>
-            <span className="sl-v7-status-dot" aria-hidden="true" /> {statusLabel(report.overallStatus)}
-          </span>
-          <button type="button" onClick={onExplainScore} className="sl-v8-scoring-link">
-            <Info size={15} aria-hidden="true"/> How scoring works
-          </button>
-        </div>
-        <div className="sl-v8-verdict-panel">
-          <span className="sl-v7-eyebrow">{isUnlocked ? "THE BIG PICTURE" : "YOUR FREE CLARITY PREVIEW"}</span>
-          <h2>{isUnlocked ? "What the page communicates." : "See your clarity scores."}</h2>
-          <p>{isUnlocked
-            ? (report.verdict || "The inspected content was assessed for first-time visitor clarity.")
-            : "Your website was evaluated across five communication signals. See which areas score higher or lower. The detailed reasons, exact page evidence and practical fixes are in Full Analysis."}</p>
-          {!isUnlocked && (
-            <div className="sl-v7-observation" data-testid="free-report-boundary">
-              <LockKeyhole size={18} aria-hidden="true"/>
-              <div>
-                <strong className="sl-v7-observation-title">What&apos;s behind the scores?</strong>
-                <p>Open the complete report for verified page evidence when available, a priority order and better wording suggestions.</p>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-      <div className={"sl-v8-summary-strip" + (!isUnlocked ? " is-free" : "")}>
-        <div className="sl-v8-summary-cell">
-          <span className="sl-v8-summary-icon"><ArrowDownRight size={17}/></span>
-          <div><span>{isUnlocked ? "WORTH A CLOSER LOOK" : "YOUR LOWEST-SCORING AREA"}</span>
-            <strong>{hasScoreSpread && weakest ? weakest.title : "No clear low signal"}</strong>
-            <p>{hasScoreSpread ? "Lowest of the scored clarity signals" : available.length ? "Available signals have equal scores" : "No scored signals available"}</p>
+          <div className="sl-v8-score-meta">
+            <span className={"sl-v7-status sl-v7-status--" + overallTone}>
+              <span className="sl-v7-status-dot" aria-hidden="true" /> {statusLabel(report.overallStatus)}
+            </span>
+            <button type="button" onClick={onExplainScore} className="sl-v8-scoring-link">
+              <Info size={15} aria-hidden="true"/> How scoring works
+            </button>
           </div>
         </div>
-        {isUnlocked && <div className="sl-v8-summary-cell">
-          <span className="sl-v8-summary-icon"><CheckCircle2 size={17}/></span>
-          <div><span>STRONGEST SIGNAL</span>
-            <strong>{hasScoreSpread && strongest ? strongest.title : "No clear high signal"}</strong>
-            <p>{hasScoreSpread ? "Highest of the scored clarity signals" : available.length ? "Review each signal on its own" : "No scored signals available"}</p>
-          </div>
-        </div>}
-        <a href="#report-clarity-signals" className="sl-v8-summary-link">
-          Explore your signals <ArrowRight size={17} />
-        </a>
       </div>
-      <p className="sl-v8-score-disclaimer">Scores reflect an AI assessment of inspected public content, not observed visitor behavior or measured conversion rates.</p>
+      <p className="sl-v8-score-disclaimer">AI assessment of inspected public content, not measured visitor behavior or conversion rates.</p>
     </section>
 
     <section id="report-clarity-signals" className="sl-v7-breakdown" aria-labelledby="sl-v7-signal-title">
       <div className="sl-v7-section-head">
         <div>
-          <p className="sl-v8-section-kicker">YOUR WEBSITE, QUESTION BY QUESTION</p>
+          <p className="sl-v8-section-kicker">FIVE FIRST-IMPRESSION CHECKS</p>
           <h2 id="sl-v7-signal-title">Your Clarity Signals<span className="sl-v8-period">.</span></h2>
-          <p>Five core communication checks{(showLockedPurchase || unlockedPurchase) ? ", plus a separate purchase-readiness assessment when applicable" : ""}.</p>
         </div>
-        <span className="sl-v8-check-count">{signals.length + (showLockedPurchase ? 1 : 0)} checks</span>
+        <span className="sl-v8-check-count">5 scores</span>
       </div>
       <div className="sl-v7-signal-list">
         {signals.map((signal, index) => {
@@ -140,50 +109,44 @@ export default function ClarityResultsOverview({
               </span>
               <strong className="sl-v8-signal-score">{signal.scoreDisplay}</strong>
             </div>
-            <p className="sl-v8-signal-question">{questionBySignal[signal.key] || (signal.key === "purchaseReadiness" ? "Is the buying decision clear?" : "How clearly is this communicated?")}</p>
             <div className="sl-v8-signal-bottom">
+              <p className="sl-v8-signal-question">{questionBySignal[signal.key] || "Is buying straightforward?"}</p>
               <span className="sl-v7-signal-status">{statusLabel(signal.status)}</span>
-              <div className="sl-v7-meter" aria-label={signal.title + " " + signal.scoreDisplay}>
-                <span className={"sl-v7-meter-fill sl-v7-meter-" + tone} style={{ width: String(scorePercent) + "%" }}/>
-              </div>
+            </div>
+            <div className="sl-v7-meter" aria-label={signal.title + " " + signal.scoreDisplay}>
+              <span className={"sl-v7-meter-fill sl-v7-meter-" + tone} style={{ width: String(scorePercent) + "%" }}/>
             </div>
             {signal.key === "purchaseReadiness" && unlockedPurchase && <p className="sl-v7-purchase-summary">
-              Separate from Overall Clarity Score · {unlockedPurchase.summary}
+              Separate from the overall score. {unlockedPurchase.summary}
             </p>}
           </article>;
         })}
         {showLockedPurchase && <div data-testid="purchase-readiness-locked" className="sl-v7-purchase-locked">
-          <span className="sl-v7-purchase-icon"><LockKeyhole size={19} aria-hidden="true"/></span>
+          <span className="sl-v7-purchase-icon"><LockKeyhole size={18} aria-hidden="true"/></span>
           <div className="sl-v7-purchase-copy">
             <div className="sl-v7-purchase-heading">
               <strong>Purchase Readiness</strong>
-              <ClaritySignalTooltip
-                signalKey="purchaseReadiness"
-                name="Purchase Readiness"
+              <ClaritySignalTooltip signalKey="purchaseReadiness" name="Purchase Readiness"
                 isOpen={activeTooltip === "locked-purchase"}
                 onOpen={() => setActiveTooltip("locked-purchase")}
-                onClose={() => setActiveTooltip(current => current === "locked-purchase" ? null : current)}
-              />
-              <span className="sl-v7-premium-label">Included in Full Analysis</span>
+                onClose={() => setActiveTooltip(current => current === "locked-purchase" ? null : current)}/>
             </div>
-            <p>This website offers paid products or services. The full report includes a separate check of how clearly the buying decision is presented.</p>
-            <p className="sl-v7-purchase-detail">Pricing clarity · Buyer confidence · Purchase next steps</p>
+            <p>Bonus buying-decision check <span className="sl-v7-premium-label">· Included with $9 report</span></p>
           </div>
         </div>}
       </div>
-    </section>
-
-    <section className="sl-v8-next-step" aria-label="Report next step">
-      <span className="sl-v8-next-icon"><Eye size={19} aria-hidden="true"/></span>
-      <div><span className="sl-v8-section-kicker">WHERE TO GO NEXT</span>
-        <h2>{isUnlocked ? "Explore your detailed findings." : "Know what to fix. And exactly how."}</h2>
-        <p>{isUnlocked
-          ? "Review the report chapters below for inspected evidence and practical improvements."
-          : "Your scores tell you where to look. Unlock the evidence, recommended fixes and replacement wording to understand what to change."}</p>
+      <div className="sl-v8-summary-strip" aria-label="Lowest-scoring area">
+        <div className="sl-v8-summary-cell">
+          <span className="sl-v8-summary-icon"><ArrowDownRight size={17} aria-hidden="true"/></span>
+          <div>
+            <span>LOWEST-SCORING AREA</span>
+            <strong>{hasScoreSpread && weakest ? weakest.title : "No single lowest signal"}</strong>
+          </div>
+        </div>
+        <a className="sl-v8-summary-link" href={isUnlocked ? "#complete-paid-report" : "#complete-report-preview"}>
+          {isUnlocked ? "See the diagnosis" : "See why & how to fix it"} <ArrowRight size={17} aria-hidden="true"/>
+        </a>
       </div>
-      <a href={isUnlocked ? "#complete-paid-report" : "#complete-report-preview"}>
-        {isUnlocked ? "View full findings" : "Unlock Full Analysis — $9"} <ArrowUpRight size={17} aria-hidden="true"/>
-      </a>
     </section>
   </>;
 }
