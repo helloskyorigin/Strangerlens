@@ -14,6 +14,7 @@ import Link from "next/link";
 import { adaptReport } from "@/lib/report-adapter";
 import { projectFreeFrontendReport } from "@/lib/free-report-projection";
 import { generateReportPdf } from "@/lib/pdf-generator";
+import type { PdfDownloadResult } from "@/lib/pdf-generator";
 import type { PremiumWorkbench } from "@/types/premiumWorkbench";
 import ClaritySignalTooltip from "@/components/ClaritySignalTooltip";
 import BrandMark from "@/components/BrandMark";
@@ -131,6 +132,15 @@ export default function ResultsScreen({
 
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [pdfError, setPdfError] = useState<string | null>(null);
+  const [readyPdf, setReadyPdf] = useState<{ href: string; filename: string } | null>(null);
+  const pdfObjectUrl = useRef<string | null>(null);
+  useEffect(() => () => {
+    if (pdfObjectUrl.current && typeof URL.revokeObjectURL === "function") {
+      URL.revokeObjectURL(pdfObjectUrl.current);
+    }
+    pdfObjectUrl.current = null;
+  }, [data?.reportId, isUnlocked]);
+
 
   const isTestMode = paymentEnvironment === "test_mode";
 
@@ -345,6 +355,63 @@ export default function ResultsScreen({
       setLoading(false);
     }
   };
+
+  const downloadPdf = async () => {
+    if (isGeneratingPdf) return;
+    setPdfError(null);
+    setIsGeneratingPdf(true);
+    setReadyPdf(null);
+    if (pdfObjectUrl.current && typeof URL.revokeObjectURL === "function") {
+      URL.revokeObjectURL(pdfObjectUrl.current);
+      pdfObjectUrl.current = null;
+    }
+    try {
+      // The PDF API decides the tier from verified server entitlement; a
+      // client-side paid flag cannot unlock premium PDF content.
+      const result: PdfDownloadResult | undefined = onDownloadPdf
+        ? await onDownloadPdf()
+        : await generateReportPdf(report, isReportUnlocked);
+      if (result?.blob && typeof URL.createObjectURL === "function") {
+        const href = URL.createObjectURL(result.blob);
+        pdfObjectUrl.current = href;
+        setReadyPdf({ href, filename: result.filename });
+      }
+      if (result?.automaticSaveRequested === false && typeof URL.createObjectURL !== "function") {
+        setPdfError("Your PDF was prepared, but this browser blocked the save. Open StrangerLens directly in Chrome or Safari and try again.");
+      }
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : "";
+      setPdfError(reason && reason.length < 200
+        ? reason
+        : "The PDF could not be prepared. Check your connection and try again; you do not need to pay again.");
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
+  const renderPdfActions = (bottom = false) => (
+    <div id={bottom ? "report-export-actions-bottom" : "report-export-actions"}
+      className="flex flex-wrap items-center justify-center gap-3 rounded-2xl border border-[#D9E8CE] bg-[#F8FCF4] p-4 scroll-mt-24">
+      <button type="button" disabled={isGeneratingPdf} onClick={downloadPdf}
+        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#111510] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#2B3B22] disabled:cursor-wait disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8BCB36]">
+        {isGeneratingPdf
+          ? <Loader2 className="h-4 w-4 animate-spin text-[#B9FC22]" aria-hidden="true" />
+          : <Download className="h-4 w-4 text-[#B9FC22]" aria-hidden="true" />}
+        {isGeneratingPdf ? "Preparing PDF…" : isReportUnlocked ? "Download Full PDF" : "Download Free PDF"}
+      </button>
+      {readyPdf && (
+        <a href={readyPdf.href} download={readyPdf.filename} target="_blank" rel="noopener noreferrer"
+          className="inline-flex min-h-11 items-center justify-center rounded-full border border-[#A8D17D] bg-white px-4 py-2 text-sm font-semibold text-[#365E24] underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8BCB36]">
+          PDF ready — tap to save
+        </a>
+      )}
+      {pdfError && <p role="alert" className="w-full text-center text-sm text-[#A3493C]">{pdfError}</p>}
+      {!pdfError && !readyPdf && !isGeneratingPdf &&
+        <p className="text-center text-xs text-[#6C7D64]">
+          {isReportUnlocked ? "Your original full report, including detailed findings." : "Free summary includes scores only; fixes stay locked until payment."}
+        </p>}
+    </div>
+  );
 
   if (!data) return null;
 
@@ -596,6 +663,9 @@ export default function ResultsScreen({
           onExplainScore={() => setIsScoreModalOpen(true)}
         />
 
+        {/* Download is available immediately, not buried under long paid chapters. */}
+        {renderPdfActions()}
+
         {/* One clear upgrade card after the free clarity signals. */}
         {!isReportUnlocked && (
           <>
@@ -823,35 +893,8 @@ export default function ResultsScreen({
           </>
         ) : null}
 
-        {/* Export remains available as a lightweight utility, not a diagnostic feature. */}
-        <div id="report-export-actions" className="flex flex-wrap justify-center gap-2 border-t border-[#263044] pt-5 scroll-mt-24">
-          <button 
-            disabled={isGeneratingPdf}
-            onClick={async () => {
-              setPdfError(null);
-              setIsGeneratingPdf(true);
-              try {
-                // PDF export verifies its tier on /api/report/[id]/pdf. The
-                // full-report endpoint intentionally rejects free reports.
-                if (onDownloadPdf) await onDownloadPdf();
-                else await generateReportPdf(report, isReportUnlocked);
-              } catch {
-                setPdfError("The PDF could not be generated. Please try again.");
-              } finally {
-                setIsGeneratingPdf(false);
-              }
-            }}
-            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-[#182516] bg-[#182516] px-4 text-xs font-semibold text-white transition hover:bg-[#2B3B22] disabled:opacity-50 cursor-pointer"
-          >
-            {isGeneratingPdf ? (
-              <Loader2 className="w-4 h-4 text-[#B9FC22] animate-spin" />
-            ) : (
-              <Download className="w-4 h-4 text-[#B9FC22]" />
-            )}
-            <span>{isGeneratingPdf ? "Generating…" : isReportUnlocked ? "Full PDF" : "Export summary"}</span>
-          </button>
-          {pdfError && <p role="alert" className="w-full text-center text-xs text-[#A3493C]">{pdfError}</p>}
-        </div>
+        {/* The same download is also available after the long paid report. */}
+        {isReportUnlocked && renderPdfActions(true)}
       </main>
     </div>
   );
