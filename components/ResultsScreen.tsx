@@ -640,7 +640,7 @@ export default function ResultsScreen({
               </p>
               <h2 className="mt-2 text-xl font-bold tracking-tight text-[#1C2B18]">Your complete clarity report is ready.</h2>
               <p className="mt-1 max-w-lg text-sm leading-relaxed text-[#61745B]">
-                Five deep dives, actual page evidence when available, first-five-seconds insight, prioritized fixes and editable copy are below. The purchase check is included when a paid offer was detected.
+{report.verdict || "Your full diagnosis and evidence-led improvements are ready in the chapters below."}
               </p>
             </div>
             <nav aria-label="Jump to paid report sections" className="flex shrink-0 flex-wrap gap-2">
