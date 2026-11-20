@@ -11,6 +11,10 @@ on:
       - "components/ScanScreen.tsx"
       - "components/ClarityResultsOverview.tsx"
       - "components/ResultsScreen.tsx"
+      - "lib/free-report-projection.ts"
+      - "lib/scan-flow-controller.ts"
+      - "server/security/reportAccess.ts"
+      - "__tests__/free-paid-conversion.test.tsx"
       - "components/PremiumActionPlan.tsx"
       - "components/CompleteReportPreview.tsx"
       - "components/PostScanUpgradeModal.tsx"
@@ -55,5 +59,7 @@ jobs:
           node --import tsx __tests__/results-lime-v8.test.tsx
           node --import tsx __tests__/premium-workbench.test.tsx
           node --import tsx __tests__/premium-report-explorer.test.tsx
+          node --import tsx __tests__/free-paid-conversion.test.tsx
+          node --import tsx __tests__/final-conversion-theme.test.tsx
       - name: Production build
         run: npm run build
