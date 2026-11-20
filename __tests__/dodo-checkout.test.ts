@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { randomUUID } from "node:crypto";
 import { createClient } from "redis";
 import { Webhook } from "standardwebhooks";
 import { NextRequest } from "next/server";
@@ -9,7 +10,7 @@ import { GET as fullReport } from "../app/api/report/[reportId]/route";
 import { GET as paymentStatus } from "../app/api/payments/status/route";
 import { saveServerReport, redactAnalysisForFreeTier, hasReportAccess } from "../server/security/reportAccess";
 import { reportKey, orderKey, paymentKey } from "../server/storage/paymentStore";
-import { applyVerifiedPayment } from "../server/payments/orders";
+import { applyVerifiedPayment, saveOrder, indexOrder } from "../server/payments/orders";
 import { paymentAnalysis, paymentSnapshot, privateText } from "./fixtures/payment-report";
 import { runPaymentDomTests } from "./payment-return-dom";
 
@@ -31,7 +32,7 @@ async function main() {
   let databaseUnavailable = false;
   let providerFailure = false;
   let invalidCheckout = false;
-  let providerProductAmount = 500;
+  let providerProductAmount = 900;
   let lastPayload: any;
   const request = (path: string, body: unknown, token?: string) => new NextRequest(`https://strangerlens.example${path}`, {
     method: "POST", body: JSON.stringify(body), headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
@@ -116,9 +117,29 @@ async function main() {
     check((await getReport(report.reportId, report.reportToken)).status === 403, "unpaid report denies premium");
     const redacted = redactAnalysisForFreeTier(paymentAnalysis);
     check(!JSON.stringify(redacted).includes(privateText), "free API strips premium signal and first-seconds explanations");
-    providerProductAmount = 900;
-    check((await newCheckoutResponse(report)).status === 503, "Outdated product must not open a checkout advertised as $5");
     providerProductAmount = 500;
+    check((await newCheckoutResponse(report)).status === 503, "Old $5 Dodo product must not open a $9 checkout");
+    providerProductAmount = 900;
+    // An older $5 pending checkout may have the same Dodo product ID, but it
+    // must not be reused after the price is raised to $9.
+    const staleReport = await createReport();
+    const oldSession = "cks_old_five_dollars";
+    const oldOrder = {
+      orderId: randomUUID(),
+      reportId: staleReport.reportId,
+      environment: "test_mode" as const,
+      productId: "pdt_single",
+      expectedAmountCents: 500,
+      createdAt: Date.now(),
+      sessionId: oldSession,
+      checkoutUrl: "https://test.checkout.dodopayments.com/session/" + oldSession,
+      returnOrigin: "https://strangerlens.example",
+      status: "pending",
+    };
+    await saveOrder(oldOrder);
+    await indexOrder(oldOrder);
+    const freshCheckout = await newCheckout(staleReport);
+    check(freshCheckout.sessionId !== oldSession, "Old $5 session must not be reused at $9");
     const order = await newCheckout(report);
     check(lastPayload.product_cart[0].product_id === "pdt_single" && lastPayload.product_cart[0].quantity === 1, "server owns checkout product and quantity");
     check(lastPayload.metadata.reportId === report.reportId && lastPayload.metadata.orderId === order.orderId, "order/report bound in provider metadata");
