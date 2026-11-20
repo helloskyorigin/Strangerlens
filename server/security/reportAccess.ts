@@ -6,6 +6,7 @@ import type { AnalysisData } from "@/components/ResultsScreen";
 import { isDurableStorageConfigured, paymentStore, reportKey, UNPAID_RETENTION_SECONDS, cleanEnvString } from "@/server/storage/paymentStore";
 import { getDodoConfig } from "@/server/payments/dodo";
 import { isPurchaseReadiness } from "@/lib/purchase-readiness";
+import { projectFreeFrontendReport } from "@/lib/free-report-projection";
 
 export interface StoredServerReport {
   reportId: string;
@@ -143,112 +144,81 @@ export function computeLockedPreviewCounts(
 }
 
 /**
- * Strips all Full-Report (Sections 04–06) premium fields from FinalValidatedAnalysis
- * so free API responses contain ONLY Free Report data (Sections 01–03).
+ * $0 API payload: only scores, their statuses, and whether the optional
+ * purchase check applies. No website quote, explanation, verdict diagnosis,
+ * primary fix, risk or rewrite travels in the free analysis object.
+ *
+ * Full analysis remains on the server, gated by verified payment entitlement.
  */
 export function redactAnalysisForFreeTier(
   analysis: FinalValidatedAnalysis
 ): FinalValidatedAnalysis {
-  const purchaseReadinessLocked = analysis.purchase_readiness_locked === true || isPurchaseReadiness(analysis.purchase_readiness);
+  const purchaseReadinessLocked = analysis.purchase_readiness_locked === true ||
+    isPurchaseReadiness(analysis.purchase_readiness);
+  const publicSignal = (signal: FinalValidatedAnalysis["signals"]["first_impression"]) => ({
+    score: signal.score,
+    status: signal.status,
+    confidence: signal.confidence,
+    explanation: "",
+    evidence_available: false,
+    evidence: [],
+  });
+  const publicFirstSeconds = (part: FinalValidatedAnalysis["first_seconds"]["what_is_this"]) => ({
+    status: part.status,
+    explanation: "",
+    evidence_available: false,
+    evidence: [],
+  });
+
   return {
     ...(purchaseReadinessLocked ? { purchase_readiness_locked: true } : {}),
     analysis_version: analysis.analysis_version,
     scoring_version: analysis.scoring_version,
     overall_score: analysis.overall_score,
     overall_status: analysis.overall_status,
-    verdict: {
-      text: analysis.verdict.text,
-    },
-    // Section 06 (5-second detailed breakdown) explanations redacted for free tier; keep only status & primary evidence needed for Section 02 findings
+    verdict: { text: "" },
     first_seconds: {
-      what_is_this: {
-        status: analysis.first_seconds.what_is_this.status,
-        explanation: "",
-        evidence_available: analysis.first_seconds.what_is_this.evidence_available,
-        evidence: analysis.first_seconds.what_is_this.evidence.slice(0, 1),
-      },
-      who_is_it_for: {
-        status: analysis.first_seconds.who_is_it_for.status,
-        explanation: "",
-        evidence_available: analysis.first_seconds.who_is_it_for.evidence_available,
-        evidence: analysis.first_seconds.who_is_it_for.evidence.slice(0, 1),
-      },
-      what_will_i_get: {
-        status: analysis.first_seconds.what_will_i_get.status,
-        explanation: "",
-        evidence_available: analysis.first_seconds.what_will_i_get.evidence_available,
-        evidence: analysis.first_seconds.what_will_i_get.evidence.slice(0, 1),
-      },
-      why_should_i_care: {
-        status: analysis.first_seconds.why_should_i_care.status,
-        explanation: "",
-        evidence_available: analysis.first_seconds.why_should_i_care.evidence_available,
-        evidence: analysis.first_seconds.why_should_i_care.evidence.slice(0, 1),
-      },
-      what_should_i_do_next: {
-        status: analysis.first_seconds.what_should_i_do_next.status,
-        explanation: "",
-        evidence_available: analysis.first_seconds.what_should_i_do_next.evidence_available,
-        evidence: analysis.first_seconds.what_should_i_do_next.evidence.slice(0, 1),
-      },
+      what_is_this: publicFirstSeconds(analysis.first_seconds.what_is_this),
+      who_is_it_for: publicFirstSeconds(analysis.first_seconds.who_is_it_for),
+      what_will_i_get: publicFirstSeconds(analysis.first_seconds.what_will_i_get),
+      why_should_i_care: publicFirstSeconds(analysis.first_seconds.why_should_i_care),
+      what_should_i_do_next: publicFirstSeconds(analysis.first_seconds.what_should_i_do_next),
     },
-    // Section 06 Visitor Impression is premium-only
-    visitor_thought: {
-      text: "",
+    visitor_thought: { text: "", confidence: "low" },
+    website_message: {
+      summary: "",
       confidence: "low",
+      evidence_available: false,
+      evidence: [],
     },
-    website_message: analysis.website_message,
     signals: {
-      first_impression: { ...analysis.signals.first_impression, explanation: "", evidence_available: false, evidence: [] },
-      audience: { ...analysis.signals.audience, explanation: "", evidence_available: false, evidence: [] },
-      value: { ...analysis.signals.value, explanation: "", evidence_available: false, evidence: [] },
-      trust: { ...analysis.signals.trust, explanation: "", evidence_available: false, evidence: [] },
-      action: { ...analysis.signals.action, explanation: "", evidence_available: false, evidence: [] },
+      first_impression: publicSignal(analysis.signals.first_impression),
+      audience: publicSignal(analysis.signals.audience),
+      value: publicSignal(analysis.signals.value),
+      trust: publicSignal(analysis.signals.trust),
+      action: publicSignal(analysis.signals.action),
     },
-    // Section 02 Biggest Issue uses only the #1 primary risk; secondary risks (Section 06) are redacted
-    risks: Array.isArray(analysis.risks) ? analysis.risks.slice(0, 1) : [],
-    // Section 03 Your #1 Priority Fix is included in Free Preview
-    priority_fix: analysis.priority_fix,
-    // Section 04 & 05 Secondary Improvements & Copy-Ready Rewrites are premium-only
+    risks: [],
+    priority_fix: {
+      title: "",
+      reason: "",
+      impact: "medium",
+      what_you_say_now: "",
+      clearer_direction: "",
+      evidence_available: false,
+      evidence: [],
+    },
     other_improvements: [],
   };
 }
 
 /**
- * Strips all Full-Report (Sections 04–06) fields from frontend AnalysisData
- * so React state/props and browser DOM never hold premium report content for unpaid users.
+ * Applied by server-side callers as a defensive projection. The browser scan
+ * controller uses the exact same pure helper after mapping a public snapshot.
  */
 export function redactFrontendDataForFreeTier(
   data: AnalysisData,
   lockedPreviewCounts?: LockedPreviewCounts
 ): AnalysisData {
-  const primaryClear = data.evidence?.clearFindings?.slice(0, 1) || [];
-  const primaryMissing = data.evidence?.missingFindings?.slice(0, 2) || [];
-
-  return {
-    ...data,
-    purchaseReadiness: undefined,
-    purchaseReadinessLocked: data.purchaseReadinessLocked === true || isPurchaseReadiness(data.purchaseReadiness) ? true : undefined,
-    firstSeconds: [],
-    visitorThought: "",
-    evidence: {
-      locationTag: data.evidence.locationTag,
-      homepageExcerpt: data.evidence.homepageExcerpt,
-      clearFindings: primaryClear,
-      missingFindings: primaryMissing,
-    },
-    risks: Array.isArray(data.risks) ? data.risks.slice(0, 1) : [],
-    otherImprovements: [],
-    premiumWorkbench: undefined,
-    supportingContext: undefined,
-    isFreeTierOnly: true,
-    lockedPreviewCounts: lockedPreviewCounts ?? {
-      actionSteps: Math.min(3, 1 + (data.otherImprovements?.length || 0)),
-      secondaryFixes: data.otherImprovements?.length || 0,
-      copyRewrites:
-        (data.recommendation?.strongerDirection ? 1 : 0) +
-        (data.otherImprovements?.filter((i) => Boolean(i.copyableSuggestion)).length || 0),
-      totalRisks: data.risks?.length || 1,
-    },
-  };
+  return projectFreeFrontendReport(data, lockedPreviewCounts);
 }
