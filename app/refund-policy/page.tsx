@@ -41,7 +41,7 @@ export default function RefundPolicyPage() {
           <strong>$5 Full Clarity Report</strong> — is a one-time digital product purchase with no recurring subscriptions or automatic renewals.
         </p>
         <p className="text-[#94A3B8]">
-          Before purchasing a paid report, you can run a <strong>Free Preview ($0)</strong> to see your overall website clarity score, five clarity signal scores (First Impression, Audience, Value, Trust, Action), and five signal statuses at no cost.
+          Before purchasing a paid report, you can run a <strong>Free Preview ($0)</strong> to see your overall website clarity score, five clarity signal scores (First Impression, Audience, Value, Trust, Action), the five signal statuses, and the lowest-scoring area at no cost.
         </p>
       </section>
 
