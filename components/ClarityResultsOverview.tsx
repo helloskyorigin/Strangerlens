@@ -155,7 +155,17 @@ export default function ClarityResultsOverview({
         {showLockedPurchase && <div data-testid="purchase-readiness-locked" className="sl-v7-purchase-locked">
           <span className="sl-v7-purchase-icon"><LockKeyhole size={19} aria-hidden="true"/></span>
           <div className="sl-v7-purchase-copy">
-            <div className="sl-v7-purchase-heading"><strong>Purchase Readiness</strong><span className="sl-v7-premium-label">Full Analysis Bonus</span></div>
+            <div className="sl-v7-purchase-heading">
+              <strong>Purchase Readiness</strong>
+              <ClaritySignalTooltip
+                signalKey="purchaseReadiness"
+                name="Purchase Readiness"
+                isOpen={activeTooltip === "locked-purchase"}
+                onOpen={() => setActiveTooltip("locked-purchase")}
+                onClose={() => setActiveTooltip(current => current === "locked-purchase" ? null : current)}
+              />
+              <span className="sl-v7-premium-label">Included in Full Analysis</span>
+            </div>
             <p>This website offers paid products or services. The full report includes a separate check of how clearly the buying decision is presented.</p>
             <p className="sl-v7-purchase-detail">Pricing clarity · Buyer confidence · Purchase next steps</p>
           </div>
