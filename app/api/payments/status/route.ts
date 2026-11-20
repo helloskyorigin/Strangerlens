@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isPaymentInfrastructureConfigured } from "@/server/security/reportAccess";
-import { assertFullReportProductPrice } from "@/server/payments/dodo";
+import { assertFullReportProductPrice, FULL_REPORT_USD_CENTS } from "@/server/payments/dodo";
 
 export const dynamic = "force-dynamic";
 export async function GET() {
@@ -13,6 +13,6 @@ export async function GET() {
   return NextResponse.json({
     checkoutEnabled: configured && priceVerified,
     environment: process.env.DODO_ENVIRONMENT?.trim() === "live_mode" ? "live_mode" : "test_mode",
-    priceUsd: 3,
+    priceUsd: FULL_REPORT_USD_CENTS / 100,
   }, { headers: { "Cache-Control": "no-store" } });
 }
