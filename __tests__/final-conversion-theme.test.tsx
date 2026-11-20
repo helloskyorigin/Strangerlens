@@ -12,9 +12,8 @@ import { escapeHtmlText } from "../lib/escape-html";
 
 const source=readFileSync("components/ResultsScreen.tsx","utf8");
 assert.equal(escapeHtmlText('<img src=x onerror="bad()" /> &'), '&lt;img src=x onerror=&quot;bad()&quot; /&gt; &amp;');
-for (const field of ["report.domain", "report.overallScoreDisplay", "report.overallStatus", "s.title", "s.status", "s.scoreDisplay"]) {
-  assert.ok(source.includes("escapeHtmlText(" + field + ")"), "Share-card HTML must escape " + field);
-}
+assert.ok(!source.includes("StrangerLens-Share.png"), "Obsolete share-card generator is removed.");
+assert.ok(!source.includes("document.createElement('div')"), "Results no longer assemble unsanitized image cards in the browser.");
 const popup=readFileSync("components/PostScanUpgradeModal.tsx","utf8");
 const scanRoute=readFileSync("app/api/check/route.ts","utf8");
 assert.ok(!source.includes("}, 700);"),"Fresh scan upgrade is not artificially delayed after showing results.");
@@ -36,7 +35,7 @@ const sample=renderToStaticMarkup(<PostScanUpgradeModal
   signals={[{title:"First Impression",scoreDisplay:"78/100"}]}
   canCheckout isTestMode={false} busy={false} onUpgrade={()=>{}} onContinueFree={()=>{}}/>);
 assert.ok(sample.includes('sl-upgrade-dialog'));
-assert.ok(sample.includes("Unlock Complete Report — $3"));
+assert.ok(sample.includes("Unlock Complete Report — $5"));
 
 const dom=new JSDOM('<!doctype html><html><body><div id="root"></div></body></html>',{
   url:"https://strangerlens.ai.studio",pretendToBeVisual:true
