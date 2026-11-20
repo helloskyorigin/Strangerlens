@@ -31,7 +31,7 @@ export default function CompleteReportPreview({
         <p className="sl-v7-upgrade-eyebrow">COMPLETE REPORT</p>
         <h2 id="complete-report-title">Know what to fix. And how.</h2>
       </div>
-      <div className="sl-v7-price"><strong>$5</strong><span>one-time</span></div>
+      <div className="sl-v7-price"><strong>$9</strong><span>one-time</span></div>
     </div>
     <p className="sl-v7-upgrade-intro">You have the scores. Now see the reasons, evidence and improvements behind them.</p>
     <div className="sl-v7-tier-compare" aria-label="Free preview versus complete report">
@@ -41,7 +41,7 @@ export default function CompleteReportPreview({
         <p>Overall score · Five clarity scores and statuses · Lowest-scoring area</p>
       </div>
       <div className="sl-v7-tier-col sl-v7-tier-paid">
-        <span>UNLOCK · $5 ONCE</span>
+        <span>UNLOCK · $9 ONCE</span>
         <strong>Know exactly what to improve</strong>
         <p>Stranger&apos;s View · Five-Signal Diagnosis · Evidence-to-Fix · Smart Priority · Better Copy Studio {purchaseReadinessApplicable ? "· Purchase Readiness bonus" : ""}</p>
       </div>
@@ -62,7 +62,7 @@ export default function CompleteReportPreview({
     </p>}
     <button type="button" disabled={!canCheckout || busy} onClick={onUnlock} className="sl-v7-upgrade-button">
       <LockKeyhole className="h-4 w-4" aria-hidden="true"/>
-      {busy ? "Opening checkout…" : "Unlock Full Analysis — $5"}
+      {busy ? "Opening checkout…" : "Unlock Full Analysis — $9"}
       {!busy && <ArrowRight className="h-4 w-4" aria-hidden="true"/>}
     </button>
     <p className="sl-v7-upgrade-assurance">
