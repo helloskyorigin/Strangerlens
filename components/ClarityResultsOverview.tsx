@@ -131,7 +131,7 @@ export default function ClarityResultsOverview({
                 onOpen={() => setActiveTooltip("locked-purchase")}
                 onClose={() => setActiveTooltip(current => current === "locked-purchase" ? null : current)}/>
             </div>
-            <p>Bonus buying-decision check <span className="sl-v7-premium-label">· Included with $9 report</span></p>
+            <p>Paid offer detected <span className="sl-v7-premium-label">· Included in Full Analysis</span></p>
           </div>
         </div>}
       </div>
