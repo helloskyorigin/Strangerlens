@@ -53,7 +53,7 @@ export default function PurchasedReport({ reportId }: { reportId: string }) {
 
   if (report) return <ResultsScreen rawUrl={report.normalizedUrl} analysisData={report.data} isUnlocked={true}
     onDownloadPdf={async () => {
-      try { await downloadPurchasedReport(reportId); }
+      try { return await downloadPurchasedReport(reportId); }
       catch (cause) { void load(); throw cause; }
     }}
     onBackToLanding={() => router.push("/")} onRunNewCheck={() => router.push("/")} />;
