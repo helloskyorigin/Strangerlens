@@ -581,13 +581,12 @@ export default function ResultsScreen({
               </p>
             </div>
             <nav aria-label="Jump to paid report sections" className="flex shrink-0 flex-wrap gap-2">
-              <a href="#your-improvement-plan" className="inline-flex min-h-10 items-center justify-center rounded-full bg-[#1E815F] px-4 text-xs font-bold text-white hover:bg-[#24936E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Start with fixes →</a>
-              <a href="#complete-paid-report" className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#385C62] px-4 text-xs font-semibold text-[#D6EDE7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Signal deep dives</a>
+              <a href="#strangers-view" className="inline-flex min-h-10 items-center justify-center rounded-full bg-[#1E815F] px-4 text-xs font-bold text-white hover:bg-[#24936E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Stranger&apos;s View</a>
+              <a href="#complete-paid-report" className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#385C62] px-4 text-xs font-semibold text-[#D6EDE7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Signal diagnosis</a>
+              <a href="#your-improvement-plan" className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#385C62] px-4 text-xs font-semibold text-[#D6EDE7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Fixes &amp; copy</a>
               {unlockedPurchase && <a href="#complete-paid-report" onClick={() => document.getElementById("chapter-tab-purchaseReadiness")?.click()}
-                className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#3D6FA0] bg-[#1B4264] px-4 text-xs font-semibold text-[#E8F3FF] hover:bg-[#21547D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300">
-                Purchase Readiness →</a>}
-              <a href="#better-copy-studio" className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#385C62] px-4 text-xs font-semibold text-[#D6EDE7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Copy Studio</a>
-              <a href="#report-export-actions" className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#385C62] px-4 text-xs font-semibold text-[#D6EDE7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Export PDF</a>
+                className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#385C62] px-4 text-xs font-semibold text-[#D6EDE7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">
+                Purchase check</a>}
             </nav>
           </section>
         )}
@@ -783,9 +782,9 @@ export default function ResultsScreen({
             />
 
             {/* FIRST 5 SECONDS */}
-            <section>
-              <h2 className="text-xl font-bold mb-2 text-white">First 5 Seconds</h2>
-              <p className="text-[#94A3B8] text-sm mb-6">What a first-time visitor grasps in the first 5 seconds.</p>
+            <section id="strangers-view" aria-label="Stranger's View and first-five-seconds interpretation" className="scroll-mt-24">
+              <h2 className="text-xl font-bold mb-2 text-white">Stranger&apos;s View · First 5 Seconds</h2>
+              <p className="text-[#94A3B8] text-sm mb-6">An AI interpretation of what the opening page communicates at first glance.</p>
               <div className="grid gap-6">
                 <div className="bg-[#121824] border border-[#263044] rounded-xl p-5">
                   <h3 className="font-bold text-emerald-400 text-xs mb-3 tracking-widest uppercase">WHAT VISITORS UNDERSTAND</h3>
