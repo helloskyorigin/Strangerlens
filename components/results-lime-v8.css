@@ -259,3 +259,163 @@ html[data-landing-theme="dark"] .sl-results-v7 .sl-purchase-deep-dive{
   .sl-results-v7 #your-improvement-plan nav a{min-height:40px;display:inline-flex;align-items:center}
   .sl-results-v7 #strangers-view .grid{gap:12px}
 }
+
+
+/* Results v9: score -> five concise signals -> one paid offer.
+   Dedicated component styling takes precedence over the shared V7 dark/blue
+   utility-theme rules. Keep contrast explicit in both light/dark themes. */
+.sl-results-v7 #report-first-look .sl-v8-score-panel{
+  display:block;min-height:0;padding:21px 28px;background:var(--v8-lime-pale);
+  border-right:0;border-bottom:0
+}
+.sl-results-v7 .sl-v8-score-header{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.sl-results-v7 .sl-v8-score-access{font-size:10px;font-weight:800;letter-spacing:.08em;
+  text-transform:uppercase;color:#557a37}
+.sl-results-v7 .sl-v8-score-mainline{display:flex;align-items:center;flex-wrap:wrap;gap:14px 30px}
+.sl-results-v7 .sl-v8-score-mainline .sl-v7-score-number{font-size:clamp(49px,6vw,77px);margin:9px 0 0;line-height:1}
+.sl-results-v7 .sl-v8-score-mainline .sl-v7-score-number span{font-size:18px}
+.sl-results-v7 .sl-v8-score-meta{display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.sl-results-v7 .sl-v8-score-meta .sl-v8-scoring-link{margin:3px 0 0}
+.sl-results-v7 #report-first-look .sl-v8-score-disclaimer{background:var(--v8-panel);padding:8px 17px;
+  font-size:10px;text-align:left}
+.sl-results-v7 #report-clarity-signals{margin-top:19px}
+.sl-results-v7 #report-clarity-signals .sl-v7-section-head{margin-bottom:12px;align-items:center}
+.sl-results-v7 #report-clarity-signals .sl-v7-section-head h2{font-size:clamp(23px,2.7vw,31px);margin:2px 0 0}
+.sl-results-v7 .sl-v7-signal-list{gap:10px}
+.sl-results-v7 .sl-v7-signal-row{padding:15px 17px;min-height:0!important;
+  border-radius:16px;gap:0}
+.sl-results-v7 .sl-v7-signal-name{font-size:14px}
+.sl-results-v7 .sl-v8-signal-score{font-size:14px}
+.sl-results-v7 .sl-v8-signal-bottom{flex-direction:row;align-items:baseline;
+  justify-content:space-between;gap:7px;margin:11px 0 11px;padding:0}
+.sl-results-v7 .sl-v8-signal-question{font-size:11.5px;line-height:1.4;font-weight:650;
+  margin:0;color:var(--v8-secondary)}
+.sl-results-v7 .sl-v7-signal-status{font-size:10.5px;white-space:nowrap;line-height:1.4}
+.sl-results-v7 .sl-v7-meter{height:5px}
+.sl-results-v7 .sl-v7-purchase-locked{display:flex;flex-direction:row;align-items:center;
+  min-height:0;gap:11px;padding:14px 15px;border-radius:16px}
+.sl-results-v7 .sl-v7-purchase-icon{width:35px;height:35px;flex:0 0 35px}
+.sl-results-v7 .sl-v7-purchase-heading{gap:6px}
+.sl-results-v7 .sl-v7-purchase-heading strong{font-size:13px}
+.sl-results-v7 .sl-v7-purchase-copy p{font-size:11px;line-height:1.4;margin-top:4px}
+.sl-results-v7 .sl-v7-premium-label{color:#547a2b;font-size:10px}
+.sl-results-v7 #report-clarity-signals .sl-v8-summary-strip{
+  min-height:0;margin-top:11px;border:1px solid var(--v8-line);border-radius:13px;
+  background:var(--v8-soft);align-items:center;justify-content:space-between;
+}
+.sl-results-v7 #report-clarity-signals .sl-v8-summary-cell{padding:9px 14px;gap:10px;border:0;flex:0 1 auto}
+.sl-results-v7 #report-clarity-signals .sl-v8-summary-icon{width:31px;height:31px;flex:0 0 31px;border-radius:10px}
+.sl-results-v7 #report-clarity-signals .sl-v8-summary-cell strong{font-size:13px;margin:2px 0 0}
+.sl-results-v7 #report-clarity-signals .sl-v8-summary-link{
+  padding:11px 15px;max-width:none;white-space:normal;line-height:1.3;
+  font-size:11.5px;text-align:center
+}
+/* The upgrade is one focused, high-contrast offer: no extra tier comparison,
+   duplicate weakest-score explanation, or tall empty benefits cards. */
+.sl-results-v7 #complete-report-preview.sl-v8-compact-upgrade{
+  margin-top:18px;padding:clamp(19px,2.4vw,27px)!important;
+  background:#111910!important;border:1px solid #33452e!important;
+  color:#F5F8F1!important;border-radius:22px;
+  box-shadow:0 12px 30px rgba(13,29,10,.08)!important;
+}
+.sl-results-v7 .sl-v8-compact-upgrade .sl-v7-upgrade-head{align-items:center;gap:16px}
+.sl-results-v7 .sl-v8-compact-upgrade .sl-v7-upgrade-head h2{
+  font-size:clamp(20px,2.4vw,27px);line-height:1.25;letter-spacing:-.045em;
+  color:#FFFFFF!important;margin:5px 0 0
+}
+.sl-results-v7 .sl-v8-compact-upgrade .sl-v7-upgrade-intro{
+  font-size:12.5px;line-height:1.55;color:#CFDCCA!important;margin-top:6px
+}
+.sl-results-v7 .sl-v8-compact-upgrade .sl-v7-price strong{color:#F8FCF4!important}
+.sl-results-v7 .sl-v8-compact-upgrade .sl-v7-price span{color:#C9D8C2!important}
+.sl-results-v7 .sl-v8-compact-upgrade .sl-v7-upgrade-eyebrow{color:#B9E38F!important}
+.sl-results-v7 .sl-v8-unlock-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  list-style:none;margin:19px 0 0;padding:0;gap:8px}
+.sl-results-v7 .sl-v8-unlock-item{display:flex;gap:10px;align-items:center;min-width:0;
+  padding:11px 12px;border:1px solid #344630;border-radius:12px;
+  background:#1B2819;color:#F5F8F1}
+.sl-results-v7 .sl-v8-unlock-icon{display:grid;place-items:center;flex:0 0 28px;
+  width:28px;height:28px;color:#B9FC22}
+.sl-results-v7 .sl-v8-unlock-copy{min-width:0;display:flex;flex-direction:column;gap:3px}
+.sl-results-v7 .sl-v8-unlock-copy strong{font-size:12.5px;line-height:1.3;
+  font-weight:800;color:#FFFFFF!important}
+.sl-results-v7 .sl-v8-unlock-copy>span{font-size:11px;line-height:1.45;color:#CBDCC4!important}
+.sl-results-v7 .sl-v8-compact-upgrade .sl-v7-upgrade-button{
+  min-height:47px;margin-top:17px;background:#B9FC22!important;color:#111510!important;
+  border:1px solid #B9FC22!important;font-weight:850
+}
+.sl-results-v7 .sl-v8-compact-upgrade .sl-v7-upgrade-button svg{color:#111510!important}
+.sl-results-v7 .sl-v8-compact-upgrade .sl-v7-upgrade-assurance{
+  font-size:11px;color:#D6E6CD!important;margin:9px 0 0
+}
+.sl-results-v7 .sl-v8-compact-upgrade .sl-v7-example-link{
+  font-size:11.5px;color:#C5E6AA!important;min-height:32px;margin:3px auto 0
+}
+.sl-results-v7 .sl-v8-compact-upgrade .sl-v7-upgrade-warning{
+  color:#FBD39C!important;font-size:11.5px
+}
+/* Screenshot bug: shared light-mode theme made black text inherit on black
+   download buttons. Set both sides of the contrast pair explicitly. */
+.sl-results-v7 #report-export-actions,
+.sl-results-v7 #report-export-actions-bottom{
+  display:flex;align-items:center;justify-content:center;gap:12px;
+  min-height:0;margin-top:13px;padding:12px 16px!important;
+  background:var(--v8-soft)!important;border:1px solid var(--v8-line)!important;
+  border-radius:14px
+}
+.sl-results-v7 #report-export-actions button,
+.sl-results-v7 #report-export-actions-bottom button{
+  display:inline-flex;min-height:43px;flex:0 0 auto;background:#111510!important;
+  color:#FFFFFF!important;border-color:#111510!important;border-radius:999px;
+  font-size:12.5px
+}
+.sl-results-v7 #report-export-actions button *,
+.sl-results-v7 #report-export-actions-bottom button *{color:#FFFFFF!important}
+.sl-results-v7 #report-export-actions button svg,
+.sl-results-v7 #report-export-actions-bottom button svg{color:#B9FC22!important}
+.sl-results-v7 #report-export-actions p,
+.sl-results-v7 #report-export-actions-bottom p{font-size:11.5px!important;line-height:1.45;
+  color:var(--v8-secondary)!important;max-width:390px;margin:0;text-align:left}
+.sl-results-v7 #report-export-actions [role="alert"],
+.sl-results-v7 #report-export-actions-bottom [role="alert"]{
+  color:#AD402F!important;max-width:none;text-align:center
+}
+.sl-results-v7 #report-export-actions a,
+.sl-results-v7 #report-export-actions-bottom a{
+  color:#325B1D!important;background:#FFFFFF!important;font-weight:800;
+  border-color:#A8D17D!important
+}
+@media(max-width:900px){
+  .sl-results-v7 .sl-v7-signal-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:650px){
+  .sl-results-v7 #report-first-look .sl-v8-score-panel{padding:18px 21px;min-height:0}
+  .sl-results-v7 .sl-v8-score-mainline{gap:12px}
+  .sl-results-v7 .sl-v8-score-mainline .sl-v7-score-number{font-size:65px;margin-top:7px}
+  .sl-results-v7 .sl-v8-score-mainline .sl-v7-score-number span{font-size:16px}
+  .sl-results-v7 .sl-v8-score-meta{gap:1px}
+  .sl-results-v7 .sl-v8-score-meta .sl-v8-scoring-link{margin-top:1px}
+  .sl-results-v7 #report-clarity-signals{margin-top:15px}
+  .sl-results-v7 .sl-v7-signal-list{grid-template-columns:1fr;gap:8px}
+  .sl-results-v7 .sl-v7-signal-row{padding:13px 15px}
+  .sl-results-v7 .sl-v8-signal-bottom{margin:8px 0 9px}
+  .sl-results-v7 .sl-v7-signal-status{font-size:10.5px}
+  .sl-results-v7 #report-clarity-signals .sl-v8-summary-strip{display:flex;flex-wrap:wrap;gap:0}
+  .sl-results-v7 #report-clarity-signals .sl-v8-summary-cell{padding:8px 11px}
+  .sl-results-v7 #report-clarity-signals .sl-v8-summary-link{padding:8px 11px}
+  .sl-results-v7 .sl-v8-unlock-list{grid-template-columns:1fr;gap:6px;margin-top:14px}
+  .sl-results-v7 .sl-v8-unlock-item{padding:9px 11px;gap:9px}
+  .sl-results-v7 .sl-v8-compact-upgrade .sl-v7-upgrade-head h2{font-size:20px}
+  .sl-results-v7 .sl-v8-compact-upgrade .sl-v7-price strong{font-size:26px}
+  .sl-results-v7 #report-export-actions,
+  .sl-results-v7 #report-export-actions-bottom{padding:12px!important;flex-wrap:wrap}
+  .sl-results-v7 #report-export-actions p,
+  .sl-results-v7 #report-export-actions-bottom p{text-align:center;max-width:100%}
+}
+@media(max-width:400px){
+  .sl-results-v7 .sl-v8-score-mainline .sl-v7-score-number{font-size:59px}
+  .sl-results-v7 .sl-v8-score-mainline{gap:11px}
+  .sl-results-v7 .sl-v7-signal-name{font-size:13px}
+  .sl-results-v7 .sl-v8-signal-question{font-size:11px}
+  .sl-results-v7 .sl-v8-unlock-copy>span{font-size:10.5px}
+}
