@@ -33,6 +33,17 @@ const paid = render(true);
 assert.ok(!paid.querySelector("#complete-report-preview"), "Already paid users do not get free-tier upsell.");
 assert.ok(paid.querySelector("#complete-paid-report"), "Paid report deep dive remains accessible.");
 assert.ok(paid.querySelector("#your-improvement-plan"), "Paid improvements remain accessible.");
+assert.ok(paid.querySelector("#strangers-view"), "Stranger's View includes the first-five-seconds interpretation.");
+assert.ok(paid.querySelector("#evidence-to-fix"), "Paid Evidence-to-Fix remains available.");
+assert.ok(paid.querySelector("#smart-priority"), "Paid Smart Priority remains available.");
+assert.ok(paid.querySelector("#better-copy-studio"), "Paid Better Copy Studio remains available.");
+for (const doc of [free, paid]) {
+  assert.ok(!doc.querySelector("#implementation-checklist"), "Extra fix-checklist UI is removed.");
+  assert.ok(!doc.querySelector("#recheck-comparison-panel"), "Score comparison is not a displayed feature.");
+  assert.ok(!doc.body.textContent?.includes("StrangerLens-Share.png"), "Share PNG UI is removed.");
+}
+assert.ok(paid.querySelector("#report-export-actions button"), "PDF remains a report utility.");
+
 assert.ok(paid.body.textContent?.includes(privateText), "Verified unlocked report contains protected findings.");
 assert.ok(paid.querySelector('.sl-v8-report-navigation a[href="#complete-paid-report"]'), "Paid next step targets paid chapters.");
 
