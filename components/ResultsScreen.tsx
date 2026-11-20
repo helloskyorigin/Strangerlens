@@ -670,10 +670,10 @@ export default function ResultsScreen({
           onExplainScore={() => setIsScoreModalOpen(true)}
         />
 
-        {/* Download is available immediately, not buried under long paid chapters. */}
-        {renderPdfActions()}
+        {/* Paid users can download directly before the long chapters. */}
+        {isReportUnlocked && renderPdfActions()}
 
-        {/* One clear upgrade card after the free clarity signals. */}
+        {/* A single $9 offer follows the free signals, with no duplicate pitch. */}
         {!isReportUnlocked && (
           <>
             <div ref={mobileUpgradeRef} data-testid="full-report-upgrade-anchor">
@@ -694,6 +694,7 @@ export default function ResultsScreen({
               }}
             />
             </div>
+            {renderPdfActions()}
             {paymentError &&
               <p role="alert" className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200">{paymentError}</p>}
           </>
@@ -900,8 +901,6 @@ export default function ResultsScreen({
           </>
         ) : null}
 
-        {/* The same download is also available after the long paid report. */}
-        {isReportUnlocked && renderPdfActions(true)}
       </main>
     </div>
   );
