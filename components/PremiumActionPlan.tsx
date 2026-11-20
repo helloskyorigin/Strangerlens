@@ -86,7 +86,7 @@ export default function PremiumActionPlan({
 
   return (
     <section id="your-improvement-plan" className="scroll-mt-24 space-y-8 sm:space-y-10" aria-labelledby="improvement-workbench-title">
-      <div className="overflow-hidden rounded-2xl border border-[#375577] bg-[#F4FBEA] p-5 sm:p-7">
+      <div className="overflow-hidden rounded-2xl border border-[#D7E8CD] bg-[#F4FBEA] p-5 sm:p-7">
         <p className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-[#578129]">
           <Layers3 className="h-4 w-4" aria-hidden="true"/> THREE TOOLS THAT MAKE THE REPORT USEFUL
         </p>
@@ -94,12 +94,12 @@ export default function PremiumActionPlan({
           What to fix. Why it matters. What to say.
         </h2>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[#64765E]">
-          Review source-backed findings, work from a clear priority order, and write a better version. Three focused tools, not a wall of features.
+          Review source-backed findings, work from a clear priority order, and write a better version. Three tools, all tied to your report.
         </p>
         <nav aria-label="Implementation workbench sections" className="mt-4 flex flex-wrap gap-2">
-          <a href="#evidence-to-fix" className="rounded-full border border-[#D8E8D0] bg-[#EDF9E0] px-3 py-2 text-xs font-semibold text-[#D2E6FF] hover:bg-[#284668]">Evidence-to-Fix</a>
-          <a href="#smart-priority" className="rounded-full border border-[#D8E8D0] bg-[#EDF9E0] px-3 py-2 text-xs font-semibold text-[#D2E6FF] hover:bg-[#284668]">Smart Priority</a>
-          <a href="#better-copy-studio" className="rounded-full border border-[#D8E8D0] bg-[#EDF9E0] px-3 py-2 text-xs font-semibold text-[#D2E6FF] hover:bg-[#284668]">Better Copy Studio</a>
+          <a href="#evidence-to-fix" className="rounded-full border border-[#D8E8D0] bg-[#EDF9E0] px-3 py-2 text-xs font-semibold text-[#48683B] hover:bg-[#DDF4C9]">Evidence-to-Fix</a>
+          <a href="#smart-priority" className="rounded-full border border-[#D8E8D0] bg-[#EDF9E0] px-3 py-2 text-xs font-semibold text-[#48683B] hover:bg-[#DDF4C9]">Smart Priority</a>
+          <a href="#better-copy-studio" className="rounded-full border border-[#D8E8D0] bg-[#EDF9E0] px-3 py-2 text-xs font-semibold text-[#48683B] hover:bg-[#DDF4C9]">Better Copy Studio</a>
         </nav>
       </div>
 
