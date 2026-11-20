@@ -115,6 +115,12 @@ async function main() {
     // Diagnose the mocked Redis/entitlement boundary without printing secrets.
     try {
       const storedPreview = await getServerReport(report.reportId);
+      console.info("STORED_REPORT_WIRE_SHAPE", {
+        type: typeof storedPreview,
+        array: Array.isArray(storedPreview),
+        keys: storedPreview && typeof storedPreview === "object" ? Object.keys(storedPreview).slice(0,12) : [],
+        stringPrefix: typeof storedPreview === "string" ? storedPreview.slice(0,2) : null,
+      });
       const decision = await verifyServerEntitlement(report.reportId, report.reportToken);
       console.info("UNPAID_ACCESS_DEBUG", {
         exists: Boolean(storedPreview),
