@@ -23,7 +23,7 @@ export default function CompleteReportPreview({
     { title: "Five-Signal Diagnosis", value: "Understand the reasons behind your scores", Icon: ListChecks },
     { title: "Evidence-to-Fix", value: "Connect inspected page evidence to practical changes", Icon: FileSearch },
     { title: "Smart Priority", value: "Know which improvements deserve attention first", Icon: ListOrdered },
-    { title: "Better Copy Studio", value: "Get editable suggestions for clearer website copy", Icon: PencilLine },
+    { title: "Better Copy Studio", value: "Get editable copy suggestions for headlines, CTAs and messaging", Icon: PencilLine },
   ];
   return <section id="complete-report-preview" aria-labelledby="complete-report-title" className="sl-v7-upgrade sl-v8-compact-upgrade">
     <div className="sl-v7-upgrade-head">
