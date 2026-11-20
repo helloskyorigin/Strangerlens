@@ -31,7 +31,7 @@ interface PricingPlan {
   isPaid: boolean;
 }
 
-// PRICING CONFIG (Free and $5 One-Time Full Clarity Report)
+// PRICING CONFIG (Free and $9 One-Time Full Clarity Report)
 const PRICING_PLANS: PricingPlan[] = [
   {
     id: "free",
@@ -104,7 +104,7 @@ const FAQ_ITEMS = [
   {
     question: "What does Full Analysis cost?",
     answer:
-      "Full Analysis costs $5 per report, paid once with no subscription. Run a free preview first, then unlock five detailed signal analyses, Evidence-to-Fix findings with verified quotes when available, a Smart Priority plan, an editable Better Copy Studio, and the First 5 Seconds breakdown. Checkout availability is shown on your report.",
+      "Full Analysis costs $9 per report, paid once with no subscription. Run a free preview first, then unlock five detailed signal analyses, Evidence-to-Fix findings with verified quotes when available, a Smart Priority plan, an editable Better Copy Studio, and the First 5 Seconds breakdown. Checkout availability is shown on your report.",
   },
   {
     question: "Do I need to create an account?",
@@ -597,7 +597,7 @@ export default function LandingPage() {
                     Simple, Transparent Pricing
                   </h3>
                   <p className="text-xs sm:text-sm text-[#94A3B8] mt-0.5">
-                    Start with a free first-impression preview today. Full Analysis costs $5 per report, paid once.
+                    Start with a free first-impression preview today. Full Analysis costs $9 per report, paid once.
                   </p>
                 </div>
                 <button
