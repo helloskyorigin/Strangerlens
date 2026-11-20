@@ -1,5 +1,6 @@
 import { validateClientUrl } from "./url-client-validator";
 import { mapBackendToFrontend } from "./mapper";
+import { projectFreeFrontendReport } from "./free-report-projection";
 import { consumeScanProgress } from "./scan-progress-stream";
 
 export type ScanMilestone = "connecting" | "connected" | "content_inspected" | "signals_evaluated" | "report_ready";
@@ -280,8 +281,13 @@ export function createScanFlowController(options: ScanFlowControllerOptions = {}
             checkJson.snapshot,
             checkJson.supportingContext
           );
+          // The mapper can derive advice from a public-page snapshot. Never
+          // let that derived analysis travel in a free browser report.
+          const visible = checkJson?.entitlement?.unlocked === true
+            ? mapped
+            : projectFreeFrontendReport(mapped, checkJson.lockedPreviewCounts);
           resolvedAnalysisData = {
-            ...mapped,
+            ...visible,
             reportId: checkJson.reportId,
             reportToken: checkJson.reportToken,
             checkoutEnabled: checkJson.entitlement?.checkoutEnabled === true,
