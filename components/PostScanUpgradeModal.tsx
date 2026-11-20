@@ -86,7 +86,7 @@ export default function PostScanUpgradeModal({
       <div className="mt-4 space-y-2 text-xs text-[#DCE7F2] sm:text-sm">
         <p className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" aria-hidden="true"/> All five detailed signal explanations</p>
         <p className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" aria-hidden="true"/> Prioritized fixes and evidence where available</p>
-        <p className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" aria-hidden="true"/> Editable copy, fix checklist and downloadable PDF</p>
+        <p className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" aria-hidden="true"/> Editable copy suggestions and downloadable PDF</p>
         {purchaseReadinessApplicable && <p className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-blue-300" aria-hidden="true"/> Purchase Readiness for this website</p>}
       </div>
       {paymentError && <p role="alert" className="mt-4 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-200">{paymentError}</p>}
