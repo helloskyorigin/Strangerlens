@@ -1,11 +1,10 @@
 "use client";
 import React from "react";
 
-import { FileText, Layers3, Quote } from "lucide-react";
+import { Layers3 } from "lucide-react";
 import EvidenceToFix from "@/components/EvidenceToFix";
 import BetterCopyStudio from "@/components/BetterCopyStudio";
 import SmartPriority from "@/components/SmartPriority";
-import ImprovementChecklist from "@/components/ImprovementChecklist";
 import type { PremiumWorkbench, EvidenceFix, PriorityItem, CopyOpportunity } from "@/types/premiumWorkbench";
 
 interface LegacyImprovement {
@@ -81,24 +80,21 @@ function legacyWorkbench(priority?: LegacyPriority, improvements: LegacyImprovem
 }
 
 export default function PremiumActionPlan({
-  workbench, recommendation, otherImprovements = [], evidence, visitorThought, reportId,
+  workbench, recommendation, otherImprovements = [],
 }: PremiumActionPlanProps) {
   const report = workbench || legacyWorkbench(recommendation, otherImprovements);
-  const quotes = [evidence?.homepageExcerpt, ...(evidence?.clearFindings || []), ...(evidence?.missingFindings || [])]
-    .filter(meaningful);
-  const uniqueQuotes = [...new Set(quotes)];
 
   return (
     <section id="your-improvement-plan" className="scroll-mt-24 space-y-8 sm:space-y-10" aria-labelledby="improvement-workbench-title">
       <div className="overflow-hidden rounded-2xl border border-[#375577] bg-gradient-to-br from-[#142742] via-[#121D30] to-[#101824] p-5 sm:p-7">
         <p className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-blue-300">
-          <Layers3 className="h-4 w-4" aria-hidden="true"/> Your Implementation Workbench
+          <Layers3 className="h-4 w-4" aria-hidden="true"/> THREE TOOLS THAT MAKE THE REPORT USEFUL
         </p>
         <h2 id="improvement-workbench-title" className="mt-3 text-2xl font-bold leading-tight tracking-tight text-white sm:text-[30px]">
-          From Clarity Scores to Changes You Can Make.
+          What to fix. Why it matters. What to say.
         </h2>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[#B7C9DD]">
-          Trace findings to the actual website wording where available, organize what to tackle first, then review and edit the suggested copy. The source and recommendations are kept separate.
+          Review source-backed findings, work from a clear priority order, and write a better version. Three focused tools, not a wall of features.
         </p>
         <nav aria-label="Implementation workbench sections" className="mt-4 flex flex-wrap gap-2">
           <a href="#evidence-to-fix" className="rounded-full border border-[#415D82] bg-[#1D3351] px-3 py-2 text-xs font-semibold text-[#D2E6FF] hover:bg-[#284668]">Evidence-to-Fix</a>
@@ -110,29 +106,7 @@ export default function PremiumActionPlan({
       <EvidenceToFix fixes={report.evidenceFixes}/>
       <SmartPriority priorities={report.priorities}/>
       <BetterCopyStudio opportunities={report.copyOpportunities}/>
-      <ImprovementChecklist workbench={report} reportId={reportId}/>
 
-      {(uniqueQuotes.length > 0 || meaningful(visitorThought)) && (
-        <section aria-labelledby="content-behind-assessment" className="rounded-2xl border border-[#2B3B50] bg-[#121824] p-5 sm:p-6">
-          <h3 id="content-behind-assessment" className="flex items-center gap-2 text-lg font-bold text-white">
-            <FileText className="h-5 w-5 text-blue-300" aria-hidden="true"/> Content Behind the Assessment
-          </h3>
-          <p className="mt-1 text-xs text-[#91A6C0]">{evidence?.locationTag || "Accessible content from the inspected website"}</p>
-          {uniqueQuotes.length > 0 && <div className="mt-4 space-y-2">
-            {uniqueQuotes.slice(0, 8).map((quote, index) =>
-              <blockquote key={index} className="break-words border-l-2 border-[#3D5878] pl-3 text-sm leading-relaxed text-[#C0D1E4]">{quote}</blockquote>)}
-          </div>}
-          {meaningful(visitorThought) && (
-            <div className="mt-5 border-t border-[#2B3B50] pt-4">
-              <p className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#92A9C4]">
-                <Quote className="h-3.5 w-3.5" aria-hidden="true"/> Simulated first-time visitor impression
-              </p>
-              <p className="text-sm leading-relaxed text-[#D1DEEC]">{visitorThought}</p>
-            </div>
-          )}
-          <p className="mt-4 text-xs leading-relaxed text-[#7D91AA]">AI interpretation of publicly accessible website content, not recordings, surveys, or measured conversions.</p>
-        </section>
-      )}
     </section>
   );
 }
