@@ -44,6 +44,22 @@ export default function SignalReportExplorer({
   const purchaseDetails = activePurchase?.details;
   const goodScore = activeSignal.score !== null && activeSignal.score >= 70;
 
+  // The next-chapter action lives after the findings. Bring the new panel
+  // into view rather than leaving visitors at the bottom of stale content.
+  const moveToNextChapter = () => {
+    if (!nextChapter) return;
+    setSelectedKey(nextChapter.key);
+    window.requestAnimationFrame(() => {
+      const panel = document.getElementById("chapter-detail-panel");
+      if (!panel) return;
+      panel.scrollIntoView({
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+        block: "start",
+      });
+      panel.focus({ preventScroll: true });
+    });
+  };
+
   // Vertical chapter navigation is operable by mouse, touch, Tab, and arrow keys.
   const onChapterKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
     const count = fullSignals.length;
@@ -115,7 +131,7 @@ export default function SignalReportExplorer({
           </p>
         </nav>
 
-        <article id="chapter-detail-panel" role="tabpanel" aria-labelledby={`chapter-tab-${activeSignal.key}`}
+        <article id="chapter-detail-panel" role="tabpanel" tabIndex={-1} aria-labelledby={`chapter-tab-${activeSignal.key}`}
           className="min-w-0 overflow-hidden rounded-2xl border border-[#E2EADD] bg-white">
           <div className="border-b border-[#E2EADD] bg-[#F4FAEC] p-5 sm:p-6">
             <p className="text-[11px] font-bold uppercase tracking-widest text-[#7A8D72]">
@@ -180,7 +196,7 @@ export default function SignalReportExplorer({
             )}
 
           {nextChapter && (
-            <button type="button" onClick={() => setSelectedKey(nextChapter.key)}
+            <button type="button" onClick={moveToNextChapter}
               className="flex w-full items-center justify-between gap-3 border-t border-[#E2EADD] bg-[#F1F9E6] px-5 py-4 text-left text-sm font-semibold text-[#182516] hover:bg-[#E8F8D5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#8ACB3A] sm:px-6">
               <span>Next chapter: {nextChapter.title}</span>
               <ArrowRight className="h-4 w-4 shrink-0 text-[#578129]" aria-hidden="true" />
