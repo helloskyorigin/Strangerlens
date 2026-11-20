@@ -182,7 +182,7 @@ export default function ClarityResultsOverview({
           : "Your scores tell you where to look. Unlock the evidence, recommended fixes and replacement wording to understand what to change."}</p>
       </div>
       <a href={isUnlocked ? "#complete-paid-report" : "#complete-report-preview"}>
-        {isUnlocked ? "View full findings" : "Unlock Full Analysis — $5"} <ArrowUpRight size={17} aria-hidden="true"/>
+        {isUnlocked ? "View full findings" : "Unlock Full Analysis — $9"} <ArrowUpRight size={17} aria-hidden="true"/>
       </a>
     </section>
   </>;
