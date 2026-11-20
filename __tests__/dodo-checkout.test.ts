@@ -119,7 +119,13 @@ async function main() {
     check(!JSON.stringify(redacted).includes(privateText), "free API strips premium signal and first-seconds explanations");
     providerProductAmount = 500;
     check((await newCheckoutResponse(report)).status === 503, "Old $5 Dodo product must not open a $9 checkout");
+    const wrongPriceStatus = await (await paymentStatus()).json();
+    check(wrongPriceStatus.priceUsd === 9 && wrongPriceStatus.checkoutEnabled === false,
+      "The advertised $9 cannot open checkout against a Dodo $5 product");
     providerProductAmount = 900;
+    const correctPriceStatus = await (await paymentStatus()).json();
+    check(correctPriceStatus.priceUsd === 9 && correctPriceStatus.checkoutEnabled === true,
+      "$9 checkout becomes available only after Dodo verifies the matching USD product");
     // An older $5 pending checkout may have the same Dodo product ID, but it
     // must not be reused after the price is raised to $9.
     const staleReport = await createReport();
