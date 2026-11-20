@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AlertCircle, ArrowUpRight, Globe2, RotateCcw, X } from "lucide-react";
-import { useReducedMotion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import BrandMark from "@/components/BrandMark";
 import type { ScanMilestone } from "@/lib/scan-flow-controller";
 
@@ -113,6 +113,9 @@ export default function ScanScreen({
   const stage = isReady ? "ready" : isError ? "error" : !hasConnection || isVerifying ? "verify" :
     scanMilestone === "signals_evaluated" ? "prepare" :
     scanMilestone === "content_inspected" ? "evaluate" : "inspect";
+  // VYLENS-style quiet heartbeat: message variation is informational only.
+  // The animation never advances the backend state, percent or completion.
+  const heartbeat = Math.floor(elapsed / 9);
   const copy = stage === "ready"
     ? { title: "Your report is ready.", description: "Opening your clarity report and findings." }
     : stage === "verify"
@@ -124,6 +127,15 @@ export default function ScanScreen({
     : stage === "prepare"
     ? { title: "Preparing your report.", description: "Organizing inspected evidence into a clear, useful overview." }
     : { title: "Couldn't finish this one.", description: safeError(backendError) };
+
+  const displayCopy = stage === "verify" && heartbeat >= 1
+    ? { title: "Connecting to the public page.", description: "Some websites take a moment to respond. We're still checking availability." }
+    : stage === "inspect" && heartbeat > 0
+    ? heartbeat % 2
+      ? { title: "Looking for a clearer message.", description: "Reviewing the accessible content and what it communicates to somebody new." }
+      : { title: "Still taking a closer look.", description: "Checking the available website content without guessing about real visitors." }
+    : copy;
+  const copyKey = stage + "-" + (stage === "inspect" || stage === "verify" ? heartbeat : "0");
 
   return (
     <div className="sl-scan-v2" data-scan-state={stage}>
@@ -175,10 +187,17 @@ export default function ScanScreen({
               <span className="sl-scan-progress-track"><span className={"sl-scan-progress-indicator" + (isReady ? " is-ready" : "")}/></span>
             </div>
 
-            <div key={stage} className="sl-scan-copy" role="status" aria-live="polite" aria-atomic="true">
-              <h1>{copy.title.replace(/\.$/, "")}<span>.</span></h1>
-              <p>{copy.description}</p>
-            </div>
+            <AnimatePresence initial={false} mode="wait">
+              <motion.div key={copyKey} className="sl-scan-copy"
+                role="status" aria-live="polite" aria-atomic="true"
+                initial={reduceMotion ? false : { opacity: 0, y: 7 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={reduceMotion ? {} : { opacity: 0, y: -7 }}
+                transition={{ duration: reduceMotion ? 0 : 0.24, ease: "easeOut" }}>
+                <h1>{displayCopy.title.replace(/\.$/, "")}<span>.</span></h1>
+                <p>{displayCopy.description}</p>
+              </motion.div>
+            </AnimatePresence>
 
             <div className="sl-scan-subject" aria-label="Current inspection">
               <span className="sl-scan-subject-symbol"><Globe2 size={20} aria-hidden="true" /></span>
