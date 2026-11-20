@@ -85,7 +85,7 @@ export default function PremiumActionPlan({
   const report = workbench || legacyWorkbench(recommendation, otherImprovements);
 
   return (
-    <section id="your-improvement-plan" className="scroll-mt-24 space-y-8 sm:space-y-10" aria-labelledby="improvement-workbench-title">
+    <section id="your-improvement-plan" className="scroll-mt-24 space-y-5 sm:space-y-6" aria-labelledby="improvement-workbench-title">
       <div className="overflow-hidden rounded-2xl border border-[#D7E8CD] bg-[#F4FBEA] p-5 sm:p-7">
         <p className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-[#578129]">
           <Layers3 className="h-4 w-4" aria-hidden="true"/> THREE TOOLS THAT MAKE THE REPORT USEFUL
