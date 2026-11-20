@@ -1,10 +1,9 @@
 "use client";
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import CompleteReportPreview from "@/components/CompleteReportPreview";
 import ClarityResultsOverview from "@/components/ClarityResultsOverview";
 import SignalReportExplorer from "@/components/SignalReportExplorer";
 import PremiumActionPlan from "@/components/PremiumActionPlan";
-import PostScanUpgradeModal from "@/components/PostScanUpgradeModal";
 import { trackFunnelEvent } from "@/lib/ui-funnel-events";
 import { persistActiveReportSession } from "@/lib/active-report-session";
 import { escapeHtmlText } from "@/lib/escape-html";
@@ -13,6 +12,7 @@ import { LandingThemeSwitcher } from "@/components/landing/LandingThemeSwitcher"
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import { adaptReport } from "@/lib/report-adapter";
+import { projectFreeFrontendReport } from "@/lib/free-report-projection";
 import { generateReportPdf } from "@/lib/pdf-generator";
 import type { PremiumWorkbench } from "@/types/premiumWorkbench";
 import ClaritySignalTooltip from "@/components/ClaritySignalTooltip";
@@ -116,7 +116,6 @@ export default function ResultsScreen({
   onRecheck,
   onOpenFaq,
   onOpenPricing,
-  postScanOfferReportId = null,
 }: any) {
   const [activeSignalTooltip, setActiveSignalTooltip] = useState<string | null>(null);
   const [isScoreModalOpen, setIsScoreModalOpen] = useState(false);
@@ -127,23 +126,9 @@ export default function ResultsScreen({
   const [earlyErrorMessage, setEarlyErrorMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
-  // Initialize the fresh-scan offer BEFORE first Results paint. Previously
-  // waiting 700ms made the report flash underneath a delayed modal.
-  const [isPostScanOfferOpen, setIsPostScanOfferOpen] = useState(() => {
-    const fresh = Boolean(postScanOfferReportId && data?.reportId === postScanOfferReportId &&
-      checkoutEnabled && !isUnlocked && paymentState !== "pending" && paymentState !== "success");
-    if (!fresh || typeof window === "undefined") return false;
-    try { return window.sessionStorage.getItem(`sl_post_scan_offer_v1:${postScanOfferReportId}`) !== "shown"; }
-    catch { return true; }
-  });
   const mobileUpgradeRef = useRef<HTMLDivElement | null>(null);
   const [showMobileUpgradeBar, setShowMobileUpgradeBar] = useState(false);
 
-  const offeredReportRef = useRef<string | null>(null);
-  const closePostScanOffer = useCallback(() => {
-    trackFunnelEvent("post_scan_offer_dismissed");
-    setIsPostScanOfferOpen(false);
-  }, []);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [pdfError, setPdfError] = useState<string | null>(null);
 
@@ -157,10 +142,9 @@ export default function ResultsScreen({
   const isVerifyingPayment = paymentState === "verifying" || paymentState === "pending";
 
   // Canonical report normalized from authoritative analysis data
-  const report = adaptReport(data);
+  const report = adaptReport(!isReportUnlocked && data ? projectFreeFrontendReport(data) : data);
   const unlockedPurchase = isReportUnlocked ? report.purchaseReadiness : undefined;
   const showLockedPurchase = !unlockedPurchase && Boolean(report.purchaseReadinessLocked || report.purchaseReadiness);
-  const displaySignals = unlockedPurchase ? [...report.signalsList, unlockedPurchase] : report.signalsList;
   // Keep a compact $5 entry point available while mobile visitors scroll the
   // free report. Hide it when either upgrade card is in view or the modal opens.
   useEffect(() => {
@@ -183,26 +167,8 @@ export default function ResultsScreen({
     };
   }, [isReportUnlocked, isCheckoutAvailable, data?.reportId]);
 
-  // Offer only after a FRESH, successfully completed scan (never on restore,
-  // back navigation, a purchased report, or after returning from checkout).
+  // Results always paint first; no automatic paywall or post-scan interruption.
   const currentReportId: string | null = data?.reportId || report.rawReport?.reportId || null;
-  useEffect(() => {
-    if (!postScanOfferReportId || currentReportId !== postScanOfferReportId ||
-      !isCheckoutAvailable || isReportUnlocked || isVerifyingPayment ||
-      paymentState === "pending" || paymentState === "success") return;
-    if (offeredReportRef.current === currentReportId) return;
-    try {
-      if (window.sessionStorage.getItem(`sl_post_scan_offer_v1:${currentReportId}`) === "shown") return;
-    } catch { /* Private browsing may disable session storage. */ }
-    offeredReportRef.current = currentReportId;
-    try { window.sessionStorage.setItem(`sl_post_scan_offer_v1:${currentReportId}`, "shown"); } catch { /* no-op */ }
-    // A new report triggers this only once. The initial state is already open
-    // on the first client paint; effect handles report changes while mounted.
-    setIsPostScanOfferOpen(true);
-    trackFunnelEvent("post_scan_offer_shown");
-  }, [postScanOfferReportId, currentReportId, isCheckoutAvailable,
-      isReportUnlocked, isVerifyingPayment, paymentState]);
-
 
   // The parent payment hook is the single owner of checkout return,
   // verification retries and restoring the server-authorized paid report.
@@ -384,24 +350,9 @@ export default function ResultsScreen({
 
   return (
     <div id="results-content" className={`sl-app-theme sl-results-v7 min-h-screen bg-white text-[#172116] font-sans antialiased flex flex-col ${!isReportUnlocked && isCheckoutAvailable ? "pb-16 sm:pb-0" : ""}`}>
-      <PostScanUpgradeModal
-        open={isPostScanOfferOpen && !isReportUnlocked && isCheckoutAvailable}
-        domain={report.domain}
-        overallScore={report.overallScoreDisplay}
-        signals={report.signalsList.map(signal => ({
-          title: signal.title, scoreDisplay: signal.scoreDisplay,
-        }))}
-        purchaseReadinessApplicable={showLockedPurchase}
-        canCheckout={isCheckoutAvailable}
-        isTestMode={isTestMode}
-        busy={loading || isVerifyingPayment}
-        paymentError={paymentError}
-        onContinueFree={closePostScanOffer}
-        onUpgrade={handleUnlockFullAnalysis}
-      />
       {/* Mobile-only compact offer stays available while long free results scroll.
-          Never blocks the report, the checkout modal, or the main premium CTA. */}
-      {!isReportUnlocked && isCheckoutAvailable && showMobileUpgradeBar && !isPostScanOfferOpen && (
+          Only appears after the visitor has scrolled past the on-page offer. */}
+      {!isReportUnlocked && isCheckoutAvailable && showMobileUpgradeBar && (
         <div className="sl-v8-mobile-upgrade fixed inset-x-0 bottom-0 z-30 border-t border-[#D9E5D1] bg-white/95 px-4 py-2.5 shadow-[0_-10px_35px_rgba(0,0,0,.45)] backdrop-blur-xl sm:hidden"
           style={{ paddingBottom: "max(10px, env(safe-area-inset-bottom))" }}>
           <div className="mx-auto flex max-w-md items-center justify-between gap-3">
@@ -669,7 +620,7 @@ export default function ResultsScreen({
               }}
             />
             </div>
-            {paymentError && !isPostScanOfferOpen &&
+            {paymentError &&
               <p role="alert" className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200">{paymentError}</p>}
           </>
         )}
