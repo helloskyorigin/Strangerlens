@@ -31,7 +31,7 @@ const report=adaptReport(data);
 const sample=renderToStaticMarkup(<CompleteReportPreview
   signals={report.signalsList} purchaseReadinessApplicable canCheckout isTestMode={false}
   busy={false} onUnlock={()=>{}} onViewExample={()=>{}}/>);
-assert.ok(sample.includes("Know what to fix. And how."));
+assert.ok(sample.includes("Know why. Know what to fix."));
 assert.ok(sample.includes("See an example report"));
 assert.ok(sample.includes("Five")||sample.includes("five"));
 assert.ok(sample.includes("Smart Priority"));
