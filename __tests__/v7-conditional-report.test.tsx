@@ -34,7 +34,7 @@ assert.equal(locked.querySelector("#complete-report-preview")?.querySelectorAll(
 const paid = render(premium as typeof mapped,true);
 assert.equal(paid.querySelectorAll('[data-signal]').length,6,
   "Unlocked commercial website displays sixth scored signal in overview");
-assert.ok(paid.querySelector('[data-signal="purchaseReadiness"]')?.textContent?.includes("68/100"));
+assert.equal(paid.querySelector('[data-signal="purchaseReadiness"] .sl-v8-signal-score')?.textContent, "68", "Paid purchase score remains accurate in compact display.");
 assert.ok(!paid.querySelector('[data-testid="purchase-readiness-locked"]'),"Verified premium removes lock placeholder");
 assert.ok(!paid.querySelector("#complete-report-preview"),"Paid customer sees no repeated sales panel");
 assert.ok(paid.querySelector("#complete-paid-report") && paid.querySelector("#your-improvement-plan"),
