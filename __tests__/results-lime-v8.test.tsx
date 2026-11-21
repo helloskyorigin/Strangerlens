@@ -17,7 +17,9 @@ function render(isUnlocked: boolean) {
 }
 
 const free = render(false);
-assert.ok(free.querySelector(".sl-v8-header .sl-v8-nav-brand"), "Results use VYLENS-style floating brand navbar.");
+assert.ok(free.querySelector('.sl-v8-header .sl-v8-nav-left [data-testid="theme-toggle"]') &&
+  free.querySelector('.sl-v8-header .sl-v8-nav-right .sl-v8-new-check'),
+  "Results navigation has appearance left, New Check right.");
 assert.ok(free.querySelector("#report-first-look .sl-v7-score-number"), "First look prominently shows backend score.");
 assert.ok(free.querySelector("#report-clarity-signals .sl-v7-signal-list"), "Signals have their own section.");
 assert.ok(free.querySelector(".sl-v8-score-insight"), "The score includes the short insight.");

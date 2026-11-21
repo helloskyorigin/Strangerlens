@@ -22,8 +22,10 @@ for (const paid of [false, true]) {
   assert.equal(doc.querySelectorAll(".sl-v11-signal").length, 5, "Five clear signal rows");
   assert.equal(doc.querySelectorAll('button[aria-label^="About "]').length, 10,
     "Every signal still has its responsive info tooltip");
-  assert.ok(doc.querySelector('.sl-v8-header .sl-v8-my-reports[aria-label="My Reports"]'),
-    "My Reports link receives mobile-safe styling");
+  assert.ok(doc.querySelector('.sl-v8-header .sl-v8-nav-left [data-testid="theme-toggle"]'),
+    "Dark mode toggle is on the left of results");
+  assert.equal(doc.querySelectorAll('.sl-v8-header a').length,0,
+    "No My Reports or brand navigation links");
   assert.ok(doc.querySelector(".sl-v8-header .sl-v8-new-check"), "New Check remains available");
   const upper = doc.querySelector("main")?.textContent || "";
   for (const noise of ["Public website content", "Report Complete", "YOUR OUTSIDE PERSPECTIVE",
@@ -41,8 +43,7 @@ for (const paid of [false, true]) {
   }
 }
 const css = readFileSync("components/results-lime-v8.css","utf8");
-assert.ok(css.includes("@media(max-width:440px)") &&
-  css.includes(".sl-v8-nav-brand > span {display:none;}"), "Small screens use icon-only brand to prevent overflow");
-assert.ok(css.includes(".sl-v8-my-reports span {") && css.includes("display:none;"),
-  "Mobile My Reports text collapses to its labeled icon");
+assert.ok(css.includes("@media(max-width:440px)"),"Small screens retain responsive layout");
+assert.ok(!readFileSync("components/ResultsScreen.tsx","utf8").includes('href="/my-reports"'),
+  "Results never show My Reports");
 console.log("PASS: clean score-first screen, five info tooltips, compact mobile header, unchanged offer/paid report/PDF.");

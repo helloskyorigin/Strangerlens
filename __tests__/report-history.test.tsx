@@ -209,7 +209,10 @@ async function main() {
     const router = { push: () => {}, replace: () => {}, back: () => {}, forward: () => {}, refresh: () => {}, prefetch: async () => {} };
     await mount(<AppRouterContext.Provider value={router}><PurchasedReport reportId={paid.reportId} /></AppRouterContext.Provider>);
     await wait(() => dom!.window.document.body.textContent?.includes("original.example") === true);
-    check(Boolean([...dom!.window.document.querySelectorAll("a")].find(a => a.getAttribute("href") === "/my-reports" && a.textContent?.trim() === "My Reports")), "purchased viewer retains My Reports header navigation");
+    check(Boolean(dom!.window.document.querySelector('.sl-v8-header [data-testid="theme-toggle"]')) &&
+      Boolean(dom!.window.document.querySelector('.sl-v8-header .sl-v8-new-check')) &&
+      !dom!.window.document.querySelector('.sl-v8-header a[href="/my-reports"]'),
+      "Purchased viewer uses minimal nav while old direct reports remain accessible");
     check(!dom!.window.document.body.textContent?.includes("Unable to open"), "original Results UI renders server-verified paid report");
     // A refund in another tab/session must remove an open report on focus.
     activeStored.payment.active = false;
@@ -243,11 +246,14 @@ async function main() {
     check(dom!.window.document.body.textContent?.includes("not available in this browser"), "direct report URL without original browser token fails closed");
     await browser({}, "/");
     await mount(<LandingPage />);
-    await wait(() => Boolean(dom!.window.document.querySelector('nav[aria-label="Primary navigation"] a[href="/my-reports"]')));
-    check(Boolean(dom!.window.document.querySelector('nav[aria-label="Primary navigation"] a[href="/my-reports"]')), "desktop header links to My Reports");
+    await wait(() => Boolean(dom!.window.document.querySelector('nav[aria-label="Primary navigation"]')));
+    check(!dom!.window.document.querySelector('nav[aria-label="Primary navigation"] a[href="/my-reports"]'),
+      "Desktop header hides My Reports");
     const hamburger = dom!.window.document.querySelector('button[aria-label="Open menu"]') as HTMLButtonElement;
     await act(async () => { hamburger.click(); });
-    check(Boolean(dom!.window.document.querySelector('nav[aria-label="Mobile navigation"] a[href="/my-reports"]')), "mobile header menu links to My Reports");
+    check(Boolean(dom!.window.document.querySelector('nav[aria-label="Mobile navigation"]')) &&
+      !dom!.window.document.querySelector('nav[aria-label="Mobile navigation"] a[href="/my-reports"]'),
+      "Mobile menu hides My Reports");
     console.log(`PASS: ${assertions} history/security/DOM/PDF assertions with real Redis and actual API handlers. No scan, AI request or Dodo transaction was made.`);
   } finally {
     await unmount();
