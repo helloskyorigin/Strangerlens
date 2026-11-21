@@ -11,7 +11,7 @@ const doc = new JSDOM(renderToStaticMarkup(<StrangerLensLanding {...props}/>)).w
 const nav=doc.querySelector('nav[aria-label="Primary navigation"]')!;
 assert.equal(nav.querySelectorAll('a').length,3,"Nav is down to How it works, Pricing and FAQ");
 assert.deepEqual([...nav.querySelectorAll("a")].map(a=>a.textContent?.trim()),
-  ["How it works","Pricing","FAQ"],"Removed redundant What we check and Full report links");
+  ["Why it matters","Explore","Pricing"],"Navigation leads with value and exploration, not an early purchase");
 assert.equal(doc.querySelectorAll(".slr-nav-actions [data-testid='theme-toggle']").length,1,
   "Theme switch always visible on the landing navbar");
 assert.equal(doc.querySelectorAll(".slr-nav-actions .slr-nav-cta").length,1,
@@ -29,13 +29,18 @@ assert.ok(sample.textContent?.includes("Sample report") &&
   sample.getAttribute("aria-label")?.includes("Illustrative"),
   "A single honest sample marker identifies the preview");
 assert.ok(!doc.querySelector("#sample-report .slr-example-tabs"),"Weak generic SaaS/service/store example section is removed");
-assert.equal(doc.querySelectorAll("main > section").length,5,"Landing has exactly five useful sections");
-assert.equal(doc.querySelectorAll("#full-report .slr-paid-proof-item").length,5,
-  "Paid value mirrors the five actual expandable report topics");
-assert.ok(!doc.querySelector(".slr-story") && !doc.querySelector("#what-we-check"),
-  "Repetitive scroll-heavy story and signal grid are removed");
-assert.ok(doc.querySelector("#pricing")&&doc.querySelector("#faq")&&doc.querySelector("#how-it-works"),
-  "Pricing, FAQ and workflow remain");
+assert.equal(doc.querySelectorAll("main > section").length,6,"Six purposeful landing sections");
+assert.equal(doc.querySelectorAll("#explore .slr-explore-choice").length,3,
+  "Three interactive visitor questions make the purpose tangible");
+assert.ok(doc.querySelector("#why-it-matters")&&doc.querySelector("#explore")&&doc.querySelector("#how-it-works")&&doc.querySelector("#faq"),
+  "Problem, exploration, workflow and FAQ all precede pricing");
+assert.equal(doc.querySelector("main > section:last-child")?.id,"pricing","Pricing is the final section");
+assert.equal(doc.querySelectorAll("main > section:not(#pricing) .slr-price-card").length,0,
+  "No paid offers in educational sections");
+assert.equal(doc.querySelectorAll("main > section:not(#pricing)").length,5);
+assert.ok(![...doc.querySelectorAll("main > section:not(#pricing)")].some(section=>/\\$9|checkout|buy now/i.test(section.textContent||"")),
+  "Price and order language are reserved for the bottom");
+assert.equal(doc.querySelectorAll("#pricing .slr-final-action button").length,1,"One final free-check action");
 assert.ok(!doc.querySelector('a[href="/my-reports"]'),"Hidden My Reports navigation stays removed");
 const css=readFileSync("components/landing/landing-result-proof.css","utf8");
 assert.ok(css.includes("grid-template-columns:minmax(0,.93fr) minmax(0,1.07fr)") &&
@@ -73,7 +78,12 @@ const root=createRoot(dom.window.document.getElementById("root")!);
   assert.ok(dom.window.document.querySelector('nav[aria-label="Mobile navigation"]'),"Mobile menu opens");
   assert.equal(dom.window.document.querySelectorAll('nav[aria-label="Mobile navigation"] a').length,3,
     "Mobile menu also has only three navigation links");
-  console.log("PASS: report-first landing and responsive top navigation, accurate sample, theme toggle, honest paid features.");
+  const choices=Array.from(dom.window.document.querySelectorAll<HTMLButtonElement>(".slr-explore-choice"));
+  assert.equal(choices.length,3,"Explore controls are rendered");
+  await act(async()=>choices[1].click());
+  assert.equal(choices[1].getAttribute("aria-pressed"),"true","Interactive visitor question switches accessibly");
+  assert.ok(dom.window.document.querySelector(".slr-explore-result")?.textContent?.includes("Is this meant for someone like me?"));
+  console.log("PASS: story-first landing, final-only pricing, responsive navigation, theme toggle and interactive examples.");
 }finally{
   await act(async()=>root.unmount());dom.window.close();
   keys.forEach(k=>saved[k]?Object.defineProperty(globalThis,k,saved[k]):delete (globalThis as any)[k]);
