@@ -289,24 +289,26 @@ Output a strictly valid JSON object matching this schema:
   ]
 }`;
 
-    const modelsToTry = await resolveGroqModelsForKey(
+    // Keep the full evidence-rich prompt and preferred 120B model, but never
+    // wait for every chat model in the account sequentially. Two attempts max.
+    const deadline = Date.now() + 30000;
+    const modelsToTry = (await resolveGroqModelsForKey(
       this.apiKey,
       this.preferredModels
-    );
+    )).slice(0, 2);
     let lastError: Error | null = null;
 
-    for (const model of modelsToTry) {
+    for (const [index, model] of modelsToTry.entries()) {
+      const remainingMs = deadline - Date.now();
+      if (remainingMs < 1200) break;
+      const attemptDeadline = Date.now() + Math.min(index === 0 ? 21000 : 8500, remainingMs);
       try {
-        const result = await this.callGroqChatApi(model, userPrompt);
-        if (result) {
-          return result;
-        }
+        const result = await this.callGroqChatApi(model, userPrompt, true, attemptDeadline);
+        if (result) return result;
       } catch (err: unknown) {
         lastError = err instanceof Error ? err : new Error(String(err));
         console.warn(`Groq model ${model} execution error:`, lastError.message);
-        if ((err as any)?.code === "AI_PROVIDER_AUTH_ERROR") {
-          throw err;
-        }
+        if ((err as any)?.code === "AI_PROVIDER_AUTH_ERROR") throw err;
       }
     }
 
@@ -318,11 +320,14 @@ Output a strictly valid JSON object matching this schema:
   private async callGroqChatApi(
     model: string,
     userPrompt: string,
-    useJsonObjectFormat = true
+    useJsonObjectFormat = true,
+    deadlineMs = Date.now() + 21000
   ): Promise<WebsiteAnalysis> {
     const endpoint = "https://api.groq.com/openai/v1/chat/completions";
+    const remainingMs = deadlineMs - Date.now();
+    if (remainingMs <= 0) throw new Error("Groq analysis time budget exceeded");
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s timeout
+    const timeoutId = setTimeout(() => controller.abort(), remainingMs);
 
     try {
       const requestBody: Record<string, unknown> = {
@@ -354,8 +359,6 @@ Output a strictly valid JSON object matching this schema:
         signal: controller.signal,
       });
 
-      clearTimeout(timeoutId);
-
       if (!response.ok) {
         let errorBody = "";
         try {
@@ -370,7 +373,7 @@ Output a strictly valid JSON object matching this schema:
           response.status === 400 &&
           /response_format|json_object/i.test(errorBody)
         ) {
-          return this.callGroqChatApi(model, userPrompt, false);
+          return this.callGroqChatApi(model, userPrompt, false, deadlineMs);
         }
 
         if (
