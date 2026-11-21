@@ -3,7 +3,7 @@ import { extractWebsiteSnapshot } from "../lib/content-extractor";
 import { discoverSupportingPages } from "../lib/supporting-page-discovery";
 import { fetchSupportingPages } from "../lib/supporting-page-fetcher";
 import { generateDeterministicFallbackAnalysis } from "../services/ai/fallbackAnalyzer";
-import { correctContradictedLegalClaims } from "../services/validation/legalClaimGuard";
+import { correctContradictedLegalClaims, reconcileFalseLegalOnlyTrustPenalty } from "../services/validation/legalClaimGuard";
 import { calculateOverallScore } from "../services/scoring/calculateOverallScore";
 
 const base = "https://taskpocket.io/";
@@ -77,5 +77,54 @@ describe("Trust legal policy accuracy regressions", () => {
     });
     expect(result.overallScore).toBe(79);
     expect(result.overallStatus).toBe("needs_improvement");
+  });
+  test("Finds each distinct legal policy despite many higher-ranked duplicate Privacy links", () => {
+    const html = '<html><body><header>' +
+      Array.from({ length: 5 }, (_, i) => '<a href="/privacy?ref=' + i + '">Privacy Policy</a>').join("") +
+      '</header><footer><a href="/terms">Terms</a><a href="/refund-policy">Refund Policy</a></footer></body></html>';
+    const found = discoverSupportingPages(html, base, { onlyLegalPolicies: true, maxPages: 3 });
+    expect(found.map(p => p.pageType).sort()).toEqual(["privacy_policy", "refund_policy", "terms_of_service"]);
+  });
+
+  test("Reads accessible icon links and both ends of long HTML for legal policies", () => {
+    const html = '<header><a href="/terms"><span> </span></a></header>' +
+      '<main>' + "long filler ".repeat(26000) + '</main>' +
+      '<footer><a href="/privacy" aria-label="Privacy Policy"><svg></svg></a><a href="/refund-policy">Refund Policy</a></footer>';
+    const found = discoverSupportingPages(html, base, { onlyLegalPolicies: true, maxPages: 3 });
+    expect(found.map(p => p.pageType).sort()).toEqual(["privacy_policy", "refund_policy", "terms_of_service"]);
+  });
+
+  test("Preserves policy links under generic /legal URLs after redirect verification", async () => {
+    const html = '<footer><a href="/legal">Privacy Policy</a></footer>';
+    const found = discoverSupportingPages(html, base, { onlyLegalPolicies: true, maxPages: 3 });
+    expect(found.length).toBe(1);
+    const bundle = await fetchSupportingPages(found, base, {
+      fetcher: async (url: string) => ({
+        success: true as const, originalUrl: url, normalizedUrl: url,
+        finalUrl: url, domain: "taskpocket.io",
+        html: '<html><head><title>Privacy Policy</title></head><body><h1>Privacy Policy</h1><p>We store minimal information to operate this service.</p></body></html>',
+        status: 200, timingMs: 1, contentLength: 144, redirectCount: 0,
+      } as any),
+    });
+    expect(bundle.pages.length).toBe(1);
+  });
+
+  test("Neutralizes only a disproven legal-only Trust penalty; never boosts on links alone", () => {
+    const snapshot = extractWebsiteSnapshot(homepage, { baseUrl: base });
+    const initial = generateDeterministicFallbackAnalysis(snapshot);
+    initial.signals.trust.score = 30;
+    initial.signals.trust.status = "unclear";
+    initial.signals.trust.explanation = "Website is missing a Privacy Policy and Terms of Service.";
+    const found = discoverSupportingPages(homepage, base, { onlyLegalPolicies: true, maxPages: 3 });
+    const empty = { candidates: found, pages: [], attempts: [], discoveredCount: 2,
+      attemptedCount: 0, fetchedCount: 0, totalTimingMs: 0 };
+    expect(reconcileFalseLegalOnlyTrustPenalty(initial, empty).signals.trust.score).toBe(30);
+    const inspected = { ...empty, pages: found.map(p => ({
+      pageType: p.pageType, url: p.url, finalUrl: p.url
+    })) } as any;
+    expect(reconcileFalseLegalOnlyTrustPenalty(initial, inspected).signals.trust.score).toBe(70);
+    const mixed = structuredClone(initial);
+    mixed.signals.trust.explanation += " There are also no customer testimonials.";
+    expect(reconcileFalseLegalOnlyTrustPenalty(mixed, inspected).signals.trust.score).toBe(30);
   });
 });

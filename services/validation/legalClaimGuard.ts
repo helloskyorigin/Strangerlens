@@ -92,3 +92,34 @@ export function correctContradictedLegalClaims(
 
   return corrected;
 }
+
+/**
+ * When the ONLY stated cause of a low Trust score is a policy supposedly
+ * absent, and all named policy pages were actually fetched, neutralize that
+ * demonstrably false cause. Mere links, unreachable pages, or additional
+ * credibility concerns do not earn any score increase.
+ */
+export function reconcileFalseLegalOnlyTrustPenalty(
+  analysis: WebsiteAnalysis,
+  bundle?: SupportingPagesBundle
+): WebsiteAnalysis {
+  const original = analysis.signals?.trust;
+  if (!original || typeof original.score !== "number" || original.score >= 70) return analysis;
+  const statement = original.explanation?.trim() || "";
+  if (!/\b(?:missing|lacks?|absent|no|does not (?:have|provide|include|link)|without)\b/i.test(statement)) return analysis;
+  if (!/\b(?:privacy|terms|refund|return policy|legal policy|legal pages?)\b/i.test(statement)) return analysis;
+  // Other complaints require their own evaluation; policy links cannot
+  // prove testimonials, credentials, security or transparent pricing.
+  if (/\b(?:testimonial|review|customer proof|case stud|credential|social proof|security|not readable|outdated|inconsistent|not accessible|hidden|hard to find|pricing)\b/i.test(statement)) return analysis;
+  const fetched = new Set((bundle?.pages || []).map(page => page.pageType));
+  const named: string[] = [];
+  if (/\bprivacy\b/i.test(statement)) named.push("privacy_policy");
+  if (/\bterms\b/i.test(statement)) named.push("terms_of_service");
+  if (/\b(?:refund|return policy)\b/i.test(statement)) named.push("refund_policy");
+  if (named.length === 0 || !named.every(type => fetched.has(type as any))) return analysis;
+  const corrected: WebsiteAnalysis = JSON.parse(JSON.stringify(analysis));
+  corrected.signals.trust.score = 70;
+  corrected.signals.trust.status = "understandable";
+  corrected.signals.trust.confidence = "medium";
+  return corrected;
+}

@@ -6,7 +6,7 @@ import { normalizeSignalScore } from "@/services/scoring/normalizeSignalScore";
 import { calculateOverallScore } from "@/services/scoring/calculateOverallScore";
 import { assessPurchaseReadiness } from "@/services/scoring/purchaseReadiness";
 import type { SupportingPagesBundle } from "@/lib/supporting-page-fetcher";
-import { correctContradictedLegalClaims } from "./legalClaimGuard";
+import { correctContradictedLegalClaims, reconcileFalseLegalOnlyTrustPenalty } from "./legalClaimGuard";
 import {
   validateEvidenceList,
   hasExplicitAudienceEvidence,
@@ -29,7 +29,9 @@ export function validateAndScoreAnalysis(
   snapshot: WebsiteSnapshot,
   supportingPages?: SupportingPagesBundle
 ): FinalValidatedAnalysis {
-  aiAnalysis = correctContradictedLegalClaims(aiAnalysis, supportingPages);
+  aiAnalysis = correctContradictedLegalClaims(
+    reconcileFalseLegalOnlyTrustPenalty(aiAnalysis, supportingPages), supportingPages
+  );
   const brandName = snapshot.navigation.brandName || snapshot.meta.title || "this website";
   const isIncompleteExtraction =
     (snapshot.stats?.cleanedTextLength ?? 0) < 200 ||
@@ -159,11 +161,18 @@ export function validateAndScoreAnalysis(
       }
     }
 
-    const dimensionSupport = evaluateEvidenceRelevanceForDimension(
+    let dimensionSupport = evaluateEvidenceRelevanceForDimension(
       sigKey,
       verifiedEv,
       snapshot
     );
+    // Successfully fetched policy pages offer limited transparency evidence,
+    // but are not customer proof. They avoid the unsupported-evidence cap
+    // without granting an automatic high Trust score.
+    if (sigKey === "trust" && dimensionSupport === "unsupported" &&
+        supportingPages?.pages.some(p => ["privacy_policy", "terms_of_service", "refund_policy"].includes(p.pageType))) {
+      dimensionSupport = "weak";
+    }
 
     if (sigKey === "audience" && dimensionSupport === "unsupported") {
       verifiedEv = [];
@@ -367,7 +376,8 @@ export function validateAndScoreAnalysis(
   const otherImprovements = validateOtherImprovements(
     aiAnalysis?.other_improvements,
     snapshot,
-    priorityFix.title
+    priorityFix.title,
+    allSignalScores
   );
 
   const rawWm: any = aiAnalysis?.website_message || {};
@@ -580,8 +590,8 @@ export function validateAndScoreAnalysis(
     return getCategorySignalScore(a.category) - getCategorySignalScore(b.category);
   });
 
-  // Limit to top 4 most critical risks
-  risks = risks.slice(0, 4);
+  // Include up to six distinct scored concerns, not fabricated fillers.
+  risks = risks.slice(0, 6);
 
   // 5. Sanitize Verdict & Visitor Thought
   const rawVerdict =

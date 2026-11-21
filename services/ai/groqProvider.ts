@@ -207,7 +207,7 @@ Output a strictly valid JSON object matching this schema:
           ],
           response_format: { type: "json_object" },
           temperature: 0.1,
-          max_completion_tokens: 3000,
+          max_completion_tokens: 4200,
         }),
         signal: controller.signal,
       });

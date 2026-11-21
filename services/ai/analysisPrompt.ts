@@ -63,6 +63,13 @@ export function formatSnapshotForAi(
         submitLabel: f.submitLabel?.slice(0, 100),
       })),
     },
+    // A linked policy is not proof that its content was inspected.
+    legalPageLinks: supportingPagesBundle?.candidates
+      ? supportingPagesBundle.candidates
+        .filter(p => ["privacy_policy", "terms_of_service", "refund_policy"].includes(p.pageType))
+        .map(p => ({ url: p.url, type: p.pageType,
+          inspected: Boolean(supportingPagesBundle.pages.some(page => page.url === p.url)) }))
+      : [],
     legalPages: supportingPagesBundle?.pages
       ? supportingPagesBundle.pages.map((p) => ({
           url: p.finalUrl,
@@ -97,6 +104,8 @@ IMPROVE TRUST ACCURACY:
 - Do not automatically penalize websites for missing irrelevant policies.
 - Do not claim legal compliance, security certification or legitimacy.
 - Verify evidence against the actual inspected page and source URL. Never invent findings or quotations.
+- legalPageLinks lists observed homepage links. inspected=false means the destination content was NOT verified, not that the linked page is absent.
+- The presence of a policy link does not prove legal compliance, valid policy contents, or independent credentials.
 
 ABSOLUTE SOURCE OF TRUTH:
 WebsiteSnapshot and legalPages are the absolute, exclusive source of truth. You must ONLY make claims supported by the actual data.
@@ -112,6 +121,7 @@ CRITICAL CONSTRAINTS & ACCURACY RULES:
 - Signal score 50-69 MUST be flagged as 'medium' severity risk.
 - NEVER return an empty 'risks' array if any signal score is below 70 or if the overall page needs improvement.
 4. Priority Fix: Select the single highest-impact improvement targeting the weakest signal. Supply a realistic, concrete rewrite in 'clearer_direction'/'suggested_direction' that maintains the product's authentic promise.
-5. Other Improvements: Provide 2-3 distinct, actionable recommendations that do NOT duplicate the Priority Fix.
+5. Other Improvements: Examine audience specificity, outcome clarity, proof, legal-page discoverability, pricing cues, forms, and CTA wording. Provide up to 5 distinct, actionable, evidence-grounded recommendations that do NOT duplicate the Priority Fix. Fewer are fine. Do not invent issues just to reach a count.
+6. Risks: Include up to 6 clearly distinct concerns from inspected evidence, qualified as possible friction rather than observed visitor behavior. Do not force a risk if the evidence supports a strength.
 
 VERSION: ${ANALYSIS_VERSION}`;

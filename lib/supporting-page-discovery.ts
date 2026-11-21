@@ -526,6 +526,37 @@ export function classifySupportingPageCandidate(
           (combinedPath.includes(kw) || lowerText.includes(kw)))
     );
 
+  // Core legal policies are more specific than generic product or pricing links.
+  if (
+    matchesAny(["refund", "refund-policy", "returns", "return-policy", "cancellation", "cancellation-policy"])
+  ) {
+    return {
+      pageType: "refund_policy",
+      categoryGroup: "legal_policies",
+      baseScore: 75,
+    };
+  }
+
+  if (
+    matchesAny(["terms", "terms-of-service", "terms-and-conditions", "tos", "conditions", "user-agreement"])
+  ) {
+    return {
+      pageType: "terms_of_service",
+      categoryGroup: "legal_policies",
+      baseScore: 70,
+    };
+  }
+
+  if (
+    matchesAny(["privacy", "privacy-policy", "privacy-statement"])
+  ) {
+    return {
+      pageType: "privacy_policy",
+      categoryGroup: "legal_policies",
+      baseScore: 70,
+    };
+  }
+
   // 1. Pricing & Plans (Highest Priority: essential for understanding offer, tiers, trials, guarantees)
   if (
     matchesAny(["pricing", "plans", "price", "packages", "tiers", "subscriptions", "pro", "premium"])
@@ -691,37 +722,6 @@ export function classifySupportingPageCandidate(
     };
   }
 
-  // 11. Legal Policies (Refund, Terms, Privacy)
-  if (
-    matchesAny(["refund", "refund-policy", "returns", "return-policy", "cancellation", "cancellation-policy"])
-  ) {
-    return {
-      pageType: "refund_policy",
-      categoryGroup: "legal_policies",
-      baseScore: 75,
-    };
-  }
-
-  if (
-    matchesAny(["terms", "terms-of-service", "terms-and-conditions", "tos", "conditions", "user-agreement"])
-  ) {
-    return {
-      pageType: "terms_of_service",
-      categoryGroup: "legal_policies",
-      baseScore: 70,
-    };
-  }
-
-  if (
-    matchesAny(["privacy", "privacy-policy", "privacy-statement"])
-  ) {
-    return {
-      pageType: "privacy_policy",
-      categoryGroup: "legal_policies",
-      baseScore: 70,
-    };
-  }
-
   return {
     pageType: "other",
     categoryGroup: "docs_integrations",
@@ -766,15 +766,12 @@ export function discoverSupportingPages(
   }
 
   const maxHtmlChars = SERVER_LIMITS.WEBSITE_MAX_HTML_CHARS;
-  // Policy links are frequently in the footer, after a very long homepage.
-  // Prefer the final bounded portion for legal-only discovery rather than
-  // silently discarding footer links outside the standard extraction window.
-  const boundedHtml =
-    html.length > maxHtmlChars
-      ? options.onlyLegalPolicies
-        ? html.slice(-maxHtmlChars)
-        : html.slice(0, maxHtmlChars)
-      : html;
+  // Inspect both the header and footer of long pages; a footer-only slice
+  // can miss policy links in the header and vice versa. Network fetch is
+  // already capped at 5MB.
+  const boundedHtml = options.onlyLegalPolicies && html.length > maxHtmlChars
+    ? html.slice(0, maxHtmlChars) + "\n" + html.slice(-maxHtmlChars)
+    : html.slice(0, maxHtmlChars);
 
   const $ = cheerio.load(boundedHtml);
 
@@ -794,12 +791,14 @@ export function discoverSupportingPages(
   $("a[href]").each((_, el) => {
     const $el = $(el);
     const rawHref = $el.attr("href");
-    const anchorText = cleanAnchorText(
-      $el.text() || $el.attr("aria-label") || $el.attr("title") || ""
-    );
-
-    // Skip empty or excessively long anchor text
-    if (!anchorText || anchorText.length > 80) return;
+    // Use the first NONEMPTY label; whitespace or icon-only anchors must not
+    // hide visible policy URLs from the scan.
+    const anchorText = [
+      $el.text(), $el.attr("aria-label"), $el.attr("title"),
+      $el.find("img[alt]").first().attr("alt"),
+    ].map(value => cleanAnchorText(value)).find(Boolean) || "";
+    const linkLabel = anchorText || (options.onlyLegalPolicies ? rawHref || "" : "");
+    if (!linkLabel || linkLabel.length > 120) return;
 
     const canonicalUrl = canonicalizeSupportingUrl(rawHref, homepageUrl);
     if (!canonicalUrl) return;
@@ -812,7 +811,7 @@ export function discoverSupportingPages(
     }
 
     const pathname = normalizeSupportingPathname(parsedUrl.pathname);
-    const exclusion = isExcludedSupportingPath(pathname, anchorText);
+    const exclusion = isExcludedSupportingPath(pathname, linkLabel);
     if (exclusion.excluded) return;
 
     // Determine structural location on the homepage
@@ -836,7 +835,7 @@ export function discoverSupportingPages(
 
     const classification = classifySupportingPageCandidate(
       pathname,
-      anchorText
+      linkLabel
     );
     const relevanceScore =
       classification.baseScore +
@@ -854,7 +853,7 @@ export function discoverSupportingPages(
         url: canonicalUrl,
         normalizedUrl: canonicalUrl,
         path: pathname,
-        anchorText,
+        anchorText: anchorText || pathname,
         pageType: classification.pageType,
         categoryGroup: classification.categoryGroup,
         sourceLocation,
@@ -878,18 +877,19 @@ export function discoverSupportingPages(
   // Pass 1: Pick the highest-scoring candidate from each distinct categoryGroup (excluding "other" pageType first)
   const selected: DiscoveredSupportingPageCandidate[] = [];
   const selectedUrls = new Set<string>();
-  const usedGroups = new Set<SupportingPageCategoryGroup>();
+  const usedGroups = new Set<string>();
 
   for (const candidate of sortedCandidates) {
     if (selected.length >= maxPages) break;
     if (
       candidate.pageType !== "other" &&
-      !usedGroups.has(candidate.categoryGroup)
+      !usedGroups.has(options.onlyLegalPolicies ? candidate.pageType : candidate.categoryGroup)
     ) {
       const { orderIndex: _idx, ...cleanCandidate } = candidate;
       selected.push(cleanCandidate);
       selectedUrls.add(candidate.normalizedUrl);
-      usedGroups.add(candidate.categoryGroup);
+      // Treat Privacy, Terms and Refund as three distinct types.
+      usedGroups.add(options.onlyLegalPolicies ? candidate.pageType : candidate.categoryGroup);
     }
   }
 

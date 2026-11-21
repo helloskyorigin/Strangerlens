@@ -66,7 +66,7 @@ export const SERVER_LIMITS = {
   AI_MAX_INPUT_TOKENS: getEnvNumber("AI_MAX_INPUT_TOKENS", 8000),
 
   /** Maximum token limit requested for AI structured output response (default 3,000) */
-  AI_MAX_OUTPUT_TOKENS: getEnvNumber("AI_MAX_OUTPUT_TOKENS", 3000),
+  AI_MAX_OUTPUT_TOKENS: getEnvNumber("AI_MAX_OUTPUT_TOKENS", 4200),
 
   /** Global deadline for the entire website check lifecycle (default 90s) */
   ANALYSIS_TOTAL_TIMEOUT_MS: getEnvNumber("ANALYSIS_TOTAL_TIMEOUT_MS", 90000),

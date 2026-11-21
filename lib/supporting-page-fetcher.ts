@@ -254,7 +254,7 @@ export async function fetchSupportingPages(
             continue;
           }
 
-          const finalPathExclusion = isExcludedSupportingPath(finalPathname);
+          const finalPathExclusion = isExcludedSupportingPath(finalPathname, candidate.anchorText);
           if (finalPathExclusion.excluded) {
             attempts[index] = {
               url: candidate.url,

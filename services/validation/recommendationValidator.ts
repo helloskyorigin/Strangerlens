@@ -511,7 +511,7 @@ export function validatePriorityFix(
 
 /**
  * Validates array of Other Improvements. Filters out generic titles, avoids duplicating priority fix,
- * strips fabricated statistics/claims, prevents contradicting clear signals, and limits max count to 3.
+ * strips fabricated statistics/claims, prevents contradicting clear signals, and limits max count to 5.
  */
 export function validateOtherImprovements(
   improvements: OtherImprovementInput[] | undefined,
@@ -545,7 +545,7 @@ export function validateOtherImprovements(
   }
 
   for (const item of improvements) {
-    if (validList.length >= 3) break; // Maximum 3 recommendations
+    if (validList.length >= 5) break; // Never pad; at most five distinct items
     if (!item || !item.title || hasRepetitiveOrNonsensicalText(item.title)) continue;
 
     const lowerTitle = item.title.toLowerCase().trim();
