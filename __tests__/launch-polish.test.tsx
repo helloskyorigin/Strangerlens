@@ -21,6 +21,35 @@ assert.ok(pageSource.includes('}, [currentView]);') &&
 assert.ok(pageSource.includes('scrollToInput();'),
  "Explicit New Check URL input scrolling remains available");
 
+// AI latency guard: full model/prompt remain, but no multi-minute model chains.
+const aiFlowSource=readFileSync("services/ai/analyzeWebsite.ts","utf8");
+const groqSource=readFileSync("services/ai/groqProvider.ts","utf8");
+const geminiSource=readFileSync("services/ai/aiProvider.ts","utf8");
+const checkSource=readFileSync("app/api/check/route.ts","utf8");
+const supportingSource=readFileSync("services/ai/supportingContextAnalyzer.ts","utf8");
+assert.ok(aiFlowSource.includes("await tryGroq();") &&
+ aiFlowSource.includes("if (!rawAnalysis) await tryGemini();") &&
+ aiFlowSource.indexOf("await tryGroq();")<aiFlowSource.indexOf("if (!rawAnalysis) await tryGemini();"),
+ "Use the configured Groq model before any Gemini fallback");
+assert.ok(groqSource.includes("const deadline = Date.now() + 30000") &&
+ groqSource.includes(").slice(0, 2)") &&
+ groqSource.includes("index === 0 ? 21000 : 8500") &&
+ groqSource.includes("deadlineMs"),
+ "Groq tries at most two models with one bounded wall-time budget");
+assert.ok(groqSource.includes("max_completion_tokens: 4200") &&
+ groqSource.includes("SYSTEM_PROMPT") &&
+ groqSource.includes("response_format"),
+ "Keep full analysis prompt and high-quality structured report");
+assert.ok(geminiSource.includes("setTimeout(() => controller.abort(), 9000)") &&
+ geminiSource.includes("abortSignal: controller.signal"),
+ "Gemini fallback must not leave a request hanging for minutes");
+assert.ok(checkSource.includes("boundedExtraPagesPromise") &&
+ checkSource.includes("optionalContextController.abort()") &&
+ checkSource.includes("}, 10000)"),
+ "Optional supporting pages must not block the core AI result");
+assert.ok(supportingSource.includes("abortSignal: options.signal"),
+ "Abort optional supporting context when its deadline expires");
+
 const landing=renderToStaticMarkup(<StrangerLensLanding url="" onUrlChange={()=>{}} onAnalyze={()=>{}} isVerifying={false} errorMessage={null}/>);
 const dl=new JSDOM(landing).window.document;
 assert.ok(dl.querySelector("h1")?.textContent?.includes("Would a stranger"),"Hero talks directly about first impressions");
