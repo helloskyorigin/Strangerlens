@@ -233,10 +233,7 @@ async function callDefaultSupportingContextAI(
         },
       },
     });
-    const candidateModels = [
-      "gemini-4-hydrogen",
-      "gemini-3.1-flash-lite",
-    ];
+    const candidateModels = ["gemini-3.1-flash-lite"];
 
     for (const model of candidateModels) {
       if (options.signal?.aborted) {
@@ -252,6 +249,9 @@ async function callDefaultSupportingContextAI(
           contents: userPrompt,
           config: {
             systemInstruction: SUPPORTING_CONTEXT_SYSTEM_PROMPT,
+            // Honor the optional-context budget instead of leaving an SDK call pending.
+            abortSignal: options.signal,
+            httpOptions: { timeout: timeoutMs },
             responseMimeType: "application/json",
             responseSchema: SUPPORTING_CONTEXT_GEMINI_SCHEMA,
             thinkingConfig: {
@@ -278,7 +278,7 @@ async function callDefaultSupportingContextAI(
       "qwen/qwen3-32b",
       "meta-llama/llama-4-scout-17b-16e-instruct",
     ]);
-    for (const model of groqModels) {
+    for (const model of groqModels.slice(0, 2)) {
       if (options.signal?.aborted) {
         throw new Error("Supporting-context AI aborted by deadline");
       }
