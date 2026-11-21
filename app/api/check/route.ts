@@ -197,16 +197,34 @@ async function runCheck(req: NextRequest, onProgress?: ProgressEmitter) {
       const legalPagesPromise = discoverAndFetchLegalPages(
         fetchResult.html, fetchResult.finalUrl, { signal: pipelineController.signal }
       );
+      // Optional supporting-page enrichment must not hold the core homepage
+      // analysis hostage. Keep up to 10s of enrichment and preserve all
+      // successfully returned evidence; legal-page checks remain mandatory.
+      const optionalContextController = new AbortController();
+      const parentAbortOptional = () => optionalContextController.abort();
+      if (pipelineController.signal.aborted) optionalContextController.abort();
+      else pipelineController.signal.addEventListener("abort", parentAbortOptional, { once: true });
       const extraPagesPromise: Promise<SupportingResultType> = shouldRunSupportingPages
         ? generateSupportingPageContext(
             snapshot, fetchResult.finalUrl, fetchResult.html,
-            { signal: pipelineController.signal }
+            { signal: optionalContextController.signal }
           ).catch((err: unknown): SupportingResultType => {
             console.warn("[SUPP-WARN] Supporting-page context failed gracefully:",
               err instanceof Error ? err.message : String(err));
             return {};
           })
         : Promise.resolve({} as SupportingResultType);
+      const boundedExtraPagesPromise = new Promise<SupportingResultType>(resolve => {
+        if (!shouldRunSupportingPages) { resolve({} as SupportingResultType); return; }
+        const timer = setTimeout(() => {
+          optionalContextController.abort();
+          resolve({} as SupportingResultType);
+        }, 10000);
+        void extraPagesPromise.then(
+          value => { clearTimeout(timer); resolve(value); },
+          () => { clearTimeout(timer); resolve({} as SupportingResultType); }
+        );
+      });
       const legalPages = await legalPagesPromise;
       // Mutable holder: provenance is set by asynchronous provider selection.
       const provenance: { mode: "ai" | "heuristic" } = { mode: "heuristic" };
@@ -214,8 +232,9 @@ async function runCheck(req: NextRequest, onProgress?: ProgressEmitter) {
         onSource: source => { provenance.mode = source === "deterministic" ? "heuristic" : "ai"; },
       });
       const [rawAiAnalysis, optionalSupportingResult] = await Promise.all([
-        rawAiPromise, extraPagesPromise,
+        rawAiPromise, boundedExtraPagesPromise,
       ]);
+      pipelineController.signal.removeEventListener("abort", parentAbortOptional);
       const aiDurationMs = Math.round(performance.now() - aiStart);
       const analysisMode: "ai" | "heuristic" = provenance.mode;
 
