@@ -1,0 +1,178 @@
+/* StrangerLens: cross-screen light/dark contrast guard.
+ * Deliberately loaded LAST: avoids conflicting legacy dark/monochrome/SCALEN rules.
+ * Scoped to interactive controls, status, form fields and primary navigation.
+ * Never alter analysis values, entitlements, or theme preference behavior.
+ */
+
+.sl-scan-v2 .sl-scan-close,
+html[data-landing-theme="light"] .sl-scan-v2 .sl-scan-close {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  min-height:43px;
+  padding:10px 16px;
+  border-radius:999px!important;
+  border:1px solid #D3E0CC!important;
+  background:#F0F7EA!important;
+  color:#20321B!important;
+  -webkit-text-fill-color:#20321B!important;
+  opacity:1!important;
+  box-shadow:none!important;
+}
+.sl-scan-v2 .sl-scan-close svg,
+html[data-landing-theme="light"] .sl-scan-v2 .sl-scan-close svg {
+  color:#20321B!important;
+  stroke:currentColor;
+  opacity:1!important;
+}
+.sl-scan-v2 .sl-scan-close:hover:not(:disabled),
+html[data-landing-theme="light"] .sl-scan-v2 .sl-scan-close:hover:not(:disabled) {
+  background:#E5F3D8!important;
+  border-color:#A7CA8F!important;
+  color:#20321B!important;
+  -webkit-text-fill-color:#20321B!important;
+}
+
+html[data-landing-theme="dark"] .sl-scan-v2{
+  color-scheme:dark!important;
+}
+html[data-landing-theme="dark"] .sl-scan-v2 .sl-scan-close{
+  background:#252C22!important;
+  border-color:#4B6041!important;
+  color:#F3FBEF!important;
+  -webkit-text-fill-color:#F3FBEF!important;
+  box-shadow:none!important;
+  opacity:1!important;
+}
+html[data-landing-theme="dark"] .sl-scan-v2 .sl-scan-close :is(span,svg){
+  color:#F3FBEF!important;
+  -webkit-text-fill-color:#F3FBEF!important;
+  opacity:1!important;
+}
+html[data-landing-theme="dark"] .sl-scan-v2 .sl-scan-close:hover:not(:disabled){
+  background:#33422D!important;
+  border-color:#7B9D63!important;
+  color:#FFFFFF!important;
+  -webkit-text-fill-color:#FFFFFF!important;
+}
+html[data-landing-theme="dark"] .sl-scan-v2 .sl-scan-close:focus-visible,
+html[data-landing-theme="light"] .sl-scan-v2 .sl-scan-close:focus-visible{
+  outline:3px solid #C7F36A!important;
+  outline-offset:3px!important;
+}
+html[data-landing-theme="dark"] .sl-scan-v2 .sl-scan-brand,
+html[data-landing-theme="dark"] .sl-scan-v2 .sl-scan-brand span{
+  color:#F5F8F1!important;
+  -webkit-text-fill-color:#F5F8F1!important;
+}
+html[data-landing-theme="dark"] .sl-scan-v2 .sl-scan-brand b{
+  color:#C7F36A!important;
+  -webkit-text-fill-color:#C7F36A!important;
+}
+html[data-landing-theme="dark"] .sl-scan-v2 .sl-scan-nav-title{
+  color:#BECBB6!important;
+  -webkit-text-fill-color:#BECBB6!important;
+}
+html[data-landing-theme="dark"] .sl-scan-v2 .sl-scan-status-row .sl-scan-elapsed{
+  background:#20291F!important;
+  border-color:#4C5D41!important;
+  color:#C7F36A!important;
+  -webkit-text-fill-color:#C7F36A!important;
+}
+html[data-landing-theme="dark"] .sl-scan-v2 .sl-scan-reset{
+  color:#CFDAC6!important;
+  -webkit-text-fill-color:#CFDAC6!important;
+}
+html[data-landing-theme="dark"] .sl-scan-v2 .sl-scan-open-report,
+html[data-landing-theme="dark"] .sl-scan-v2 .sl-scan-retry{
+  background:#C7F36A!important;
+  border-color:#C7F36A!important;
+  color:#16220E!important;
+  -webkit-text-fill-color:#16220E!important;
+}
+html[data-landing-theme="dark"] .sl-scan-v2 .sl-scan-open-report :is(span,svg),
+html[data-landing-theme="dark"] .sl-scan-v2 .sl-scan-retry :is(span,svg){
+  color:#16220E!important;
+  -webkit-text-fill-color:#16220E!important;
+}
+html[data-landing-theme="dark"] .sl-scan-v2 .sl-scan-open-report:hover:not(:disabled),
+html[data-landing-theme="dark"] .sl-scan-v2 .sl-scan-retry:hover:not(:disabled){
+  background:#DCFF9C!important;
+  border-color:#DCFF9C!important;
+}
+
+/* Result header: the New Check CTA and appearance toggle maintain contrast.
+   These are state controls, not score indicators. */
+html[data-landing-theme="dark"] .sl-results-v7 .sl-v8-new-check{
+  background:#C7F36A!important;
+  border-color:#C7F36A!important;
+  color:#15200F!important;
+  -webkit-text-fill-color:#15200F!important;
+}
+html[data-landing-theme="dark"] .sl-results-v7 .sl-v8-new-check :is(span,svg){
+  color:#15200F!important;
+  -webkit-text-fill-color:#15200F!important;
+}
+html[data-landing-theme="light"] .sl-results-v7 .sl-v8-new-check{
+  background:#152014!important;
+  border-color:#152014!important;
+  color:#FFFFFF!important;
+  -webkit-text-fill-color:#FFFFFF!important;
+}
+html[data-landing-theme="light"] .sl-results-v7 .sl-v8-new-check :is(span,svg){
+  color:#FFFFFF!important;
+  -webkit-text-fill-color:#FFFFFF!important;
+}
+html[data-landing-theme="dark"] .sl-results-v7 .sl-v8-nav-left .sl-theme-quick,
+html[data-landing-theme="dark"] .sl-results-v7 .sl-v8-nav-right .sl-theme-quick{
+  background:#242B21!important;
+  border-color:#4A5D40!important;
+  color:#F5FFE9!important;
+  -webkit-text-fill-color:#F5FFE9!important;
+}
+html[data-landing-theme="dark"] .sl-results-v7 .sl-theme-quick :is(span,svg){
+  color:#F5FFE9!important;
+  -webkit-text-fill-color:#F5FFE9!important;
+}
+html[data-landing-theme="light"] .sl-results-v7 .sl-theme-quick :is(span,svg){
+  color:#1C2D1B!important;
+  -webkit-text-fill-color:#1C2D1B!important;
+}
+
+/* Legal/support navigational actions: no dark-on-dark tab or white-on-white button. */
+html[data-landing-theme="dark"] .slr-legal .slr-legal-tab{
+  background:#222A20!important;
+  border-color:#4D5F43!important;
+  color:#F1F8EB!important;
+  -webkit-text-fill-color:#F1F8EB!important;
+}
+html[data-landing-theme="dark"] .slr-legal .slr-legal-tab.is-active{
+  background:#C7F36A!important;
+  border-color:#C7F36A!important;
+  color:#18250F!important;
+  -webkit-text-fill-color:#18250F!important;
+}
+html[data-landing-theme="dark"] .slr-legal :is(.slr-legal-back,.slr-legal-help-button){
+  background:#C7F36A!important;
+  border-color:#C7F36A!important;
+  color:#18250F!important;
+  -webkit-text-fill-color:#18250F!important;
+}
+html[data-landing-theme="dark"] .slr-legal :is(.slr-legal-back,.slr-legal-help-button) :is(span,svg){
+  color:#18250F!important;
+  -webkit-text-fill-color:#18250F!important;
+}
+html[data-landing-theme="light"] .slr-legal :is(.slr-legal-back,.slr-legal-help-button) :is(span,svg){
+  color:#FFFFFF!important;
+  -webkit-text-fill-color:#FFFFFF!important;
+}
+/* Honor disabled states without making text disappear. */
+html[data-landing-theme="dark"] .sl-scan-v2 :is(.sl-scan-close,.sl-scan-retry,.sl-scan-open-report):disabled,
+html[data-landing-theme="light"] .sl-scan-v2 :is(.sl-scan-close,.sl-scan-retry,.sl-scan-open-report):disabled{
+  opacity:.65!important;
+  cursor:not-allowed!important;
+}
+@media(max-width:570px){
+  .sl-scan-v2 .sl-scan-close{min-height:40px;padding:9px 13px;gap:6px}
+}
