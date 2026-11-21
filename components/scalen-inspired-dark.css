@@ -1,0 +1,368 @@
+/* StrangerLens dark theme: adapted from the actual SCALEN theme-dark.css.
+   Identity: near-black #111113, raised #171718/#202022, soft-white #efeff1,
+   signature lime #a9e66e/#bdfb54. NO alterations to the light/white-lime theme. */
+html[data-landing-theme="dark"]{
+  --scalen-canvas:#111113;
+  --scalen-panel:#171718;
+  --scalen-lift:#202022;
+  --scalen-border:#39393c;
+  --scalen-copy:#efeff1;
+  --scalen-muted:#bcbcc0;
+  --scalen-lime:#bdfb54;
+  --scalen-lime-text:#a9e66e;
+  color-scheme:dark;
+  background:var(--scalen-canvas)!important;
+  color:var(--scalen-copy)!important;
+}
+html[data-landing-theme="dark"] body{
+  background:var(--scalen-canvas)!important;
+  color:var(--scalen-copy)!important;
+}
+/* Shared surfaces: dark, but not lifeless. */
+html[data-landing-theme="dark"] :is(.slr-page,.sl-results-v7,.sl-scan-v2,.slr-legal,.sl-app-theme){
+  background:var(--scalen-canvas)!important;
+  color:var(--scalen-copy)!important;
+}
+html[data-landing-theme="dark"] :is(.slr-page,.sl-results-v7,.sl-scan-v2,.slr-legal,.sl-app-theme) :focus-visible{
+  outline:3px solid var(--scalen-lime)!important;
+  outline-offset:3px!important;
+}
+html[data-landing-theme="dark"] .slr-page{
+  --slr-ink:var(--scalen-copy);
+  --slr-muted:var(--scalen-muted);
+  --slr-subtle:var(--scalen-muted);
+  --slr-lime:var(--scalen-lime);
+  --slr-lime-soft:#27331e;
+  --slr-line:var(--scalen-border);
+  --slr-surface:var(--scalen-panel);
+}
+html[data-landing-theme="dark"] .sl-results-v7{
+  --v8-page:var(--scalen-canvas);
+  --v8-panel:var(--scalen-panel);
+  --v8-soft:var(--scalen-lift);
+  --v8-ink:var(--scalen-copy);
+  --v8-secondary:var(--scalen-muted);
+  --v8-muted:#9ca69b;
+  --v8-line:var(--scalen-border);
+  --v8-lime:var(--scalen-lime);
+  --v8-lime-pale:#26321d;
+}
+/* The original glossy lime S is NEVER desaturated. */
+html[data-landing-theme="dark"] .slr-page img[src*="strangerlens-mark"],
+html[data-landing-theme="dark"] .sl-scan-v2 img[src*="strangerlens"],
+html[data-landing-theme="dark"] .sl-results-v7 img[src*="strangerlens"]{
+  filter:none!important;
+}
+/* Brand accents: intentional, not green paint on every box. */
+html[data-landing-theme="dark"] .slr-page :is(
+  .slr-brand-dot,.slr-lime-period,.slr-example-heading h2 span,
+  .slr-example-heading h2>span,.slr-section-heading h2>span,
+  .slr-example-findings-head span:first-child,.slr-example-question,
+  .slr-example-fix>span,.slr-example-fix>div strong,
+  .slr-eyebrow,.slr-price-label,.slr-preview-intro h2 span,
+  .slr-deep-eyebrow,.slr-mini-brand,.slr-footer-links a:hover
+){
+  color:var(--scalen-lime-text)!important;
+}
+html[data-landing-theme="dark"] .slr-page :is(
+  .slr-kicker-dot,.slr-green-dot,.slr-live-demo-dot
+){
+  background:var(--scalen-lime)!important;
+  box-shadow:0 0 0 4px rgba(189,251,84,.10)!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-hero-proof .slr-underline{
+  color:var(--scalen-lime-text)!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-underline::after{
+  background:var(--scalen-lime)!important;
+  box-shadow:none!important;
+}
+html[data-landing-theme="dark"] .slr-page :is(
+  .slr-kicker,.slr-price-chip,.slr-deep-icon,.slr-card-icon,
+  .slr-report-icon,.slr-story-icon,.slr-step-number,.slr-signal-index
+){
+  color:var(--scalen-lime-text)!important;
+  background:#202a1c!important;
+  border-color:#405035!important;
+}
+html[data-landing-theme="dark"] .slr-page :is(
+  .slr-hero-assurances svg,.slr-price-card li svg,
+  .slr-deep-foot svg,.slr-report-icon svg,.slr-form-note svg
+){
+  color:var(--scalen-lime-text)!important;
+}
+/* Top navigation and one-click appearance toggle. */
+html[data-landing-theme="dark"] .slr-page :is(
+  .slr-navbar,.slr-mobile-menu
+){
+  background:rgba(24,24,26,.96)!important;
+  border-color:#39393c!important;
+  box-shadow:0 12px 35px rgba(0,0,0,.15)!important;
+}
+html[data-landing-theme="dark"] .slr-page :is(
+  .slr-navlinks a,.slr-mobile-menu a
+){
+  color:var(--scalen-copy)!important;
+}
+html[data-landing-theme="dark"] .slr-page :is(
+  .slr-navlinks a:hover,.slr-mobile-menu a:hover
+){
+  color:var(--scalen-lime-text)!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-nav-actions .sl-theme-quick,
+html[data-landing-theme="dark"] .sl-results-v7 .sl-theme-quick{
+  background:var(--scalen-lift)!important;
+  color:var(--scalen-lime-text)!important;
+  border-color:#526148!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-nav-actions .sl-theme-quick:hover,
+html[data-landing-theme="dark"] .sl-results-v7 .sl-theme-quick:hover{
+  background:#2a3423!important;
+  border-color:var(--scalen-lime)!important;
+  color:var(--scalen-lime)!important;
+}
+/* Primary CTAs: the unmistakable electric lime SCALEN uses. */
+html[data-landing-theme="dark"] .slr-page :is(
+  .slr-button,.slr-menu-toggle
+),
+html[data-landing-theme="dark"] .slr-page .slr-hero-scan .slr-form-submit,
+html[data-landing-theme="dark"] .sl-results-v7 :is(
+  .sl-v8-new-check,.sl-v8-new-check:hover
+),
+html[data-landing-theme="dark"] .sl-results-v7 #complete-report-preview.sl-v11-offer .sl-v7-upgrade-button,
+html[data-landing-theme="dark"] .slr-legal :is(
+  .slr-legal-back,.slr-legal-help-button
+){
+  background:var(--scalen-lime)!important;
+  border-color:var(--scalen-lime)!important;
+  color:#17210f!important;
+  box-shadow:0 7px 22px rgba(109,155,44,.09)!important;
+}
+html[data-landing-theme="dark"] .slr-page :is(
+  .slr-button,.slr-menu-toggle
+) svg,
+html[data-landing-theme="dark"] .slr-page .slr-hero-scan .slr-form-submit svg,
+html[data-landing-theme="dark"] .sl-results-v7 #complete-report-preview.sl-v11-offer .sl-v7-upgrade-button svg,
+html[data-landing-theme="dark"] .slr-legal :is(.slr-legal-back,.slr-legal-help-button) svg{
+  color:#17210f!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-button:hover:not(:disabled),
+html[data-landing-theme="dark"] .sl-results-v7 .sl-v8-new-check:hover,
+html[data-landing-theme="dark"] .sl-results-v7 #complete-report-preview.sl-v11-offer .sl-v7-upgrade-button:hover:not(:disabled){
+  background:#d0ff85!important;
+  border-color:#d0ff85!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-hero-scan .slr-input-wrap,
+html[data-landing-theme="dark"] .slr-page .slr-input-wrap{
+  background:var(--scalen-panel)!important;
+  border-color:var(--scalen-border)!important;
+  box-shadow:0 13px 32px rgba(0,0,0,.11)!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-input-wrap:focus-within{
+  border-color:var(--scalen-lime)!important;
+  box-shadow:0 0 0 3px rgba(189,251,84,.14)!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-hero-scan :is(input,.slr-input-icon){
+  color:var(--scalen-copy)!important;
+}
+/* The 68/100 sample: charcoal report, lime labels, score emphasis and status. */
+html[data-landing-theme="dark"] .slr-page .slr-live-demo{
+  background:var(--scalen-panel)!important;
+  border-color:var(--scalen-border)!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-live-demo :is(
+  .slr-live-demo-top,.slr-live-demo-signals,.slr-live-demo-score
+){
+  background:var(--scalen-panel)!important;
+  border-color:var(--scalen-border)!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-live-demo :is(
+  .slr-live-demo-kicker,.slr-live-demo-label,.slr-live-demo-title-dot
+){
+  color:var(--scalen-lime-text)!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-live-demo :is(
+  .slr-live-demo-unlock,.slr-live-demo-lock
+){
+  background:#26311e!important;
+  border-color:#405438!important;
+  color:var(--scalen-lime-text)!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-live-demo :is(
+  .slr-live-demo-unlock>svg,.slr-live-demo-lock svg
+){
+  color:var(--scalen-lime-text)!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-live-demo .slr-live-demo-unlock strong{
+  color:var(--scalen-copy)!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-live-demo .slr-live-demo-meter{
+  background:#303330!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-live-demo .slr-live-demo-fill--good{
+  background:var(--scalen-lime-text)!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-live-demo .slr-live-demo-fill--amber{background:#e1ae57!important}
+html[data-landing-theme="dark"] .slr-page .slr-live-demo .slr-live-demo-fill--red{background:#e27670!important}
+html[data-landing-theme="dark"] .slr-page .slr-live-demo .slr-live-demo-status--good{
+  background:#283b24!important;
+  color:#c7f4a9!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-live-demo .slr-live-demo-score-status{
+  background:#423525!important;color:#f1d09d!important;
+}
+/* Landing sample wording, example navigation and paid cards. */
+html[data-landing-theme="dark"] .slr-page .slr-example :is(
+  .slr-example-thought,.slr-example-fix>div
+){
+  background:#23301e!important;
+  border-color:#425239!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-example-tabs button.is-active{
+  background:var(--scalen-lime)!important;
+  color:#17210f!important;
+  border-color:var(--scalen-lime)!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-example-tabs button.is-active *{
+  color:#17210f!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-paid-proof-intro h2 span{
+  color:var(--scalen-lime-text)!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-paid-proof-price strong{
+  color:var(--scalen-lime)!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-paid-proof-item{
+  background:var(--scalen-panel)!important;
+  border-color:var(--scalen-border)!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-paid-proof :is(
+  .slr-paid-proof-index,.slr-paid-proof-note svg,.slr-paid-proof-item>svg
+){
+  color:var(--scalen-lime-text)!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-bottom-panel{
+  background:#182017!important;
+  border-color:#394b33!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-footer-links a:hover{
+  color:var(--scalen-lime-text)!important;
+}
+/* Report score and five signals: lime highlights but status meaning intact. */
+html[data-landing-theme="dark"] .sl-results-v7 :is(
+  .sl-v8-header-inner,.sl-v11-summary,.sl-paid-card
+){
+  background:var(--scalen-panel)!important;
+  border-color:var(--scalen-border)!important;
+}
+html[data-landing-theme="dark"] .sl-results-v7 .sl-v11-summary #report-first-look :is(
+  .sl-v7-eyebrow,.sl-v8-score-insight
+),
+html[data-landing-theme="dark"] .sl-results-v7 .sl-v11-summary #report-clarity-signals :is(
+  .sl-v7-section-head h2,.sl-v7-section-head h2 span
+){
+  color:var(--scalen-copy)!important;
+}
+html[data-landing-theme="dark"] .sl-results-v7 .sl-v11-summary #report-clarity-signals .sl-v11-lime-dot{
+  color:var(--scalen-lime-text)!important;
+}
+html[data-landing-theme="dark"] .sl-results-v7 .sl-v11-summary #report-clarity-signals :is(
+  .sl-v7-meter-good,.sl-v11-meter--strong,.sl-v11-meter--good
+){
+  background:var(--scalen-lime-text)!important;
+}
+html[data-landing-theme="dark"] .sl-results-v7 .sl-v11-summary #report-clarity-signals :is(
+  .sl-v11-badge--strong,.sl-v11-badge--good
+){
+  background:#293c25!important;
+  color:#c7f4a9!important;
+}
+html[data-landing-theme="dark"] .sl-results-v7 .sl-v11-summary #report-clarity-signals .sl-v12-info-button,
+html[data-landing-theme="dark"] .sl-results-v7 .sl-v11-summary #report-clarity-signals .sl-v12-info-button:is(:hover,[aria-expanded="true"]){
+  background:#26311e!important;
+  border-color:#526b3b!important;
+  color:var(--scalen-lime-text)!important;
+}
+html[data-landing-theme="dark"] .sl-results-v7 #complete-report-preview.sl-v11-offer{
+  background:#171c16!important;
+  border-color:#3e4d35!important;
+}
+html[data-landing-theme="dark"] .sl-results-v7 #complete-report-preview.sl-v11-offer :is(
+  .sl-v7-upgrade-eyebrow,.sl-v8-unlock-icon
+){
+  color:var(--scalen-lime-text)!important;
+}
+html[data-landing-theme="dark"] .sl-results-v7 #complete-report-preview.sl-v11-offer .sl-v8-unlock-icon{
+  background:#26311e!important;border-color:#526b3b!important;
+}
+html[data-landing-theme="dark"] .sl-results-v7 #complete-report-preview.sl-v11-offer .sl-v8-unlock-icon svg{
+  color:var(--scalen-lime-text)!important;
+}
+html[data-landing-theme="dark"] .sl-results-v7 .sl-paid-unlocked{
+  color:var(--scalen-lime-text)!important;
+}
+html[data-landing-theme="dark"] .sl-results-v7 .sl-paid-card--green .sl-paid-card-stripe,
+html[data-landing-theme="dark"] .sl-results-v7 .sl-paid-card:not(.sl-paid-card--red):not(.sl-paid-card--amber) .sl-paid-card-stripe{
+  background:var(--scalen-lime-text)!important;
+}
+html[data-landing-theme="dark"] .sl-results-v7 .sl-paid-card.is-open{
+  border-color:#677f55!important;
+}
+html[data-landing-theme="dark"] .sl-results-v7 .sl-paid-bullets li:before{
+  background:var(--scalen-lime-text)!important;
+}
+html[data-landing-theme="dark"] .sl-results-v7 .sl-paid-card-content :is(
+  .sl-paid-soft-panel,.sl-paid-signal-detail,.sl-paid-risk
+){
+  background:var(--scalen-lift)!important;border-color:var(--scalen-border)!important;
+}
+/* Scanner, legal and recovery pages reuse the same restrained accent. */
+html[data-landing-theme="dark"] .sl-scan-v2 :is(
+  .sl-scan-live-dot,.sl-scan-progress-indicator,.sl-scan-subject-activity i
+){
+  background:var(--scalen-lime)!important;
+}
+html[data-landing-theme="dark"] .sl-scan-v2 .sl-scan-lens-beam{
+  background:linear-gradient(90deg,transparent,rgba(189,251,84,.8),transparent)!important;
+  box-shadow:none!important;
+}
+html[data-landing-theme="dark"] .sl-scan-v2 :is(
+  .sl-scan-eyebrow,.sl-scan-subject-symbol
+){
+  color:var(--scalen-lime-text)!important;
+}
+html[data-landing-theme="dark"] .slr-legal{
+  --slr-law-ink:var(--scalen-copy);
+  --slr-law-muted:var(--scalen-muted);
+  --slr-law-line:var(--scalen-border);
+  --slr-law-lime:var(--scalen-lime);
+  --slr-law-pale:#25321d;
+}
+html[data-landing-theme="dark"] .slr-legal :is(
+  .slr-legal-overline,.slr-legal-intro h1 em,
+  .slr-legal-document a,.slr-legal-help a,.slr-legal-footer a:hover
+){
+  color:var(--scalen-lime-text)!important;
+}
+html[data-landing-theme="dark"] .sl-app-theme :is(a,button)[class*="bg-["]{
+  background:var(--scalen-lime)!important;
+  color:#17210f!important;
+  border-color:var(--scalen-lime)!important;
+}
+html[data-landing-theme="dark"] .sl-app-theme :is(a,button)[class*="bg-["] *{
+  color:#17210f!important;
+}
+/* Keep disabled actions clearly disabled rather than glowing. */
+html[data-landing-theme="dark"] .slr-page :is(button:disabled,.slr-form-submit:disabled),
+html[data-landing-theme="dark"] .sl-results-v7 .sl-v7-upgrade-button:disabled{
+  background:#596a48!important;
+  border-color:#596a48!important;
+  color:#182117!important;
+  opacity:.74;
+}
+@media(prefers-reduced-motion:reduce){
+  html[data-landing-theme="dark"] .slr-page *,
+  html[data-landing-theme="dark"] .sl-results-v7 *{
+    transition-duration:.01ms!important;
+  }
+}
