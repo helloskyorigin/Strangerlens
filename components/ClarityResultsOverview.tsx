@@ -53,7 +53,7 @@ export default function ClarityResultsOverview({
             <h1 id="sl-v7-score-title" className="sl-v7-eyebrow">Website Clarity Score</h1>
           </div>
           <button type="button" onClick={onExplainScore} className="sl-v8-scoring-link"
-            aria-label="About your clarity score" title="About your clarity score">
+            aria-label="Score details" title="About your clarity score">
             <Info size={17} aria-hidden="true" />
           </button>
         </div>
