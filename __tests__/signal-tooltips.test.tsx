@@ -16,11 +16,11 @@ async function main() {
   let hiddenTrigger: Element | null = null;
   const check = (condition: unknown, message: string) => { assert.ok(condition, message); assertions++; };
   const expected: Record<string, string> = {
-    "First Impression": "How quickly visitors understand what your website does.",
-    Audience: "How clearly your website communicates who it's for.",
-    Value: "How clearly visitors understand the benefits you offer.",
-    Trust: "How effectively your website communicates credibility and trustworthiness.",
-    Action: "How clearly visitors understand what to do next.",
+    "First Impression": "Checks whether someone can understand what your website does in the first few seconds.",
+    Audience: "Checks whether visitors can quickly tell who your website is meant for.",
+    Value: "Checks whether people understand what they get and why it matters.",
+    Trust: "Checks whether your website gives visitors clear reasons to feel confident.",
+    Action: "Checks whether the next step, like signing up or buying, is easy to find.",
   };
   check(Object.entries(CLARITY_SIGNAL_HELP).filter(([key]) => key !== "purchaseReadiness").map(([, value]) => value).join("|") === Object.values(expected).join("|"), "all five explanations match the requested copy exactly");
 
@@ -81,12 +81,15 @@ async function main() {
         const first = buttonFor("First Impression");
         check(dom.window.document.querySelectorAll('button[aria-label^="About "]').length === 10, `${width}px ${paid ? "paid" : "free"}: each responsive layout has five info buttons`);
         check(!tooltip(), "no tooltip renders before interaction");
+        check([...dom.window.document.querySelectorAll('button[aria-label^="About "]')].every(b =>
+          b.classList.contains("sl-v12-info-button") && b.getAttribute("title")?.startsWith("What does ")),
+          "All five circular icons have accessible names and plain-language titles");
 
         // Tap/click for every explanation and tap outside to dismiss.
         for (const [name, content] of Object.entries(expected)) {
           const button = buttonFor(name);
           await click(button, width < 640 ? "touch" : "mouse");
-          check(tooltip()?.textContent === content, `${width}px ${paid ? "paid" : "free"}: ${name} copy is readable`);
+          check(tooltip()?.textContent?.includes(content) && tooltip()?.textContent?.includes("What this checks"), `${width}px ${paid ? "paid" : "free"}: ${name} copy is readable`);
           check(tooltip()?.parentElement === dom.window.document.body, "portal escapes rounded card overflow without changing row layout");
           check(button.getAttribute("aria-describedby") === tooltip()?.id && button.getAttribute("aria-expanded") === "true", "info button has a unique accessible tooltip relationship");
           const bounds = tooltip()!.style;
@@ -114,7 +117,7 @@ async function main() {
         check(!tooltip(), "repeated keyboard activation closes pinned help");
         await act(async () => { first.blur(); first.focus(); });
         await act(async () => { buttonFor("Audience").focus(); });
-        check(dom.window.document.querySelectorAll('[role="tooltip"]').length === 1 && tooltip()?.textContent === expected.Audience, "moving keyboard focus closes previous help and opens only one tooltip");
+        check(dom.window.document.querySelectorAll('[role="tooltip"]').length === 1 && tooltip()?.textContent?.includes(expected.Audience), "moving keyboard focus closes previous help and opens only one tooltip");
         await act(async () => { (dom!.window.document.getElementById("outside") as HTMLButtonElement).focus(); });
         check(!tooltip(), "tabbing away dismisses help");
 
@@ -132,7 +135,7 @@ async function main() {
         await act(async () => { pointer(first, "pointerout", "mouse", dom!.window.document.body); });
         await tick(170); check(Boolean(tooltip()), "click pins an already-hovered tooltip");
         await click(buttonFor("Trust"));
-        check(dom.window.document.querySelectorAll('[role="tooltip"]').length === 1 && tooltip()?.textContent === expected.Trust, "clicking a different info icon replaces the existing tooltip");
+        check(dom.window.document.querySelectorAll('[role="tooltip"]').length === 1 && tooltip()?.textContent?.includes(expected.Trust), "clicking a different info icon replaces the existing tooltip");
         hiddenTrigger = buttonFor("Trust");
         await act(async () => { dom!.window.dispatchEvent(new dom!.window.Event("resize")); });
         check(!tooltip(), "responsive changes cannot leave a detached tooltip for a hidden trigger");

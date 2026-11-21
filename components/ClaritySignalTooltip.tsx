@@ -6,12 +6,12 @@ import { Info } from "lucide-react";
 import type { CanonicalSignalKey } from "@/lib/report-adapter";
 
 export const CLARITY_SIGNAL_HELP: Record<CanonicalSignalKey | "purchaseReadiness", string> = {
-  firstImpression: "How quickly visitors understand what your website does.",
-  audience: "How clearly your website communicates who it's for.",
-  value: "How clearly visitors understand the benefits you offer.",
-  trust: "How effectively your website communicates credibility and trustworthiness.",
-  action: "How clearly visitors understand what to do next.",
-  purchaseReadiness: "How clearly your paid offer explains its value, pricing and purchase next step. This separate score does not affect your Overall Clarity Score.",
+  firstImpression: "Checks whether someone can understand what your website does in the first few seconds.",
+  audience: "Checks whether visitors can quickly tell who your website is meant for.",
+  value: "Checks whether people understand what they get and why it matters.",
+  trust: "Checks whether your website gives visitors clear reasons to feel confident.",
+  action: "Checks whether the next step, like signing up or buying, is easy to find.",
+  purchaseReadiness: "Checks whether visitors can understand your offer, price and buying steps. It is separate from your five clarity scores.",
 };
 
 interface Viewport { left: number; top: number; width: number; height: number }
@@ -117,7 +117,8 @@ export default function ClaritySignalTooltip({ signalKey, name, isOpen, onOpen, 
       aria-label={`About ${name}`}
       aria-describedby={isOpen ? id : undefined}
       aria-expanded={isOpen}
-      className="-m-1 inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full text-[#6B7966] transition-colors hover:text-[#111510] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8BCB36]"
+      title={`What does ${name} check?`}
+      className="sl-v12-info-button inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8BCB36]"
       onPointerDown={() => { pointerFocus.current = true; }}
       onPointerCancel={() => { pointerFocus.current = false; }}
       onPointerEnter={event => {
@@ -146,7 +147,10 @@ export default function ClaritySignalTooltip({ signalKey, name, isOpen, onOpen, 
         onPointerLeave={leave}
         className="fixed z-[100] overflow-y-auto overscroll-contain rounded-xl border border-[#2F3F2B] bg-[#111510] px-3.5 py-3 text-left font-sans text-xs font-normal leading-5 text-[#F2F7EE] shadow-[0_12px_36px_rgba(17,21,16,0.35)] break-words"
         style={position ? { ...position, visibility: "visible" } : { width: "min(288px, calc(100vw - 24px))", visibility: "hidden" }}
-      >{CLARITY_SIGNAL_HELP[signalKey]}</div>, document.body,
+      >
+        <span className="sl-v12-tooltip-heading">What this checks</span>
+        <span className="sl-v12-tooltip-message">{CLARITY_SIGNAL_HELP[signalKey]}</span>
+      </div>, document.body,
     ) : null}
   </>;
 }
