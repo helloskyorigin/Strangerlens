@@ -143,15 +143,15 @@ export default function StrangerLensLanding({
               <div className="slr-input-wrap">
                 <label htmlFor="slr-website-url" className="slr-sr-only">Your public website URL</label>
                 <Link2 size={20} className="slr-input-icon" aria-hidden="true"/>
-                <input id="slr-website-url" ref={inputRef} type="text" inputMode="url" autoComplete="url" spellCheck={false}
+                <input id="slr-website-url" ref={inputRef} type="url" inputMode="url" autoComplete="url" autoCapitalize="off" spellCheck={false}
                   placeholder="yourwebsite.com" value={url} onChange={event=>onUrlChange(event.target.value)}
                   aria-invalid={Boolean(errorMessage)} aria-describedby={errorMessage?"slr-url-error":undefined}
                   disabled={isVerifying}/>
-                <button className="slr-button slr-form-submit" type="submit" disabled={isVerifying}>
-                  <span>{isVerifying?"Checking your website...":"Reveal My Clarity Score — Free"}</span>
-                  <ArrowUpRight size={18} aria-hidden="true"/>
-                </button>
               </div>
+              <button className="slr-button slr-form-submit" type="submit" disabled={isVerifying}>
+                <span>{isVerifying?"Checking your website...":"Reveal My Clarity Score — Free"}</span>
+                <ArrowUpRight size={18} aria-hidden="true"/>
+              </button>
               {errorMessage&&<p id="slr-url-error" role="alert" className="slr-input-error">{errorMessage}</p>}
             </form>
             <div className="slr-hero-assurances">
