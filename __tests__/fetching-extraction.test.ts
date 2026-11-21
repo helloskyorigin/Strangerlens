@@ -1,5 +1,6 @@
 import { describe, test, expect } from "./test-harness";
 import { extractWebsiteSnapshot } from "../lib/content-extractor";
+import { formatSnapshotForAi } from "../services/ai/analysisPrompt";
 import {
   getCachedFetch,
   setCachedFetch,
@@ -19,6 +20,7 @@ import {
 import {
   fetchSupportingPages,
   discoverAndFetchSupportingPages,
+  discoverAndFetchLegalPages,
 } from "../lib/supporting-page-fetcher";
 
 describe("Phase 1 Task 4: Content Extractor & Fetch Cache Tests", () => {
@@ -514,5 +516,68 @@ describe("Phase 1 Task 4: Content Extractor & Fetch Cache Tests", () => {
     expect(bundle.fetchedCount).toBe(1);
     expect(bundle.pages[0].path).toBe("/product");
     expect(bundle.attempts.some((a) => a.error === "REDIRECTED_TO_HOMEPAGE")).toBe(true);
+  });
+
+  test("Linked-page coverage: pricing, product, features, proof, company and legal evidence all reach AI", async () => {
+    const links = [
+      "pricing","product","features","customers","security","about",
+      "solutions","how-it-works","docs","privacy","terms","refund"
+    ];
+    const homeHtml = `<html><head><title>Example SaaS</title></head><body>
+      <header><nav>${links.map(name => `<a href="/${name}">${name === "terms" ? "Terms of Service" : name === "refund" ? "Refund Policy" : name === "privacy" ? "Privacy Policy" : name}</a>`).join("")}</nav></header>
+      <main><h1>Make team planning simpler</h1><p>Teams can organize workflows in one place.</p></main>
+      </body></html>`;
+    let inFlight = 0;
+    let maxInFlight = 0;
+    const mockFetcher = async (rawUrl: string, normalizedUrl: string): Promise<FetchResult> => {
+      inFlight++;
+      maxInFlight = Math.max(maxInFlight, inFlight);
+      await new Promise(resolve => setTimeout(resolve, 6));
+      inFlight--;
+      const kind = new URL(normalizedUrl).pathname.slice(1);
+      const title = kind === "terms" ? "Terms of Service" :
+        kind === "privacy" ? "Privacy Policy" :
+        kind === "refund" ? "Refund Policy" : kind.toUpperCase();
+      const html = `<html><head><title>${title}</title></head><body><main>
+        <h1>${title}</h1><p>Evidence for ${kind} is published on this page.</p>
+        </main></body></html>`;
+      return {
+        success:true, originalUrl:rawUrl, normalizedUrl, finalUrl:normalizedUrl,
+        domain:"example.com", status:200, statusText:"OK", contentType:"text/html",
+        contentLength:html.length, redirectCount:0, redirectHistory:[], timingMs:6, html,
+      };
+    };
+    const base = "https://example.com/";
+    const [legal, linked] = await Promise.all([
+      discoverAndFetchLegalPages(homeHtml, base, { fetcher: mockFetcher }),
+      discoverAndFetchSupportingPages(homeHtml, base, { maxPages: 8, concurrency: 8, fetcher: mockFetcher }),
+    ]);
+    expect(legal.pages.length).toBe(3);
+    expect(linked.pages.length).toBe(8);
+    expect(maxInFlight > 1).toBe(true);
+    expect(linked.pages.some(p => p.pageType === "pricing")).toBe(true);
+    expect(linked.pages.some(p => p.pageType === "features")).toBe(true);
+    expect(linked.pages.some(p => p.pageType === "customers")).toBe(true);
+    expect(linked.pages.every(p => !["privacy_policy","terms_of_service","refund_policy"].includes(p.pageType))).toBe(true);
+
+    const bundle = {
+      ...legal,
+      discoveredCount: legal.discoveredCount + linked.discoveredCount,
+      attemptedCount: legal.attemptedCount + linked.attemptedCount,
+      fetchedCount: legal.fetchedCount + linked.fetchedCount,
+      candidates: [...legal.candidates, ...linked.candidates],
+      pages: [...legal.pages, ...linked.pages],
+      attempts: [...legal.attempts, ...linked.attempts],
+    };
+    const snapshot = extractWebsiteSnapshot(homeHtml, { baseUrl: base });
+    const prompt = JSON.parse(formatSnapshotForAi(snapshot, bundle));
+    expect(prompt.legalPages.length).toBe(3);
+    expect(prompt.supportingPages.length).toBe(8);
+    expect(prompt.inspection.inspected).toBe(11);
+    for (const page of linked.pages) {
+      expect(prompt.supportingPages.some((p: {url: string; headline: string}) =>
+        p.url === page.finalUrl && p.headline === page.snapshot.hero.headline)).toBe(true);
+    }
+    expect(prompt.supportingPages.some((p: {url:string})=>p.url.endsWith("/pricing"))).toBe(true);
   });
 });
