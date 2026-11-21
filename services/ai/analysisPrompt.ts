@@ -70,6 +70,11 @@ export function formatSnapshotForAi(
         .map(p => ({ url: p.url, type: p.pageType,
           inspected: Boolean(supportingPagesBundle.pages.some(page => page.url === p.url)) }))
       : [],
+    externalPolicyLinks: supportingPagesBundle?.externalLegalLinks
+      ? supportingPagesBundle.externalLegalLinks.map(link => ({
+          url: link.url, type: link.pageType, inspected: false, source: "external link only",
+        }))
+      : [],
     legalPages: supportingPagesBundle?.pages
       ? supportingPagesBundle.pages.map((p) => ({
           url: p.finalUrl,
@@ -106,6 +111,7 @@ IMPROVE TRUST ACCURACY:
 - Verify evidence against the actual inspected page and source URL. Never invent findings or quotations.
 - legalPageLinks lists observed homepage links. inspected=false means the destination content was NOT verified, not that the linked page is absent.
 - The presence of a policy link does not prove legal compliance, valid policy contents, or independent credentials.
+- externalPolicyLinks are observed outgoing links ONLY; never treat their destinations as fetched, verified, compliant or same-domain.
 
 ABSOLUTE SOURCE OF TRUTH:
 WebsiteSnapshot and legalPages are the absolute, exclusive source of truth. You must ONLY make claims supported by the actual data.

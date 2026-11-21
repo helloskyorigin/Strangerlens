@@ -15,6 +15,7 @@ export function correctContradictedLegalClaims(
   const knownTypes = new Set([
     ...(bundle?.candidates ?? []).map(page => page.pageType),
     ...(bundle?.pages ?? []).map(page => page.pageType),
+    ...(bundle?.externalLegalLinks ?? []).map(link => link.pageType),
   ]);
   const policyNames = [
     knownTypes.has("privacy_policy") ? "Privacy Policy" : "",
@@ -46,7 +47,24 @@ export function correctContradictedLegalClaims(
     if (/\b(?:add|create|include|provide)\b/i.test(value) && /\b(?:links?|footer|polic(?:y|ies)|terms|privacy|legal)\b/i.test(value)) return true;
     return /\b(?:lack(?:s|ing)?|missing|absen(?:t|ce)|not (?:available|accessible|linked|provided|found|displayed)|no (?:visible |accessible )?(?:privacy|terms|legal|policy)|does not (?:provide|have|include|link|display)|without (?:privacy|terms|legal)|add (?:a |the )?(?:privacy|terms|legal|policy)|add (?:legal|policy) links|need(?:s)? (?:a |to add )?(?:privacy|terms|legal))\b/i.test(value);
   };
-  const replaceClaim = (value: string): string => absentClaim(value) ? grounded : value;
+  const replaceClaim = (value: string): string => {
+    if (!absentClaim(value)) return value;
+    const mentioned = [
+      /\bprivacy\b/i.test(value) ? "privacy_policy" : "",
+      /\bterms\b/i.test(value) ? "terms_of_service" : "",
+      /\b(?:refund|return policy)\b/i.test(value) ? "refund_policy" : "",
+    ].filter(Boolean);
+    const unconfirmed = mentioned.filter(type => !knownTypes.has(type));
+    if (unconfirmed.length) {
+      const pretty: Record<string, string> = {
+        privacy_policy: "Privacy Policy", terms_of_service: "Terms of Service",
+        refund_policy: "Refund Policy",
+      };
+      return grounded + " " + unconfirmed.map(type => pretty[type]).join(", ") +
+        " could not be confirmed from the inspected homepage links.";
+    }
+    return grounded;
+  };
 
   if (corrected.verdict?.text) corrected.verdict.text = replaceClaim(corrected.verdict.text);
   if (corrected.website_message) {

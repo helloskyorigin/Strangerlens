@@ -729,6 +729,43 @@ export function classifySupportingPageCandidate(
   };
 }
 
+/**
+ * External hosted policy links (e.g. a hosted Privacy Policy) can establish
+ * that a website *links* to a policy. We never crawl an external URL or treat
+ * its contents as reviewed. This only prevents false "no policy link" claims.
+ */
+export function discoverExternalLegalLinks(
+  html: string,
+  homepageUrl: string
+): Array<{ url: string; pageType: "privacy_policy" | "terms_of_service" | "refund_policy" }> {
+  const max = SERVER_LIMITS.WEBSITE_MAX_HTML_CHARS;
+  const bounded = html.length > max ? html.slice(0, max) + "\n" + html.slice(-max) : html;
+  const $ = cheerio.load(bounded);
+  const linked: Array<{ url: string; pageType: "privacy_policy" | "terms_of_service" | "refund_policy" }> = [];
+  const seen = new Set<string>();
+  $("a[href]").each((_, el) => {
+    if (linked.length >= 6) return false;
+    const anchor = $(el);
+    const label = [anchor.text(), anchor.attr("aria-label"), anchor.attr("title")]
+      .map(text => cleanAnchorText(text)).find(Boolean) || "";
+    const looksPolicy = /\b(?:privacy (?:policy|notice|statement)|terms(?: of (?:service|use))?|refund(?:s| policy)?|return policy|cancellation policy)\b/i.test(label);
+    if (!looksPolicy) return;
+    const href = anchor.attr("href") || "";
+    try {
+      const url = new URL(href, homepageUrl);
+      if (!["http:", "https:"].includes(url.protocol) || url.username || url.password) return;
+      if (isSameWebsiteDomain(url.href, homepageUrl)) return;
+      const kind = classifySupportingPageCandidate(url.pathname, label).pageType;
+      if (kind !== "privacy_policy" && kind !== "terms_of_service" && kind !== "refund_policy") return;
+      const key = kind + ":" + url.origin + url.pathname;
+      if (seen.has(key)) return;
+      seen.add(key);
+      linked.push({ url: url.origin + url.pathname, pageType: kind });
+    } catch { /* malformed external links are not evidence */ }
+  });
+  return linked;
+}
+
 function getLocationBonus(location: SupportingLinkLocation): number {
   switch (location) {
     case "header":

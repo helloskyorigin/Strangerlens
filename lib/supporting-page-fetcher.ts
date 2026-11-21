@@ -10,6 +10,7 @@ import {
 } from "./content-extractor";
 import {
   discoverSupportingPages,
+  discoverExternalLegalLinks,
   isSameWebsiteDomain,
   isExcludedSupportingPath,
   normalizeSupportingPathname,
@@ -55,6 +56,10 @@ export interface SupportingPagesBundle {
   candidates: DiscoveredSupportingPageCandidate[];
   pages: SupportingPageRecord[];
   attempts: SupportingPageFetchAttempt[];
+  /** Visible externally hosted policy links; their content is never fetched. */
+  externalLegalLinks?: Array<{
+    url: string; pageType: "privacy_policy" | "terms_of_service" | "refund_policy";
+  }>;
 }
 
 export interface FetchSupportingPagesOptions {
@@ -492,7 +497,11 @@ export async function discoverAndFetchLegalPages(
       maxPages,
       onlyLegalPolicies: true,
     });
-    return await fetchSupportingPages(candidates, homepageFinalUrl, { ...options, maxPages });
+    const fetched = await fetchSupportingPages(candidates, homepageFinalUrl, { ...options, maxPages });
+    return {
+      ...fetched,
+      externalLegalLinks: discoverExternalLegalLinks(homepageHtml, homepageFinalUrl),
+    };
   } catch (err: unknown) {
     console.warn(
       "Legal-page discovery/fetching degraded gracefully:",

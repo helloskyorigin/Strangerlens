@@ -1,6 +1,6 @@
 import { describe, test, expect } from "./test-harness";
 import { extractWebsiteSnapshot } from "../lib/content-extractor";
-import { discoverSupportingPages } from "../lib/supporting-page-discovery";
+import { discoverSupportingPages, discoverExternalLegalLinks } from "../lib/supporting-page-discovery";
 import { fetchSupportingPages } from "../lib/supporting-page-fetcher";
 import { generateDeterministicFallbackAnalysis } from "../services/ai/fallbackAnalyzer";
 import { correctContradictedLegalClaims, reconcileFalseLegalOnlyTrustPenalty } from "../services/validation/legalClaimGuard";
@@ -141,5 +141,22 @@ describe("Trust legal policy accuracy regressions", () => {
     expect(bundle.pages.length).toBe(0);
     expect(bundle.attempts.every(attempt => !attempt.success)).toBe(true);
     expect(bundle.candidates.length).toBe(2);
+  });
+
+  test("Externally hosted policy links are recognized but never fetched or scored as verified content", () => {
+    const html = '<html><body><h1>Shop</h1><footer>' +
+      '<a href="https://app.termly.io/document/abc">Privacy Policy</a>' +
+      '<a href="https://external.example/legal/terms">Terms of Service</a>' +
+      '</footer></body></html>';
+    const external = discoverExternalLegalLinks(html, base);
+    expect(external.map(p => p.pageType).sort()).toEqual(["privacy_policy", "terms_of_service"]);
+    const original = generateDeterministicFallbackAnalysis(extractWebsiteSnapshot(html, { baseUrl: base }));
+    original.signals.trust.score = 30;
+    original.signals.trust.explanation = "Website is missing a Privacy Policy and Terms of Service.";
+    const bundle = { pages: [], candidates: [], attempts: [], externalLegalLinks: external,
+      discoveredCount: 0, attemptedCount: 0, fetchedCount: 0, totalTimingMs: 0 };
+    const corrected = correctContradictedLegalClaims(original, bundle);
+    expect(corrected.signals.trust.explanation.includes("missing a Privacy")).toBe(false);
+    expect(reconcileFalseLegalOnlyTrustPenalty(original, bundle).signals.trust.score).toBe(30);
   });
 });
