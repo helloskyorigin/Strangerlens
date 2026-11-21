@@ -157,7 +157,6 @@ export default function StrangerLensLanding({
             <div className="slr-hero-assurances">
               <span><Check size={14} aria-hidden="true"/> Free score &amp; 5 checks</span>
               <span><Check size={14} aria-hidden="true"/> No account needed</span>
-              <span><Check size={14} aria-hidden="true"/> No changes made to your site</span>
             </div>
           </div>
           <LandingResultPreview/>
