@@ -164,7 +164,9 @@ async function main() {
         await act(async()=>primaryCta.click());
         check(refreshes===1 && !doc.querySelector('[data-signal="purchaseReadiness"]'), `${width}px: already paid checkout does not invent a score`);
         await act(async()=>root.render(<ResultsScreen analysisData={mapped} isUnlocked={true} onBackToLanding={()=>{}}/>));
-        check(!doc.querySelector('[data-testid="purchase-readiness-locked"]') && doc.body.textContent?.includes(full.summary), `${width}px: verified full data replaces locked card`);
+        await act(async()=>doc.querySelector<HTMLButtonElement>('#paid-card-trigger-hesitation')?.click());
+        check(!doc.querySelector('[data-testid="purchase-readiness-locked"]') && doc.body.textContent?.includes(full.summary),
+          `${width}px: verified full data appears inside the expanded buyer-confidence card`);
         globalThis.fetch=async()=>{throw new Error('Unexpected analysis/payment request');};
       }
       await act(async()=>root.unmount());dom.window.close();
