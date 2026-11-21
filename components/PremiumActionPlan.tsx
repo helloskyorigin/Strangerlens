@@ -41,7 +41,7 @@ const meaningful = (value: unknown): value is string =>
 
 /** Previous full reports may not contain the new workbench field. Preserve
  * their recommendations, but never manufacture or claim verified quotations. */
-function legacyWorkbench(priority?: LegacyPriority, improvements: LegacyImprovement[] = []): PremiumWorkbench {
+export function legacyWorkbench(priority?: LegacyPriority, improvements: LegacyImprovement[] = []): PremiumWorkbench {
   const fixes: EvidenceFix[] = [];
   if (priority && (meaningful(priority.subhead) || meaningful(priority.explanation))) {
     fixes.push({

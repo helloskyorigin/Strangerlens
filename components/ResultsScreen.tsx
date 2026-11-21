@@ -2,8 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import CompleteReportPreview from "@/components/CompleteReportPreview";
 import ClarityResultsOverview from "@/components/ClarityResultsOverview";
-import SignalReportExplorer from "@/components/SignalReportExplorer";
-import PremiumActionPlan from "@/components/PremiumActionPlan";
+import PaidReportAccordion from "@/components/PaidReportAccordion";
 import { trackFunnelEvent } from "@/lib/ui-funnel-events";
 import { persistActiveReportSession } from "@/lib/active-report-session";
 import { escapeHtmlText } from "@/lib/escape-html";
@@ -590,27 +589,6 @@ export default function ResultsScreen({
             </div>
           </section>
         )}
-        {isReportUnlocked && (
-          <section id="full-analysis-unlocked" aria-label="Full analysis unlocked" className="scroll-mt-24 flex flex-col gap-4 rounded-2xl border border-[#D3E7C1] bg-[#F4FCEB] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-            <div>
-              <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#52812B]">
-                <Check className="h-4 w-4" aria-hidden="true" /> Full Analysis Unlocked
-              </p>
-              <h2 className="mt-2 text-xl font-bold tracking-tight text-[#1C2B18]">Your complete clarity report is ready.</h2>
-              <p className="mt-1 max-w-lg text-sm leading-relaxed text-[#61745B]">
-{report.verdict || "Your full diagnosis and evidence-led improvements are ready in the chapters below."}
-              </p>
-            </div>
-            <nav aria-label="Jump to paid report sections" className="flex shrink-0 flex-wrap gap-2">
-              <a href="#strangers-view" className="inline-flex min-h-10 items-center justify-center rounded-full bg-[#111510] px-4 text-xs font-bold text-white hover:bg-[#283724] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Stranger&apos;s View</a>
-              <a href="#complete-paid-report" className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#CEDFC2] px-4 text-xs font-semibold text-[#4B663F] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Signal diagnosis</a>
-              <a href="#your-improvement-plan" className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#CEDFC2] px-4 text-xs font-semibold text-[#4B663F] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Fixes &amp; copy</a>
-              {unlockedPurchase && <a href="#complete-paid-report" onClick={() => document.getElementById("chapter-tab-purchaseReadiness")?.click()}
-                className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#CEDFC2] px-4 text-xs font-semibold text-[#4B663F] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">
-                Purchase check</a>}
-            </nav>
-          </section>
-        )}
         {paymentMessage && ["verifying", "pending", "error", "failed"].includes(paymentState) &&
           <div role="status" aria-live="polite" className="rounded-xl border border-[#CADFC0] bg-[#F6FCEB] p-4 text-sm text-[#4B663F]">
             <p>{paymentMessage}</p>
@@ -624,13 +602,10 @@ export default function ResultsScreen({
           <ClarityResultsOverview
             report={report}
             isUnlocked={isReportUnlocked}
-            unlockedPurchase={unlockedPurchase}
             onExplainScore={() => setIsScoreModalOpen(true)}
           />
         </div>
 
-        {/* Paid users can download directly before the long chapters. */}
-        {isReportUnlocked && renderPdfActions()}
 
         {/* A single $9 offer follows the free signals, with no duplicate pitch. */}
         {!isReportUnlocked && (
@@ -788,69 +763,12 @@ export default function ResultsScreen({
           </section>
         )}
 
-        {isReportUnlocked ? (
+        {isReportUnlocked && data && (
           <>
-            {/* Verified paid access unlocks the complete multi-chapter analysis. */}
-            {/* FIRST 5 SECONDS */}
-            <section id="strangers-view" aria-label="Stranger's View and first-five-seconds interpretation" className="scroll-mt-24">
-              <h2 className="text-2xl font-bold mb-2 text-[#172516]">Stranger&apos;s View · First 5 Seconds</h2>
-              <p className="text-[#6C7C64] text-sm mb-6">An AI interpretation of what the opening page communicates at first glance.</p>
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="bg-white border border-[#DDE9D5] rounded-xl p-5">
-                  <h3 className="font-bold text-[#4C8124] text-xs mb-3 tracking-widest uppercase">WHAT THE PAGE MAKES CLEAR</h3>
-                  {report.firstSeconds.understandItems.length > 0 ? (
-                    <div className="space-y-3">
-                      {report.firstSeconds.understandItems.map((item, i) => (
-                        <div key={i} className="text-sm">
-                          <div className="font-semibold text-[#1B2C17]">{item.title}</div>
-                          <div className="text-[#65775E] mt-0.5">{item.explanation}</div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-[#65775E] text-sm">No clearly communicated strengths were identified in the inspected content.</p>
-                  )}
-                </div>
-                <div className="bg-white border border-[#DDE9D5] rounded-xl p-5">
-                  <h3 className="font-bold text-[#9C6E20] text-xs mb-3 tracking-widest uppercase">WHAT MAY BE UNCLEAR</h3>
-                  {report.firstSeconds.missItems.length > 0 ? (
-                    <div className="space-y-3">
-                      {report.firstSeconds.missItems.map((item, i) => (
-                        <div key={i} className="text-sm">
-                          <div className="font-semibold text-[#1B2C17]">{item.title}</div>
-                          <div className="text-[#65775E] mt-0.5">{item.explanation}</div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-[#65775E] text-sm">No specific clarity blockers were recorded for this section.</p>
-                  )}
-                </div>
-              </div>
-              {typeof data?.visitorThought === "string" && data.visitorThought.trim() && (
-                <div className="mt-4 rounded-xl border border-[#263044] bg-[#121824] p-5">
-                  <h3 className="mb-2 text-xs font-bold uppercase tracking-widest text-[#B9FC22]">Simulated stranger impression</h3>
-                  <p className="text-sm leading-relaxed text-[#4A6041]">{data.visitorThought}</p>
-                  <p className="mt-2 text-xs text-[#76856F]">AI interpretation, not a recording of a real person.</p>
-                </div>
-              )}
-            </section>
-
-            <SignalReportExplorer
-              signals={report.signalsList}
-              purchaseReadiness={unlockedPurchase}
-            />
-
-
-            <PremiumActionPlan reportId={currentReportId}
-              recommendation={data?.recommendation}
-              otherImprovements={Array.isArray(data?.otherImprovements) ? data.otherImprovements : []}
-              evidence={data?.evidence}
-              visitorThought={data?.visitorThought}
-              workbench={data?.premiumWorkbench}
-            />
+            <PaidReportAccordion report={report} data={data}/>
+            {renderPdfActions()}
           </>
-        ) : null}
+        )}
 
       </main>
     </div>

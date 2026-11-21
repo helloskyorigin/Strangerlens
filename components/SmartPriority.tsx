@@ -11,10 +11,10 @@ const LANES: Array<{ id: PriorityLane; title: string; description: string; accen
   { id: "keep-as-is", title: "Keep As Is", description: "Clear signals worth preserving, not rewriting blindly.", accent: "text-[#5B776C]" },
 ];
 
-export default function SmartPriority({ priorities }: { priorities: PriorityItem[] }) {
+export default function SmartPriority({ priorities, compact = false }: { priorities: PriorityItem[]; compact?: boolean }) {
   return (
-    <section id="smart-priority" aria-labelledby="smart-priority-title" className="scroll-mt-24 space-y-4">
-      <div className="flex items-start gap-3">
+    <section id="smart-priority" aria-label={compact ? "Your recommended order of changes" : undefined} aria-labelledby={compact ? undefined : "smart-priority-title"} className="scroll-mt-24 space-y-4">
+      {!compact && <div className="flex items-start gap-3">
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#CAE3B9] bg-[#EDF9E0] text-[#578129]">
           <ClipboardList className="h-5 w-5" aria-hidden="true"/>
         </span>
@@ -25,7 +25,7 @@ export default function SmartPriority({ priorities }: { priorities: PriorityItem
             A suggested order based on the report&apos;s primary recommendation, wording cues and verified evidence — not predicted conversion lift or a measured effort estimate.
           </p>
         </div>
-      </div>
+      </div>}
       {priorities.length === 0 && (
         <p className="rounded-xl border border-[#E2EADD] bg-[#F7FAF3] p-4 text-sm text-[#64765E]">No prioritized recommendations were available in this report.</p>
       )}

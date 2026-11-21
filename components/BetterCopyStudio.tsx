@@ -17,7 +17,7 @@ function conciseDraft(value: string): string | null {
   return first;
 }
 
-export default function BetterCopyStudio({ opportunities }: { opportunities: CopyOpportunity[] }) {
+export default function BetterCopyStudio({ opportunities, compact = false }: { opportunities: CopyOpportunity[]; compact?: boolean }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [mode, setMode] = useState<CopyMode>("recommended");
   const [drafts, setDrafts] = useState<Record<string, string>>({});
@@ -42,8 +42,8 @@ export default function BetterCopyStudio({ opportunities }: { opportunities: Cop
   };
 
   return (
-    <section id="better-copy-studio" aria-labelledby="copy-studio-title" className="scroll-mt-24 space-y-4">
-      <div className="flex items-start gap-3">
+    <section id="better-copy-studio" aria-label={compact ? "Copy and rewrite suggestions" : undefined} aria-labelledby={compact ? undefined : "copy-studio-title"} className="scroll-mt-24 space-y-4">
+      {!compact && <div className="flex items-start gap-3">
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#CAE3B9] bg-[#EDF9E0] text-[#578129]"><PencilLine className="h-5 w-5" aria-hidden="true"/></span>
         <div>
           <p className="text-[11px] font-bold uppercase tracking-widest text-[#578129]">03 · Better Copy Studio</p>
@@ -52,7 +52,7 @@ export default function BetterCopyStudio({ opportunities }: { opportunities: Cop
             Compare website wording with suggested copy, use a shorter option when safely available, or edit your own version. Drafts stay in this browser session.
           </p>
         </div>
-      </div>
+      </div>}
       {!selected ? (
         <div className="rounded-2xl border border-[#E2EADD] bg-[#F7FAF3] p-5 text-sm text-[#64765E]">
           No copy-ready drafts were included in this scan. Use the Evidence-to-Fix recommendations instead; the tool will not invent product claims.

@@ -4,10 +4,10 @@ import { ArrowUpRight, CheckCircle2, FileSearch, SearchX } from "lucide-react";
 import type { EvidenceFix } from "@/types/premiumWorkbench";
 import { CLARITY_REPORT_CHAPTERS } from "@/lib/clarity-report-chapters";
 
-export default function EvidenceToFix({ fixes }: { fixes: EvidenceFix[] }) {
+export default function EvidenceToFix({ fixes, compact = false }: { fixes: EvidenceFix[]; compact?: boolean }) {
   return (
-    <section id="evidence-to-fix" className="space-y-4 scroll-mt-24" aria-labelledby="evidence-to-fix-title">
-      <div className="flex items-start gap-3">
+    <section id="evidence-to-fix" className="space-y-4 scroll-mt-24" aria-label={compact ? "Website findings and specific fixes" : undefined} aria-labelledby={compact ? undefined : "evidence-to-fix-title"}>
+      {!compact && <div className="flex items-start gap-3">
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#CAE3B9] bg-[#EDF9E0] text-[#578129]">
           <FileSearch className="h-5 w-5" aria-hidden="true"/>
         </span>
@@ -16,7 +16,7 @@ export default function EvidenceToFix({ fixes }: { fixes: EvidenceFix[] }) {
           <h3 id="evidence-to-fix-title" className="mt-1 text-xl font-bold text-[#182516] sm:text-2xl">See what informed each recommendation</h3>
           <p className="mt-2 text-sm leading-relaxed text-[#64765E]">Verified website wording on the left, recommended action beside it. When source evidence is missing, we say so rather than inventing a quote.</p>
         </div>
-      </div>
+      </div>}
       {!fixes.length && <p className="rounded-xl border border-[#E2EADD] bg-[#F7FAF3] p-5 text-sm text-[#52664B]">No detailed improvements were recorded for this report. The signal explorer still contains your available diagnostic guidance.</p>}
       <div className="space-y-3">
         {fixes.map((fix, index) => {
