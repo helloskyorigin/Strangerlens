@@ -12,7 +12,7 @@ export function correctContradictedLegalClaims(
   analysis: WebsiteAnalysis,
   bundle?: SupportingPagesBundle
 ): WebsiteAnalysis {
-  const knownTypes = new Set([
+  const knownTypes = new Set<string>([
     ...(bundle?.candidates ?? []).map(page => page.pageType),
     ...(bundle?.pages ?? []).map(page => page.pageType),
     ...(bundle?.externalLegalLinks ?? []).map(link => link.pageType),
