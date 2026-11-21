@@ -63,5 +63,5 @@ const atmosphere=readFileSync("app/landing-v3.css","utf8");
 assert.ok(atmosphere.includes("@keyframes sl-color-flow"));
 assert.ok(atmosphere.includes("prefers-reduced-motion:reduce"));
 const landing=readFileSync("components/landing/StrangerLensLanding.tsx","utf8");
-assert.ok(landing.includes("FULL CLARITY REPORT") && landing.includes("$9") && !landing.includes("No card required"), "Landing reflects current $9 report and avoids filler.");
+assert.ok(landing.includes("THE DEEPER LOOK") && landing.includes("$9") && !landing.includes("No card required") && landing.indexOf('id="pricing"') > landing.indexOf('id="faq"'), "Landing keeps the $9 report only in its final pricing section.");
 console.log("PASS: personalized public-score upgrade, paid-only report gating, compact landing and slow accessible aurora.");
