@@ -25,9 +25,11 @@ assert.equal(sample.querySelectorAll(".slr-live-demo-row").length,5,"Exactly fiv
 assert.ok(sample.textContent?.includes("First Impression")&&sample.textContent?.includes("Audience") &&
   sample.textContent?.includes("Value")&&sample.textContent?.includes("Trust")&&sample.textContent?.includes("Action"),
   "Sample reflects the actual free signal categories");
-assert.ok(sample.textContent?.includes("example, not a live scan")||sample.textContent?.includes("Illustrative example"),
-  "No invented live report or fake customer case");
-assert.ok(doc.querySelector("#sample-report .slr-example-tabs"),"Fictional example walkthrough is retained");
+assert.ok(sample.textContent?.includes("Sample report") &&
+  sample.getAttribute("aria-label")?.includes("Illustrative"),
+  "A single honest sample marker identifies the preview");
+assert.ok(!doc.querySelector("#sample-report .slr-example-tabs"),"Weak generic SaaS/service/store example section is removed");
+assert.equal(doc.querySelectorAll("main > section").length,5,"Landing has exactly five useful sections");
 assert.equal(doc.querySelectorAll("#full-report .slr-paid-proof-item").length,5,
   "Paid value mirrors the five actual expandable report topics");
 assert.ok(!doc.querySelector(".slr-story") && !doc.querySelector("#what-we-check"),

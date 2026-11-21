@@ -24,7 +24,8 @@ assert.doesNotMatch(connecting, /Open my report/, "The report must not open whil
 const connected = render({ verifiedSite: { domain: "example.com", httpStatus: 200 }, scanMilestone: "connected" });
 assert.match(connected, /Understanding your website/);
 const inspected = render({ verifiedSite: { domain: "example.com", httpStatus: 200 }, scanMilestone: "content_inspected" });
-assert.match(inspected, /Looking through fresh eyes/);
+assert.match(inspected, /Checking what stands out/);
+assert.doesNotMatch(inspected, /fresh eyes|public content analysis/i);
 const evaluated = render({ verifiedSite: { domain: "example.com", httpStatus: 200 }, scanMilestone: "signals_evaluated" });
 assert.match(evaluated, /Preparing your report/);
 assert.doesNotMatch(evaluated, /Open my report/);

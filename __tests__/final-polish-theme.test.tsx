@@ -24,7 +24,10 @@ assert.ok(scan.includes("sl-scan-lens-scene") && !scan.includes("sl-scan-stages"
 const app=readFileSync("app/page.tsx","utf8");
 assert.ok(app.includes('<AnimatePresence mode="popLayout" initial={false}>'), "Cross-screen transitions cannot wait on an empty black frame.");
 const currentLanding=readFileSync("components/landing/StrangerLensLanding.tsx","utf8");
-assert.ok(currentLanding.includes("inspects accessible public website content") && app.includes("public website URL"), "Current landing describes the inspected public-website scope accurately.");
+assert.ok(currentLanding.includes("StrangerLens evaluates how clearly") &&
+  !currentLanding.includes("publicly accessible website content") &&
+  app.includes("public website URL"),
+  "Landing describes five clear checks without technical public-content copy.");
 const css=readFileSync("app/landing-v3.css","utf8");
 const theme=readFileSync("app/app-theme.css","utf8");
 const globals=readFileSync("app/globals.css","utf8");
