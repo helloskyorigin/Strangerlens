@@ -232,3 +232,111 @@ html[data-landing-theme="dark"] .slr-page .slr-final-price-grid .slr-price-card 
 @media(prefers-reduced-motion:reduce){
   .slr-page .slr-explore-choice{transition:none}
 }
+
+
+/* Landing final visual polish: one iOS-pill CTA language in BOTH themes.
+   This file loads last to beat legacy black/white landing button styles. */
+.slr-page .slr-button,
+.slr-page .slr-hero-scan .slr-form-submit,
+html[data-landing-theme="dark"] .slr-page .slr-button,
+html[data-landing-theme="dark"] .slr-page .slr-hero-scan .slr-form-submit{
+  background:#C7F36A!important;
+  background-image:none!important;
+  color:#17210D!important;
+  -webkit-text-fill-color:#17210D!important;
+  border:1px solid #B5E85B!important;
+  border-radius:999px!important;
+  box-shadow:0 6px 18px rgba(74,109,29,.13)!important;
+  transition:background-color .2s ease,box-shadow .2s ease,transform .2s ease;
+}
+.slr-page .slr-button svg,
+.slr-page .slr-hero-scan .slr-form-submit svg,
+html[data-landing-theme="dark"] .slr-page .slr-button svg,
+html[data-landing-theme="dark"] .slr-page .slr-hero-scan .slr-form-submit svg{
+  color:#17210D!important;
+  stroke:#17210D!important;
+}
+.slr-page .slr-button:hover:not(:disabled),
+.slr-page .slr-hero-scan .slr-form-submit:hover:not(:disabled),
+html[data-landing-theme="dark"] .slr-page .slr-button:hover:not(:disabled),
+html[data-landing-theme="dark"] .slr-page .slr-hero-scan .slr-form-submit:hover:not(:disabled){
+  background:#D6FF8D!important;
+  border-color:#C7F36A!important;
+  color:#17210D!important;
+  -webkit-text-fill-color:#17210D!important;
+  box-shadow:0 9px 24px rgba(74,109,29,.17)!important;
+}
+.slr-page .slr-hero-scan .slr-form-submit{
+  min-height:53px;
+  padding-inline:18px;
+}
+.slr-page .slr-hero-scan .slr-input-wrap{border-radius:27px}
+.slr-page .slr-explore-choice.is-active,
+html[data-landing-theme="dark"] .slr-page .slr-explore-choice.is-active{
+  background:#C7F36A!important;
+  border-color:#B5E85B!important;
+  color:#17210D!important;
+  border-radius:999px;
+}
+.slr-page .slr-explore-choice.is-active .slr-explore-choice-number{
+  color:#3B5222!important;
+}
+
+/* Dark sample readability: override legacy neutral-tone rules explicitly.
+   Make the headline number, /100, each score and each status visible. */
+html[data-landing-theme="dark"] .slr-page .slr-live-demo .slr-live-demo-scoreline strong{
+  color:#F5FFE9!important;
+  -webkit-text-fill-color:#F5FFE9!important;
+  opacity:1!important;
+  text-shadow:none!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-live-demo .slr-live-demo-scoreline strong span{
+  color:#C7D9B7!important;
+  -webkit-text-fill-color:#C7D9B7!important;
+  opacity:1!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-live-demo .slr-live-demo-row-score{
+  color:#F5FFE9!important;
+  -webkit-text-fill-color:#F5FFE9!important;
+  opacity:1!important;
+  font-variant-numeric:tabular-nums;
+}
+html[data-landing-theme="dark"] .slr-page .slr-live-demo .slr-live-demo-row-head > strong,
+html[data-landing-theme="dark"] .slr-page .slr-live-demo .slr-live-demo-signals-head strong{
+  color:#F1F8EA!important;
+  -webkit-text-fill-color:#F1F8EA!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-live-demo .slr-live-demo-row > p,
+html[data-landing-theme="dark"] .slr-page .slr-live-demo .slr-live-demo-score > p,
+html[data-landing-theme="dark"] .slr-page .slr-live-demo .slr-live-demo-domain{
+  color:#B6C8AA!important;
+  -webkit-text-fill-color:#B6C8AA!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-live-demo .slr-live-demo-score-status,
+html[data-landing-theme="dark"] .slr-page .slr-live-demo .slr-live-demo-status--amber{
+  color:#FFE1A8!important;
+  -webkit-text-fill-color:#FFE1A8!important;
+  background:#473724!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-live-demo .slr-live-demo-status--red{
+  color:#FFC2C0!important;
+  -webkit-text-fill-color:#FFC2C0!important;
+  background:#4A2C2B!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-live-demo .slr-live-demo-status--good{
+  color:#CEFFB7!important;
+  -webkit-text-fill-color:#CEFFB7!important;
+  background:#274129!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-live-demo .slr-live-demo-scoreline,
+html[data-landing-theme="dark"] .slr-page .slr-live-demo .slr-live-demo-row-head{
+  opacity:1!important;
+  filter:none!important;
+}
+@media(max-width:570px){
+  .slr-page .slr-hero-scan .slr-input-wrap{border-radius:23px}
+  .slr-page .slr-hero-scan .slr-form-submit{border-radius:999px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .slr-page .slr-button,.slr-page .slr-hero-scan .slr-form-submit{transition:none!important}
+}
