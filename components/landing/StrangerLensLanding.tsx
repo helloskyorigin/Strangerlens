@@ -61,14 +61,6 @@ const examples = [
   },
 ];
 
-const signals = [
-  { name: "First impression", question: "What is this?", description: "Whether the opening message explains what the website is about.", icon: Eye },
-  { name: "Audience", question: "Is this for me?", description: "Whether the people this is meant for can recognize themselves.", icon: Target },
-  { name: "Value", question: "Why would I care?", description: "Whether the benefit is specific and understandable.", icon: Sparkles },
-  { name: "Trust", question: "Can I believe it?", description: "Whether the inspected content provides credible support for its claims.", icon: ShieldCheck },
-  { name: "Action", question: "What now?", description: "Whether the intended next step is clear from the page.", icon: ArrowUpRight },
-];
-
 const questions = [
   {
     q: "What exactly does StrangerLens analyze?",
@@ -164,47 +156,34 @@ export default function StrangerLensLanding({
       </header>
 
       <main id="main-content">
-        <section className="slr-hero slr-container" aria-labelledby="slr-hero-title">
-          <div className="slr-kicker"><span className="slr-kicker-dot" /> FREE WEBSITE CLARITY CHECK</div>
-          <h1 id="slr-hero-title">What&apos;s unclear on<br /><span className="slr-underline">your website?</span></h1>
-          <p className="slr-hero-subtitle">Spot what could leave first-time visitors guessing.</p>
-          <p className="slr-hero-description">Get your free clarity score, see five key signals, and find out what deserves a closer look.</p>
-          <form id="slr-scan" className="slr-scan-form" onSubmit={onAnalyze} noValidate>
-            <div className="slr-input-wrap">
-              <label htmlFor="slr-website-url" className="slr-sr-only">Your public website URL</label>
-              <Link2 size={20} className="slr-input-icon" aria-hidden="true" />
-              <input id="slr-website-url" ref={inputRef} type="text" inputMode="url" autoComplete="url" spellCheck={false}
-                placeholder="yourwebsite.com" value={url} onChange={event => onUrlChange(event.target.value)}
-                aria-invalid={Boolean(errorMessage)} aria-describedby={errorMessage ? "slr-url-error" : undefined}
-                disabled={isVerifying} />
-              <button className="slr-button slr-form-submit" type="submit" disabled={isVerifying}>
-                <span>{isVerifying ? "Connecting to website..." : "Find My Website’s Weak Spots — Free"}</span>
-                <ArrowUpRight size={18} aria-hidden="true" />
-              </button>
-            </div>
-            {errorMessage && <p id="slr-url-error" role="alert" className="slr-input-error">{errorMessage}</p>}
-          </form>
-        </section>
-
-        <section className="slr-story slr-container" aria-labelledby="slr-story-title">
-          <div className="slr-story-heading">
-            <span className="slr-eyebrow">THE PROBLEM WITH KNOWING YOUR PRODUCT TOO WELL</span>
-            <h2 id="slr-story-title">You know what every sentence means.<br /><span>New visitors have to figure it out.</span></h2>
-            <p>You know the features, the audience and the backstory. Someone arriving for the first time only has what&apos;s written on the page.</p>
-          </div>
-          <div className="slr-story-grid">
-            <div className="slr-story-card slr-story-founder"><span className="slr-story-mark"><Check size={18}/></span><span className="slr-story-label">IN YOUR HEAD</span>
-              <h3>“Of course they understand it.”</h3>
-              <p>You already know who it&apos;s for, what it does and why it matters.</p>
-              <div className="slr-story-quote">The product is obvious because you built it.</div>
-            </div>
-            <div className="slr-story-card slr-story-stranger"><span className="slr-story-mark"><CircleHelp size={19}/></span><span className="slr-story-label">ON THE FIRST VISIT</span>
-              <h3>“Wait, what is this actually for?”</h3>
-              <p>The headline may sound polished but still leave important questions unanswered.</p>
-              <div className="slr-story-quote">The meaning has to work without an explanation.</div>
+        <section className="slr-hero slr-hero-proof slr-container" aria-labelledby="slr-hero-title">
+          <div className="slr-hero-copy">
+            <div className="slr-kicker"><span className="slr-kicker-dot"/> FREE WEBSITE CLARITY CHECK</div>
+            <h1 id="slr-hero-title">Would a stranger<br/><span className="slr-underline">get your website?</span></h1>
+            <p className="slr-hero-subtitle">Your homepage can look polished and still leave people guessing.</p>
+            <p className="slr-hero-description">See how clearly it explains itself. Get a free score and five simple checks for your first impression, audience, value, trust and next step.</p>
+            <form id="slr-scan" className="slr-scan-form slr-hero-scan" onSubmit={onAnalyze} noValidate>
+              <div className="slr-input-wrap">
+                <label htmlFor="slr-website-url" className="slr-sr-only">Your public website URL</label>
+                <Link2 size={20} className="slr-input-icon" aria-hidden="true"/>
+                <input id="slr-website-url" ref={inputRef} type="text" inputMode="url" autoComplete="url" spellCheck={false}
+                  placeholder="yourwebsite.com" value={url} onChange={event=>onUrlChange(event.target.value)}
+                  aria-invalid={Boolean(errorMessage)} aria-describedby={errorMessage?"slr-url-error":undefined}
+                  disabled={isVerifying}/>
+                <button className="slr-button slr-form-submit" type="submit" disabled={isVerifying}>
+                  <span>{isVerifying?"Checking your website...":"Reveal My Clarity Score — Free"}</span>
+                  <ArrowUpRight size={18} aria-hidden="true"/>
+                </button>
+              </div>
+              {errorMessage&&<p id="slr-url-error" role="alert" className="slr-input-error">{errorMessage}</p>}
+            </form>
+            <div className="slr-hero-assurances">
+              <span><Check size={14} aria-hidden="true"/> Free score &amp; 5 checks</span>
+              <span><Check size={14} aria-hidden="true"/> No account needed</span>
+              <span><Check size={14} aria-hidden="true"/> Full report optional · $9 once</span>
             </div>
           </div>
-          <p className="slr-story-foot">StrangerLens helps you spot that gap using an AI assessment of inspected public website content.</p>
+          <LandingResultPreview/>
         </section>
 
         <section className="slr-example slr-container" id="sample-report" aria-labelledby="slr-example-title">
