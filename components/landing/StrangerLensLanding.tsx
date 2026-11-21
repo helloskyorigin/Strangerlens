@@ -8,6 +8,8 @@ import {
   SearchCheck, ShieldCheck, Sparkles, Target, WandSparkles, X,
 } from "lucide-react";
 import { LEGAL_CONFIG, getSupportGmailComposeUrl } from "@/lib/legal-config";
+import { LandingThemeSwitcher } from "@/components/landing/LandingThemeSwitcher";
+import LandingResultPreview from "@/components/landing/LandingResultPreview";
 
 interface StrangerLensLandingProps {
   url: string;
@@ -19,8 +21,6 @@ interface StrangerLensLandingProps {
 
 const navLinks = [
   { label: "How it works", href: "#how-it-works" },
-  { label: "What we check", href: "#what-we-check" },
-  { label: "Full report", href: "#full-report" },
   { label: "Pricing", href: "#pricing" },
   { label: "FAQ", href: "#faq" },
 ];
@@ -143,8 +143,9 @@ export default function StrangerLensLanding({
             {navLinks.map(link => <a key={link.href} href={link.href}>{link.label}</a>)}
           </nav>
           <div className="slr-nav-actions">
+            <LandingThemeSwitcher compact />
             <button type="button" className="slr-button slr-nav-cta" onClick={goToScan}>
-              Check My Website Free <ArrowUpRight size={16} />
+              Get Free Score <ArrowUpRight size={16} />
             </button>
             <button type="button" className="slr-menu-toggle"
               onClick={() => setMenuOpen(open => !open)}
@@ -157,7 +158,7 @@ export default function StrangerLensLanding({
         {menuOpen && (
           <nav id="slr-mobile-menu" className="slr-mobile-menu slr-container" aria-label="Mobile navigation">
             {navLinks.map(link => <a key={link.href} href={link.href} onClick={() => setMenuOpen(false)}>{link.label}<ArrowUpRight size={16} /></a>)}
-            <button type="button" className="slr-button" onClick={goToScan}>Check My Website Free <ArrowUpRight size={16} /></button>
+            <button type="button" className="slr-button" onClick={goToScan}>Get Free Score <ArrowUpRight size={16} /></button>
           </nav>
         )}
       </header>
