@@ -38,7 +38,20 @@ assert.ok(globals.includes('@import "../components/dark-monochrome.css"') &&
 for(const name of [".slr-page",".sl-results-v7",".sl-scan-v2",".slr-legal",".sl-app-theme"]){
  assert.ok(css.includes(name),"Dark style covers "+name);
 }
-assert.ok(css.includes("background:#050505!important") && css.includes("color:#f5f5f5!important")
- && css.includes(".sl-v7-upgrade-button"),"Black canvas and contrast-safe neutral paid CTA");
-assert.ok(!/#(?:b9fc22|c7f36a|a8e452|d9f4b2|22301b|1f291d)/i.test(css),"No green tint in dark override");
+const scalen = readFileSync("components/scalen-inspired-dark.css","utf8");
+assert.ok(scalen.includes("--scalen-panel:#171718") &&
+  scalen.includes("--scalen-lime-text:#a9e66e") &&
+  scalen.includes("--scalen-lime:#bdfb54"),
+  "Dark mode is SCALEN-inspired charcoal and electric lime, not monochrome");
+assert.ok(scalen.includes('.sl-v7-upgrade-button') &&
+  scalen.includes("filter:none!important"),
+  "Bright lime paid CTA and original lime logo stay visible");
+assert.ok(globals.indexOf("scalen-inspired-dark.css")>globals.indexOf("landing-result-proof.css") &&
+  globals.indexOf("scalen-inspired-dark.css")<globals.indexOf(":root"),
+  "SCALEN color corrections load last");
+assert.ok(globals.includes("color-scheme: light;") &&
+  globals.includes("background-color: #f7faf4") &&
+  globals.includes('html[data-landing-theme="light"]'),
+  "New visits default to white and lime rather than dark");
+
 console.log("PASS: strong landing CTA, minimal results navbar, monochrome dark CSS, paid flow & PDF access.");

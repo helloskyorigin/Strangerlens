@@ -10,21 +10,21 @@
 @import "../components/scalen-inspired-dark.css";
 
 :root {
-  color-scheme: dark;
-  background-color: #090D15;
+  color-scheme: light;
+  background-color: #f7faf4;
 }
 html {
-  background-color: #090D15;
-  color: #F1F5F9;
-  color-scheme: dark;
+  background-color: #f7faf4;
+  color: #111510;
+  color-scheme: light;
   scroll-behavior: smooth;
   scroll-padding-top: 84px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 body {
-  background-color: #090D15;
-  color: #F1F5F9;
+  background-color: #f7faf4;
+  color: #111510;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   overflow-x: hidden;
 }
@@ -39,6 +39,6 @@ html[data-landing-theme="dark"], html[data-landing-theme="dark"] body {
 }
 html[data-landing-theme="light"], html[data-landing-theme="light"] body {
   color-scheme:light;
-  background-color:#F8FAFE;
-  color:#18283E;
+  background-color:#f7faf4;
+  color:#111510;
 }

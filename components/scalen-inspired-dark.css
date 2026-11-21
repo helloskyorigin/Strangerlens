@@ -366,3 +366,13 @@ html[data-landing-theme="dark"] .sl-results-v7 .sl-v7-upgrade-button:disabled{
     transition-duration:.01ms!important;
   }
 }
+
+/* Prefer the identity dot and lime headlines over the old neutral preview overrides. */
+html[data-landing-theme="dark"] .slr-page .slr-live-demo .slr-live-demo-dot{
+  background:var(--scalen-lime)!important;
+  box-shadow:0 0 0 3px rgba(189,251,84,.11)!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-paid-proof-intro .slr-eyebrow,
+html[data-landing-theme="dark"] .slr-page .slr-example-heading .slr-eyebrow{
+  color:var(--scalen-lime-text)!important;
+}

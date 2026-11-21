@@ -39,12 +39,16 @@ const css=readFileSync("components/landing/landing-result-proof.css","utf8");
 assert.ok(css.includes("grid-template-columns:minmax(0,.93fr) minmax(0,1.07fr)") &&
   css.includes("@media(max-width:570px)")&&css.includes("@media(max-width:360px)"),
   "Desktop split hero and 570px/360px mobile breakpoints");
-assert.ok(css.includes('html[data-landing-theme="dark"] .slr-page .slr-live-demo') &&
-  css.includes("background:#151515!important")&&css.includes("background:#cacaca!important"),
-  "Dark preview is black/charcoal and neutral, not green-tinted");
+const brandDark=readFileSync("components/scalen-inspired-dark.css","utf8");
+assert.ok(brandDark.includes('html[data-landing-theme="dark"] .slr-page .slr-live-demo') &&
+  brandDark.includes("--scalen-lime:#bdfb54")&&brandDark.includes("--scalen-panel:#171718") &&
+  brandDark.includes(".slr-live-demo-fill--good"),
+  "Dark preview keeps readable charcoal plus signature lime signals");
 const globals=readFileSync("app/globals.css","utf8");
 assert.ok(globals.indexOf('landing-result-proof.css')>globals.indexOf("dark-monochrome.css") &&
-  globals.indexOf('landing-result-proof.css')<globals.indexOf(":root"),"Launch CSS loads after dark skin and before CSS rules");
+  globals.indexOf('scalen-inspired-dark.css')>globals.indexOf('landing-result-proof.css') &&
+  globals.indexOf('scalen-inspired-dark.css')<globals.indexOf(":root"),
+  "SCALEN lime overrides all previous monochrome dark declarations");
 
 const saved:Record<string,PropertyDescriptor|undefined>={};
 const keys=["window","document","self","HTMLElement","Element","Node","SVGElement","IS_REACT_ACT_ENVIRONMENT"];
