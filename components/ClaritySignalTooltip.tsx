@@ -117,7 +117,7 @@ export default function ClaritySignalTooltip({ signalKey, name, isOpen, onOpen, 
       aria-label={`About ${name}`}
       aria-describedby={isOpen ? id : undefined}
       aria-expanded={isOpen}
-      className="-m-1 inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full text-[#64748B] transition-colors hover:text-blue-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+      className="-m-1 inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full text-[#6B7966] transition-colors hover:text-[#111510] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8BCB36]"
       onPointerDown={() => { pointerFocus.current = true; }}
       onPointerCancel={() => { pointerFocus.current = false; }}
       onPointerEnter={event => {
@@ -144,7 +144,7 @@ export default function ClaritySignalTooltip({ signalKey, name, isOpen, onOpen, 
         role="tooltip"
         onPointerEnter={stopCloseTimer}
         onPointerLeave={leave}
-        className="fixed z-[100] overflow-y-auto overscroll-contain rounded-xl border border-[#384660] bg-[#171F2D] px-3.5 py-3 text-left font-sans text-xs font-normal leading-5 text-[#E2E8F0] shadow-[0_12px_36px_rgba(0,0,0,0.4)] break-words"
+        className="fixed z-[100] overflow-y-auto overscroll-contain rounded-xl border border-[#2F3F2B] bg-[#111510] px-3.5 py-3 text-left font-sans text-xs font-normal leading-5 text-[#F2F7EE] shadow-[0_12px_36px_rgba(17,21,16,0.35)] break-words"
         style={position ? { ...position, visibility: "visible" } : { width: "min(288px, calc(100vw - 24px))", visibility: "hidden" }}
       >{CLARITY_SIGNAL_HELP[signalKey]}</div>, document.body,
     ) : null}

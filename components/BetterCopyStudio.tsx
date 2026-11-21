@@ -76,7 +76,7 @@ export default function BetterCopyStudio({ opportunities }: { opportunities: Cop
               <p className="text-[11px] font-bold uppercase tracking-widest text-[#74866F]">Observed wording</p>
               {selected.originalQuote ? (
                 <>
-                  <blockquote className="mt-3 break-words rounded-xl border border-[#30445C] bg-[#F7FAF3] p-4 text-sm leading-relaxed text-[#1C2B19]">“{selected.originalQuote.text}”</blockquote>
+                  <blockquote className="mt-3 break-words rounded-xl border border-[#D5E4CC] bg-[#F7FAF3] p-4 text-sm leading-relaxed text-[#1C2B19]">“{selected.originalQuote.text}”</blockquote>
                   <p className="mt-2 text-[11px] text-[#367A28]">Verified source · {selected.originalQuote.source}</p>
                 </>
               ) : (

@@ -53,7 +53,7 @@ export default function SmartPriority({ priorities }: { priorities: PriorityItem
                         <p className="mt-1.5 text-xs leading-relaxed text-[#64765E]">{item.reason}</p>
                         <p className="mt-2 text-[11px] leading-relaxed text-[#74866F]">{item.effortNote}</p>
                         <div className="mt-2.5 flex flex-wrap gap-2">
-                          {chapter && <span className="rounded-full border border-[#35516E] px-2 py-1 text-[10px] font-semibold text-[#476D25]">{chapter.title}</span>}
+                          {chapter && <span className="rounded-full border border-[#C5D8BA] px-2 py-1 text-[10px] font-semibold text-[#476D25]">{chapter.title}</span>}
                           <span className={`rounded-full border px-2 py-1 text-[10px] font-medium ${item.evidenceCount ? "border-[#BCDFAE] text-[#367A28]" : "border-[#E8D6AE] text-[#9C7123]"}`}>
                             {item.evidenceCount ? `${item.evidenceCount} verified quote${item.evidenceCount === 1 ? "" : "s"}` : "Verify before changing"}
                           </span>

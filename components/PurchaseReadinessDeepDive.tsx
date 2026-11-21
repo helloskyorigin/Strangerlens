@@ -82,10 +82,10 @@ export default function PurchaseReadinessDeepDive({ details }: Props) {
       <p className="sl-purchase-kicker"><Sparkles className="h-4 w-4" aria-hidden="true"/> PURCHASE ACTION COPY</p>
       <h4 className="sl-purchase-heading">Make the next action clearer</h4>
       {details.copyImprovements.map((c,i)=><div key={i} className="sl-purchase-copy-pair">
-        <div><span>CURRENT BUTTON</span><p>{c.current}</p></div>
-        <div><span>SUGGESTED DIRECTION</span><p>{c.suggested}</p></div>
+        <div><span>OBSERVED CTA TEXT</span><p>{c.current}</p></div>
+        <div><span>SUGGESTED WORDING</span><p>{c.suggested}</p></div>
       </div>)}
-      <p className="sl-purchase-disclaimer">Only existing, clearly identified purchase actions receive suggested wording. Check the destination and terms before applying a rewrite.</p>
+      <p className="sl-purchase-disclaimer">Only existing, clearly identified purchase actions receive suggested wording. Check the destination and terms before applying changes.</p>
     </section>}
 
     {details.recommendations.length>0 && <details className="sl-purchase-details">
