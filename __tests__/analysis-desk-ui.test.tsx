@@ -24,7 +24,7 @@ assert.ok(analyzing.includes("example.com"), "Actual website shown.");
 assert.ok(!analyzing.includes("Open my report"), "No premature result availability.");
 
 const inspected = render({verifiedSite:{domain:"example.com",httpStatus:200},scanMilestone:"content_inspected"});
-assert.ok(inspected.includes("Looking through fresh eyes"), "Copy reflects inspected backend content.");
+assert.ok(inspected.includes("Checking what stands out") && !inspected.includes("fresh eyes"), "Copy reflects the inspected backend stage without the rejected slogan.");
 const scored = render({verifiedSite:{domain:"example.com",httpStatus:200},scanMilestone:"signals_evaluated"});
 assert.ok(scored.includes("Preparing your report"), "Copy reflects actual evaluated signals.");
 assert.ok(!scored.includes("Open my report"), "Backend has not declared report ready.");
