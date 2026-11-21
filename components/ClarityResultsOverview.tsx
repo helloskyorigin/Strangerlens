@@ -1,6 +1,5 @@
 "use client";
 import React, { useState } from "react";
-import { Info } from "lucide-react";
 import type { CanonicalReport, CanonicalSignal, CanonicalPurchaseSignal } from "@/lib/report-adapter";
 import ClaritySignalTooltip from "@/components/ClaritySignalTooltip";
 
@@ -8,7 +7,6 @@ interface Props {
   report: CanonicalReport;
   isUnlocked: boolean;
   unlockedPurchase?: CanonicalPurchaseSignal;
-  onExplainScore: () => void;
 }
 type Band = "strong" | "good" | "review" | "weak" | "unknown";
 function bandFor(score: number | null): Band {
@@ -74,7 +72,7 @@ function overallHeadline(score: number | null): string {
   return "Your website's first message needs attention.";
 }
 export default function ClarityResultsOverview({
-  report, isUnlocked, unlockedPurchase, onExplainScore,
+  report, isUnlocked, unlockedPurchase,
 }: Props) {
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
   const signals: Array<CanonicalSignal | CanonicalPurchaseSignal> =
@@ -92,10 +90,6 @@ export default function ClarityResultsOverview({
           <div className="sl-v8-score-heading">
             <h1 id="sl-v7-score-title" className="sl-v7-eyebrow">Website Clarity Score</h1>
           </div>
-          <button type="button" onClick={onExplainScore} className="sl-v8-scoring-link"
-            aria-label="Score details" title="About your clarity score">
-            <Info size={17} aria-hidden="true"/>
-          </button>
         </div>
         <div className="sl-v8-score-mainline">
           <div className="sl-v7-score-number">
@@ -103,7 +97,6 @@ export default function ClarityResultsOverview({
           </div>
         </div>
         <p className="sl-v8-score-insight">{overallHeadline(report.overallScore)}</p>
-        <p className="sl-v8-result-domain">Results for {report.domain}</p>
       </div>
     </section>
     <section id="report-clarity-signals" className="sl-v7-breakdown" aria-labelledby="sl-v7-signal-title">
@@ -139,7 +132,6 @@ export default function ClarityResultsOverview({
           </article>;
         })}
       </div>
-      <p className="sl-v11-score-note">Scores are estimates, not actual visitor behavior.</p>
     </section>
   </>;
 }

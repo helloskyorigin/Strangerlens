@@ -2355,3 +2355,49 @@ html[data-landing-theme="dark"] .sl-results-v7 .sl-v11-summary #report-clarity-s
 @media (prefers-reduced-motion:reduce) {
   .sl-results-v7 .sl-v11-summary #report-clarity-signals .sl-v12-info-button {transition:none!important}
 }
+
+
+/* Results v13 · Minimal top and reliable single-line mobile navigation.
+   No score info control, staged intro, or technical report preamble. */
+.sl-results-v7 .sl-v11-summary #report-first-look .sl-v8-score-header {
+  min-height:0!important;
+}
+.sl-results-v7 .sl-v11-summary #report-first-look .sl-v8-score-mainline {
+  margin-top:13px!important;
+}
+.sl-results-v7 .sl-v11-summary #report-first-look .sl-v8-score-panel {
+  padding-top:27px!important;
+  padding-bottom:26px!important;
+}
+.sl-results-v7 .sl-v11-summary #report-first-look .sl-v8-score-insight {
+  margin-top:10px!important;
+}
+.sl-results-v7 .sl-v8-nav-right > .sl-v8-my-reports {
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  flex:0 0 auto;white-space:nowrap;min-height:42px;
+}
+.sl-results-v7 .sl-v8-nav-right > .sl-v8-my-reports span {
+  white-space:nowrap;
+}
+@media(max-width:650px) {
+  .sl-results-v7 .sl-v8-nav-right > .sl-v8-my-reports {
+    min-width:42px;min-height:42px;padding:0 9px;
+  }
+  .sl-results-v7 .sl-v8-nav-right > .sl-v8-my-reports span {
+    display:none;
+  }
+  .sl-results-v7 .sl-v8-header-inner {
+    overflow:hidden;
+  }
+}
+@media(max-width:440px) {
+  .sl-results-v7 .sl-v8-nav-brand > span {display:none;}
+  .sl-results-v7 .sl-v8-nav-brand {gap:0;}
+  .sl-results-v7 .sl-v8-nav-right {gap:5px;flex:0 0 auto;}
+  .sl-results-v7 .sl-v8-nav-left {flex:0 0 auto;}
+  .sl-results-v7 .sl-v8-header-inner {gap:6px;padding:6px 8px;}
+  .sl-results-v7 .sl-v8-new-check {padding:8px 11px;}
+  .sl-results-v7 .sl-v11-summary #report-first-look .sl-v8-score-panel {
+    padding:22px 17px!important;
+  }
+}

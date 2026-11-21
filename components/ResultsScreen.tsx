@@ -6,7 +6,7 @@ import PaidReportAccordion from "@/components/PaidReportAccordion";
 import { trackFunnelEvent } from "@/lib/ui-funnel-events";
 import { persistActiveReportSession } from "@/lib/active-report-session";
 import { escapeHtmlText } from "@/lib/escape-html";
-import { Download, Check, Info, X, Lock, Loader2, AlertCircle, ArrowRight, FileText } from "lucide-react";
+import { Download, Check, X, Lock, Loader2, AlertCircle, ArrowRight, FileText } from "lucide-react";
 import { LandingThemeSwitcher } from "@/components/landing/LandingThemeSwitcher";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import Link from "next/link";
@@ -118,7 +118,6 @@ export default function ResultsScreen({
   onOpenPricing,
 }: any) {
   const [activeSignalTooltip, setActiveSignalTooltip] = useState<string | null>(null);
-  const [isScoreModalOpen, setIsScoreModalOpen] = useState(false);
   const [isEarlySuccessModalOpen, setIsEarlySuccessModalOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [earlyEmail, setEarlyEmail] = useState("");
@@ -173,8 +172,6 @@ export default function ResultsScreen({
 
 
   const shouldReduceMotion = useReducedMotion();
-  const scoreCloseButtonRef = useRef<HTMLButtonElement>(null);
-  const scorePreviousFocusRef = useRef<HTMLElement | null>(null);
   const gotItButtonRef = useRef<HTMLButtonElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const modalCardRef = useRef<HTMLDivElement>(null);
@@ -210,39 +207,16 @@ export default function ResultsScreen({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isEarlySuccessModalOpen]);
 
-  // Give the scoring explanation a keyboard-operable modal, not a dead-end
-  // overlay. Restore focus to the button that opened it when dismissed.
-  useEffect(() => {
-    if (!isScoreModalOpen) return;
-    scorePreviousFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    const frame = window.requestAnimationFrame(() => scoreCloseButtonRef.current?.focus());
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        setIsScoreModalOpen(false);
-      } else if (event.key === "Tab") {
-        event.preventDefault();
-        scoreCloseButtonRef.current?.focus();
-      }
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => {
-      window.cancelAnimationFrame(frame);
-      window.removeEventListener("keydown", onKeyDown);
-      scorePreviousFocusRef.current?.focus();
-    };
-  }, [isScoreModalOpen]);
-
   // Prevent background scrolling while modal is open
   useEffect(() => {
-    if (isEarlySuccessModalOpen || isScoreModalOpen) {
+    if (isEarlySuccessModalOpen) {
       const originalOverflow = document.body.style.overflow;
       document.body.style.overflow = "hidden";
       return () => {
         document.body.style.overflow = originalOverflow;
       };
     }
-  }, [isEarlySuccessModalOpen, isScoreModalOpen]);
+  }, [isEarlySuccessModalOpen]);
 
   // Focus management: move focus into modal when opened, restore when closed
   useEffect(() => {
@@ -520,29 +494,6 @@ export default function ResultsScreen({
         )}
       </AnimatePresence>
 
-      {/* ACCESSIBLE SCORE EXPLANATION */}
-      {isScoreModalOpen && (
-        <div role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setIsScoreModalOpen(false); }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#111710]/60 p-4 backdrop-blur-sm">
-          <section role="dialog" aria-modal="true" aria-labelledby="scoring-dialog-title"
-            aria-describedby="scoring-dialog-description"
-            className="w-full max-w-lg rounded-3xl border border-[#DCE8D5] bg-white p-6 text-[#192817] shadow-2xl sm:p-8">
-            <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-[#588532]">Five-signal clarity</p>
-            <h2 id="scoring-dialog-title" className="mb-3 text-2xl font-extrabold tracking-tight">How scoring works</h2>
-            <p id="scoring-dialog-description" className="mb-5 text-sm leading-relaxed text-[#5B7055]">
-              Your overall score is a weighted average of five clarity signals: First Impression (25%),
-              Audience (20%), Value (25%), Trust (15%) and Action (15%).
-              Purchase Readiness is scored separately and never changes this total.
-              These are AI assessments of inspected content, not measured visitor behavior.
-            </p>
-            <button ref={scoreCloseButtonRef} type="button" onClick={() => setIsScoreModalOpen(false)}
-              className="min-h-11 w-full rounded-full bg-[#111510] px-4 py-3 text-sm font-bold text-white hover:bg-[#2B3826] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#91C939]">
-              Got it
-            </button>
-          </section>
-        </div>
-      )}
-
       {/* FLOATING RESULTS NAV · VYLENS DESIGN LANGUAGE */}
       <header className="sl-v8-header">
         <div className="sl-v8-header-inner">
@@ -557,7 +508,7 @@ export default function ResultsScreen({
           </div>
           <div className="sl-v8-nav-right">
             <LandingThemeSwitcher compact />
-            <Link href="/my-reports" aria-label="My Reports"><FileText size={16} aria-hidden="true"/> <span>My Reports</span></Link>
+            <Link href="/my-reports" className="sl-v8-my-reports" aria-label="My Reports" title="My Reports"><FileText size={18} aria-hidden="true"/> <span>My Reports</span></Link>
             <button type="button" onClick={onRunNewCheck || onBackToLanding} className="sl-v8-new-check">
               New Check <ArrowRight size={16} aria-hidden="true"/>
             </button>
@@ -602,7 +553,6 @@ export default function ResultsScreen({
           <ClarityResultsOverview
             report={report}
             isUnlocked={isReportUnlocked}
-            onExplainScore={() => setIsScoreModalOpen(true)}
           />
         </div>
 
