@@ -10,10 +10,8 @@ export interface AIProvider {
 
 export class GeminiAIProvider implements AIProvider {
   private ai: GoogleGenAI | null = null;
-  private candidateModels = [
-    "gemini-4-hydrogen",
-    "gemini-3.1-flash-lite",
-  ];
+  // Backup only: try the fast supported candidate once, not a long model chain.
+  private candidateModels = ["gemini-3.1-flash-lite"];
 
   constructor(apiKey?: string) {
     const key = apiKey || process.env.GEMINI_API_KEY;
@@ -41,8 +39,12 @@ export class GeminiAIProvider implements AIProvider {
     const userPrompt = `Perform a Percept first-impression and legal trust analysis on this WebsiteSnapshot and legalPages:\n\n${formattedInput}`;
 
     let lastError: Error | null = null;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 9000);
 
+    try {
     for (const model of this.candidateModels) {
+      if (controller.signal.aborted) break;
       const modelStart = Date.now();
       try {
         const thinkingLevel =
@@ -54,6 +56,8 @@ export class GeminiAIProvider implements AIProvider {
           contents: userPrompt,
           config: {
             systemInstruction: SYSTEM_PROMPT,
+            abortSignal: controller.signal,
+            httpOptions: { timeout: 9000 },
             responseMimeType: "application/json",
             responseSchema: WEBSITE_ANALYSIS_GEMINI_SCHEMA,
             thinkingConfig: {
@@ -88,6 +92,9 @@ export class GeminiAIProvider implements AIProvider {
       }
     }
 
+    } finally {
+      clearTimeout(timer);
+    }
     throw new Error(`AI website analysis failed: ${lastError?.message || "Engine timeout or invalid response"}`);
   }
 }
