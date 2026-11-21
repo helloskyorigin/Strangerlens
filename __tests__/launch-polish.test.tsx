@@ -10,8 +10,8 @@ import { paymentAnalysis, paymentSnapshot } from "./fixtures/payment-report";
 
 const landing=renderToStaticMarkup(<StrangerLensLanding url="" onUrlChange={()=>{}} onAnalyze={()=>{}} isVerifying={false} errorMessage={null}/>);
 const dl=new JSDOM(landing).window.document;
-assert.ok(dl.querySelector("h1")?.textContent?.includes("What\x27s unclear on"),"Landing headline names the actual problem");
-assert.ok(dl.querySelector(".slr-form-submit")?.textContent?.includes("Find My Website’s Weak Spots — Free"),"Free CTA explains the benefit");
+assert.ok(dl.querySelector("h1")?.textContent?.includes("Would a stranger"),"Hero talks directly about first impressions");
+assert.ok(dl.querySelector(".slr-form-submit")?.textContent?.includes("Reveal My Clarity Score — Free"),"Free CTA previews the actual score");
 assert.ok(!dl.querySelector('a[href="/my-reports"]'),"No My Reports link on the landing page");
 assert.ok(!landing.includes("A FRESH LOOK AT YOUR WEBSITE") && !landing.includes("See my website differently"),"No abstract old CTA");
 const data=mapBackendToFrontend(paymentAnalysis,"https://example.com",paymentSnapshot);
