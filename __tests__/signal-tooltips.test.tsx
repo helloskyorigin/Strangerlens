@@ -145,7 +145,7 @@ async function main() {
         await act(async () => { dom!.window.dispatchEvent(new dom!.window.Event("scroll")); });
         check(!tooltip(), "scrolling the trigger off-screen dismisses detached help");
         check(data.signals.map(s => s.score).join(",") === originalScores && data.score === 72, "tooltip interactions preserve every original score");
-        check(dom.window.document.body.textContent?.includes("Share Result") && dom.window.document.body.textContent?.includes("Download PDF"), "existing Results actions remain present");
+        check(dom.window.document.body.textContent?.includes("New Check") && dom.window.document.body.textContent?.includes(paid ? "Download Full PDF" : "Download Free PDF"), "existing new-check and Free/Full PDF actions remain present");
         await unmount(); check(!tooltip(), "unmount removes the portal and all open UI");
         dom.window.close(); dom = undefined;
       }
