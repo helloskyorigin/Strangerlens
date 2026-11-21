@@ -24,7 +24,7 @@ assert.ok(doc.querySelector(".slr-live-demo-tag")?.textContent?.includes("Sample
 assert.ok(!doc.querySelector(".slr-live-demo-unlock"),"Hero sample stays informative, not an upsell");
 assert.ok(doc.querySelector("#why-it-matters .slr-perspective--visitor"),"Founder and visitor perspectives clearly contrasted");
 assert.equal(doc.querySelectorAll("#explore .slr-explore-choice").length,3,"Explore presents actual editable examples");
-assert.ok(![...doc.querySelectorAll("main > section:not(#pricing)")].some(el => /\\$9|pay now|checkout/i.test(el.textContent||"")),
+assert.ok(![...doc.querySelectorAll("main > section:not(#pricing)")].some(el => /[$]9|pay now|checkout/i.test(el.textContent||"")),
   "Pricing/order stays exclusively at the end");
 const lp=doc.querySelector("main")?.textContent||"";
 for(const unwanted of ["fresh eyes","publicly accessible website content","All three examples are fictional","Good questions. Clear answers"]) {
