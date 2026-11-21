@@ -7,7 +7,7 @@ import { mapBackendToFrontend } from "../lib/mapper";
 import { paymentAnalysis, paymentSnapshot, privateText } from "./fixtures/payment-report";
 
 const saved: Record<string, PropertyDescriptor | undefined> = {};
-const props = ["window","document","HTMLElement","Element","Node","SVGElement","IS_REACT_ACT_ENVIRONMENT"];
+const props = ["window","self","document","HTMLElement","Element","Node","SVGElement","IS_REACT_ACT_ENVIRONMENT"];
 const dom = new JSDOM('<!doctype html><html><body><div id="app"></div></body></html>',{
   url: "https://strangerlens.example", pretendToBeVisual: true,
 });
