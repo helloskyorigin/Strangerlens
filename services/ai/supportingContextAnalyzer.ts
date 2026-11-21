@@ -37,7 +37,7 @@ export interface SupportingContextAnalysisOptions {
 
 const SUPPORTING_CONTEXT_SYSTEM_PROMPT = `You are StrangerLens's Supporting-Page Context Analyzer.
 
-Your role is to evaluate how up to 3 same-domain supporting pages relate to the website's homepage message.
+Your role is to evaluate the inspected same-domain supporting pages (up to 12) in relation to the website's homepage message.
 You do NOT score the homepage. You only produce structured supporting-page context across three dimensions:
 1. messageConsistency: Whether the supporting pages clarify, reinforce, or diverge from the homepage's central product promise. Do NOT claim inconsistency merely because supporting pages have more detail.
 2. trustContext: Relevant credibility elements observed on supporting pages (such as company background, methodology explanations, published customer testimonials, documentation, or security statements).
@@ -136,7 +136,7 @@ const SUPPORTING_CONTEXT_GEMINI_SCHEMA: Schema = {
 };
 
 /**
- * Formats the homepage core promise and up to 3 supporting page snapshots into a
+ * Formats the homepage core promise and inspected supporting page snapshots into a
  * tightly bounded JSON payload capped by `SERVER_LIMITS.SUPPORTING_CONTEXT_MAX_INPUT_CHARS`.
  */
 export function formatSupportingContextPromptPayload(
@@ -158,7 +158,7 @@ export function formatSupportingContextPromptPayload(
         : undefined,
     },
     supportingPages: pages
-      .slice(0, SERVER_LIMITS.SUPPORTING_PAGES_MAX_COUNT)
+      .slice(0, 12)
       .map((p) => ({
         sourceUrl: p.finalUrl,
         category: p.pageType,
@@ -204,9 +204,26 @@ export function formatSupportingContextPromptPayload(
 
   const serialized = JSON.stringify(payload);
   const maxChars = SERVER_LIMITS.SUPPORTING_CONTEXT_MAX_INPUT_CHARS;
-  return serialized.length > maxChars
-    ? serialized.slice(0, maxChars)
-    : serialized;
+  if (serialized.length <= maxChars) return serialized;
+  // Do not truncate JSON mid-string or silently remove inspected page URLs.
+  // Compress depth per page while retaining every source for attribution.
+  const compact = {
+    homepage: payload.homepage,
+    supportingPages: payload.supportingPages.map(page => ({
+      sourceUrl: page.sourceUrl,
+      category: page.category,
+      headline: page.headline.slice(0, 120),
+      subheadline: page.subheadline.slice(0, 100),
+      primaryCta: page.primaryCta?.slice(0, 55),
+      headings: page.headings.slice(0, 2).map(h => h.slice(0, 75)),
+      pricingPlans: page.pricingPlans.slice(0, 2),
+      trustElements: {
+        socialProofHeadings: page.trustElements.socialProofHeadings.slice(0, 1),
+        badges: page.trustElements.badges.slice(0, 2),
+      },
+    })),
+  };
+  return JSON.stringify(compact);
 }
 
 /**
@@ -342,7 +359,7 @@ async function callDefaultSupportingContextAI(
  * Safe, isolated Phase 2 Supporting-Page Context pipeline.
  *
  * - Returns `undefined` immediately without fetching or calling AI if the feature flag is disabled (default OFF).
- * - When enabled, discovers and safely fetches up to 3 supporting pages (or uses a provided bundle).
+ * - When enabled, discovers bounded supporting pages or reuses already-fetched pages.
  * - If 0 pages are fetched, returns a validated `SupportingContext` with `status: "unavailable"` and makes 0 AI calls.
  * - If 1-3 pages are fetched, makes at most ONE bounded AI call, validates every quote & URL deterministically,
  *   and degrades gracefully to deterministic snapshot observations if the AI call fails.
