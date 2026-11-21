@@ -340,3 +340,123 @@ html[data-landing-theme="dark"] .slr-page .slr-live-demo .slr-live-demo-row-head
 @media(prefers-reduced-motion:reduce){
   .slr-page .slr-button,.slr-page .slr-hero-scan .slr-form-submit{transition:none!important}
 }
+
+
+/* URL field / autofill hardening — an input is not a second card.
+   The field and submit action are separate siblings so no nested bordered rectangle. */
+.slr-page .slr-hero-scan{
+  display:flex;
+  flex-direction:column;
+  gap:11px;
+}
+.slr-page .slr-hero-scan .slr-input-wrap{
+  width:100%;
+  min-width:0;
+  min-height:62px;
+  display:grid!important;
+  grid-template-columns:24px minmax(0,1fr)!important;
+  align-items:center;
+  gap:12px!important;
+  padding:9px 17px!important;
+  border-radius:23px!important;
+  background:#FFFFFF!important;
+  border:1px solid #DCE5D6!important;
+  box-shadow:0 9px 22px rgba(17,29,13,.055)!important;
+}
+.slr-page .slr-hero-scan .slr-input-wrap:focus-within{
+  border-color:#86AD5E!important;
+  box-shadow:0 0 0 3px rgba(134,173,94,.14)!important;
+}
+.slr-page .slr-hero-scan .slr-input-icon{
+  margin:0!important;
+  width:21px;
+  height:21px;
+  color:#63735B!important;
+}
+.slr-page .slr-hero-scan .slr-input-wrap input,
+.slr-page .slr-hero-scan .slr-input-wrap input:focus,
+.slr-page .slr-hero-scan .slr-input-wrap input:focus-visible{
+  display:block;
+  width:100%;
+  min-width:0;
+  max-width:100%;
+  min-height:42px!important;
+  height:42px!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  outline:0!important;
+  outline-offset:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  background:transparent!important;
+  background-image:none!important;
+  color:#202A1B!important;
+  -webkit-text-fill-color:#202A1B!important;
+  caret-color:#4F7C20!important;
+  font-size:16px!important;
+  line-height:1.45!important;
+  appearance:none!important;
+  -webkit-appearance:none!important;
+}
+/* Android Chrome may paint a gray/blue square for a saved URL without these rules. */
+.slr-page .slr-hero-scan .slr-input-wrap input:is(:-webkit-autofill,:-webkit-autofill:hover,:-webkit-autofill:focus){
+  border:0!important;
+  border-radius:0!important;
+  outline:0!important;
+  -webkit-box-shadow:0 0 0 1000px #FFFFFF inset!important;
+  box-shadow:0 0 0 1000px #FFFFFF inset!important;
+  -webkit-text-fill-color:#202A1B!important;
+  caret-color:#4F7C20!important;
+}
+.slr-page .slr-hero-scan .slr-form-submit{
+  display:flex;
+  width:100%;
+  min-width:0!important;
+  min-height:54px;
+  height:auto;
+  margin:0!important;
+  grid-column:auto!important;
+  border-radius:999px!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-hero-scan .slr-input-wrap{
+  background:#1A1D19!important;
+  border-color:#3D4935!important;
+  box-shadow:none!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-hero-scan .slr-input-wrap:focus-within{
+  border-color:#A0CE63!important;
+  box-shadow:0 0 0 3px rgba(199,243,106,.12)!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-hero-scan .slr-input-icon{
+  color:#B0C69B!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-hero-scan .slr-input-wrap input,
+html[data-landing-theme="dark"] .slr-page .slr-hero-scan .slr-input-wrap input:focus,
+html[data-landing-theme="dark"] .slr-page .slr-hero-scan .slr-input-wrap input:focus-visible{
+  color:#F4F8EF!important;
+  -webkit-text-fill-color:#F4F8EF!important;
+  caret-color:#C7F36A!important;
+  outline:0!important;
+  border:0!important;
+  box-shadow:none!important;
+  background:transparent!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-hero-scan .slr-input-wrap input:is(:-webkit-autofill,:-webkit-autofill:hover,:-webkit-autofill:focus){
+  -webkit-box-shadow:0 0 0 1000px #1A1D19 inset!important;
+  box-shadow:0 0 0 1000px #1A1D19 inset!important;
+  -webkit-text-fill-color:#F4F8EF!important;
+  caret-color:#C7F36A!important;
+}
+@media(max-width:570px){
+  .slr-page .slr-hero-scan{gap:10px}
+  .slr-page .slr-hero-scan .slr-input-wrap{
+    min-height:60px;
+    border-radius:21px!important;
+    padding:8px 15px!important;
+  }
+  .slr-page .slr-hero-scan .slr-form-submit{
+    min-height:54px!important;
+    border-radius:999px!important;
+  }
+}
