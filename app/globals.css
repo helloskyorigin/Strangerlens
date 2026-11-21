@@ -5,6 +5,7 @@
 @import "../components/legal-shell.css";
 @import "../components/scan-screen-v2.css";
 @import "../components/results-lime-v8.css";
+@import "../components/dark-monochrome.css";
 
 :root {
   color-scheme: dark;
