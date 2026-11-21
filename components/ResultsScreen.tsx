@@ -691,7 +691,7 @@ export default function ResultsScreen({
                     No payment required today. We&apos;ll email you when full analysis is available.
                     <br />
                     <span className="block mt-1.5 text-[11px] text-slate-500">
-                      Submitted email addresses are stored securely and used solely to notify you about StrangerLens Full Analysis availability. Waitlist emails are received and retained in the operator&apos;s Gmail inbox. To request removal, contact hello.skyorigin@gmail.com. Review our{" "}
+                      Submitted email addresses are stored securely and used solely to notify you about StrangerLens Full Analysis availability. Waitlist emails are received and retained in the operator&apos;s Gmail inbox. To request removal, contact hello.skyworking@gmail.com. Review our{" "}
                       <Link href="/privacy" className="text-[#3B82F6] hover:underline font-medium">
                         Privacy Policy
                       </Link>

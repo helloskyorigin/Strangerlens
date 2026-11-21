@@ -4,12 +4,12 @@ export const LEGAL_CONFIG = {
   brandName: BRAND_NAME,
   productName: BRAND_NAME,
   tagline: "AI Website First-Impression Clarity Analyzer",
-  supportEmail: "hello.skyorigin@gmail.com",
+  supportEmail: "hello.skyworking@gmail.com",
   billingSupportNote:
-    "For order receipts, payment inquiries, or report delivery questions, please email hello.skyorigin@gmail.com with your analyzed URL and order details.",
+    "For order receipts, payment inquiries, or report delivery questions, please email hello.skyworking@gmail.com with your analyzed URL and order details.",
   supportResponseWindow: "Within 24–48 business hours (Monday–Friday)",
   effectiveDate: "October 16, 2026",
-  lastUpdated: "November 20, 2026",
+  lastUpdated: "November 21, 2026",
   pricing: {
     freeTier: {
       name: "Free Preview",
@@ -32,7 +32,7 @@ export const LEGAL_CONFIG = {
   paymentProvider: {
     plannedProvider: "Dodo Payments",
     disclosure:
-      "Checkout is processed through Dodo Payments when available. Test checkout is labeled clearly and does not charge real money.",
+      "Payments for unlocked reports are processed by Dodo Payments, subject to checkout availability.",
   },
   links: [
     { label: "Privacy Policy", href: "/privacy" },

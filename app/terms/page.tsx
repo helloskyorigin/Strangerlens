@@ -35,7 +35,7 @@ export default function TermsOfServicePage() {
           2. Description of the Service
         </h2>
         <p>
-          {LEGAL_CONFIG.productName} is an AI-powered website first-impression clarity analyzer. When you submit a public website URL, our system inspects publicly accessible website content, extracts visible text, and evaluates five core clarity signals: <strong>First Impression</strong>, <strong>Audience</strong>, <strong>Value</strong>, <strong>Trust</strong>, and <strong>Action</strong>.
+          {LEGAL_CONFIG.productName} is an AI-powered website first-impression clarity analyzer. When you submit a website link, our system reviews the page text it can access and evaluates five core clarity signals: <strong>First Impression</strong>, <strong>Audience</strong>, <strong>Value</strong>, <strong>Trust</strong>, and <strong>Action</strong>.
         </p>
         <div className="bg-[#171F2D] border border-[#263044] rounded-2xl p-4 sm:p-5 text-xs sm:text-sm text-[#94A3B8] space-y-1.5">
           <p className="font-bold text-white text-sm">Scope of Analysis Notice:</p>

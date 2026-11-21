@@ -23,9 +23,8 @@ export const metadata: Metadata = {
 };
 
 const earlyTheme = `(function(){try{
-var v=localStorage.getItem("strangerlens-theme-v3");
-var p=v==="dark"||v==="light"||v==="system"?v:"light";
-var dark=p==="dark"||(p==="system"&&window.matchMedia("(prefers-color-scheme: dark)").matches);
+var v=localStorage.getItem("strangerlens-theme-v4");
+var dark=v==="dark";
 document.documentElement.dataset.landingTheme=dark?"dark":"light";document.documentElement.classList.toggle("dark",dark);
 }catch(e){document.documentElement.dataset.landingTheme="light";document.documentElement.classList.remove("dark");}
 })();`;

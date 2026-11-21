@@ -16,7 +16,7 @@ export default function PrivacyPolicyPage() {
       activePage="privacy"
       badge="PRIVACY POLICY"
       title="Privacy Policy"
-      subtitle="How StrangerLens handles website URLs, inspected publicly accessible website content, local browser storage, and checkout information."
+      subtitle="How StrangerLens handles website reviews, browser storage, payments and support requests."
     >
       {/* 1. Overview & Scope */}
       <section className="space-y-3">
@@ -39,10 +39,10 @@ export default function PrivacyPolicyPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
           <div className="bg-[#171F2D] border border-[#263044] rounded-2xl p-4 sm:p-5 space-y-2">
             <h3 className="font-bold text-white text-sm sm:text-[15px]">
-              A. Website URLs &amp; Public Page Content
+              A. Website URLs &amp; Content Reviewed
             </h3>
             <p className="text-xs sm:text-sm text-[#94A3B8] leading-relaxed">
-              When you submit a URL for analysis, our servers verify reachability and inspect the publicly accessible HTML and visible text of that website to evaluate visitor clarity across five core communication signals.
+              When you submit a website link, our servers verify that it can be reached and review available page headings, text and navigation to assess five communication signals.
             </p>
           </div>
 
@@ -60,7 +60,7 @@ export default function PrivacyPolicyPage() {
               C. Payment &amp; Billing Information
             </h3>
             <p className="text-xs sm:text-sm text-[#94A3B8] leading-relaxed">
-              Available checkout is processed by our payment partner, <strong>{LEGAL_CONFIG.paymentProvider.plannedProvider}</strong>. We do not collect or store raw card numbers or card credentials on StrangerLens servers. Test checkout is labeled and does not charge real money.
+              Paid reports use <strong>{LEGAL_CONFIG.paymentProvider.plannedProvider}</strong> for checkout. StrangerLens does not collect or store raw card numbers or card credentials on its servers.
             </p>
           </div>
 
@@ -81,10 +81,10 @@ export default function PrivacyPolicyPage() {
           3. How AI Analysis Works
         </h2>
         <p>
-          When you request a website review, {LEGAL_CONFIG.productName} extracts publicly visible text elements (such as page titles, meta descriptions, headings, body copy, navigation labels, and calls to action) from the submitted public URL. This extracted text is processed to generate structured clarity scores across five core signals (First Impression, Audience, Value, Trust, Action) and deliver improvement insights. First-party privacy, terms and refund pages may also be inspected when linked and accessible; other relevant public supporting pages may provide additional context when enabled. Purchase Readiness is a sixth, separate paid assessment only when a genuine paid offering is identified.
+          When you request a website review, {LEGAL_CONFIG.productName} processes page titles, descriptions, headings, text, navigation and button labels from the submitted website link. This extracted text is processed to generate structured clarity scores across five core signals (First Impression, Audience, Value, Trust, Action) and deliver improvement insights. First-party privacy, terms and refund pages may also be inspected when linked and accessible; other relevant public supporting pages may provide additional context when enabled. Purchase Readiness is a sixth, separate paid assessment only when a genuine paid offering is identified.
         </p>
         <ul className="list-disc pl-5 space-y-1.5 text-[#94A3B8]">
-          <li>We evaluate website communication based only on the content actually inspected from publicly reachable pages; we do not bypass authentication, paywalls, or private intranet pages, and inaccessible pages are not treated as verified.</li>
+          <li>We evaluate only pages our service can read. We do not bypass passwords, paywalls or restricted pages, and we do not treat inaccessible pages as verified.</li>
           <li>StrangerLens is an AI-powered clarity analyzer and does not conduct real human visitor testing, accessibility compliance audits, or technical performance tests.</li>
         </ul>
       </section>

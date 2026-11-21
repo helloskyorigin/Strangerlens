@@ -65,7 +65,7 @@ export default function LegalLayout({ activePage, badge, title, subtitle, childr
         <div className="slr-legal-container slr-legal-footer-inner">
           <div><strong>{BRAND_NAME}</strong><span>© {new Date().getFullYear()} {BRAND_NAME}</span></div>
           <nav aria-label="Footer links">
-            <Link href="/">Home</Link><Link href="/my-reports">My Reports</Link>
+            <Link href="/">Home</Link>
             {LEGAL_CONFIG.links.map(item => <Link key={item.href} href={item.href}>{item.label}</Link>)}
           </nav>
         </div>

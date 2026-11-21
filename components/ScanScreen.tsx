@@ -29,7 +29,7 @@ function safeError(raw?: string | null): string {
   if (!message || message.length > 320 ||
     /\b(?:API_KEY|Bearer\s|stack trace|TypeError|SyntaxError|ReferenceError|at\s+\S+\s+\()/i.test(message) ||
     message.startsWith("{") || message.includes("\n    at ")) {
-    return "The website couldn't be analyzed right now. Try again or check another public URL.";
+    return "The website couldn't be analyzed right now. Try again or check another website link.";
   }
   return message;
 }
@@ -119,21 +119,21 @@ export default function ScanScreen({
   const copy = stage === "ready"
     ? { title: "Your report is ready.", description: "Opening your clarity report and findings." }
     : stage === "verify"
-    ? { title: "Taking a closer look.", description: "Connecting to your public website." }
+    ? { title: "Taking a closer look.", description: "Opening your website for review." }
     : stage === "inspect"
     ? { title: "Understanding your website.", description: "Reviewing what your visitors can see and the next steps your page presents." }
     : stage === "evaluate"
-    ? { title: "Looking through fresh eyes.", description: "Evaluating the clarity of your message, audience, trust and next step." }
+    ? { title: "Checking what stands out.", description: "Evaluating the clarity of your message, audience, trust and next step." }
     : stage === "prepare"
     ? { title: "Preparing your report.", description: "Organizing inspected evidence into a clear, useful overview." }
     : { title: "Couldn't finish this one.", description: safeError(backendError) };
 
   const displayCopy = stage === "verify" && heartbeat >= 1
-    ? { title: "Connecting to the public page.", description: "Some websites take a moment to respond. We're still checking availability." }
+    ? { title: "Connecting to your website.", description: "Some websites take a moment to respond. We're still checking availability." }
     : stage === "inspect" && heartbeat > 0
     ? heartbeat % 2
-      ? { title: "Looking for a clearer message.", description: "Reviewing the accessible content and what it communicates to somebody new." }
-      : { title: "Still taking a closer look.", description: "Checking the available website content without guessing about real visitors." }
+      ? { title: "Looking for a clearer message.", description: "Checking whether the message makes sense to someone new." }
+      : { title: "Still taking a closer look.", description: "Reviewing your page without guessing about your customers." }
     : copy;
   const copyKey = stage + "-" + (stage === "inspect" || stage === "verify" ? heartbeat : "0");
 
@@ -211,7 +211,7 @@ export default function ScanScreen({
             </div>
 
             {showLongWait && !isReady &&
-              <p className="sl-scan-quiet">Still looking. Some public websites take longer to inspect.</p>}
+              <p className="sl-scan-quiet">Still checking. Some websites take a little longer to load.</p>}
             {isReady && <button type="button" onClick={openReport} className="sl-scan-open-report">
               Open my report <ArrowUpRight size={17} aria-hidden="true" />
             </button>}
@@ -221,7 +221,7 @@ export default function ScanScreen({
       <footer className="sl-scan-footer">
         <span>© {new Date().getFullYear()} StrangerLens</span>
         <span>Website clarity, viewed from the outside.</span>
-        <span>Public content analysis</span>
+        <span>Website clarity analysis</span>
       </footer>
     </div>
   );

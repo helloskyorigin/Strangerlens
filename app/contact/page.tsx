@@ -157,7 +157,7 @@ export default function ContactSupportPage() {
         </p>
         <ul className="list-disc pl-5 space-y-1.5 text-xs sm:text-sm text-[#94A3B8]">
           <li>
-            <strong>Website URL:</strong> The domain or URL you analyzed (e.g., <code className="bg-[#090D15] text-[#3B82F6] px-1.5 py-0.5 rounded border border-[#263044]">example.com</code>).
+            <strong>Website URL:</strong> The website link you checked.
           </li>
           <li>
             <strong>Checkout Email Address:</strong> The email address entered when unlocking a paid report.

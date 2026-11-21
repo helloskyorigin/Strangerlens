@@ -4,16 +4,13 @@ import React, { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
 
 export type LandingThemePreference = "light" | "dark" | "system";
-export const LANDING_THEME_KEY = "strangerlens-theme-v3";
+export const LANDING_THEME_KEY = "strangerlens-theme-v4";
 export type ResolvedTheme = "light" | "dark";
 
 function getSavedTheme(): ResolvedTheme {
   try {
     const stored = window.localStorage.getItem(LANDING_THEME_KEY);
     if (stored === "light" || stored === "dark") return stored;
-    if (stored === "system") {
-      return window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-    }
   } catch { /* Browsers can deny local storage in private mode. */ }
   return "light";
 }
