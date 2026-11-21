@@ -4,8 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight, ArrowUpRight, Check, ChevronDown, CircleHelp,
-  Download, Eye, Link2, ListChecks, LockKeyhole, Menu,
-  SearchCheck, ShieldCheck, Sparkles, Target, WandSparkles, X,
+  Link2, Menu, X,
 } from "lucide-react";
 import { LEGAL_CONFIG, getSupportGmailComposeUrl } from "@/lib/legal-config";
 import { LandingThemeSwitcher } from "@/components/landing/LandingThemeSwitcher";
@@ -25,50 +24,14 @@ const navLinks = [
   { label: "FAQ", href: "#faq" },
 ];
 
-const examples = [
-  {
-    label: "SaaS product",
-    site: "SAMPLE / PROJECT SOFTWARE",
-    headline: "Everything your team needs to move faster.",
-    question: "Move faster doing what, exactly?",
-    interpretation: "I can tell this is for teams, but I can't tell what the product actually helps them do.",
-    evidence: "Everything your team needs to move faster.",
-    diagnosis: "The headline talks about a broad outcome but leaves the actual product and job unclear.",
-    fix: "Name the specific workflow and the people it helps. Keep the claim tied to your real product.",
-    rewrite: "Plan client projects, assign tasks, and keep every deadline in one place.",
-  },
-  {
-    label: "Service business",
-    site: "SAMPLE / CREATIVE STUDIO",
-    headline: "Your vision. Our passion. Endless possibilities.",
-    question: "What can I actually hire you to do?",
-    interpretation: "The tone feels professional, but I still don't know which service they provide.",
-    evidence: "Your vision. Our passion. Endless possibilities.",
-    diagnosis: "The opening message sounds polished without identifying the service, audience, or deliverable.",
-    fix: "Say what you create and for whom before adding brand language.",
-    rewrite: "Brand identity and web design for independent businesses ready to stand out.",
-  },
-  {
-    label: "Online store",
-    site: "SAMPLE / HOME GOODS",
-    headline: "Live better. Every day.",
-    question: "What are they selling here?",
-    interpretation: "I see a lifestyle promise, but not enough information to know the category or products.",
-    evidence: "Live better. Every day.",
-    diagnosis: "The hero describes an aspiration instead of the products and their relevance.",
-    fix: "Introduce the product category in the hero and make the next step easy to find.",
-    rewrite: "Everyday organizers that make small spaces feel easier to live in.",
-  },
-];
-
 const questions = [
   {
     q: "What exactly does StrangerLens analyze?",
-    a: "StrangerLens inspects accessible public website content and evaluates five communication signals: First Impression, Audience, Value, Trust and Action. When a genuine paid offer is identified, a separate Purchase Readiness check may also appear in the full analysis.",
+    a: "Enter your website link. StrangerLens evaluates how clearly your message explains what you do, who it's for, why it matters, whether it feels trustworthy, and what to do next. Paid websites may receive an extra buying-confidence check.",
   },
   {
     q: "Is this a real visitor test?",
-    a: "No. It's an AI interpretation grounded in the public website content it can inspect. StrangerLens does not record real visitors, track clicks or measure actual conversion rates.",
+    a: "No. StrangerLens reviews your website's message using AI. It doesn't watch visitors or measure real purchases.",
   },
   {
     q: "What do I see before paying?",
@@ -76,7 +39,7 @@ const questions = [
   },
   {
     q: "What is included in the $9 report?",
-    a: "Five detailed signal analyses, evidence-to-fix recommendations when source wording is available, a prioritized improvement plan, Better Copy Studio, the First 5 Seconds breakdown and a downloadable PDF. Purchase Readiness appears when applicable.",
+    a: "You'll get the stranger's view, what's holding your message back, possible buyer doubts, a prioritized fix-first plan, clearer wording suggestions, and a downloadable PDF.",
   },
   {
     q: "Does it edit my website for me?",
@@ -84,11 +47,11 @@ const questions = [
   },
   {
     q: "Will it work on any URL?",
-    a: "It needs a public website with readable content. Password-protected pages, JavaScript-only content or sites that block automated access may produce limited results. If content can't be inspected reliably, the report should indicate the coverage limit.",
+    a: "Your website needs to be reachable and readable. Private or blocked pages may return limited results.",
   },
   {
     q: "Can I reopen a purchased report?",
-    a: "If you kept its direct report link, open it in the original browser. Access relies on saved browser references, so clearing data or switching devices may remove access. Keep your payment receipt and contact support if you need help.",
+    a: "Yes, using your original report link and browser. Save your receipt, and contact support if you lose access.",
   },
   {
     q: "Do I need an account or a subscription?",
@@ -100,9 +63,7 @@ export default function StrangerLensLanding({
   url, onUrlChange, onAnalyze, isVerifying, errorMessage,
 }: StrangerLensLandingProps) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [exampleIndex, setExampleIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
-  const example = examples[exampleIndex];
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -161,7 +122,7 @@ export default function StrangerLensLanding({
             <div className="slr-kicker"><span className="slr-kicker-dot"/> FREE WEBSITE CLARITY CHECK</div>
             <h1 id="slr-hero-title">Would a stranger<br/><span className="slr-underline">get your website?</span></h1>
             <p className="slr-hero-subtitle">Your homepage can look polished and still leave people guessing.</p>
-            <p className="slr-hero-description">See how clearly it explains itself. Get a free score and five simple checks for your first impression, audience, value, trust and next step.</p>
+            <p className="slr-hero-description">Find out what your website explains well, where visitors may hesitate, and what deserves attention. Your first five scores are free.</p>
             <form id="slr-scan" className="slr-scan-form slr-hero-scan" onSubmit={onAnalyze} noValidate>
               <div className="slr-input-wrap">
                 <label htmlFor="slr-website-url" className="slr-sr-only">Your public website URL</label>
@@ -186,41 +147,16 @@ export default function StrangerLensLanding({
           <LandingResultPreview/>
         </section>
 
-        <section className="slr-example slr-container" id="sample-report" aria-labelledby="slr-example-title">
-          <div className="slr-section-heading slr-example-heading">
-            <div><span className="slr-eyebrow">BEYOND A SCORE</span>
-              <h2 id="slr-example-title">The words sound good.<br/><span>But what do they tell a stranger?</span></h2></div>
-            <p>Explore three fictional examples of unclear messaging, with a specific fix and a stronger way to say it.</p>
-          </div>
-          <div className="slr-example-tabs" role="group" aria-label="Choose sample business type">
-            {examples.map((item, index) => <button type="button" key={item.label} onClick={() => setExampleIndex(index)}
-              className={index === exampleIndex ? "is-active" : ""} aria-pressed={index === exampleIndex}>{item.label}</button>)}
-          </div>
-          <div className="slr-example-layout" aria-live="polite">
-            <div className="slr-example-original">
-              <div className="slr-example-browser"><span className="slr-browser-dots"><i/><i/><i/></span><span>{example.site}</span></div>
-              <div className="slr-example-site"><span>EXAMPLE HOMEPAGE</span><h3>{example.headline}</h3><p>Looks polished on the surface. But a new visitor may need more context.</p><span className="slr-example-faux-button">Get started <ArrowUpRight size={14}/></span></div>
-            </div>
-            <div className="slr-example-findings">
-              <div className="slr-example-findings-head"><span><Eye size={17}/> STRANGER&apos;S PERSPECTIVE</span><span>Illustrative example</span></div>
-              <div className="slr-example-thought"><span className="slr-example-question">The question it raises</span><strong>{example.question}</strong><p>{example.interpretation}</p></div>
-              <div className="slr-example-evidence"><span>PAGE EVIDENCE</span><p>“{example.evidence}”</p><small>{example.diagnosis}</small></div>
-              <div className="slr-example-fix"><span><WandSparkles size={15}/> IMPROVEMENT DIRECTION</span><p>{example.fix}</p><div><strong>Possible rewrite</strong><p>“{example.rewrite}”</p></div></div>
-            </div>
-          </div>
-          <p className="slr-example-disclosure">All three examples are fictional. Actual reports only reference content inspected from the submitted website; suggested copy must be checked for accuracy before publishing.</p>
-        </section>
-
         <section id="full-report" className="slr-section slr-paid-proof slr-container">
           <div className="slr-paid-proof-intro">
             <span className="slr-eyebrow">WHEN YOU WANT TO FIX IT</span>
             <h2>The score tells you where.<br/><span>The full report shows you what to change.</span></h2>
-            <p>Start with the five free signals. Unlock the deeper findings only if you want a practical plan for your website.</p>
+            <p>See your clarity score for free. Then unlock specific findings, fixes and better wording in one useful report.</p>
             <div className="slr-paid-proof-price"><strong>$9</strong><span>once per report<br/>No subscription</span></div>
             <button type="button" className="slr-button slr-paid-proof-cta" onClick={goToScan}>
               Check My Website First <ArrowUpRight size={16} aria-hidden="true"/>
             </button>
-            <p className="slr-paid-proof-note"><Check size={14} aria-hidden="true"/> The free score appears before any payment.</p>
+            <p className="slr-paid-proof-note"><Check size={14} aria-hidden="true"/> Free preview first. Pay only when you want the fixes.</p>
           </div>
           <div className="slr-paid-proof-cards">
             {[
@@ -235,14 +171,13 @@ export default function StrangerLensLanding({
               <ArrowUpRight size={17} aria-hidden="true"/>
             </article>)}
           </div>
-          <p className="slr-paid-proof-disclaimer">Purchase readiness is included when a real paid offer is detected. Suggestions come from accessible public content—not measured visitor activity.</p>
         </section>
 
         <section id="how-it-works" className="slr-section slr-container">
           <div className="slr-section-heading slr-center"><span className="slr-eyebrow">FROM URL TO CLARITY</span>
             <h2>Paste your URL. See what comes across<span className="slr-lime-period">.</span></h2></div>
           <div className="slr-steps">
-            <div className="slr-step"><div className="slr-step-number">01</div><div><h3>Enter your website</h3><p>Give StrangerLens a public URL to inspect.</p></div></div>
+            <div className="slr-step"><div className="slr-step-number">01</div><div><h3>Enter your website</h3><p>Paste the link to your website.</p></div></div>
             <ArrowRight className="slr-step-arrow" size={21} aria-hidden="true" />
             <div className="slr-step"><div className="slr-step-number">02</div><div><h3>See your five signals</h3><p>Review your clarity score and the areas worth checking.</p></div></div>
             <ArrowRight className="slr-step-arrow" size={21} aria-hidden="true" />
@@ -268,33 +203,25 @@ export default function StrangerLensLanding({
               <p className="slr-price-description">Move beyond a number. Understand what needs attention and how to improve it.</p>
               <ul><li><Check size={17} /> All detailed signal findings</li><li><Check size={17} /> Website evidence & practical recommendations</li><li><Check size={17} /> Prioritized improvement plan</li><li><Check size={17} /> Editable copy suggestions</li><li><Check size={17} /> Stranger&apos;s View & first-five-seconds breakdown</li><li><Check size={17} /> Purchase readiness when applicable</li></ul>
               <button className="slr-button slr-price-button" type="button" onClick={goToScan}>Check My Website First <ArrowUpRight size={17} /></button>
-              <small>PDF download and saved report access included as utilities.</small>
+              <small>Includes your downloadable full report.</small>
             </div>
           </div>
-          <p className="slr-pricing-disclosure">Digital reports are delivered on demand. <Link href="/refund-policy">Refund terms</Link> and <Link href="/terms">service terms</Link> apply.</p>
+          <p className="slr-pricing-disclosure"><Link href="/refund-policy">Refund Policy</Link> · <Link href="/terms">Terms of Service</Link></p>
         </section>
 
         <section id="faq" className="slr-section slr-faq-section slr-container">
-          <div className="slr-section-heading slr-center"><span className="slr-eyebrow">BEFORE YOU TRY IT</span><h2>Good questions. Clear answers<span className="slr-lime-period">.</span></h2></div>
+          <div className="slr-section-heading slr-center"><span className="slr-eyebrow">HELPFUL ANSWERS</span><h2>FAQ<span className="slr-lime-period">.</span></h2></div>
           <div className="slr-faq-list">
             {questions.map(({q,a}) => <details className="slr-faq" key={q}><summary><span>{q}</span><ChevronDown size={20} aria-hidden="true"/></summary><p>{a}</p></details>)}
           </div>
         </section>
 
-        <section className="slr-bottom-cta slr-container">
-          <div className="slr-bottom-panel">
-            <span className="slr-eyebrow">KNOW WHAT NEEDS ATTENTION</span>
-            <h2>See what your website is saying.<br />And what it isn&apos;t.</h2>
-            <p>Your free first-impression score and five clarity signals are one URL away.</p>
-            <button type="button" className="slr-button" onClick={goToScan}>Reveal My Clarity Score — Free <ArrowUpRight size={17}/></button>
-          </div>
-        </section>
       </main>
 
       <footer className="slr-footer slr-container">
         <div className="slr-footer-main"><a className="slr-brand" href="#top"><img src="/strangerlens-mark.webp" alt="" width={34} height={34}/><span>StrangerLens<span className="slr-brand-dot">.</span></span></a><p>Know what your website explains—and what it leaves unclear.</p></div>
         <div className="slr-footer-links">{LEGAL_CONFIG.links.map(link => <Link href={link.href} key={link.href}>{link.label}</Link>)}<a href={getSupportGmailComposeUrl()} target="_blank" rel="noopener noreferrer">Email support</a></div>
-        <div className="slr-footer-bottom"><span>© {new Date().getFullYear()} StrangerLens. All rights reserved.</span><span>AI-based assessment of publicly accessible website content.</span></div>
+        <div className="slr-footer-bottom"><span>© {new Date().getFullYear()} StrangerLens. All rights reserved.</span><span>Website clarity, made simple.</span></div>
       </footer>
     </div>
   );
