@@ -188,9 +188,9 @@ export default function StrangerLensLanding({
 
         <section className="slr-example slr-container" id="sample-report" aria-labelledby="slr-example-title">
           <div className="slr-section-heading slr-example-heading">
-            <div><span className="slr-eyebrow">THE KIND OF INSIGHT THAT MATTERS</span>
-              <h2 id="slr-example-title">From “sounds good”<br />to <span>“now I get it.”</span></h2></div>
-            <p>See how a familiar homepage line can sound different to somebody who has never heard of the business.</p>
+            <div><span className="slr-eyebrow">BEYOND A SCORE</span>
+              <h2 id="slr-example-title">The words sound good.<br/><span>But what do they tell a stranger?</span></h2></div>
+            <p>Explore three fictional examples of unclear messaging, with a specific fix and a stronger way to say it.</p>
           </div>
           <div className="slr-example-tabs" role="group" aria-label="Choose sample business type">
             {examples.map((item, index) => <button type="button" key={item.label} onClick={() => setExampleIndex(index)}
@@ -211,68 +211,42 @@ export default function StrangerLensLanding({
           <p className="slr-example-disclosure">All three examples are fictional. Actual reports only reference content inspected from the submitted website; suggested copy must be checked for accuracy before publishing.</p>
         </section>
 
-        <section id="what-we-check" className="slr-section slr-container">
-          <div className="slr-section-heading slr-center"><span className="slr-eyebrow">THE QUESTIONS A NEW VISITOR NEEDS ANSWERED</span>
-            <h2>Five signals. One clearer story<span className="slr-lime-period">.</span></h2>
-            <p>Not five random ratings. Five ways to understand whether your page explains itself.</p></div>
-          <div className="slr-signal-grid">
-            {signals.map((signal, index) => {
-              const Icon = signal.icon;
-              return <article className="slr-signal-card" key={signal.name}>
-                <div className="slr-signal-head"><span className="slr-card-icon"><Icon size={23} strokeWidth={1.8} /></span><span className="slr-signal-index">{String(index + 1).padStart(2, "0")}</span></div>
-                <h3>{signal.name}</h3><span className="slr-signal-tagline">{signal.question}</span><p>{signal.description}</p>
-              </article>;
-            })}
-            <article className="slr-signal-extra"><div className="slr-signal-extra-icon"><LockKeyhole size={24}/></div>
-              <div><span>ADDITIONAL / WHEN APPLICABLE</span><h3>Purchase readiness</h3><p>If the site offers something paid, the full analysis includes a separate look at how clearly the buying decision is presented. It doesn&apos;t change the five-signal clarity score.</p></div>
-            </article>
+        <section id="full-report" className="slr-section slr-paid-proof slr-container">
+          <div className="slr-paid-proof-intro">
+            <span className="slr-eyebrow">WHEN YOU WANT TO FIX IT</span>
+            <h2>The score tells you where.<br/><span>The full report shows you what to change.</span></h2>
+            <p>Start with the five free signals. Unlock the deeper findings only if you want a practical plan for your website.</p>
+            <div className="slr-paid-proof-price"><strong>$9</strong><span>once per report<br/>No subscription</span></div>
+            <button type="button" className="slr-button slr-paid-proof-cta" onClick={goToScan}>
+              Check My Website First <ArrowUpRight size={16} aria-hidden="true"/>
+            </button>
+            <p className="slr-paid-proof-note"><Check size={14} aria-hidden="true"/> The free score appears before any payment.</p>
           </div>
-        </section>
-
-        <section id="full-report" className="slr-section slr-container">
-          <div className="slr-section-heading slr-center"><span className="slr-eyebrow">INSIDE YOUR FULL ANALYSIS</span>
-            <h2>Don&apos;t just find confusion.<br /><span>Know what to change.</span></h2>
-            <p>Six focused capabilities, one clear purpose: understand your website and improve what matters.</p></div>
-          <div className="slr-deep-grid">
-            <article className="slr-deep-card slr-deep-primary">
-              <div className="slr-deep-icon"><SearchCheck size={24}/></div><span className="slr-deep-eyebrow">01 / EVIDENCE TO FIX</span>
-              <h3>Understand the why behind each finding.</h3><p>See the exact inspected wording when available, what it makes unclear and the recommended direction.</p>
-              <div className="slr-deep-mini-report"><small>EXAMPLE / HEADLINE</small><span>“Make work effortless.”</span><div><span>Observation</span><p>Doesn&apos;t explain which work or for whom.</p></div><div><span>Next edit</span><p>Describe the user, the job and the outcome.</p></div></div>
-            </article>
-            <article className="slr-deep-card slr-deep-priority">
-              <div className="slr-deep-icon"><ListChecks size={24}/></div><span className="slr-deep-eyebrow">02 / PRIORITIZED IMPROVEMENTS</span>
-              <h3>Know where to start.</h3><p>One primary recommendation and additional improvements, organized by priority instead of buried in a wall of feedback.</p>
-              <div className="slr-deep-priority-list"><span><b>01</b> Most important change</span><span><b>02</b> Next useful improvement</span><span><b>03</b> Worth testing afterward</span></div>
-            </article>
-            <article className="slr-deep-card">
-              <span className="slr-deep-icon"><WandSparkles size={22}/></span><h3>Better Copy Studio</h3>
-              <p>Review, edit and copy suggested wording grounded in your offering.</p>
-            </article>
-            <article className="slr-deep-card">
-              <span className="slr-deep-icon"><Eye size={22}/></span><h3>Stranger&apos;s View</h3>
-              <p>Discover what your page communicates at first glance, including the first-five-seconds breakdown.</p>
-            </article>
-            <article className="slr-deep-card">
-              <span className="slr-deep-icon"><Target size={22}/></span><h3>Five-Signal Diagnosis</h3>
-              <p>Read why each clarity signal scored as it did, what works and what to improve.</p>
-            </article>
-            <article className="slr-deep-card">
-              <span className="slr-deep-icon"><LockKeyhole size={22}/></span><h3>Purchase Readiness</h3>
-              <p>A separate buyer-decision analysis when a real paid offer is detected.</p>
-            </article>
+          <div className="slr-paid-proof-cards">
+            {[
+              ["01","The Stranger's View","What someone could understand—or miss—at first glance."],
+              ["02","What's Holding Your Website Back","Where the words leave important questions unanswered."],
+              ["03","Why Visitors Might Hesitate","Trust and buying concerns, when the page supports them."],
+              ["04","Your Fix-First Action Plan","Which useful changes to consider first, and why."],
+              ["05","Better Copy & Rewrites","Suggested wording to review, edit and make your own."],
+            ].map(([number,title,detail])=><article className="slr-paid-proof-item" key={number}>
+              <span className="slr-paid-proof-index">{number}</span>
+              <div><h3>{title}</h3><p>{detail}</p></div>
+              <ArrowUpRight size={17} aria-hidden="true"/>
+            </article>)}
           </div>
-          <div className="slr-deep-foot"><ShieldCheck size={18}/><p>Findings are based on accessible website content, not invented testimonials, measured visitor behavior or promises of more sales.</p></div>
+          <p className="slr-paid-proof-disclaimer">Purchase readiness is included when a real paid offer is detected. Suggestions come from accessible public content—not measured visitor activity.</p>
         </section>
 
         <section id="how-it-works" className="slr-section slr-container">
-          <div className="slr-section-heading slr-center"><span className="slr-eyebrow">A BETTER VIEW IN THREE STEPS</span>
-            <h2>Simple to start. Useful when it counts<span className="slr-lime-period">.</span></h2></div>
+          <div className="slr-section-heading slr-center"><span className="slr-eyebrow">FROM URL TO CLARITY</span>
+            <h2>Paste your URL. See what comes across<span className="slr-lime-period">.</span></h2></div>
           <div className="slr-steps">
             <div className="slr-step"><div className="slr-step-number">01</div><div><h3>Enter your website</h3><p>Give StrangerLens a public URL to inspect.</p></div></div>
             <ArrowRight className="slr-step-arrow" size={21} aria-hidden="true" />
-            <div className="slr-step"><div className="slr-step-number">02</div><div><h3>See the outside perspective</h3><p>Review the five clarity scores and the lowest-scoring area.</p></div></div>
+            <div className="slr-step"><div className="slr-step-number">02</div><div><h3>See your five signals</h3><p>Review your clarity score and the areas worth checking.</p></div></div>
             <ArrowRight className="slr-step-arrow" size={21} aria-hidden="true" />
-            <div className="slr-step"><div className="slr-step-number">03</div><div><h3>Go deeper when it matters</h3><p>Unlock evidence, priority fixes and clearer wording in the full report.</p></div></div>
+            <div className="slr-step"><div className="slr-step-number">03</div><div><h3>Decide what to improve</h3><p>Unlock detailed findings and suggested changes only if you want them.</p></div></div>
           </div>
         </section>
 
@@ -286,14 +260,14 @@ export default function StrangerLensLanding({
               <div className="slr-price"><strong>$0</strong><span>free</span></div>
               <p className="slr-price-description">Understand how clearly your website introduces itself.</p>
               <ul><li><Check size={17} /> Overall clarity score</li><li><Check size={17} /> Five core signal scores</li><li><Check size={17} /> Statuses and lowest-scoring area</li></ul>
-              <button className="slr-button slr-price-button" type="button" onClick={goToScan}>Check My Website Free <ArrowUpRight size={17} /></button>
+              <button className="slr-button slr-price-button" type="button" onClick={goToScan}>Reveal My Clarity Score <ArrowUpRight size={17} /></button>
             </div>
             <div className="slr-price-card slr-price-featured">
               <span className="slr-price-label">FULL CLARITY REPORT <span className="slr-price-chip">ONE-TIME</span></span>
               <div className="slr-price"><strong>$9</strong><span>per report</span></div>
               <p className="slr-price-description">Move beyond a number. Understand what needs attention and how to improve it.</p>
               <ul><li><Check size={17} /> All detailed signal findings</li><li><Check size={17} /> Website evidence & practical recommendations</li><li><Check size={17} /> Prioritized improvement plan</li><li><Check size={17} /> Editable copy suggestions</li><li><Check size={17} /> Stranger&apos;s View & first-five-seconds breakdown</li><li><Check size={17} /> Purchase readiness when applicable</li></ul>
-              <button className="slr-button slr-price-button" type="button" onClick={goToScan}>Find My Website’s Weak Spots <ArrowUpRight size={17} /></button>
+              <button className="slr-button slr-price-button" type="button" onClick={goToScan}>Check My Website First <ArrowUpRight size={17} /></button>
               <small>PDF download and saved report access included as utilities.</small>
             </div>
           </div>
@@ -310,9 +284,9 @@ export default function StrangerLensLanding({
         <section className="slr-bottom-cta slr-container">
           <div className="slr-bottom-panel">
             <span className="slr-eyebrow">KNOW WHAT NEEDS ATTENTION</span>
-            <h2>Don&apos;t guess what&apos;s unclear.<br />Check your website.</h2>
-            <p>See your clarity score for free. Unlock practical fixes only if you need them.</p>
-            <button type="button" className="slr-button" onClick={goToScan}>Find My Website’s Weak Spots <ArrowUpRight size={17}/></button>
+            <h2>See what your website is saying.<br />And what it isn&apos;t.</h2>
+            <p>Your free first-impression score and five clarity signals are one URL away.</p>
+            <button type="button" className="slr-button" onClick={goToScan}>Reveal My Clarity Score — Free <ArrowUpRight size={17}/></button>
           </div>
         </section>
       </main>
