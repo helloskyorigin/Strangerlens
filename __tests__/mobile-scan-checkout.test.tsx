@@ -18,7 +18,7 @@ assert.ok(!scan.includes("aria-valuenow") && !scan.includes("Open my report"), "
 const mapped = mapBackendToFrontend(structuredClone(paymentAnalysis), "https://example.com", paymentSnapshot);
 const freeDoc = new JSDOM(renderToStaticMarkup(<ResultsScreen rawUrl="https://example.com" analysisData={mapped} checkoutEnabled={true}/>)).window.document;
 const preview = freeDoc.querySelector('#complete-report-preview');
-const score = [...freeDoc.querySelectorAll("h2")].find(el => el.textContent?.includes("Website Clarity Score"));
+const score = freeDoc.querySelector("#report-first-look #sl-v7-score-title");
 const signals = [...freeDoc.querySelectorAll("h2")].find(el => el.textContent?.includes("Your Clarity Signals"));
 assert.ok(preview && score && signals, "Score, compact signal list and single upgrade card coexist.");
 assert.ok(freeDoc.querySelector('[data-testid="full-report-upgrade-anchor"] > #complete-report-preview'),
