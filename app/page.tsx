@@ -113,6 +113,26 @@ const FAQ_ITEMS = [
 ];
 
 
+/**
+ * View switches in this SPA don't navigate to a new document, so the browser can
+ * preserve the previous screen's middle-of-page scroll position. Reset immediately
+ * without the global smooth-scrolling animation.
+ */
+function showScreenFromTop() {
+  if (typeof window === "undefined") return;
+  const html = document.documentElement;
+  const previousBehavior = html.style.scrollBehavior;
+  html.style.scrollBehavior = "auto";
+  try {
+    window.scrollTo(0, 0);
+  } catch {
+    // DOM-only test environments may not implement window.scrollTo.
+  }
+  html.scrollTop = 0;
+  document.body.scrollTop = 0;
+  html.style.scrollBehavior = previousBehavior;
+}
+
 export default function LandingPage() {
   const [url, setUrl] = useState("");
   const [currentView, setCurrentView] = useState<"landing" | "scan" | "results">("landing");
@@ -123,9 +143,32 @@ export default function LandingPage() {
   const [isMounted, setIsMounted] = useState<boolean>(false);
 
   useEffect(() => {
+    // Prevent native browser scroll restoration from reopening a SPA view halfway down.
+    const previous = window.history.scrollRestoration;
+    window.history.scrollRestoration = "manual";
+    showScreenFromTop();
+    const frame = requestAnimationFrame(showScreenFromTop);
+    const onPageShow = () => {
+      // Covers browser Back/Forward cache and Android in-app previews.
+      showScreenFromTop();
+    };
+    window.addEventListener("pageshow", onPageShow);
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMounted(true);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("pageshow", onPageShow);
+      window.history.scrollRestoration = previous;
+    };
   }, []);
+
+  useEffect(() => {
+    // Opening scan/results or returning home always starts at that screen's header.
+    // Explicit actions like "New Check" still scroll to the URL input afterwards.
+    showScreenFromTop();
+    const frame = requestAnimationFrame(showScreenFromTop);
+    return () => cancelAnimationFrame(frame);
+  }, [currentView]);
 
 
   useEffect(() => {
