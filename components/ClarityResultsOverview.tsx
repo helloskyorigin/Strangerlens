@@ -122,7 +122,7 @@ export default function ClarityResultsOverview({
               <span className="sl-v7-signal-name">
                 {signal.title}
                 <span className="sl-v8-tooltip-desktop hidden sm:inline-flex">{renderTooltip(signal, "desktop")}</span>
-                <span className="sl-v8-tooltip-mobile sm:inline-flex sm:hidden">{renderTooltip(signal, "mobile")}</span>
+                <span className="sl-v8-tooltip-mobile sm:hidden">{renderTooltip(signal, "mobile")}</span>
               </span>
               <strong className="sl-v8-signal-score">{signal.score === null ? "—/100" : signal.score}</strong>
               <span className={`sl-v7-signal-status sl-v11-badge sl-v11-badge--${band}`}>{labels[band]}</span>
