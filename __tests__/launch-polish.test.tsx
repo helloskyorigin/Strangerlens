@@ -43,10 +43,24 @@ assert.ok(groqSource.includes("max_completion_tokens: 4200") &&
 assert.ok(geminiSource.includes("setTimeout(() => controller.abort(), 9000)") &&
  geminiSource.includes("abortSignal: controller.signal"),
  "Gemini fallback must not leave a request hanging for minutes");
-assert.ok(checkSource.includes("boundedExtraPagesPromise") &&
- checkSource.includes("optionalContextController.abort()") &&
- checkSource.includes("}, 10000)"),
- "Optional supporting pages must not block the core AI result");
+assert.ok(checkSource.includes("discoverAndFetchSupportingPages") &&
+ checkSource.includes("discoverAndFetchLegalPages") &&
+ checkSource.includes("maxLinkedPages") &&
+ checkSource.includes("Promise.all([") &&
+ checkSource.includes("analyzeWebsite(snapshot, analysisPages") &&
+ checkSource.includes("supportingPagesBundle: linkedPages") &&
+ checkSource.includes("pageInspection:"),
+ "Linked feature/pricing/about and legal pages are fetched, passed to AI and reported");
+assert.ok(!checkSource.includes("boundedExtraPagesPromise") &&
+ !checkSource.includes("optionalContextController.abort()") &&
+ !checkSource.includes("isSupportingPagesEnabled() &&"),
+ "A short time budget or disabled feature flag must not silently drop linked page evidence");
+const promptSource=readFileSync("services/ai/analysisPrompt.ts","utf8");
+assert.ok(promptSource.includes("supportingPages: supportingPagesBundle?.pages") &&
+ promptSource.includes("url: p.finalUrl") &&
+ promptSource.includes("inspection:"),
+ "Main AI receives each inspected linked page with its URL and scan coverage");
+
 assert.ok(supportingSource.includes("abortSignal: options.signal"),
  "Abort optional supporting context when its deadline expires");
 
