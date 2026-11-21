@@ -26,7 +26,7 @@ assert.ok(app.includes('<AnimatePresence mode="popLayout" initial={false}>'), "C
 const currentLanding=readFileSync("components/landing/StrangerLensLanding.tsx","utf8");
 assert.ok(currentLanding.includes("StrangerLens evaluates how clearly") &&
   !currentLanding.includes("publicly accessible website content") &&
-  app.includes("public website URL"),
+  app.includes("No signup required"),
   "Landing describes five clear checks without technical public-content copy.");
 const css=readFileSync("app/landing-v3.css","utf8");
 const theme=readFileSync("app/app-theme.css","utf8");

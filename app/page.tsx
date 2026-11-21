@@ -39,12 +39,12 @@ const PRICING_PLANS: PricingPlan[] = [
     price: 0,
     paymentLabel: "FREE",
     badge: null,
-    positioning: "Instant clarity evaluation.",
-    description: "Discover your overall website clarity score and five core signal scores. Purchase Readiness is a conditional premium signal.",
+    positioning: "Get your free score.",
+    description: "See your website clarity score and five simple signals.",
     features: [
       "Overall Website Clarity Score (0–100)",
-      "Five Core Signal Scores and Statuses",
-      "Signal Statuses (Clear / Partly clear / Needs work)",
+      "Five clarity signals",
+      "See which areas need attention",
     ],
     cta: "Analyze My Website Free",
     disabledCta: "Analyze My Website Free",
@@ -54,18 +54,17 @@ const PRICING_PLANS: PricingPlan[] = [
   {
     id: "complete",
     name: "Unlock Your Full Analysis",
-    price: 5,
+    price: 9,
     paymentLabel: "ONE-TIME",
     badge: "FULL ANALYSIS",
-    positioning: "Actionable clarity & diagnostics.",
+    positioning: "Clear findings and fixes.",
     description: "Go beyond your clarity scores. Discover what's working, what's unclear, and how to improve your website.",
     features: [
-      "Five Detailed Signal Diagnostics",
-      "Evidence-to-Fix (verified wording when available)",
-      "Smart Priority & Action Plan",
-      "Better Copy Studio (review, edit & copy)",
-      "First 5 Seconds + Premium PDF",
-      "Purchase Readiness (when applicable)",
+      "The Stranger’s View",
+      "What’s holding your website back",
+      "Why visitors might hesitate",
+      "Your fix-first action plan",
+      "Better copy and PDF download",
     ],
     cta: "Check Your Website First",
     disabledCta: "Check Your Website First",
@@ -79,37 +78,37 @@ const FAQ_ITEMS = [
   {
     question: "What does StrangerLens analyse?",
     answer:
-      "StrangerLens is an AI-powered website first-impression clarity analyzer. It evaluates First Impression, Audience, Value, Trust, and Action using inspected website content. A sixth signal, Purchase Readiness, appears when a genuine paid offering is identified. Its separate score does not affect the Overall Clarity Score.",
+      "StrangerLens checks whether your website makes a clear first impression, explains who it's for, shows its value, earns trust and makes the next action obvious.",
   },
   {
     question: "Does StrangerLens work with any website?",
     answer:
-      "StrangerLens works with publicly reachable websites whose text and structure are accessible in the initial HTML response, including SaaS products, developer tools, B2B services, and landing pages.",
+      "It works with most websites that can be opened and read. Login-only or blocked pages may return limited results.",
   },
   {
     question: "Is the analysis based on real website content?",
     answer:
-      "Yes. StrangerLens inspects your live public website URL and extracts visible text, headings, value propositions, and calls to action to ground its findings in your actual inspected content.",
+      "Yes. It checks your website's headings, descriptions and buttons, then explains what looks clear and what could improve.",
   },
   {
     question: "Is StrangerLens a security, SEO, or human test panel?",
     answer:
-      "No. StrangerLens is an AI website first-impression clarity analyzer focused on visitor comprehension, audience alignment, value perception, trust cues, and call-to-action clarity. It does not conduct human usability panels, nor is it a technical SEO or vulnerability scanner.",
+      "No. It reviews your website's message using AI. It doesn't track real visitors or run security tests.",
   },
   {
     question: "What is included in the free analysis?",
     answer:
-      "The Free Preview ($0) gives you your Overall Website Clarity Score and five core signal scores and statuses with zero signup or credit card required. When paid products, subscriptions or services are identified, Purchase Readiness appears as a locked premium card. Its separate score and findings unlock with verified Full Analysis.",
+      "You get your overall score and five clarity signals for free. Detailed reasons and changes are unlocked separately.",
   },
   {
     question: "What does Full Analysis cost?",
     answer:
-      "Full Analysis costs $9 per report, paid once with no subscription. Run a free preview first, then unlock five detailed signal analyses, Evidence-to-Fix findings with verified quotes when available, a Smart Priority plan, an editable Better Copy Studio, and the First 5 Seconds breakdown. Checkout availability is shown on your report.",
+      "It's $9 once per report. Get five detailed findings, your fix-first plan, better wording suggestions and a full PDF.",
   },
   {
     question: "Do I need to create an account?",
     answer:
-      "No account or signup is required. Enter any public website URL to run an instant analysis.",
+      "No signup required. Paste your website link to get started.",
   },
 ];
 
