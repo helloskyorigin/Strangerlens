@@ -240,7 +240,7 @@ async function runCheck(req: NextRequest, onProgress?: ProgressEmitter) {
               snapshot, fetchResult.finalUrl, fetchResult.html,
               { enabled: true, supportingPagesBundle: linkedPages, signal: pipelineController.signal }
             )
-          : Promise.resolve({}),
+          : Promise.resolve({} as Awaited<ReturnType<typeof generateSupportingPageContext>>),
       ]);
       const aiDurationMs = Math.round(performance.now() - aiStart);
       const analysisMode: "ai" | "heuristic" = provenance.mode;
