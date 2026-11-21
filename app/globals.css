@@ -8,6 +8,7 @@
 @import "../components/dark-monochrome.css";
 @import "../components/landing/landing-result-proof.css";
 @import "../components/scalen-inspired-dark.css";
+@import "../components/landing/landing-story.css";
 
 :root {
   color-scheme: light;
