@@ -13,8 +13,8 @@ export interface AnalyzeWebsiteOptions {
 
 /**
  * Main entry point for Phase 3 AI Analysis.
- * Tries Gemini AI Provider first when configured (unless an explicit Groq apiKey
- * override is passed), then Groq AI Provider, with a deterministic fallback analyzer
+ * Uses configured Groq first (the StrangerLens default), with Gemini only
+ * when Groq cannot produce a validated analysis, then deterministic fallback
  * to guarantee preview generation even if providers are unavailable or rate-limited.
  */
 export async function analyzeWebsite(
@@ -26,9 +26,8 @@ export async function analyzeWebsite(
   let providerError: Error | null = null;
   let source: "groq" | "gemini" | "deterministic" = "deterministic";
 
-  const hasExplicitGroqKey = Boolean(options.apiKey && options.apiKey.trim());
   const hasGeminiKey = Boolean(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim());
-  const hasGroqKey = hasExplicitGroqKey || Boolean(process.env.GROQ_API_KEY && process.env.GROQ_API_KEY.trim());
+  const hasGroqKey = Boolean(options.apiKey?.trim() || process.env.GROQ_API_KEY?.trim());
 
   const tryGemini = async () => {
     if (!hasGeminiKey || rawAnalysis) return;
@@ -56,13 +55,9 @@ export async function analyzeWebsite(
     }
   };
 
-  if (hasExplicitGroqKey) {
-    await tryGroq();
-    await tryGemini();
-  } else {
-    await tryGemini();
-    await tryGroq();
-  }
+  // Never spend minutes on Gemini before attempting the configured Groq model.
+  await tryGroq();
+  if (!rawAnalysis) await tryGemini();
 
   // If AI providers failed or hit rate limits, use deterministic fallback analysis to ensure preview appears successfully
   if (!rawAnalysis) {
