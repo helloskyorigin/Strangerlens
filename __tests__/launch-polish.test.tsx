@@ -5,6 +5,7 @@ import { JSDOM } from "jsdom";
 import { readFileSync } from "node:fs";
 import StrangerLensLanding from "../components/landing/StrangerLensLanding";
 import ResultsScreen from "../components/ResultsScreen";
+import ScanScreen from "../components/ScanScreen";
 import { mapBackendToFrontend } from "../lib/mapper";
 import { paymentAnalysis, paymentSnapshot } from "./fixtures/payment-report";
 
@@ -31,6 +32,47 @@ for(const paid of [false,true]){
     assert.ok(doc.querySelector("#complete-report-preview .sl-v7-upgrade-button"),"Free paid CTA remains");
  }
 }
+// Guard the exact scanner Exit white-on-white regression and common theme controls.
+// This CSS must load after the legacy theme rules to win the cascade.
+const guard=readFileSync("components/theme-contrast-guard.css","utf8");
+const imports=readFileSync("app/globals.css","utf8");
+assert.ok(imports.includes('theme-contrast-guard.css') &&
+  imports.indexOf("theme-contrast-guard.css")>imports.indexOf("landing-story.css") &&
+  imports.indexOf("theme-contrast-guard.css")>imports.indexOf("scalen-inspired-dark.css"),
+  "Contrast safeguards must load last");
+for (const selector of [
+  'html[data-landing-theme="dark"] .sl-scan-v2 .sl-scan-close',
+  'html[data-landing-theme="light"] .sl-scan-v2 .sl-scan-close',
+  'html[data-landing-theme="dark"] .sl-scan-v2 .sl-scan-close :is(span,svg)',
+  'html[data-landing-theme="dark"] .sl-scan-v2 .sl-scan-status-row .sl-scan-elapsed',
+  'html[data-landing-theme="dark"] .sl-scan-v2 .sl-scan-brand',
+  'html[data-landing-theme="dark"] .sl-results-v7 .sl-v8-new-check',
+  'html[data-landing-theme="light"] .sl-results-v7 .sl-v8-new-check',
+  'html[data-landing-theme="dark"] .sl-results-v7 .sl-theme-quick :is(span,svg)',
+  'html[data-landing-theme="dark"] .slr-legal .slr-legal-tab.is-active',
+  'html[data-landing-theme="dark"] .slr-legal :is(.slr-legal-back,.slr-legal-help-button)',
+  'html[data-landing-theme="light"] .slr-legal :is(.slr-legal-back,.slr-legal-help-button)'
+]) assert.ok(guard.includes(selector),"Missing route/theme-specific contrast rule: "+selector);
+const luminance=(hex:string)=>{
+ const n=hex.match(/[A-F0-9]{2}/gi)!.map(c=>parseInt(c,16)/255)
+   .map(c=>c<=0.04045?c/12.92:Math.pow((c+0.055)/1.055,2.4));
+ return n[0]*.2126+n[1]*.7152+n[2]*.0722;
+};
+const contrast=(a:string,b:string)=>{const x=luminance(a),y=luminance(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05)};
+for(const [name,fg,bg] of [
+  ["dark scanner Exit","F3FBEF","252C22"],
+  ["light scanner Exit","20321B","F0F7EA"],
+  ["dark results New Check","15200F","C7F36A"],
+  ["light results New Check","FFFFFF","152014"],
+  ["dark legal selected tab","18250F","C7F36A"],
+  ["dark scanner timer","C7F36A","20291F"]
+]) assert.ok(contrast(fg,bg)>=4.5,name+" must meet WCAG AA text contrast");
+const scanMarkup=renderToStaticMarkup(<ScanScreen rawUrl="https://example.com" onBackToLanding={()=>{}}/>);
+assert.ok(scanMarkup.includes('class="sl-scan-close"') && scanMarkup.includes("Exit"),
+ "Scanner Exit button must remain visible and accessible");
+assert.ok(scanMarkup.includes('class="sl-scan-brand"') && scanMarkup.includes("StrangerLens"),
+ "Scanner branding stays in the header during theme switches");
+
 const css=readFileSync("components/dark-monochrome.css","utf8");
 const globals=readFileSync("app/globals.css","utf8");
 assert.ok(globals.includes('@import "../components/dark-monochrome.css"') &&
