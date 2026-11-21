@@ -46,6 +46,42 @@ const css=readFileSync("components/landing/landing-result-proof.css","utf8");
 assert.ok(css.includes("grid-template-columns:minmax(0,.93fr) minmax(0,1.07fr)") &&
   css.includes("@media(max-width:570px)")&&css.includes("@media(max-width:360px)"),
   "Desktop split hero and 570px/360px mobile breakpoints");
+// Protect the actual reported screenshot bugs: black CTA and invisible dark sample numbers.
+const polish=readFileSync("components/landing/landing-story.css","utf8");
+assert.ok(polish.includes(".slr-page .slr-hero-scan .slr-form-submit") &&
+  polish.includes("background:#C7F36A!important") &&
+  polish.includes("border-radius:999px!important") &&
+  polish.includes("-webkit-text-fill-color:#17210D!important"),
+  "Free score button stays electric lime, rounded, and high-contrast in both themes");
+for(const selector of [
+  ".slr-live-demo-scoreline strong",
+  ".slr-live-demo-scoreline strong span",
+  ".slr-live-demo-row-score",
+  ".slr-live-demo-row-head > strong",
+  ".slr-live-demo-score-status",
+  ".slr-live-demo-status--red",
+  ".slr-live-demo-status--good",
+]){
+  assert.ok(polish.includes(selector),"Dark sample contrast correction stays in place: "+selector);
+}
+assert.ok(polish.includes("color:#F5FFE9!important")&&
+  polish.includes("-webkit-text-fill-color:#F5FFE9!important"),
+  "Dark mode numbers use strong, explicit readable text color");
+const luminance=(hex:string)=>{
+  const channels=hex.match(/[0-9a-f]{2}/gi)!.map(x=>parseInt(x,16)/255)
+    .map(v=>v<=0.04045?v/12.92:Math.pow((v+.055)/1.055,2.4));
+  return .2126*channels[0]+.7152*channels[1]+.0722*channels[2];
+};
+const contrast=(a:string,b:string)=>{
+  const la=luminance(a),lb=luminance(b);
+  return (Math.max(la,lb)+.05)/(Math.min(la,lb)+.05);
+};
+assert.ok(contrast("F5FFE9","171718")>=7,"Dark preview scores exceed AAA text contrast");
+assert.ok(contrast("17210D","C7F36A")>=7,"Lime CTA label remains high contrast");
+assert.ok(readFileSync("app/globals.css","utf8").indexOf("landing-story.css") >
+  readFileSync("app/globals.css","utf8").indexOf("scalen-inspired-dark.css"),
+  "Final bugfix selectors load after older theme-specific overrides");
+
 const brandDark=readFileSync("components/scalen-inspired-dark.css","utf8");
 assert.ok(brandDark.includes('html[data-landing-theme="dark"] .slr-page .slr-live-demo') &&
   brandDark.includes("--scalen-lime:#bdfb54")&&brandDark.includes("--scalen-panel:#171718") &&
