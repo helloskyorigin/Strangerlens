@@ -76,19 +76,68 @@ export function formatSnapshotForAi(
         }))
       : [],
     legalPages: supportingPagesBundle?.pages
-      ? supportingPagesBundle.pages.map((p) => ({
+      ? supportingPagesBundle.pages.filter(p => ["privacy_policy", "terms_of_service", "refund_policy"].includes(p.pageType))
+        .map(p => ({
           url: p.finalUrl,
           pageType: p.pageType,
-          title: p.snapshot.meta.title.slice(0, 200),
-          headings: p.snapshot.valueProps.headings.slice(0, 6).map((h) => h.text.slice(0, 150)),
-          textSummary: p.snapshot.bodySections.slice(0, 4).map((s) => s.textSummary.slice(0, 300)).join(" "),
+          title: p.snapshot.meta.title.slice(0, 160),
+          headings: p.snapshot.valueProps.headings.slice(0, 5).map(h => h.text.slice(0, 120)),
+          textSummary: p.snapshot.bodySections.slice(0, 3).map(part => part.textSummary.slice(0, 200)).join(" "),
         }))
       : [],
+    // The exact internal URLs matter: a claim on /pricing is not homepage proof.
+    // Preserve every successfully fetched relevant linked page in the main AI pass.
+    supportingPages: supportingPagesBundle?.pages
+      ? supportingPagesBundle.pages.filter(p => !["privacy_policy", "terms_of_service", "refund_policy"].includes(p.pageType))
+        .map(p => ({
+          url: p.finalUrl,
+          pageType: p.pageType,
+          title: p.snapshot.meta.title.slice(0, 150),
+          headline: p.snapshot.hero.headline.slice(0, 200),
+          subheadline: p.snapshot.hero.subheadline.slice(0, 230),
+          primaryCta: p.snapshot.hero.primaryCta?.text.slice(0, 90),
+          headings: p.snapshot.valueProps.headings.slice(0, 5).map(h => h.text.slice(0, 110)),
+          featureCards: p.snapshot.valueProps.featureCards.slice(0, 3).map(c => ({
+            title: c.title.slice(0, 75), description: c.description.slice(0, 120),
+          })),
+          pricing: p.snapshot.valueProps.pricingSignals.plans.slice(0, 3).map(plan => ({
+            name: plan.name?.slice(0, 70), price: plan.price?.slice(0, 70),
+          })),
+          trustEvidence: {
+            testimonials: p.snapshot.trustSignals.testimonials.slice(0, 2).map(t => t.quote.slice(0, 120)),
+            badges: p.snapshot.trustSignals.badgesAndCertifications.slice(0, 4),
+          },
+          sections: p.snapshot.bodySections.slice(0, 2).map(part => part.textSummary.slice(0, 170)),
+        }))
+      : [],
+    inspection: {
+      discovered: supportingPagesBundle?.discoveredCount ?? 0,
+      attempted: supportingPagesBundle?.attemptedCount ?? 0,
+      inspected: supportingPagesBundle?.pages.length ?? 0,
+      inaccessiblePages: supportingPagesBundle?.attempts.filter(a => !a.success).map(a => ({
+        url: a.url, reason: a.error,
+      })) ?? [],
+    },
   };
 
-  const serialized = JSON.stringify(compactPayload, null, 2);
+  // Compact JSON preserves every page URL and remains parseable (unlike a raw
+  // substring cut through the middle of a JSON object).
   const maxChars = SERVER_LIMITS.AI_MAX_INPUT_TOKENS * 4;
-  return serialized.length > maxChars ? serialized.slice(0, maxChars) : serialized;
+  const serialized = JSON.stringify(compactPayload);
+  if (serialized.length <= maxChars) return serialized;
+  const compacted = {
+    ...compactPayload,
+    homepage: {
+      ...compactPayload.homepage,
+      sections: compactPayload.homepage.sections.slice(0, 4),
+      ctas: compactPayload.homepage.ctas.slice(0, 8),
+      valueProps: {
+        ...compactPayload.homepage.valueProps,
+        featureCards: compactPayload.homepage.valueProps.featureCards.slice(0, 4),
+      },
+    },
+  };
+  return JSON.stringify(compacted);
 }
 
 export const SYSTEM_PROMPT = `You are Percept, the definitive website first-impression diagnostic engine.
@@ -99,9 +148,11 @@ PAGE ANALYSIS SCOPE & SIGNAL BOUNDARIES:
 1. First Impression → Homepage only (Hero section, headline, subheadline, above the fold).
 2. Audience → Homepage only (Target audience framing and specificity).
 3. Value → Homepage only (Core benefit and visitor outcome clarity).
-4. Trust → Homepage + Legal Pages (Privacy Policy, Terms of Service, Refund Policy when present). Legal pages must influence ONLY the Trust assessment and must not alter First Impression, Audience, Value, or Action scores.
-5. Action → Homepage only (Primary call to action clarity and prominence).
+4. Trust → Homepage + actually inspected legal and supporting pages (Privacy, Terms, Refund, About, Security, Customers when present). A linked page is supporting evidence only; never assume its published claims are independently verified.
+5. Action → Homepage primary call to action clarity and prominence. Inspect the linked destination when present to assess if its promise matches the CTA, but do not award a strong homepage score for information a visitor cannot see without clicking.
 6. First 5 Seconds must remain based strictly on the homepage's initial message.
+7. Inspect relevant linked Pricing, Features, Product, Customers, About, Security and Solutions pages included in supportingPages. Explicitly consider whether they reinforce or contradict the homepage. Reference their real source URLs, and never invent page content.
+8. If inspection.inaccessiblePages is nonempty, explain limitations rather than implying that those pages were verified.
 
 IMPROVE TRUST ACCURACY:
 - Evaluate actual evidence across homepage and legal pages: accessible privacy information, clear terms and conditions, refund information when applicable, consistency with homepage claims, discoverability of legal pages, and relevant transparency signals.
@@ -114,9 +165,9 @@ IMPROVE TRUST ACCURACY:
 - externalPolicyLinks are observed outgoing links ONLY; never treat their destinations as fetched, verified, compliant or same-domain.
 
 ABSOLUTE SOURCE OF TRUTH:
-WebsiteSnapshot and legalPages are the absolute, exclusive source of truth. You must ONLY make claims supported by the actual data.
+WebsiteSnapshot, legalPages, and supportingPages are the absolute, exclusive source of truth. You must ONLY make claims supported by the actual data.
 DO NOT INVENT: features, customers, statistics, testimonials, audience, pricing, guarantees, trust signals, product capabilities, company information, or results.
-If something is not present on the website or legal pages, state honestly that it is not clearly communicated or not found. NEVER fill gaps with assumptions.
+If something is not present on inspected website or linked pages, state honestly that it is not clearly communicated or not found. NEVER fill gaps with assumptions.
 
 CRITICAL CONSTRAINTS & ACCURACY RULES:
 1. Grounding & Verbatim Evidence: Every quote in 'evidence_refs' MUST be EXACT, VERBATIM text from the snapshot or legal pages. Each evidence object must have source ('hero', 'section', 'cta', 'metadata', 'footer', or legal page URL), element ('h1', 'p', 'button', 'heading'), exact text, and a concise 'reason' explaining why it matters. If evidence is lacking, return [].
