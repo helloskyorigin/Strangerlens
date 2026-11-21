@@ -16,7 +16,9 @@ for (const paid of [false, true]) {
   assert.equal(title?.textContent, "Website Clarity Score", "Single score heading");
   assert.ok(doc.querySelector("#report-first-look .sl-v7-score-number"), "Score is immediately visible");
   assert.ok(!doc.querySelector("#report-first-look button, #scoring-dialog-title, #report-first-look .sl-v8-result-domain"),
-    "Score contains no unnecessary tooltip or domain metadata");
+    "Score contains no unnecessary tooltip or verbose metadata");
+  assert.equal(doc.querySelector("#report-first-look .sl-v13-domain")?.textContent, "example.com",
+    "Saved audit is identified by its domain alone");
   assert.equal(doc.querySelectorAll(".sl-v11-signal").length, 5, "Five clear signal rows");
   assert.equal(doc.querySelectorAll('button[aria-label^="About "]').length, 10,
     "Every signal still has its responsive info tooltip");

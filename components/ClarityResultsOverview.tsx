@@ -97,6 +97,7 @@ export default function ClarityResultsOverview({
           </div>
         </div>
         <p className="sl-v8-score-insight">{overallHeadline(report.overallScore)}</p>
+        <p className="sl-v13-domain">{report.domain}</p>
       </div>
     </section>
     <section id="report-clarity-signals" className="sl-v7-breakdown" aria-labelledby="sl-v7-signal-title">

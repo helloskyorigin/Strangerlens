@@ -2401,3 +2401,12 @@ html[data-landing-theme="dark"] .sl-results-v7 .sl-v11-summary #report-clarity-s
     padding:22px 17px!important;
   }
 }
+
+/* Identify restored reports without the old technical scope line. */
+.sl-results-v7 .sl-v11-summary #report-first-look .sl-v13-domain {
+  margin:9px auto 0!important;color:#7b8974!important;font-size:11px!important;
+  line-height:1.45;font-weight:550!important;overflow-wrap:anywhere;
+}
+html[data-landing-theme="dark"] .sl-results-v7 .sl-v11-summary #report-first-look .sl-v13-domain {
+  color:#b1c1aa!important;
+}
