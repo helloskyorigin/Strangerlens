@@ -460,3 +460,110 @@ html[data-landing-theme="dark"] .slr-page .slr-hero-scan .slr-input-wrap input:i
     border-radius:999px!important;
   }
 }
+
+
+/* Sample scores: legible chips and differentiated bars, including mobile dark mode.
+   Opaque number chips keep digits visible even when parent theme styles change. */
+.slr-page .slr-live-demo .slr-live-demo-row-head .slr-live-demo-row-score,
+html[data-landing-theme="dark"] .slr-page .slr-live-demo .slr-live-demo-row-head .slr-live-demo-row-score,
+html[data-landing-theme="light"] .slr-page .slr-live-demo .slr-live-demo-row-head .slr-live-demo-row-score{
+  display:inline-flex!important;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  min-width:41px;
+  padding:5px 7px;
+  color:#D9FF9B!important;
+  -webkit-text-fill-color:#D9FF9B!important;
+  background:#24331C!important;
+  background-image:none!important;
+  border:1px solid #425B2C!important;
+  border-radius:10px!important;
+  font:900 14px/1.1 Manrope,Inter,system-ui,sans-serif!important;
+  letter-spacing:0!important;
+  font-variant-numeric:tabular-nums;
+  opacity:1!important;
+  filter:none!important;
+  text-shadow:none!important;
+}
+.slr-page .slr-live-demo .slr-live-demo-row-head{
+  gap:8px;
+}
+.slr-page .slr-live-demo .slr-live-demo-row{
+  padding-block:15px!important;
+}
+.slr-page .slr-live-demo .slr-live-demo-row-head > strong{
+  font-weight:800;
+  min-width:0;
+}
+.slr-page .slr-live-demo .slr-live-demo-meter{
+  display:block;
+  position:relative;
+  height:10px!important;
+  margin:11px 0 9px!important;
+  overflow:hidden;
+  border-radius:999px;
+  background:#E7EBE3!important;
+}
+.slr-page .slr-live-demo .slr-live-demo-fill{
+  display:block;
+  position:relative;
+  height:100%;
+  border-radius:999px;
+  box-shadow:inset 0 -1px 1px rgba(0,0,0,.10);
+}
+.slr-page .slr-live-demo .slr-live-demo-fill::after{
+  content:"";
+  position:absolute;
+  right:2px;
+  top:50%;
+  width:5px;
+  height:5px;
+  border-radius:50%;
+  background:rgba(255,255,255,.84);
+  transform:translateY(-50%);
+}
+.slr-page .slr-live-demo .slr-live-demo-fill--red{
+  background:linear-gradient(90deg,#FA8C80,#E35463)!important;
+}
+.slr-page .slr-live-demo .slr-live-demo-fill--amber{
+  background:linear-gradient(90deg,#FFD075,#E69B35)!important;
+}
+.slr-page .slr-live-demo .slr-live-demo-fill--good{
+  background:linear-gradient(90deg,#BAEF75,#73C84C)!important;
+}
+.slr-page .slr-live-demo .slr-live-demo-row > .slr-live-demo-visitor-thought{
+  margin:0;
+  font-size:11.5px;
+  line-height:1.55;
+  font-weight:560;
+  letter-spacing:0;
+}
+html[data-landing-theme="dark"] .slr-page .slr-live-demo .slr-live-demo-meter{
+  background:#333C34!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-live-demo .slr-live-demo-fill--red{
+  background:linear-gradient(90deg,#F58F83,#FF566E)!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-live-demo .slr-live-demo-fill--amber{
+  background:linear-gradient(90deg,#FFE18C,#F6AB3A)!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-live-demo .slr-live-demo-fill--good{
+  background:linear-gradient(90deg,#D0FF8D,#8BDD5D)!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-live-demo .slr-live-demo-row > .slr-live-demo-visitor-thought{
+  color:#CCD9C5!important;
+  -webkit-text-fill-color:#CCD9C5!important;
+}
+@media(max-width:570px){
+  .slr-page .slr-live-demo .slr-live-demo-row-head{gap:7px;}
+  .slr-page .slr-live-demo .slr-live-demo-row-head .slr-live-demo-row-score{
+    min-width:38px;
+    font-size:13px!important;
+    padding:5px 6px;
+  }
+  .slr-page .slr-live-demo .slr-live-demo-status{
+    padding-inline:8px;
+    font-size:9px;
+  }
+}
