@@ -806,9 +806,11 @@ export function discoverSupportingPages(
   // Inspect both the header and footer of long pages; a footer-only slice
   // can miss policy links in the header and vice versa. Network fetch is
   // already capped at 5MB.
-  const boundedHtml = options.onlyLegalPolicies && html.length > maxHtmlChars
+  // Large sites often place About, Pricing, Trust and legal links in the footer.
+  // Inspect both ends for all page discovery, not only for legal policies.
+  const boundedHtml = html.length > maxHtmlChars
     ? html.slice(0, maxHtmlChars) + "\n" + html.slice(-maxHtmlChars)
-    : html.slice(0, maxHtmlChars);
+    : html;
 
   const $ = cheerio.load(boundedHtml);
 
