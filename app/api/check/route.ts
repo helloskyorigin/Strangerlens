@@ -3,7 +3,7 @@ import { validateUrl, checkSsrf } from "@/lib/url-validator";
 import { fetchWebsiteHomepage } from "@/lib/website-fetcher";
 import { extractWebsiteSnapshot } from "@/lib/content-extractor";
 import { assessScanCoverage } from "@/lib/scan-coverage";
-import { discoverAndFetchLegalPages } from "@/lib/supporting-page-fetcher";
+import { discoverAndFetchLegalPages, discoverAndFetchSupportingPages } from "@/lib/supporting-page-fetcher";
 import { analyzeWebsite } from "@/services/ai/analyzeWebsite";
 import { validateAndScoreAnalysis } from "@/services/validation/analysisValidator";
 import { generateSupportingPageContext } from "@/services/ai/supportingContextAnalyzer";
@@ -13,7 +13,7 @@ import {
   checkAndAcquireRateLimit,
   releaseConcurrencySlot,
 } from "@/server/security/rateLimiter";
-import { isSupportingPagesEnabled, SERVER_LIMITS } from "@/server/config/limits";
+import { SERVER_LIMITS } from "@/server/config/limits";
 import {
   saveServerReport,
   redactAnalysisForFreeTier,
@@ -33,7 +33,7 @@ export async function GET() {
     status: "online",
     service: "StrangerLens Full Backend Pipeline (Validation, Fetching, Extraction, AI & Scoring)",
     phase: "Phase 1, Phase 2, Phase 3, Phase 4 & Multi-Page Phase 2 - Backend",
-    supportingPagesEnabled: isSupportingPagesEnabled(),
+    supportingPagesEnabled: true,
     endpoints: {
       "POST /api/check": "Validates URL, checks SSRF safety, normalizes URL, fetches primary homepage, extracts WebsiteSnapshot, runs AI Analysis and Evidence Validation & Deterministic Scoring on the homepage, and optionally generates supporting-page context when enabled.",
     },
@@ -187,67 +187,63 @@ async function runCheck(req: NextRequest, onProgress?: ProgressEmitter) {
       // This milestone is truthful: extraction and coverage validation have finished.
       onProgress?.("content_inspected");
 
-      // 5. Fetch legal pages regardless of the optional multi-page feature flag.
-      // Ground the Trust assessment in actual policy pages before asking the AI.
-      // Other supporting-page analysis can run concurrently with these fetches.
+      // 5. Inspect linked site pages AND legal pages before either scoring or AI.
+      // Linked product/pricing/about pages are core evidence, not optional work
+      // that can be silently discarded after a 10-second timer.
       const aiStart = performance.now();
-      const shouldRunSupportingPages =
-        isSupportingPagesEnabled() && !pipelineController.signal.aborted;
-      type SupportingResultType = Awaited<ReturnType<typeof generateSupportingPageContext>>;
-      const legalPagesPromise = discoverAndFetchLegalPages(
-        fetchResult.html, fetchResult.finalUrl, { signal: pipelineController.signal }
-      );
-      // Optional supporting-page enrichment must not hold the core homepage
-      // analysis hostage. Keep up to 10s of enrichment and preserve all
-      // successfully returned evidence; legal-page checks remain mandatory.
-      const optionalContextController = new AbortController();
-      const parentAbortOptional = () => optionalContextController.abort();
-      if (pipelineController.signal.aborted) optionalContextController.abort();
-      else pipelineController.signal.addEventListener("abort", parentAbortOptional, { once: true });
-      const extraPagesPromise: Promise<SupportingResultType> = shouldRunSupportingPages
-        ? generateSupportingPageContext(
-            snapshot, fetchResult.finalUrl, fetchResult.html,
-            { signal: optionalContextController.signal }
-          ).catch((err: unknown): SupportingResultType => {
-            console.warn("[SUPP-WARN] Supporting-page context failed gracefully:",
-              err instanceof Error ? err.message : String(err));
-            return {};
-          })
-        : Promise.resolve({} as SupportingResultType);
-      const boundedExtraPagesPromise = new Promise<SupportingResultType>(resolve => {
-        if (!shouldRunSupportingPages) { resolve({} as SupportingResultType); return; }
-        const timer = setTimeout(() => {
-          optionalContextController.abort();
-          resolve({} as SupportingResultType);
-        }, 10000);
-        void extraPagesPromise.then(
-          value => { clearTimeout(timer); resolve(value); },
-          () => { clearTimeout(timer); resolve({} as SupportingResultType); }
-        );
-      });
-      const legalPages = await legalPagesPromise;
-      // Mutable holder: provenance is set by asynchronous provider selection.
-      const provenance: { mode: "ai" | "heuristic" } = { mode: "heuristic" };
-      const rawAiPromise = analyzeWebsite(snapshot, legalPages, {
-        onSource: source => { provenance.mode = source === "deterministic" ? "heuristic" : "ai"; },
-      });
-      const [rawAiAnalysis, optionalSupportingResult] = await Promise.all([
-        rawAiPromise, boundedExtraPagesPromise,
+      const maxLinkedPages = Math.min(12, Math.max(8, SERVER_LIMITS.SUPPORTING_PAGES_MAX_COUNT));
+      const [legalPages, linkedPages] = await Promise.all([
+        discoverAndFetchLegalPages(fetchResult.html, fetchResult.finalUrl, {
+          signal: pipelineController.signal,
+        }),
+        discoverAndFetchSupportingPages(fetchResult.html, fetchResult.finalUrl, {
+          signal: pipelineController.signal,
+          maxPages: maxLinkedPages,
+          concurrency: 8,
+        }),
       ]);
-      pipelineController.signal.removeEventListener("abort", parentAbortOptional);
-      const aiDurationMs = Math.round(performance.now() - aiStart);
-      const analysisMode: "ai" | "heuristic" = provenance.mode;
 
-      // Merge policy links with any feature-flagged product/pricing context so
-      // payment-readiness keeps the richer evidence while Trust sees legal pages.
-      const extraPages = optionalSupportingResult.supportingPagesBundle;
+      const legalUrls = new Set(legalPages.pages.map(page => page.finalUrl));
       const analysisPages = {
         ...legalPages,
-        candidates: [...legalPages.candidates, ...(extraPages?.candidates ?? [])],
-        pages: [...legalPages.pages, ...(extraPages?.pages ?? []).filter(
-          (page) => !legalPages.pages.some((legal) => legal.finalUrl === page.finalUrl)
+        discoveredCount: legalPages.discoveredCount + linkedPages.discoveredCount,
+        attemptedCount: legalPages.attemptedCount + linkedPages.attemptedCount,
+        fetchedCount: legalPages.pages.length + linkedPages.pages.filter(page => !legalUrls.has(page.finalUrl)).length,
+        totalTimingMs: Math.max(legalPages.totalTimingMs, linkedPages.totalTimingMs),
+        candidates: [...legalPages.candidates, ...linkedPages.candidates.filter(
+          p => !legalPages.candidates.some(legal => legal.url === p.url)
+        )],
+        pages: [...legalPages.pages, ...linkedPages.pages.filter(page => !legalUrls.has(page.finalUrl))],
+        attempts: [...legalPages.attempts, ...linkedPages.attempts.filter(
+          attempt => !legalPages.attempts.some(legal => legal.url === attempt.url)
         )],
       };
+      const inspectedLinkedUrls = analysisPages.pages.map(page => page.finalUrl);
+      const uninspectedLinkedUrls = analysisPages.attempts
+        .filter(attempt => !attempt.success)
+        .map(attempt => attempt.url);
+      console.log(
+        `[PERF] page inspection domain="${fetchResult.domain}" linked=${linkedPages.pages.length} legal=${legalPages.pages.length} inspected=${inspectedLinkedUrls.length} attempted=${analysisPages.attemptedCount}`
+      );
+
+      // Pass every fetched linked page to the main high-quality AI, with source
+      // URLs. Separately synthesize supporting-page consistency from the SAME
+      // fetched bundle; never fetch those pages twice or race them against a
+      // timer that drops evidence.
+      const provenance: { mode: "ai" | "heuristic" } = { mode: "heuristic" };
+      const [rawAiAnalysis, optionalSupportingResult] = await Promise.all([
+        analyzeWebsite(snapshot, analysisPages, {
+          onSource: source => { provenance.mode = source === "deterministic" ? "heuristic" : "ai"; },
+        }),
+        linkedPages.pages.length > 0
+          ? generateSupportingPageContext(
+              snapshot, fetchResult.finalUrl, fetchResult.html,
+              { enabled: true, supportingPagesBundle: linkedPages, signal: pipelineController.signal }
+            )
+          : Promise.resolve({}),
+      ]);
+      const aiDurationMs = Math.round(performance.now() - aiStart);
+      const analysisMode: "ai" | "heuristic" = provenance.mode;
 
       // 6. Deterministic evidence validation & scoring
       const scoreStart = performance.now();
@@ -302,6 +298,15 @@ async function runCheck(req: NextRequest, onProgress?: ProgressEmitter) {
           },
           lockedPreviewCounts,
           scanCoverage: coverage,
+          pageInspection: {
+            discovered: analysisPages.discoveredCount,
+            attempted: analysisPages.attemptedCount,
+            inspected: inspectedLinkedUrls.length,
+            inspectedUrls: inspectedLinkedUrls,
+            failedUrls: uninspectedLinkedUrls,
+            limitedToHomepageLinks: true,
+            maxLinkedPages,
+          },
           analysisMode,
           snapshot,
           analysis: redactAnalysisForFreeTier(finalValidatedAnalysis),
