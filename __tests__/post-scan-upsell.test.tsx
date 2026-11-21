@@ -49,5 +49,6 @@ check(freeMarkup.includes('id="complete-report-preview"') && !freeMarkup.include
 
 const paidMarkup = renderToStaticMarkup(<ResultsScreen analysisData={freeReport} rawUrl="https://example.com" checkoutEnabled={true} isUnlocked={true} />);
 check(!paidMarkup.includes('id="complete-report-preview"'), "paid users do not see locked preview");
-check(paidMarkup.includes('id="complete-paid-report"') && paidMarkup.includes('id="your-improvement-plan"'), "verified paid users see full chapter explorer and actionable plan");
+check(paidMarkup.includes('id="full-analysis-unlocked"') && (paidMarkup.match(/class="sl-paid-card-trigger"/g)||[]).length===5,
+  "verified paid users receive five individually expandable detailed sections");
 console.log(`PASS: ${assertions} full-report popup, five-signal preview, free access and premium gating assertions.`);
