@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { ArrowUpRight, LockKeyhole } from "lucide-react";
+
 
 /**
  * Fictional display data, showing the actual result screen's five-signal format.
@@ -50,11 +50,7 @@ export default function LandingResultPreview() {
           </div>)}
       </div>
     </div>
-    <div className="slr-live-demo-unlock">
-      <span className="slr-live-demo-lock"><LockKeyhole size={16} aria-hidden="true"/></span>
-      <span><strong>Know exactly what to work on next.</strong><small>Deeper findings, suggested fixes and rewrites in the $9 report.</small></span>
-      <ArrowUpRight size={18} aria-hidden="true"/>
-    </div>
+    <div className="slr-live-demo-foot">Illustrative scores only. Your results depend on your own website.</div>
     
   </aside>;
 }
