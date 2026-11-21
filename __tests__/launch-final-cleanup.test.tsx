@@ -12,14 +12,20 @@ import RefundPage from "../app/refund-policy/page";
 import { LEGAL_CONFIG, getSupportGmailComposeUrl } from "../lib/legal-config";
 
 const doc=new JSDOM(renderToStaticMarkup(<StrangerLensLanding url="" onUrlChange={()=>{}} onAnalyze={()=>{}} isVerifying={false} errorMessage={null}/>)).window.document;
-assert.equal(doc.querySelectorAll("main > section").length,5,"Exactly five useful landing sections");
-for(const id of ["full-report","how-it-works","pricing","faq"])assert.ok(doc.querySelector("#"+id),id+" preserved");
-assert.ok(!doc.querySelector("#sample-report,.slr-bottom-cta,.slr-example"),"Weak examples and repeated ending removed");
+assert.equal(doc.querySelectorAll("main > section").length,6,"Six useful story-first landing sections");
+for(const id of ["why-it-matters","explore","how-it-works","faq","pricing"])assert.ok(doc.querySelector("#"+id),id+" preserved");
+assert.equal(doc.querySelector("main > section:last-child")?.id,"pricing","No early pricing sections");
+assert.ok(!doc.querySelector("#sample-report,.slr-bottom-cta,.slr-example,.slr-paid-proof"),"No redundant early sales pitch or generic example");
 assert.equal(doc.querySelector("#faq h2")?.textContent?.trim(),"FAQ.","FAQ has the requested simple heading");
 assert.ok(!doc.querySelector(".slr-paid-proof-disclaimer,.slr-example-disclosure"),"No long technical caveats inside the sales flow");
 assert.equal(doc.querySelectorAll(".slr-live-demo-row").length,5,"The five free score categories match the product");
 assert.equal(doc.querySelectorAll(".slr-live-demo-tag").length,1,"One clearly labeled sample");
 assert.ok(doc.querySelector(".slr-live-demo-tag")?.textContent?.includes("Sample report"));
+assert.ok(!doc.querySelector(".slr-live-demo-unlock"),"Hero sample stays informative, not an upsell");
+assert.ok(doc.querySelector("#why-it-matters .slr-perspective--visitor"),"Founder and visitor perspectives clearly contrasted");
+assert.equal(doc.querySelectorAll("#explore .slr-explore-choice").length,3,"Explore presents actual editable examples");
+assert.ok(![...doc.querySelectorAll("main > section:not(#pricing)")].some(el => /\\$9|pay now|checkout/i.test(el.textContent||"")),
+  "Pricing/order stays exclusively at the end");
 const lp=doc.querySelector("main")?.textContent||"";
 for(const unwanted of ["fresh eyes","publicly accessible website content","All three examples are fictional","Good questions. Clear answers"]) {
  assert.ok(!lp.toLowerCase().includes(unwanted.toLowerCase()),"Marketing language removed: "+unwanted);
@@ -50,4 +56,4 @@ assert.ok(layout.includes('data-landing-theme="light"') &&
  layout.includes('var dark=v==="dark";'),"New visits open white and lime and only intentional dark choices activate dark");
 assert.ok(switcher.includes('LANDING_THEME_KEY = "strangerlens-theme-v4"') &&
  !switcher.includes("prefers-color-scheme: dark"),"OS dark mode no longer overrides the light default");
-console.log("PASS: 820px result nav, collision-safe signals, five-section landing, focused FAQ, scan copy, real support email, accurate legal pages and default light.");
+console.log("PASS: story-led landing, one final offer, interactive examples, results navbar, scan copy, support and default light.");
