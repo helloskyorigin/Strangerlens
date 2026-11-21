@@ -108,28 +108,26 @@ async function main() {
       await act(async()=>{root.render(<ResultsScreen analysisData={mapBackendToFrontend(paid?analysis:free,'https://example.com',s)} isUnlocked={paid} onBackToLanding={()=>{}}/>)});
       const doc=dom.window.document;
       const buttons=doc.querySelectorAll<HTMLButtonElement>('button[aria-label="About Purchase Readiness"]');
-      check(buttons.length===(paid?2:1), `${width}px ${paid?'paid':'free'}: sixth info trigger exists in scored or locked card`);
-      const trigger=buttons[paid && width>=640?1:0];
-      trigger.getBoundingClientRect=()=>({left:150,right:178,top:150,bottom:178,width:28,height:28,x:150,y:150,toJSON(){}});
-      await act(async()=>trigger.click());
-      check(doc.querySelector('[role="tooltip"]')?.textContent?.includes('does not affect your Overall Clarity Score'), `${width}px: new tooltip opens with separate-score explanation`);
-      await act(async()=>doc.dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:'Escape',bubbles:true})));
-      check(!doc.querySelector('[role="tooltip"]'), `${width}px: tooltip keyboard dismissal works`);
+      check(buttons.length===(paid?2:0), `${width}px: purchase tooltip only shows on paid results`);
+      if(paid){
+        const trigger=buttons[width>=640?1:0];
+        trigger.getBoundingClientRect=()=>({left:150,right:178,top:150,bottom:178,width:28,height:28,x:150,y:150,toJSON(){}});
+        await act(async()=>trigger.click());
+        check(doc.querySelector('[role="tooltip"]')?.textContent?.includes('does not affect your Overall Clarity Score'), `${width}px: paid tooltip opens`);
+        await act(async()=>doc.dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:'Escape',bubbles:true})));
+        check(!doc.querySelector('[role="tooltip"]'), `${width}px: tooltip dismisses`);
+      }
       if(paid){
         const tab=[...doc.querySelectorAll<HTMLButtonElement>('#complete-paid-report [role="tab"]')].find(x=>x.textContent?.includes('Purchase Readiness'))!;
         await act(async()=>tab.click());
         check(doc.body.textContent?.includes('PREMIUM_PURCHASE_SENTINEL') && doc.body.textContent?.includes('Observed Website Evidence'), `${width}px: authorized purchase tab displays original paid findings and evidence`);
       }else{
-        const locked=doc.querySelector('[data-testid="purchase-readiness-locked"]')!;
-        check(!!locked && locked.textContent?.includes('Paid offer detected'), `${width}px: free card explains commercial applicability`);
-        check(!locked.textContent?.includes('/100') && !locked.textContent?.includes(full.summary) && !doc.body.textContent?.includes('PREMIUM_PURCHASE_SENTINEL'), `${width}px: free card hides score, status, findings and recommendations`);
-        check(!locked.querySelector('button:not([aria-label])') && locked.textContent?.includes('Included in Full Analysis'), `${width}px: locked card replaces duplicate button with Included in Full Analysis`);
-        // Even a stale full assessment in browser storage must remain locked in free Results.
+        check(!doc.querySelector('[data-testid="purchase-readiness-locked"]'), `${width}px: only five free cards`);
+        check(!doc.body.textContent?.includes(full.summary) && !doc.body.textContent?.includes('PREMIUM_PURCHASE_SENTINEL'), `${width}px: free assessment is redacted`);
         await act(async()=>root.render(<ResultsScreen analysisData={mapped} isUnlocked={false} onBackToLanding={()=>{}}/>));
-        check(!!doc.querySelector('[data-testid="purchase-readiness-locked"]') && !doc.body.textContent?.includes(full.summary), `${width}px: old cached assessments cannot reveal the sixth score in free Results`);
-        // A forged UI flag cannot manufacture missing server-redacted scores/findings.
+        check(!doc.querySelector('[data-signal="purchaseReadiness"]') && !doc.body.textContent?.includes(full.summary), `${width}px: stale data stays locked`);
         await act(async()=>root.render(<ResultsScreen analysisData={freeMapped} isUnlocked={true} onBackToLanding={()=>{}}/>));
-        check(!!doc.querySelector('[data-testid="purchase-readiness-locked"]') && !doc.body.textContent?.includes('PREMIUM_PURCHASE_SENTINEL'), `${width}px: forged unlocked flag alone never creates a paid assessment`);
+        check(!doc.querySelector('[data-signal="purchaseReadiness"]') && !doc.body.textContent?.includes('PREMIUM_PURCHASE_SENTINEL'), `${width}px: forged flag cannot unlock findings`);
       }
       await act(async()=>root.render(<ResultsScreen analysisData={mapBackendToFrontend(legacy,'https://example.com',s)} isUnlocked={paid} onBackToLanding={()=>{}}/>));
       check(!doc.querySelector('button[aria-label="About Purchase Readiness"]') && ![...doc.querySelectorAll('h3')].some(x=>x.textContent==='Purchase Readiness'), `${width}px: switching to an old report removes the sixth signal and its findings`);
@@ -149,7 +147,7 @@ async function main() {
           const category=validateAndScoreAnalysis(generateDeterministicFallbackAnalysis(sample),sample);
           const publicReport=redactAnalysisForFreeTier(category);
           await act(async()=>root.render(<ResultsScreen analysisData={mapBackendToFrontend(publicReport,'https://example.com',sample)} checkoutEnabled={true} onBackToLanding={()=>{}}/>));
-          check(!!doc.querySelector('[data-testid="purchase-readiness-locked"]')===applies, `${width}px: ${name} conditional free-card visibility`);
+          check(!doc.querySelector('[data-testid="purchase-readiness-locked"]'), `${width}px: ${name} has five public cards only`);
           check(!publicReport.purchase_readiness, `${name}: no paid assessment sent before verification`);
         }
         let checkoutCalls=0;
@@ -163,12 +161,12 @@ async function main() {
         const checkoutData={...freeMapped,reportId:'fixture-report',reportToken:'fixture-token'};
         await act(async()=>root.render(<ResultsScreen analysisData={checkoutData} checkoutEnabled={true} onRefreshPaidReport={()=>{refreshes++;}} onBackToLanding={()=>{}}/>));
         const primaryCta=[...doc.querySelectorAll('button')].find(b=>b.textContent?.includes('Unlock Full Analysis — $9'))!;
-        check(!!primaryCta && !doc.querySelector('[data-testid="purchase-readiness-locked"] button:not([aria-label])'), `${width}px: only one primary payment CTA exists`);
+        check(!!primaryCta && doc.querySelectorAll('#complete-report-preview button').length===1, `${width}px: one checkout action`);
         await act(async()=>primaryCta.click());
-        check(checkoutCalls===1 && !!doc.querySelector('[data-testid="purchase-readiness-locked"]') && doc.body.textContent?.includes('Checkout fixture unavailable'), `${width}px: failed checkout shows error and keeps sixth assessment locked`);
+        check(checkoutCalls===1 && !doc.querySelector('[data-signal="purchaseReadiness"]') && doc.body.textContent?.includes('Checkout fixture unavailable'), `${width}px: failed checkout keeps paid check hidden`);
         globalThis.fetch=async()=>new Response(JSON.stringify({alreadyPaid:true}),{status:200,headers:{'Content-Type':'application/json'}});
         await act(async()=>primaryCta.click());
-        check(refreshes===1 && !!doc.querySelector('[data-testid="purchase-readiness-locked"]'), `${width}px: already-paid checkout refreshes authorized data instead of inventing a score`);
+        check(refreshes===1 && !doc.querySelector('[data-signal="purchaseReadiness"]'), `${width}px: already paid checkout does not invent a score`);
         await act(async()=>root.render(<ResultsScreen analysisData={mapped} isUnlocked={true} onBackToLanding={()=>{}}/>));
         check(!doc.querySelector('[data-testid="purchase-readiness-locked"]') && doc.body.textContent?.includes(full.summary), `${width}px: verified full data replaces locked card`);
         globalThis.fetch=async()=>{throw new Error('Unexpected analysis/payment request');};

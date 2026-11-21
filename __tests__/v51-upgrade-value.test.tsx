@@ -31,11 +31,11 @@ const report=adaptReport(data);
 const sample=renderToStaticMarkup(<CompleteReportPreview
   signals={report.signalsList} purchaseReadinessApplicable canCheckout isTestMode={false}
   busy={false} onUnlock={()=>{}} onViewExample={()=>{}}/>);
-assert.ok(sample.includes("Know why. Know what to fix."));
+assert.ok(sample.includes("Know what to fix. And how."));
 assert.ok(sample.includes("See an example report"));
-assert.ok(sample.includes("Five")||sample.includes("five"));
-assert.ok(sample.includes("Smart Priority"));
-assert.ok(sample.includes("editable copy")||sample.includes("edit and copy"));
+assert.ok(sample.includes("See your site through a visitor"));
+assert.ok(sample.includes("Know which fixes to make first"));
+assert.ok(sample.includes("Get clearer headlines and button text"));
 assert.ok(sample.includes("Unlock Full Analysis — $9"));
 assert.ok(!sample.includes(privateText),"No premium findings in unpaid upgrade card.");
 const modal=renderToStaticMarkup(<PostScanUpgradeModal open domain="example.com"

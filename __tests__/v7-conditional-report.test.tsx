@@ -19,7 +19,7 @@ function render(data: typeof mapped, paid=false) {
     analysisData={data} isUnlocked={paid} checkoutEnabled={true}/>)).window.document;
 }
 const free = render(bare);
-assert.ok(free.querySelector(".sl-v7-intro h1"), "V7 report opens with website-specific editorial heading");
+assert.ok(free.querySelector("#report-first-look h1"), "The score card is the first report heading");
 assert.ok(free.querySelector(".sl-v7-score") && free.querySelector(".sl-v7-signal-list"), "Strong score and grouped signals");
 assert.equal(free.querySelectorAll('[data-signal]').length,5,"Only five core signals on non-commercial websites");
 assert.ok(!free.body.textContent?.includes("Purchase Readiness"),"No purchase card or claim for a free/unknown website");
@@ -27,12 +27,10 @@ assert.ok(free.querySelector("#complete-report-preview"),"One compact $9 premium
 assert.ok(!free.body.textContent?.includes(privateText),"Unpaid page does not expose private diagnostic content");
 const locked=render(commercial);
 assert.equal(locked.querySelectorAll('[data-signal]').length,5);
-assert.equal(locked.querySelectorAll('[data-testid="purchase-readiness-locked"]').length,1,
-  "Detected commercial website gains only one sixth locked signal");
-assert.ok(!locked.querySelector('[data-testid="purchase-readiness-locked"]')?.textContent?.includes("/100"),
-  "Locked commercial check does not reveal its numeric score");
-assert.ok(locked.querySelector("#complete-report-preview")?.textContent?.includes("Purchase Readiness · bonus"),
-  "Offer describes sixth signal only when detected");
+assert.equal(locked.querySelectorAll('[data-testid="purchase-readiness-locked"]').length,0,
+  "The five free signals do not show a sixth locked tile.");
+assert.equal(locked.querySelector("#complete-report-preview")?.querySelectorAll(".sl-v8-unlock-item").length,5,
+  "Exactly five paid benefits, even for commercial sites.");
 const paid = render(premium as typeof mapped,true);
 assert.equal(paid.querySelectorAll('[data-signal]').length,6,
   "Unlocked commercial website displays sixth scored signal in overview");

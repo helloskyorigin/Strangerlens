@@ -28,18 +28,18 @@ assert.equal(score.nextElementSibling?.id, "report-clarity-signals",
   "The five clarity signals follow the overall score directly; no duplicate preview panels interrupt the flow.");
 assert.equal(free.querySelectorAll(".sl-v7-signal-row").length, 5,
   "Free preview has exactly five scored signals.");
-assert.equal(free.querySelectorAll(".sl-v8-summary-strip").length, 1,
-  "The lowest-scoring signal is identified once, in a compact row after the signals.");
-assert.equal(signals.lastElementChild?.classList.contains("sl-v8-summary-strip"), true);
+assert.equal(free.querySelectorAll(".sl-v8-summary-strip, .sl-v7-intro, .sl-v8-report-navigation, [data-testid='purchase-readiness-locked']").length, 0,
+  "No extra intro, sixth free card, navigation or bottom strip.");
+assert.ok(score.querySelector(".sl-v8-score-insight"), "The score has a one-line insight.");
 assert.equal(free.querySelectorAll(".sl-v8-next-step, .sl-v8-verdict-panel, .sl-v7-tier-compare, .sl-v7-upgrade-reason").length, 0,
   "Old duplicated explanation, next-step and free/paid comparison cards are removed.");
-assert.equal(upgrade.querySelectorAll(".sl-v8-unlock-item").length,
-  free.querySelector("[data-testid=purchase-readiness-locked]") ? 6 : 5,
-  "The paid offer lists only five strong outcomes plus optional purchase-readiness bonus.");
+assert.equal(upgrade.querySelectorAll(".sl-v8-unlock-item").length, 5,
+  "The paid offer always shows exactly five benefits.");
 assert.ok(upgrade.querySelector('[aria-label="Included in Full Analysis"]'));
-assert.ok(!upgrade.textContent?.includes("YOU HAVE") && !upgrade.textContent?.includes("Know where you stand"));
+assert.ok(!upgrade.textContent?.includes("YOU HAVE") && !upgrade.textContent?.includes("Five-Signal Diagnosis"));
 assert.ok(upgrade.textContent?.includes("Unlock Full Analysis — $9"));
 assert.ok(!free.body.textContent?.includes(privateText), "No premium text leaks to free visitors.");
+assert.ok(!free.body.textContent?.includes("Public website content"), "No jargon appears in the free report.");
 assert.ok(upgrade.compareDocumentPosition(exportUtility) & free.defaultView!.Node.DOCUMENT_POSITION_FOLLOWING,
   "The $9 value proposition comes immediately after the signal report, ahead of the free PDF utility.");
 assert.equal(free.querySelectorAll("#report-export-actions button").length, 1);

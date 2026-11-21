@@ -20,10 +20,8 @@ const free = render(false);
 assert.ok(free.querySelector(".sl-v8-header .sl-v8-nav-brand"), "Results use VYLENS-style floating brand navbar.");
 assert.ok(free.querySelector("#report-first-look .sl-v7-score-number"), "First look prominently shows backend score.");
 assert.ok(free.querySelector("#report-clarity-signals .sl-v7-signal-list"), "Signals have their own section.");
-assert.ok(free.querySelector(".sl-v8-summary-strip"), "Report highlights weaker and stronger scored signals.");
-assert.ok(free.querySelector('.sl-v8-report-navigation a[href="#report-first-look"]'), "Navigation starts with first look.");
-assert.ok(free.querySelector('.sl-v8-report-navigation a[href="#report-clarity-signals"]'), "Navigation links to signals.");
-assert.ok(free.querySelector('.sl-v8-report-navigation a[href="#complete-report-preview"]'), "Free next step links to authorized upsell.");
+assert.ok(free.querySelector(".sl-v8-score-insight"), "The score includes the short insight.");
+assert.ok(!free.querySelector(".sl-v8-report-navigation"), "No extra navigation breaks the flow.");
 assert.equal(free.querySelectorAll('[data-signal]').length, 5, "Only five core scores visible in free non-purchase sample.");
 assert.ok(free.querySelector("#complete-report-preview"), "Paid upgrade remains present.");
 assert.ok(!free.querySelector("#your-improvement-plan"), "Free view does not expose the premium plan.");
@@ -45,6 +43,6 @@ for (const doc of [free, paid]) {
 assert.ok(paid.querySelector("#report-export-actions button"), "PDF remains a report utility.");
 
 assert.ok(paid.body.textContent?.includes(privateText), "Verified unlocked report contains protected findings.");
-assert.ok(paid.querySelector('.sl-v8-report-navigation a[href="#complete-paid-report"]'), "Paid next step targets paid chapters.");
+assert.ok(paid.querySelector("#complete-paid-report"), "The paid diagnosis remains accessible.");
 
 console.log("PASS: VYLENS-inspired results hierarchy, anchored navigation and protected premium report boundaries.");

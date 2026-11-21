@@ -128,7 +128,6 @@ export default function ResultsScreen({
   const [loading, setLoading] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const mobileUpgradeRef = useRef<HTMLDivElement | null>(null);
-  const [showMobileUpgradeBar, setShowMobileUpgradeBar] = useState(false);
 
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [pdfError, setPdfError] = useState<string | null>(null);
@@ -155,28 +154,6 @@ export default function ResultsScreen({
   const report = adaptReport(!isReportUnlocked && data ? projectFreeFrontendReport(data) : data);
   const unlockedPurchase = isReportUnlocked ? report.purchaseReadiness : undefined;
   const showLockedPurchase = !unlockedPurchase && Boolean(report.purchaseReadinessLocked || report.purchaseReadiness);
-  // Keep a compact $9 entry point available while mobile visitors scroll the
-  // free report. Hide it when either upgrade card is in view or the modal opens.
-  useEffect(() => {
-    if (isReportUnlocked || !isCheckoutAvailable) return;
-    const updateVisibility = () => {
-      const entry = mobileUpgradeRef.current;
-      const checkoutSection = document.getElementById("complete-report-preview");
-      if (!entry) return;
-      const entryAboveViewport = entry.getBoundingClientRect().bottom < 0;
-      const previewRect = checkoutSection?.getBoundingClientRect();
-      const previewVisible = Boolean(previewRect && previewRect.top < window.innerHeight - 65 && previewRect.bottom > 65);
-      setShowMobileUpgradeBar(entryAboveViewport && !previewVisible);
-    };
-    updateVisibility();
-    window.addEventListener("scroll", updateVisibility, { passive: true });
-    window.addEventListener("resize", updateVisibility);
-    return () => {
-      window.removeEventListener("scroll", updateVisibility);
-      window.removeEventListener("resize", updateVisibility);
-    };
-  }, [isReportUnlocked, isCheckoutAvailable, data?.reportId]);
-
   // Results always paint first; no automatic paywall or post-scan interruption.
   const currentReportId: string | null = data?.reportId || report.rawReport?.reportId || null;
 
@@ -398,7 +375,7 @@ export default function ResultsScreen({
 
   const renderPdfActions = (bottom = false) => (
     <div id={bottom ? "report-export-actions-bottom" : "report-export-actions"}
-      className="flex flex-wrap items-center justify-center gap-3 rounded-2xl border border-[#D9E8CE] bg-[#F8FCF4] p-4 scroll-mt-24">
+      className={`${isReportUnlocked ? "" : "sl-free-pdf-utility "}flex flex-wrap items-center justify-center gap-3 rounded-2xl border border-[#D9E8CE] bg-[#F8FCF4] p-4 scroll-mt-24`}>
       <button type="button" disabled={isGeneratingPdf} onClick={downloadPdf}
         className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#111510] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#2B3B22] disabled:cursor-wait disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8BCB36]">
         {isGeneratingPdf
@@ -413,34 +390,15 @@ export default function ResultsScreen({
         </a>
       )}
       {pdfError && <p role="alert" className="w-full text-center text-sm text-[#A3493C]">{pdfError}</p>}
-      {!pdfError && !readyPdf && !isGeneratingPdf &&
-        <p className="text-center text-xs text-[#6C7D64]">
-          {isReportUnlocked ? "Your original full report, including detailed findings." : "Free summary includes scores only; fixes stay locked until payment."}
-        </p>}
+      {!pdfError && !readyPdf && !isGeneratingPdf && isReportUnlocked &&
+        <p className="text-center text-xs text-[#6C7D64]">Your full report, including the detailed findings.</p>}
     </div>
   );
 
   if (!data) return null;
 
   return (
-    <div id="results-content" className={`sl-app-theme sl-results-v7 min-h-screen bg-white text-[#172116] font-sans antialiased flex flex-col ${!isReportUnlocked && isCheckoutAvailable ? "pb-16 sm:pb-0" : ""}`}>
-      {/* Mobile-only compact offer stays available while long free results scroll.
-          Only appears after the visitor has scrolled past the on-page offer. */}
-      {!isReportUnlocked && isCheckoutAvailable && showMobileUpgradeBar && (
-        <div className="sl-v8-mobile-upgrade fixed inset-x-0 bottom-0 z-30 border-t border-[#D9E5D1] bg-white/95 px-4 py-2.5 shadow-[0_-10px_35px_rgba(0,0,0,.45)] backdrop-blur-xl sm:hidden"
-          style={{ paddingBottom: "max(10px, env(safe-area-inset-bottom))" }}>
-          <div className="mx-auto flex max-w-md items-center justify-between gap-3">
-            <div className="min-w-0">
-              <p className="text-xs font-bold text-[#162516]">Full evidence + fix plan</p>
-              <p className="text-[11px] text-[#6B7C63]">$9 once · Full findings &amp; fixes</p>
-            </div>
-            <button type="button" onClick={handleUnlockFullAnalysis} disabled={loading || isVerifyingPayment}
-              className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full bg-[#111510] px-4 text-xs font-bold text-white disabled:opacity-50">
-              {loading || isVerifyingPayment ? "Opening…" : "Unlock — $9"} <ArrowRight className="h-3.5 w-3.5" aria-hidden="true"/>
-            </button>
-          </div>
-        </div>
-      )}
+    <div id="results-content" className={`sl-app-theme sl-results-v7 min-h-screen bg-white text-[#172116] font-sans antialiased flex flex-col `}>
       {/* EARLY ACCESS THANK YOU SUCCESS MODAL */}
       <AnimatePresence>
         {isEarlySuccessModalOpen && (
@@ -609,7 +567,7 @@ export default function ResultsScreen({
       </header>
 
       {/* MAIN CONTENT */}
-      <main className="flex-1 w-full max-w-[1080px] mx-auto px-4 py-6 sm:py-10 space-y-8 sm:space-y-12">
+      <main className={`flex-1 w-full max-w-[1080px] mx-auto px-4 py-6 sm:py-10 ${isReportUnlocked ? "space-y-8 sm:space-y-12" : "space-y-5 sm:space-y-6"}`}>
         {data?.analysisMode === "heuristic" && (
           <section role="note" aria-label="Limited heuristic preview" className="rounded-2xl border border-amber-500/30 bg-[#30271A] p-4 sm:p-5">
             <p className="text-sm font-bold text-amber-200">Limited preview · AI analysis unavailable</p>
@@ -665,7 +623,6 @@ export default function ResultsScreen({
         <ClarityResultsOverview
           report={report}
           isUnlocked={isReportUnlocked}
-          showLockedPurchase={showLockedPurchase}
           unlockedPurchase={unlockedPurchase}
           onExplainScore={() => setIsScoreModalOpen(true)}
         />
@@ -684,14 +641,6 @@ export default function ResultsScreen({
               isTestMode={isTestMode}
               busy={loading || isVerifyingPayment}
               onUnlock={handleUnlockFullAnalysis}
-              onViewExample={() => {
-                onBackToLanding?.();
-                window.setTimeout(() => {
-                  document.getElementById("full-report-demo")?.scrollIntoView({
-                    behavior: shouldReduceMotion ? "auto" : "smooth", block: "start",
-                  });
-                }, 480);
-              }}
             />
             </div>
             {renderPdfActions()}

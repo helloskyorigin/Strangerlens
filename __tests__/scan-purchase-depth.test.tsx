@@ -43,5 +43,5 @@ const paid=renderToStaticMarkup(<ResultsScreen analysisData={mapBackendToFronten
 assert.ok(paid.includes("Purchase check") && !paid.includes('data-testid="purchase-readiness-locked"'),"Verified result shows a direct purchase chapter jump.");
 const free=renderToStaticMarkup(<ResultsScreen analysisData={mapBackendToFrontend(redactAnalysisForFreeTier(full),"https://example.com",snapshot)} isUnlocked={false}/>);
 assert.ok(!free.includes('data-testid="purchase-decision-deep-dive"') && !free.includes("Purchase check"),"Unpaid results never expose the buyer diagnosis.");
-assert.ok(free.includes('data-testid="purchase-readiness-locked"'),"Unpaid sixth remains independently locked.");
+assert.ok(!free.includes('data-testid="purchase-readiness-locked"'),"The five free checks do not show the paid assessment.");
 console.log("PASS: brand-led scanning, no homepage copy, five evidence-backed paid buyer decision checks and no free data leakage.");

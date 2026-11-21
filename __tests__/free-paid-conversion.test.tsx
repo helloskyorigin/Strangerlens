@@ -62,7 +62,7 @@ const free = new JSDOM(renderToStaticMarkup(
 )).window.document;
 assert.equal(free.querySelectorAll(".sl-v7-signal-row").length, 5, "Five free signal scores are visible.");
 assert.ok(free.querySelector(".sl-v7-score-number"), "Overall score stays visible.");
-assert.ok(free.querySelector(".sl-v8-summary-strip"), "Lowest-scoring signal remains visible.");
+assert.ok(free.querySelector(".sl-v8-score-insight"), "A short next step appears inside the score card.");
 assert.ok(free.querySelector("#complete-report-preview"), "On-page $9 full analysis offer exists.");
 assert.ok(!free.querySelector(".sl-upgrade-dialog"), "A scan never opens an automatic checkout popup.");
 assert.ok(!free.querySelector('[role="dialog"][aria-modal="true"]'), "Free results appear without a modal.");
