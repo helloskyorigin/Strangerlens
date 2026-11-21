@@ -110,7 +110,7 @@ export function reconcileFalseLegalOnlyTrustPenalty(
   if (!/\b(?:privacy|terms|refund|return policy|legal policy|legal pages?)\b/i.test(statement)) return analysis;
   // Other complaints require their own evaluation; policy links cannot
   // prove testimonials, credentials, security or transparent pricing.
-  if (/\b(?:testimonial|review|customer proof|case stud|credential|social proof|security|not readable|outdated|inconsistent|not accessible|hidden|hard to find|pricing)\b/i.test(statement)) return analysis;
+  if (/\b(?:testimonials?|reviews?|customer proof|case stud|credential|social proof|security|not readable|outdated|inconsistent|not accessible|hidden|hard to find|pricing)\b/i.test(statement)) return analysis;
   const fetched = new Set((bundle?.pages || []).map(page => page.pageType));
   const named: string[] = [];
   if (/\bprivacy\b/i.test(statement)) named.push("privacy_policy");
