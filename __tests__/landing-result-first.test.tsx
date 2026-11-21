@@ -9,7 +9,7 @@ import StrangerLensLanding from "../components/landing/StrangerLensLanding";
 const props={url:"",onUrlChange:()=>{},onAnalyze:()=>{},isVerifying:false,errorMessage:null};
 const doc = new JSDOM(renderToStaticMarkup(<StrangerLensLanding {...props}/>)).window.document;
 const nav=doc.querySelector('nav[aria-label="Primary navigation"]')!;
-assert.equal(nav.querySelectorAll('a').length,3,"Nav is down to How it works, Pricing and FAQ");
+assert.equal(nav.querySelectorAll('a').length,3,"Three clear navigation choices");
 assert.deepEqual([...nav.querySelectorAll("a")].map(a=>a.textContent?.trim()),
   ["Why it matters","Explore","Pricing"],"Navigation leads with value and exploration, not an early purchase");
 assert.equal(doc.querySelectorAll(".slr-nav-actions [data-testid='theme-toggle']").length,1,
@@ -38,7 +38,7 @@ assert.equal(doc.querySelector("main > section:last-child")?.id,"pricing","Prici
 assert.equal(doc.querySelectorAll("main > section:not(#pricing) .slr-price-card").length,0,
   "No paid offers in educational sections");
 assert.equal(doc.querySelectorAll("main > section:not(#pricing)").length,5);
-assert.ok(![...doc.querySelectorAll("main > section:not(#pricing)")].some(section=>/\\$9|checkout|buy now/i.test(section.textContent||"")),
+assert.ok(![...doc.querySelectorAll("main > section:not(#pricing)")].some(section=>/[$]9|checkout|buy now/i.test(section.textContent||"")),
   "Price and order language are reserved for the bottom");
 assert.equal(doc.querySelectorAll("#pricing .slr-final-action button").length,1,"One final free-check action");
 assert.ok(!doc.querySelector('a[href="/my-reports"]'),"Hidden My Reports navigation stays removed");
