@@ -127,4 +127,19 @@ describe("Trust legal policy accuracy regressions", () => {
     mixed.signals.trust.explanation += " There are also no customer testimonials.";
     expect(reconcileFalseLegalOnlyTrustPenalty(mixed, inspected).signals.trust.score).toBe(30);
   });
+
+  test("Rejects soft-404 and SPA fallback HTML despite an HTTP 200 response", async () => {
+    const found = discoverSupportingPages(homepage, base, { onlyLegalPolicies: true, maxPages: 3 });
+    const bundle = await fetchSupportingPages(found, base, {
+      fetcher: async (url: string) => ({
+        success: true as const, originalUrl: url, normalizedUrl: url, finalUrl: url,
+        domain: "taskpocket.io", status: 200, timingMs: 1, contentLength: 160,
+        redirectCount: 0,
+        html: "<html><head><title>TaskPocket Home</title></head><body><h1>Page not found</h1><p>Return home</p></body></html>",
+      } as any),
+    });
+    expect(bundle.pages.length).toBe(0);
+    expect(bundle.attempts.every(attempt => !attempt.success)).toBe(true);
+    expect(bundle.candidates.length).toBe(2);
+  });
 });

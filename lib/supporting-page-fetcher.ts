@@ -349,6 +349,37 @@ export async function fetchSupportingPages(
         maxHtmlChars,
       });
 
+      // Some SPAs return their homepage or an HTML 404 screen with status
+      // 200 for every path. Never count that as an inspected legal document.
+      // Headings/title take precedence over footer boilerplate.
+      if (["privacy_policy", "terms_of_service", "refund_policy"].includes(candidate.pageType)) {
+        const heading = [
+          snapshot.meta.title, snapshot.hero.headline,
+          ...snapshot.valueProps.headings.slice(0, 3).map(h => h.text),
+        ].join(" ").toLowerCase();
+        const bodyLead = snapshot.bodySections.slice(0, 2)
+          .map(part => part.textSummary).join(" ").slice(0, 600).toLowerCase();
+        const relevant: Record<string, RegExp> = {
+          privacy_policy: /\b(?:privacy|data protection|personal data|information collection)\b/i,
+          terms_of_service: /\b(?:terms|conditions|user agreement|service agreement)\b/i,
+          refund_policy: /\b(?:refund|returns?|cancellation|money.back)\b/i,
+        };
+        const matchesPolicy = relevant[candidate.pageType].test(heading) ||
+          (!heading.trim() && relevant[candidate.pageType].test(bodyLead));
+        const looksLikeError = /\b(?:404|page not found|not found|does not exist|something went wrong)\b/i.test(heading);
+        if (!matchesPolicy || looksLikeError) {
+          attempts[i] = {
+            url: candidate.url, finalUrl: fetchResult.finalUrl, pageType: candidate.pageType,
+            anchorText: candidate.anchorText, sourceLocation: candidate.sourceLocation,
+            relevanceScore: candidate.relevanceScore, success: false, status: fetchResult.status,
+            error: "EXTRACTION_FAILED",
+            message: "Policy destination did not present identifiable policy content; it was not verified.",
+            timingMs: fetchResult.timingMs,
+          };
+          continue;
+        }
+      }
+
       seenFinalPaths.add(finalPath);
       pages.push({
         url: candidate.url,
