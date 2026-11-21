@@ -263,7 +263,7 @@ html[data-landing-theme="dark"] .sl-results-v7 .sl-v11-summary #report-clarity-s
 ){
   color:var(--scalen-copy)!important;
 }
-html[data-landing-theme="dark"] .sl-results-v7 .sl-v11-summary #report-clarity-signals .sl-v11-lime-dot{
+html[data-landing-theme="dark"] .sl-results-v7 .sl-v11-summary #report-clarity-signals .sl-v8-period{
   color:var(--scalen-lime-text)!important;
 }
 html[data-landing-theme="dark"] .sl-results-v7 .sl-v11-summary #report-clarity-signals :is(
@@ -374,5 +374,10 @@ html[data-landing-theme="dark"] .slr-page .slr-live-demo .slr-live-demo-dot{
 }
 html[data-landing-theme="dark"] .slr-page .slr-paid-proof-intro .slr-eyebrow,
 html[data-landing-theme="dark"] .slr-page .slr-example-heading .slr-eyebrow{
+  color:var(--scalen-lime-text)!important;
+}
+
+/* Match the real ClarityResultsOverview heading marker, not a demo-only class. */
+html[data-landing-theme="dark"] .sl-results-v7 .sl-v11-summary #report-clarity-signals .sl-v8-period{
   color:var(--scalen-lime-text)!important;
 }
