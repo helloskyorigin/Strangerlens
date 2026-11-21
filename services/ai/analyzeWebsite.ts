@@ -13,9 +13,9 @@ export interface AnalyzeWebsiteOptions {
 
 /**
  * Main entry point for Phase 3 AI Analysis.
- * Tries Groq AI Provider first (primary), then Gemini AI Provider,
- * with a robust deterministic fallback analyzer to guarantee preview generation
- * even if rate limits (429) or model errors occur.
+ * Tries Gemini AI Provider first when configured (unless an explicit Groq apiKey
+ * override is passed), then Groq AI Provider, with a deterministic fallback analyzer
+ * to guarantee preview generation even if providers are unavailable or rate-limited.
  */
 export async function analyzeWebsite(
   snapshot: WebsiteSnapshot,
@@ -26,20 +26,12 @@ export async function analyzeWebsite(
   let providerError: Error | null = null;
   let source: "groq" | "gemini" | "deterministic" = "deterministic";
 
-  // 1. Try Groq AI Provider first (Primary)
-  if (process.env.GROQ_API_KEY && process.env.GROQ_API_KEY.trim()) {
-    try {
-      const groqProvider = new GroqAIProvider(options.apiKey);
-      rawAnalysis = await groqProvider.analyzeWebsite(snapshot, supportingPagesBundle);
-      if (rawAnalysis) source = "groq";
-    } catch (err: unknown) {
-      providerError = err instanceof Error ? err : new Error(String(err));
-      console.warn("[AI-WARN] Groq provider failed or rate limited:", providerError.message);
-    }
-  }
+  const hasExplicitGroqKey = Boolean(options.apiKey && options.apiKey.trim());
+  const hasGeminiKey = Boolean(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim());
+  const hasGroqKey = hasExplicitGroqKey || Boolean(process.env.GROQ_API_KEY && process.env.GROQ_API_KEY.trim());
 
-  // 2. Fall back to Gemini if Groq failed or was unconfigured
-  if (!rawAnalysis && process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim()) {
+  const tryGemini = async () => {
+    if (!hasGeminiKey || rawAnalysis) return;
     try {
       const geminiProvider = new GeminiAIProvider();
       rawAnalysis = await geminiProvider.analyzeWebsite(snapshot, supportingPagesBundle);
@@ -49,9 +41,30 @@ export async function analyzeWebsite(
       console.warn("[AI-WARN] Gemini provider failed or rate limited:", geminiErr.message);
       if (!providerError) providerError = geminiErr;
     }
+  };
+
+  const tryGroq = async () => {
+    if (!hasGroqKey || rawAnalysis) return;
+    try {
+      const groqProvider = new GroqAIProvider(options.apiKey);
+      rawAnalysis = await groqProvider.analyzeWebsite(snapshot, supportingPagesBundle);
+      if (rawAnalysis) source = "groq";
+    } catch (err: unknown) {
+      const groqErr = err instanceof Error ? err : new Error(String(err));
+      console.warn("[AI-WARN] Groq provider failed or rate limited:", groqErr.message);
+      if (!providerError) providerError = groqErr;
+    }
+  };
+
+  if (hasExplicitGroqKey) {
+    await tryGroq();
+    await tryGemini();
+  } else {
+    await tryGemini();
+    await tryGroq();
   }
 
-  // 3. If AI providers failed or hit rate limits, use deterministic fallback analysis to ensure preview appears successfully
+  // If AI providers failed or hit rate limits, use deterministic fallback analysis to ensure preview appears successfully
   if (!rawAnalysis) {
     console.log("[AI-FALLBACK] Using deterministic snapshot analyzer to guarantee instant preview generation.");
     rawAnalysis = generateDeterministicFallbackAnalysis(snapshot);

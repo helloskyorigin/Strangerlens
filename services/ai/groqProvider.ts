@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { WebsiteSnapshot } from "@/lib/content-extractor";
 import { SupportingPagesBundle } from "@/lib/supporting-page-fetcher";
 import { WebsiteAnalysis } from "./analysisSchema";
@@ -5,6 +6,147 @@ import { formatSnapshotForAi, SYSTEM_PROMPT } from "./analysisPrompt";
 
 export interface AIProvider {
   analyzeWebsite(snapshot: WebsiteSnapshot, supportingPagesBundle?: SupportingPagesBundle): Promise<WebsiteAnalysis>;
+}
+
+/**
+ * Active Groq text-generation models supporting JSON object output.
+ * Decommissioned models (llama-3.2-*-preview, gemma2-9b-it, llama3-8b-8192)
+ * must never appear here.
+ */
+export const ACTIVE_GROQ_MODELS = [
+  "openai/gpt-oss-120b",
+  "openai/gpt-oss-20b",
+  "qwen/qwen3-32b",
+  "meta-llama/llama-4-scout-17b-16e-instruct",
+] as const;
+
+const SECONDARY_GROQ_MODELS = [
+  "llama-3.3-70b-versatile",
+  "llama-3.1-8b-instant",
+] as const;
+
+const NON_CHAT_MODEL_PATTERN =
+  /(whisper|orpheus|prompt-guard|safeguard|\bguard\b|tts|embedding|playai)/i;
+
+const MODEL_CACHE_TTL_MS = 5 * 60 * 1000;
+const groqModelCache = new Map<string, { models: string[]; expiresAt: number }>();
+
+export function clearGroqModelCache(): void {
+  groqModelCache.clear();
+}
+
+function hashKey(apiKey: string): string {
+  return createHash("sha256").update(apiKey).digest("hex").slice(0, 16);
+}
+
+/**
+ * Discovers active chat models permitted for the configured GROQ_API_KEY via
+ * GET /openai/v1/models so inaccessible (404) or project-blocked models are skipped
+ * before issuing completion requests.
+ */
+export async function resolveGroqModelsForKey(
+  apiKey: string,
+  preferredModels: readonly string[] = ACTIVE_GROQ_MODELS,
+  fetchImpl: typeof fetch = fetch
+): Promise<string[]> {
+  const trimmedKey = apiKey.trim();
+  const envModel = process.env.GROQ_MODEL?.trim();
+  const fallbackList = Array.from(
+    new Set([...(envModel ? [envModel] : []), ...preferredModels])
+  );
+
+  if (!trimmedKey) {
+    return fallbackList;
+  }
+
+  const cacheKey = `${hashKey(trimmedKey)}:${preferredModels.join(",")}:${envModel || ""}`;
+  const cached = groqModelCache.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.models;
+  }
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 4000);
+
+  try {
+    const res = await fetchImpl("https://api.groq.com/openai/v1/models", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${trimmedKey}`,
+      },
+      signal: controller.signal,
+    });
+
+    if (res.status === 401 || res.status === 403) {
+      const authErr = new Error("Groq models blocked at project level");
+      (authErr as any).code = "AI_PROVIDER_AUTH_ERROR";
+      throw authErr;
+    }
+
+    if (!res.ok) {
+      return fallbackList;
+    }
+
+    const json = await res.json();
+    const rawModels = Array.isArray(json?.data) ? json.data : null;
+    if (!rawModels) {
+      return fallbackList;
+    }
+
+    const accessibleChatIds = rawModels
+      .filter(
+        (m: any) =>
+          m &&
+          typeof m.id === "string" &&
+          m.active !== false &&
+          !NON_CHAT_MODEL_PATTERN.test(m.id)
+      )
+      .map((m: any) => m.id as string);
+
+    if (accessibleChatIds.length === 0) {
+      const authErr = new Error("No active chat models available for Groq API key");
+      (authErr as any).code = "AI_PROVIDER_AUTH_ERROR";
+      throw authErr;
+    }
+
+    const accessibleSet = new Set(accessibleChatIds);
+    const ranked: string[] = [];
+
+    for (const candidate of [
+      ...(envModel ? [envModel] : []),
+      ...preferredModels,
+      ...SECONDARY_GROQ_MODELS,
+      ...accessibleChatIds,
+    ]) {
+      if (accessibleSet.has(candidate) && !ranked.includes(candidate)) {
+        ranked.push(candidate);
+      }
+    }
+
+    groqModelCache.set(cacheKey, {
+      models: ranked,
+      expiresAt: Date.now() + MODEL_CACHE_TTL_MS,
+    });
+
+    return ranked;
+  } catch (err: unknown) {
+    if ((err as any)?.code === "AI_PROVIDER_AUTH_ERROR") {
+      throw err;
+    }
+    return fallbackList;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+export function stripReasoningAndMarkdown(content: string): string {
+  return content
+    .replace(/<think>[\s\S]*?<\/think>/gi, "")
+    .trim()
+    .replace(/^```json\s*/i, "")
+    .replace(/^```\s*/i, "")
+    .replace(/\s*```$/i, "")
+    .trim();
 }
 
 /**
@@ -17,10 +159,7 @@ Output ONLY the raw JSON object.`;
 
 export class GroqAIProvider implements AIProvider {
   private apiKey: string | undefined;
-  // Server-side only: override through GROQ_MODEL without shipping settings or keys to the client.
-  // The old Llama/Gemma model IDs are retired from Groq self-serve tiers.
-  private readonly primaryModel = process.env.GROQ_MODEL?.trim() || "openai/gpt-oss-120b";
-  private readonly fallbackModels = ["openai/gpt-oss-20b"];
+  private preferredModels = [...ACTIVE_GROQ_MODELS];
 
   constructor(apiKey?: string) {
     this.apiKey = apiKey || process.env.GROQ_API_KEY;
@@ -150,7 +289,10 @@ Output a strictly valid JSON object matching this schema:
   ]
 }`;
 
-    const modelsToTry = [...new Set([this.primaryModel, ...this.fallbackModels])];
+    const modelsToTry = await resolveGroqModelsForKey(
+      this.apiKey,
+      this.preferredModels
+    );
     let lastError: Error | null = null;
 
     for (const model of modelsToTry) {
@@ -175,35 +317,40 @@ Output a strictly valid JSON object matching this schema:
 
   private async callGroqChatApi(
     model: string,
-    userPrompt: string
+    userPrompt: string,
+    useJsonObjectFormat = true
   ): Promise<WebsiteAnalysis> {
     const endpoint = "https://api.groq.com/openai/v1/chat/completions";
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s timeout
 
     try {
+      const requestBody: Record<string, unknown> = {
+        model,
+        messages: [
+          {
+            role: "system",
+            content: `${SYSTEM_PROMPT}\n${JSON_INSTRUCTION}`,
+          },
+          {
+            role: "user",
+            content: userPrompt,
+          },
+        ],
+        temperature: 0.1,
+        max_completion_tokens: 4200,
+      };
+      if (useJsonObjectFormat) {
+        requestBody.response_format = { type: "json_object" };
+      }
+
       const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${this.apiKey}`,
         },
-        body: JSON.stringify({
-          model,
-          messages: [
-            {
-              role: "system",
-              content: `${SYSTEM_PROMPT}\n${JSON_INSTRUCTION}`,
-            },
-            {
-              role: "user",
-              content: userPrompt,
-            },
-          ],
-          response_format: { type: "json_object" },
-          temperature: 0.1,
-          max_completion_tokens: 4200,
-        }),
+        body: JSON.stringify(requestBody),
         signal: controller.signal,
       });
 
@@ -216,6 +363,14 @@ Output a strictly valid JSON object matching this schema:
           errorBody = errJson?.error?.message || JSON.stringify(errJson);
         } catch {
           errorBody = await response.text().catch(() => "");
+        }
+
+        if (
+          useJsonObjectFormat &&
+          response.status === 400 &&
+          /response_format|json_object/i.test(errorBody)
+        ) {
+          return this.callGroqChatApi(model, userPrompt, false);
         }
 
         if (
@@ -243,9 +398,8 @@ Output a strictly valid JSON object matching this schema:
       let parsed: any;
       try {
         parsed = JSON.parse(content);
-      } catch (jsonErr) {
-        // Strip markdown backticks if present
-        const cleaned = content.replace(/^```json\s*/i, "").replace(/```$/i, "").trim();
+      } catch {
+        const cleaned = stripReasoningAndMarkdown(content);
         parsed = JSON.parse(cleaned);
       }
 

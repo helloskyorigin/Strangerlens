@@ -7,6 +7,13 @@ import {
   extractSearchableTextsFromSnapshot,
 } from "../services/ai/evidenceValidator";
 import { WebsiteAnalysis } from "../services/ai/analysisSchema";
+import {
+  ACTIVE_GROQ_MODELS,
+  clearGroqModelCache,
+  GroqAIProvider,
+  resolveGroqModelsForKey,
+  stripReasoningAndMarkdown,
+} from "../services/ai/groqProvider";
 
 // Helper mock snapshot generator
 function createMockSnapshot(overrides: Partial<WebsiteSnapshot> = {}): WebsiteSnapshot {
@@ -190,5 +197,111 @@ describe("Phase 3 AI Analysis Engine Tests", () => {
     expect(cleaned.first_seconds.what_is_this.evidence_refs.length).toBe(1);
     expect(cleaned.first_seconds.what_is_this.evidence_refs[0].text).toBe(validQuote);
     expect(cleaned.priority_fix.evidence_refs.length).toBe(0);
+  });
+
+  test("4. Active Groq model configuration excludes all decommissioned models", () => {
+    const decommissioned = [
+      "llama-3.2-3b-preview",
+      "llama-3.2-1b-preview",
+      "gemma2-9b-it",
+      "llama3-8b-8192",
+      "llama3-70b-8192",
+    ];
+    for (const badModel of decommissioned) {
+      expect((ACTIVE_GROQ_MODELS as readonly string[]).includes(badModel)).toBe(false);
+    }
+    expect(ACTIVE_GROQ_MODELS.includes("openai/gpt-oss-120b")).toBe(true);
+    expect(ACTIVE_GROQ_MODELS.includes("openai/gpt-oss-20b")).toBe(true);
+  });
+
+  test("5. resolveGroqModelsForKey filters inaccessible 404/non-chat models and respects key allowlist", async () => {
+    clearGroqModelCache();
+    const mockFetch = (async () =>
+      new Response(
+        JSON.stringify({
+          data: [
+            { id: "whisper-large-v3", active: true },
+            { id: "meta-llama/llama-prompt-guard-2-22m", active: true },
+            { id: "openai/gpt-oss-safeguard-20b", active: true },
+            { id: "openai/gpt-oss-20b", active: true },
+            { id: "qwen/qwen3-32b", active: true },
+          ],
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      )) as unknown as typeof fetch;
+
+    const resolved = await resolveGroqModelsForKey("gsk_test_allowlist_1", ACTIVE_GROQ_MODELS, mockFetch);
+    expect(resolved).toEqual(["openai/gpt-oss-20b", "qwen/qwen3-32b"]);
+    clearGroqModelCache();
+  });
+
+  test("6. GroqAIProvider handles <think> tags and uses accessible discovered models", async () => {
+    clearGroqModelCache();
+    const cleaned = stripReasoningAndMarkdown(
+      `<think>internal reasoning</think>\n\`\`\`json\n{"ok":true}\n\`\`\``
+    );
+    expect(JSON.parse(cleaned)).toEqual({ ok: true });
+
+    const originalFetch = globalThis.fetch;
+    const requestedUrls: string[] = [];
+    const requestedModels: string[] = [];
+    try {
+      globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = String(input);
+        requestedUrls.push(url);
+        if (url.endsWith("/openai/v1/models")) {
+          return new Response(
+            JSON.stringify({
+              data: [{ id: "openai/gpt-oss-20b", active: true }],
+            }),
+            { status: 200, headers: { "Content-Type": "application/json" } }
+          );
+        }
+        const body = JSON.parse(String(init?.body || "{}"));
+        requestedModels.push(body.model);
+        return new Response(
+          JSON.stringify({
+            choices: [
+              {
+                message: {
+                  content: JSON.stringify({
+                    analysis_version: "1.0",
+                    verdict: { status: "clear", text: "Clear SaaS value proposition." },
+                    first_seconds: {
+                      what_is_this: { status: "clear", explanation: "Workflow tool.", evidence_refs: [] },
+                      who_is_it_for: { status: "clear", explanation: "Ops teams.", evidence_refs: [] },
+                      what_will_i_get: { status: "clear", explanation: "Automation.", evidence_refs: [] },
+                      why_should_i_care: { status: "understandable", explanation: "Saves time.", evidence_refs: [] },
+                      what_should_i_do_next: { status: "clear", explanation: "Start Free Trial.", evidence_refs: [] },
+                    },
+                    visitor_thought: { text: "Looks useful for workflow automation.", confidence: "high" },
+                    signals: {
+                      first_impression: { score: 80, status: "clear", explanation: "Clear hero.", confidence: "high", evidence_refs: [] },
+                      audience: { score: 78, status: "clear", explanation: "Ops teams.", confidence: "high", evidence_refs: [] },
+                      value: { score: 80, status: "clear", explanation: "Saves time.", confidence: "high", evidence_refs: [] },
+                      trust: { score: 72, status: "understandable", explanation: "Proof visible.", confidence: "medium", evidence_refs: [] },
+                      action: { score: 82, status: "clear", explanation: "Visible CTA.", confidence: "high", evidence_refs: [] },
+                    },
+                    risks: [],
+                    priority_fix: { title: "None critical", reason: "Strong baseline.", evidence_refs: [] },
+                    other_improvements: [],
+                  }),
+                },
+              },
+            ],
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        );
+      }) as typeof fetch;
+
+      const provider = new GroqAIProvider("gsk_test_provider_key");
+      const result = await provider.analyzeWebsite(createMockSnapshot());
+      expect(result.analysis_version).toBe("1.0");
+      expect(requestedModels).toEqual(["openai/gpt-oss-20b"]);
+      expect(requestedUrls.some((u) => u.endsWith("/openai/v1/models"))).toBe(true);
+    } finally {
+      globalThis.fetch = originalFetch;
+      clearGroqModelCache();
+    }
   });
 });

@@ -1,4 +1,5 @@
-import { GoogleGenAI, Type, Schema } from "@google/genai";
+import { GoogleGenAI, Type, Schema, ThinkingLevel } from "@google/genai";
+import { resolveGroqModelsForKey, stripReasoningAndMarkdown } from "./groqProvider";
 import { WebsiteSnapshot } from "@/lib/content-extractor";
 import {
   discoverAndFetchSupportingPages,
@@ -233,10 +234,8 @@ async function callDefaultSupportingContextAI(
       },
     });
     const candidateModels = [
+      "gemini-4-hydrogen",
       "gemini-3.1-flash-lite",
-      "gemini-3.5-flash",
-      "gemini-2.5-flash",
-      "gemini-flash-latest",
     ];
 
     for (const model of candidateModels) {
@@ -244,6 +243,10 @@ async function callDefaultSupportingContextAI(
         throw new Error("Supporting-context AI aborted by deadline");
       }
       try {
+        const thinkingLevel =
+          model === "gemini-3.1-flash-lite"
+            ? ThinkingLevel.MINIMAL
+            : ThinkingLevel.LOW;
         const response = await ai.models.generateContent({
           model,
           contents: userPrompt,
@@ -251,9 +254,8 @@ async function callDefaultSupportingContextAI(
             systemInstruction: SUPPORTING_CONTEXT_SYSTEM_PROMPT,
             responseMimeType: "application/json",
             responseSchema: SUPPORTING_CONTEXT_GEMINI_SCHEMA,
-            temperature: 0.1,
             thinkingConfig: {
-              thinkingBudget: 0,
+              thinkingLevel,
             },
           },
         });
@@ -270,11 +272,12 @@ async function callDefaultSupportingContextAI(
   // 2. Fall back to Groq if Gemini was not configured or threw an error
   const groqKey = process.env.GROQ_API_KEY?.trim();
   if (groqKey) {
-    const groqModels = [
+    const groqModels = await resolveGroqModelsForKey(groqKey, [
       "openai/gpt-oss-20b",
       "openai/gpt-oss-120b",
-      "llama-3.3-70b-versatile",
-    ];
+      "qwen/qwen3-32b",
+      "meta-llama/llama-4-scout-17b-16e-instruct",
+    ]);
     for (const model of groqModels) {
       if (options.signal?.aborted) {
         throw new Error("Supporting-context AI aborted by deadline");
@@ -320,10 +323,7 @@ async function callDefaultSupportingContextAI(
         const data = await res.json();
         const content = data?.choices?.[0]?.message?.content;
         if (typeof content === "string" && content.trim()) {
-          const cleaned = content
-            .replace(/^```json\s*/i, "")
-            .replace(/```$/i, "")
-            .trim();
+          const cleaned = stripReasoningAndMarkdown(content);
           return JSON.parse(cleaned) as RawSupportingContextAIOutput;
         }
       } catch {

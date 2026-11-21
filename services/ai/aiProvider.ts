@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, ThinkingLevel } from "@google/genai";
 import { WebsiteSnapshot } from "@/lib/content-extractor";
 import { SupportingPagesBundle } from "@/lib/supporting-page-fetcher";
 import { WebsiteAnalysis, WEBSITE_ANALYSIS_GEMINI_SCHEMA } from "./analysisSchema";
@@ -11,10 +11,8 @@ export interface AIProvider {
 export class GeminiAIProvider implements AIProvider {
   private ai: GoogleGenAI | null = null;
   private candidateModels = [
+    "gemini-4-hydrogen",
     "gemini-3.1-flash-lite",
-    "gemini-3.5-flash",
-    "gemini-2.5-flash",
-    "gemini-flash-latest",
   ];
 
   constructor(apiKey?: string) {
@@ -47,6 +45,10 @@ export class GeminiAIProvider implements AIProvider {
     for (const model of this.candidateModels) {
       const modelStart = Date.now();
       try {
+        const thinkingLevel =
+          model === "gemini-3.1-flash-lite"
+            ? ThinkingLevel.MINIMAL
+            : ThinkingLevel.LOW;
         const response = await this.ai.models.generateContent({
           model,
           contents: userPrompt,
@@ -54,9 +56,8 @@ export class GeminiAIProvider implements AIProvider {
             systemInstruction: SYSTEM_PROMPT,
             responseMimeType: "application/json",
             responseSchema: WEBSITE_ANALYSIS_GEMINI_SCHEMA,
-            temperature: 0.2, // Low temperature for deterministic analysis
             thinkingConfig: {
-              thinkingBudget: 0,
+              thinkingLevel,
             },
           },
         });
