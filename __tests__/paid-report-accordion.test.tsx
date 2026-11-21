@@ -44,7 +44,7 @@ try {
   assert.ok(doc.querySelector("#evidence-to-fix")?.textContent?.includes("Build clearer websites"),"Evidence retained");
   await act(async()=>get("copy").click());
   assert.ok(isOpen("copy") && !isOpen("fixes"),"Copy opens without other content");
-  assert.ok(doc.querySelector("#better-copy-studio") && doc.querySelector("#better-copy-studio button")?.textContent?.includes("Copy"),"Editable copy tool is ready");
+  assert.ok(doc.querySelector("#better-copy-studio") && [...doc.querySelectorAll("#better-copy-studio button")].some(button => button.textContent?.includes("Copy this version")),"Editable copy tool is ready");
   await act(async()=>get("copy").click());
   assert.equal(doc.querySelectorAll('.sl-paid-card-trigger[aria-expanded="true"]').length,0,"Open card closes again");
 
