@@ -458,9 +458,12 @@ export async function discoverAndFetchSupportingPages(
   try {
     const maxPages =
       options.maxPages ?? SERVER_LIMITS.SUPPORTING_PAGES_MAX_COUNT;
+    // Legal policies have their own concurrent fetch lane. Do not spend
+    // supporting-page slots or network requests fetching them twice.
     const candidates = discoverSupportingPages(homepageHtml, homepageFinalUrl, {
-      maxPages,
-    });
+      maxPages: maxPages + 3,
+    }).filter(candidate => !["privacy_policy", "terms_of_service", "refund_policy"].includes(candidate.pageType))
+      .slice(0, maxPages);
     return await fetchSupportingPages(candidates, homepageFinalUrl, options);
   } catch (err: unknown) {
     console.warn(
