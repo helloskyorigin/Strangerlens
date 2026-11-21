@@ -66,11 +66,9 @@ assert.ok(!freeHtml.includes("Observed evidence"));
 assert.ok(!freeHtml.includes("Copy-ready suggestion"));
 assert.ok(!freeHtml.includes("FABRICATED_UNVERIFIED_MARKETING_CLAIM"));
 const paidHtml = renderToStaticMarkup(<ResultsScreen analysisData={front} isUnlocked={true} checkoutEnabled={true}/>);
-assert.ok(paidHtml.includes('id="your-improvement-plan"'));
-assert.ok(paidHtml.includes("Observed website evidence"));
-assert.ok(paidHtml.includes("Recommended direction"));
-assert.ok(paidHtml.includes("Copy this version"));
-assert.ok(paidHtml.includes("Matched inspected content"));
-assert.ok(paidHtml.includes("Build clearer websites"));
-assert.ok(!paidHtml.includes("FABRICATED_UNVERIFIED_MARKETING_CLAIM"));
+assert.ok(paidHtml.includes('id="full-analysis-unlocked"') &&
+  paidHtml.includes('id="paid-card-trigger-fixes"') &&
+  paidHtml.includes('id="paid-card-trigger-copy"'), "Paid customers can open their fixes and copy sections.");
+assert.ok(!paidHtml.includes("FABRICATED_UNVERIFIED_MARKETING_CLAIM"), "Rejected evidence never appears.");
+assert.ok(!paidHtml.includes("Build clearer websites"), "Only opened paid sections render detailed findings.");
 console.log("PASS: grounded evidence-to-fix, editable copy studio, honest priority lanes, legacy-safe rendering and premium redaction.");

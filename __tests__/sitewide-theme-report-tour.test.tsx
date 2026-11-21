@@ -27,7 +27,7 @@ for(const paid of [false,true]){
   const markup=renderToStaticMarkup(<ResultsScreen analysisData={analysis} rawUrl="https://example.com" checkoutEnabled={true} isUnlocked={paid}/>);
   assert.ok(markup.includes('sl-app-theme'), "Free/paid reports use shared theme.");
   assert.ok(markup.includes("Switch to dark mode"), "Report header has one-tap appearance switcher.");
-  assert.equal(markup.includes('id="your-improvement-plan"'),paid,"Premium workbench remains gated.");
+  assert.equal(markup.includes('id="full-analysis-unlocked"'),paid,"Premium accordion stays behind verified access.");
 }
 const fullTour = renderToStaticMarkup(<FullReportTour onTryFree={()=>{}}/>);
 assert.ok(fullTour.includes("THE $9 COMPLETE REPORT") && fullTour.includes("INTERACTIVE SAMPLE"), "Full walkthrough is clearly labeled as illustrative.");

@@ -32,12 +32,11 @@ assert.equal(locked.querySelectorAll('[data-testid="purchase-readiness-locked"]'
 assert.equal(locked.querySelector("#complete-report-preview")?.querySelectorAll(".sl-v8-unlock-item").length,5,
   "Exactly five paid benefits, even for commercial sites.");
 const paid = render(premium as typeof mapped,true);
-assert.equal(paid.querySelectorAll('[data-signal]').length,6,
-  "Unlocked commercial website displays sixth scored signal in overview");
-assert.equal(paid.querySelector('[data-signal="purchaseReadiness"] .sl-v8-signal-score')?.textContent, "68", "Paid purchase score remains accurate in compact display.");
+assert.equal(paid.querySelectorAll('[data-signal]').length,5, "The score overview always contains the five core signals.");
+assert.ok(paid.querySelector('#paid-card-trigger-hesitation'), "A commercial paid report includes its buying-confidence card.");
 assert.ok(!paid.querySelector('[data-testid="purchase-readiness-locked"]'),"Verified premium removes lock placeholder");
 assert.ok(!paid.querySelector("#complete-report-preview"),"Paid customer sees no repeated sales panel");
-assert.ok(paid.querySelector("#complete-paid-report") && paid.querySelector("#your-improvement-plan"),
+assert.ok(paid.querySelector("#full-analysis-unlocked") && paid.querySelector("#paid-card-trigger-fixes"),
   "Deep dives and implementation workbench remain accessible after unlock");
 assert.ok(paid.querySelector("#report-export-actions"),"Paid PDF export remains accessible");
 console.log("PASS: V7 light-first semantics, conditional sixth signal, no free leakage and intact premium workspace.");

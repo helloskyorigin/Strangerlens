@@ -32,12 +32,12 @@ for (const width of [320, 390, 1440]) {
       check(text.includes("Your Clarity Signals") && text.includes("Website Clarity Score"), "core score UI remains visible");
       if (paid) {
         check(!doc.querySelector("#complete-report-preview"), "verified paid users do not see upsell");
-        check(!!doc.querySelector("#complete-paid-report"), "paid users see full report explorer");
-        check(doc.querySelectorAll('#complete-paid-report [role="tab"]').length === 5, "paid explorer provides all five core chapters");
-        check(doc.querySelectorAll('#complete-paid-report [role="tab"][aria-selected="true"]').length === 1, "one full report chapter is active");
-        check(text.includes("Why This Score") && text.includes("What's Working") && text.includes("How to Improve"), "paid chapter contains detailed reasoning and recommendations");
-        check(text.includes(privateText), "paid signal explanations are rendered");
-        check(!!doc.querySelector("#your-improvement-plan") && text.includes("Observed website evidence") && text.includes("Recommended direction") && text.includes("Copy this version") && text.includes("Matched inspected content"), "paid improvements and copy proposals are visible");
+        check(doc.querySelectorAll('.sl-paid-card-trigger').length===5, "paid users see exactly five expandable reports");
+        check(doc.querySelectorAll('.sl-paid-card-trigger[aria-expanded=true]').length===0, "all five cards start closed");
+        check(!!doc.querySelector("#full-analysis-unlocked") && !!doc.querySelector("#report-export-actions"),
+          "paid reports include the report and full PDF below");
+        check(!doc.querySelector("#complete-paid-report") && !doc.querySelector("#your-improvement-plan"),
+          "detailed findings are only rendered inside an opened card");
       } else {
         const preview = doc.querySelector("#complete-report-preview");
         check(!!preview, "free visitor sees complete-report preview");

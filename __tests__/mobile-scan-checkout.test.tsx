@@ -34,7 +34,7 @@ assert.ok(!freeDoc.querySelector(".sl-upgrade-dialog"), "Free results do not aut
 
 const paidDoc = new JSDOM(renderToStaticMarkup(<ResultsScreen rawUrl="https://example.com" analysisData={mapped} isUnlocked={true} checkoutEnabled={true}/>)).window.document;
 assert.ok(!paidDoc.querySelector('#complete-report-preview'), "Paid accounts never see the free upsell.");
-assert.ok(paidDoc.querySelector('#your-improvement-plan'), "Paid account retains full implementation workbench.");
+assert.ok(paidDoc.querySelector('#paid-card-trigger-fixes'), "Paid account retains the complete fix-first plan under a card.");
 
 const modal = new JSDOM(renderToStaticMarkup(<PostScanUpgradeModal open
   domain="example.com" overallScore="73/100"

@@ -29,12 +29,9 @@ assert.ok(!free.body.textContent?.includes(privateText), "Free view cannot leak 
 
 const paid = render(true);
 assert.ok(!paid.querySelector("#complete-report-preview"), "Already paid users do not get free-tier upsell.");
-assert.ok(paid.querySelector("#complete-paid-report"), "Paid report deep dive remains accessible.");
-assert.ok(paid.querySelector("#your-improvement-plan"), "Paid improvements remain accessible.");
-assert.ok(paid.querySelector("#strangers-view"), "Stranger's View includes the first-five-seconds interpretation.");
-assert.ok(paid.querySelector("#evidence-to-fix"), "Paid Evidence-to-Fix remains available.");
-assert.ok(paid.querySelector("#smart-priority"), "Paid Smart Priority remains available.");
-assert.ok(paid.querySelector("#better-copy-studio"), "Paid Better Copy Studio remains available.");
+assert.equal(paid.querySelectorAll(".sl-paid-card-trigger").length,5,"Five paid report cards replace long scroll sections.");
+assert.equal(paid.querySelectorAll('[aria-expanded="true"].sl-paid-card-trigger').length,0, "Paid cards start collapsed.");
+assert.ok(paid.querySelector("#full-analysis-unlocked") && paid.querySelector("#report-export-actions"),"Paid report and PDF available after payment.");
 for (const doc of [free, paid]) {
   assert.ok(!doc.querySelector("#implementation-checklist"), "Extra fix-checklist UI is removed.");
   assert.ok(!doc.querySelector("#recheck-comparison-panel"), "Score comparison is not a displayed feature.");
@@ -42,7 +39,8 @@ for (const doc of [free, paid]) {
 }
 assert.ok(paid.querySelector("#report-export-actions button"), "PDF remains a report utility.");
 
-assert.ok(paid.body.textContent?.includes(privateText), "Verified unlocked report contains protected findings.");
-assert.ok(paid.querySelector("#complete-paid-report"), "The paid diagnosis remains accessible.");
+assert.ok(!paid.body.textContent?.includes(privateText), "Closed paid panels do not render long diagnosis text until opened.");
+assert.ok(paid.querySelector("#paid-card-trigger-fixes") && paid.querySelector("#paid-card-trigger-copy"),
+  "Verified users can open their detailed fixes and rewrites.");
 
 console.log("PASS: VYLENS-inspired results hierarchy, anchored navigation and protected premium report boundaries.");

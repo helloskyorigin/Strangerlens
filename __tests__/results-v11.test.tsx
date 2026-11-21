@@ -53,7 +53,10 @@ assert.equal(unknown.querySelector('[data-signal="trust"] .sl-v11-badge')?.textC
 assert.ok(unknown.querySelector('[data-signal="trust"] .sl-v8-signal-score')?.textContent?.includes("—"));
 const paid = make(fixed, true);
 assert.equal(paid.querySelector("#complete-report-preview"), null, "Paid customers never see the $9 offer again");
-assert.ok(paid.querySelector("#your-improvement-plan") && paid.querySelector("#complete-paid-report"), "Original paid detail stays");
+assert.equal(paid.querySelectorAll(".sl-paid-card-trigger").length, 5, "Paid report presents five expandable cards");
+assert.equal(paid.querySelectorAll('.sl-paid-card-trigger[aria-expanded="true"]').length, 0, "Every card starts closed");
+assert.ok(paid.querySelector("#full-analysis-unlocked") && paid.querySelector("#report-export-actions"),
+  "Paid report and full PDF access remain present");
 const offline = make(fixed, false, false);
 assert.ok(offline.querySelector("#complete-report-preview button[disabled]"), "Checkout cannot be clicked while unavailable");
 const stylesheet = readFileSync("components/results-lime-v8.css", "utf8");

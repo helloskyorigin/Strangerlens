@@ -55,7 +55,7 @@ const resultSource=readFileSync("components/ResultsScreen.tsx","utf8");
 assert.ok(!resultSource.includes("setVerifiedUnlocked(true)"),"Client-only verification cannot independently unlock premium content.");
 assert.ok(!resultSource.includes('fetch("/api/payments/verify"'),"Avoid racing two independent payment verification requests.");
 assert.ok(resultSource.includes("onRefreshPaidReport"),"Already-paid checkout triggers authoritative report fetch.");
-assert.ok(resultSource.includes("your-improvement-plan"),"Paid user can reach the full implementation plan.");
+assert.ok(resultSource.includes("PaidReportAccordion"), "Paid user can open the complete five-card report.");
 const payments=readFileSync("hooks/useReportPayments.ts","utf8");
 assert.ok(payments.includes("await loadPaidReport(reportId, token"),"Successful verification restores paid data before unlocking.");
 assert.ok(payments.includes("setUnlockedReportId(reportId)"),"Unlock flag comes only after protected paid data is fetched.");

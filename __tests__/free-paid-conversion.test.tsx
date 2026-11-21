@@ -76,11 +76,10 @@ for (const secret of protectedStrings) {
 const paid = new JSDOM(renderToStaticMarkup(
   <ResultsScreen rawUrl="https://example.com" analysisData={paidData} checkoutEnabled isUnlocked={true}/>
 )).window.document;
-assert.ok(paid.querySelector("#strangers-view"), "Stranger's View unlocks.");
-assert.ok(paid.querySelector("#complete-paid-report"), "Five-signal diagnosis unlocks.");
-assert.ok(paid.querySelector("#evidence-to-fix"), "Evidence-to-Fix unlocks.");
-assert.ok(paid.querySelector("#smart-priority"), "Smart Priority unlocks.");
-assert.ok(paid.querySelector("#better-copy-studio"), "Better Copy Studio unlocks.");
-assert.ok(paid.body.textContent?.includes("PRIVATE_VERDICT_EXACT_CONCERN"), "Full report keeps real paid reasoning.");
+assert.equal(paid.querySelectorAll('.sl-paid-card-trigger').length, 5, "Five paid benefits unlock as expandable cards.");
+assert.ok(["stranger", "problems", "hesitation", "fixes", "copy"].every(name =>
+  paid.querySelector('#paid-card-trigger-' + name)), "Each promised topic has its own trigger.");
+assert.ok(!paid.body.textContent?.includes("PRIVATE_VERDICT_EXACT_CONCERN"), "Closed cards hide long report text until requested.");
+assert.ok(paid.querySelector("#report-export-actions button")?.textContent?.includes("Download Full PDF"), "Full PDF remains accessible.");
 
 console.log("PASS: scores-first $0 preview, no forced popup, server+browser redaction, protected $9 report and five paid features.");

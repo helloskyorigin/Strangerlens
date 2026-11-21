@@ -48,9 +48,11 @@ assert.ok(free.querySelector("#report-export-actions button")?.textContent?.incl
 assert.equal(paid.querySelectorAll("#report-export-actions button").length, 1);
 assert.ok(paid.querySelector("#report-export-actions button")?.textContent?.includes("Download Full PDF"));
 assert.equal(paid.querySelector("#complete-report-preview"), null, "Paid report has no repeated unlock pitch.");
-for (const id of ["strangers-view", "complete-paid-report", "evidence-to-fix", "smart-priority", "better-copy-studio"]) {
-  assert.ok(paid.getElementById(id), "The original paid feature survives: " + id);
-}
+assert.equal(paid.querySelectorAll(".sl-paid-card-trigger").length, 5, "Five paid topics are the only report sections");
+assert.equal(paid.querySelectorAll(".sl-paid-card-trigger[aria-expanded=true]").length, 0, "Five paid cards begin collapsed");
+assert.ok(paid.querySelector("#full-analysis-unlocked") && paid.querySelector("#report-export-actions"),
+  "Paid reports keep the purchase confirmation and PDF below all cards");
+assert.equal(paid.querySelector("#complete-paid-report"), null, "No old always-open diagnosis section");
 const stylesheet = readFileSync("components/results-lime-v8.css", "utf8");
 assert.ok(stylesheet.includes("#report-first-look .sl-v8-score-panel") &&
   stylesheet.includes("#report-clarity-signals{margin-top:19px}"),

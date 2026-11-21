@@ -107,20 +107,15 @@ async function main() {
       const root=createRoot(dom.window.document.getElementById('app')!);
       await act(async()=>{root.render(<ResultsScreen analysisData={mapBackendToFrontend(paid?analysis:free,'https://example.com',s)} isUnlocked={paid} onBackToLanding={()=>{}}/>)});
       const doc=dom.window.document;
-      const buttons=doc.querySelectorAll<HTMLButtonElement>('button[aria-label="About Purchase Readiness"]');
-      check(buttons.length===(paid?2:0), `${width}px: purchase tooltip only shows on paid results`);
+      check(!doc.querySelector('button[aria-label="About Purchase Readiness"]'), `${width}px: sixth score is not duplicated in the five-signal overview`);
       if(paid){
-        const trigger=buttons[width>=640?1:0];
-        trigger.getBoundingClientRect=()=>({left:150,right:178,top:150,bottom:178,width:28,height:28,x:150,y:150,toJSON(){}});
+        const trigger=doc.querySelector<HTMLButtonElement>('#paid-card-trigger-hesitation')!;
+        check(Boolean(trigger) && trigger.getAttribute('aria-expanded')==='false', `${width}px: buyer-confidence report starts collapsed`);
         await act(async()=>trigger.click());
-        check(doc.querySelector('[role="tooltip"]')?.textContent?.includes('does not affect your Overall Clarity Score'), `${width}px: paid tooltip opens`);
-        await act(async()=>doc.dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:'Escape',bubbles:true})));
-        check(!doc.querySelector('[role="tooltip"]'), `${width}px: tooltip dismisses`);
-      }
-      if(paid){
-        const tab=[...doc.querySelectorAll<HTMLButtonElement>('#complete-paid-report [role="tab"]')].find(x=>x.textContent?.includes('Purchase Readiness'))!;
-        await act(async()=>tab.click());
-        check(doc.body.textContent?.includes('PREMIUM_PURCHASE_SENTINEL') && doc.body.textContent?.includes('Observed Website Evidence'), `${width}px: authorized purchase tab displays original paid findings and evidence`);
+        check(Boolean(doc.querySelector('[data-testid="purchase-decision-deep-dive"]')) &&
+          doc.body.textContent?.includes("PREMIUM_PURCHASE_SENTINEL") &&
+          doc.body.textContent?.includes("What we found on the website"),
+          `${width}px: verified buyer-confidence card includes saved detailed findings and website wording`);
       }else{
         check(!doc.querySelector('[data-testid="purchase-readiness-locked"]'), `${width}px: only five free cards`);
         check(!doc.body.textContent?.includes(full.summary) && !doc.body.textContent?.includes('PREMIUM_PURCHASE_SENTINEL'), `${width}px: free assessment is redacted`);
@@ -131,13 +126,14 @@ async function main() {
       }
       await act(async()=>root.render(<ResultsScreen analysisData={mapBackendToFrontend(legacy,'https://example.com',s)} isUnlocked={paid} onBackToLanding={()=>{}}/>));
       check(!doc.querySelector('button[aria-label="About Purchase Readiness"]') && ![...doc.querySelectorAll('h3')].some(x=>x.textContent==='Purchase Readiness'), `${width}px: switching to an old report removes the sixth signal and its findings`);
-      if(paid)check([...doc.querySelectorAll<HTMLButtonElement>('#complete-paid-report [role="tab"]')].some(x=>x.textContent?.includes('First Impression') && x.getAttribute('aria-selected')==='true'), `${width}px: a removed optional signal falls back to the first diagnostic tab`);
+      if(paid)check(doc.querySelectorAll('.sl-paid-card-trigger').length===5 &&
+        !doc.querySelector('[data-testid="purchase-decision-deep-dive"]'), `${width}px: old paid reports show five cards without invented purchase details`);
       if(paid){
         for(const [name,html,applies,title] of cases){
           const sample=snapshot(html,title);
           const category=validateAndScoreAnalysis(generateDeterministicFallbackAnalysis(sample),sample);
           await act(async()=>root.render(<ResultsScreen analysisData={mapBackendToFrontend(category,'https://example.com',sample)} isUnlocked={true} onBackToLanding={()=>{}}/>));
-          check(doc.querySelectorAll('button[aria-label="About Purchase Readiness"]').length===(applies?2:0), `${width}px: ${name} conditional paid-score visibility`);
+          check(Boolean(doc.querySelector('[data-testid="purchase-decision-deep-dive"]'))===applies, `${width}px: ${name} conditional paid purchase details`);
           check(!doc.querySelector('[data-testid="purchase-readiness-locked"]'), `${width}px: ${name} paid report has no locked placeholder`);
         }
       }
