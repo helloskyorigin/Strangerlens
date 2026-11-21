@@ -9,6 +9,7 @@
 @import "../components/landing/landing-result-proof.css";
 @import "../components/scalen-inspired-dark.css";
 @import "../components/landing/landing-story.css";
+@import "../components/theme-contrast-guard.css";
 
 :root {
   color-scheme: light;
