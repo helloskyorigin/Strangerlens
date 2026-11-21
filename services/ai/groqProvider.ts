@@ -17,15 +17,10 @@ Output ONLY the raw JSON object.`;
 
 export class GroqAIProvider implements AIProvider {
   private apiKey: string | undefined;
-  // Primary model: llama-3.3-70b-versatile, with fallbacks including 3.2, 3.1, gemma2, and 8192 models
-  private primaryModel = "llama-3.3-70b-versatile";
-  private fallbackModels = [
-    "llama-3.1-8b-instant",
-    "llama-3.2-3b-preview",
-    "llama-3.2-1b-preview",
-    "gemma2-9b-it",
-    "llama3-8b-8192",
-  ];
+  // Server-side only: override through GROQ_MODEL without shipping settings or keys to the client.
+  // The old Llama/Gemma model IDs are retired from Groq self-serve tiers.
+  private readonly primaryModel = process.env.GROQ_MODEL?.trim() || "openai/gpt-oss-120b";
+  private readonly fallbackModels = ["openai/gpt-oss-20b"];
 
   constructor(apiKey?: string) {
     this.apiKey = apiKey || process.env.GROQ_API_KEY;
@@ -155,7 +150,7 @@ Output a strictly valid JSON object matching this schema:
   ]
 }`;
 
-    const modelsToTry = [this.primaryModel, ...this.fallbackModels];
+    const modelsToTry = [...new Set([this.primaryModel, ...this.fallbackModels])];
     let lastError: Error | null = null;
 
     for (const model of modelsToTry) {
