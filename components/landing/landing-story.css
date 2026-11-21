@@ -1,0 +1,234 @@
+/* Narrative landing sections. Brand-safe: scoped to StrangerLens.
+   Payment appears only in the final section; examples stay explicitly illustrative. */
+
+.slr-page .slr-why{padding-top:96px;max-width:1120px}
+.slr-page .slr-why-heading{max-width:840px;margin:0 auto 34px;text-align:center}
+.slr-page .slr-why-heading h2{
+  font:850 clamp(31px,4.25vw,55px)/1.13 Manrope,Inter,system-ui,sans-serif;
+  letter-spacing:-.068em;margin:13px 0 18px;text-wrap:balance
+}
+.slr-page .slr-why-heading h2 span{color:#5d8529}
+.slr-page .slr-why-heading p{
+  max-width:675px;margin:0 auto;color:#667262;
+  font-size:15px;line-height:1.75
+}
+.slr-page .slr-perspective-grid{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px
+}
+.slr-page .slr-perspective{
+  min-width:0;min-height:257px;padding:31px;border-radius:24px;
+  border:1px solid #e0e7dc;background:#fff;
+  display:flex;flex-direction:column;align-items:flex-start
+}
+.slr-page .slr-perspective--visitor{background:#effbdc;border-color:#cde5ad}
+.slr-page .slr-perspective-tag{
+  font-size:10px;font-weight:850;letter-spacing:.13em;color:#5a7651
+}
+.slr-page .slr-perspective h3{
+  margin:33px 0 12px;font:850 clamp(23px,2.5vw,32px)/1.2 Manrope,Inter,system-ui,sans-serif;
+  letter-spacing:-.055em;color:#202a1b
+}
+.slr-page .slr-perspective p{
+  margin:0 0 23px;max-width:385px;color:#62705c;font-size:13px;line-height:1.7
+}
+.slr-page .slr-perspective-caption{
+  margin-top:auto;border-top:1px solid #dce5d7;padding-top:14px;
+  width:100%;color:#83927b;font-size:11px;font-weight:700
+}
+.slr-page .slr-why-conclusion{
+  text-align:center;max-width:740px;margin:23px auto 0;
+  font-size:13px;line-height:1.8;color:#56684f;font-weight:720
+}
+.slr-page .slr-why-conclusion span{
+  color:#80ac33;font-size:19px;vertical-align:-1px;margin-right:5px
+}
+
+.slr-page .slr-explore{padding-top:111px}
+.slr-page .slr-explore .slr-section-heading{max-width:720px;margin:0 auto 33px}
+.slr-page .slr-explore-workbench{
+  display:grid;grid-template-columns:minmax(215px,.36fr) minmax(0,1fr);
+  gap:18px;background:#f0f5ea;border:1px solid #e2eadd;border-radius:28px;
+  padding:15px;box-shadow:0 20px 45px -39px #546649
+}
+.slr-page .slr-explore-selector{
+  padding:17px 7px 7px 10px;display:flex;flex-direction:column;gap:10px;min-width:0
+}
+.slr-page .slr-workbench-caption{
+  font-size:10px;letter-spacing:.125em;font-weight:850;color:#75816e
+}
+.slr-page .slr-explore-selector>.slr-workbench-caption{margin:5px 12px 10px}
+.slr-page .slr-explore-choice{
+  min-width:0;width:100%;display:flex;align-items:center;gap:14px;
+  border:1px solid transparent;background:transparent;border-radius:15px;
+  padding:16px 14px;text-align:left;color:#5b6954;
+  transition:background .2s,border-color .2s,transform .2s;
+  font-weight:800;font-size:14px
+}
+.slr-page .slr-explore-choice-number{font-size:11px;color:#9caa95;letter-spacing:.03em}
+.slr-page .slr-explore-choice>span:nth-child(2){flex:1;min-width:0}
+.slr-page .slr-explore-choice>svg{opacity:.55}
+.slr-page .slr-explore-choice:hover{background:#f8fcf3;border-color:#dde9d3}
+.slr-page .slr-explore-choice.is-active{
+  background:#1a2515;color:#f7ffe9;border-color:#1a2515;
+  box-shadow:0 8px 18px rgba(19,35,12,.12)
+}
+.slr-page .slr-explore-choice.is-active .slr-explore-choice-number{color:#b8de84}
+.slr-page .slr-explore-side-note{
+  margin-top:auto;padding:20px 12px 4px;color:#8b9783;font-size:11px;line-height:1.6
+}
+.slr-page .slr-explore-result{
+  min-width:0;background:#fff;border:1px solid #e1e8dc;
+  border-radius:21px;padding:clamp(21px,3vw,35px);
+}
+.slr-page .slr-explore-topline{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.slr-page .slr-explore-signal{
+  padding:6px 9px;border-radius:99px;background:#eff7e7;color:#5f8735;
+  font-size:9px;font-weight:850;letter-spacing:.07em;white-space:nowrap
+}
+.slr-page .slr-explore-result h3{
+  color:#1a2716;font:850 clamp(20px,2.3vw,31px)/1.25 Manrope,Inter,system-ui,sans-serif;
+  margin:15px 0 23px;letter-spacing:-.05em
+}
+.slr-page .slr-copy-comparison{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.slr-page .slr-copy-block{
+  min-width:0;min-height:153px;padding:20px;border:1px solid #e7e9e5;border-radius:15px;background:#f8faf7
+}
+.slr-page .slr-copy-block--after{background:#eff8e5;border-color:#d0e8b9}
+.slr-page .slr-copy-block>span{font-size:9.5px;letter-spacing:.1em;font-weight:850;color:#849081}
+.slr-page .slr-copy-block--after>span{color:#5d852f}
+.slr-page .slr-copy-block p{
+  margin:19px 0 0;color:#35412f;letter-spacing:-.03em;font-size:clamp(14px,1.6vw,18px);
+  line-height:1.46;font-weight:780
+}
+.slr-page .slr-explore-explanation{
+  display:flex;align-items:flex-start;gap:9px;color:#4c6044;margin:20px 0 0;
+  font-size:12.5px;line-height:1.7;font-weight:650
+}
+.slr-page .slr-explore-explanation svg{margin-top:2px;color:#628e2d}
+.slr-page .slr-explore-footnote{
+  text-align:center;margin-top:18px;color:#778671;font-size:12px;line-height:1.7
+}
+
+.slr-page .slr-process{padding-top:110px}
+.slr-page .slr-process .slr-section-heading{max-width:780px;margin:0 auto 36px}
+.slr-page .slr-process-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+.slr-page .slr-process-card{
+  min-width:0;padding:27px 25px;border:1px solid #e1e8dc;border-radius:21px;background:#fff
+}
+.slr-page .slr-process-number{font-size:10px;letter-spacing:.1em;font-weight:850;color:#608e27}
+.slr-page .slr-process-card h3{
+  margin:31px 0 11px;font:800 19px/1.3 Manrope,Inter,system-ui,sans-serif;
+  letter-spacing:-.04em;color:#25301e
+}
+.slr-page .slr-process-card p{margin:0;font-size:12.5px;line-height:1.75;color:#72806c}
+.slr-page .slr-process-bottom{
+  display:flex;justify-content:space-between;align-items:center;gap:24px;
+  padding:23px 26px;margin-top:15px;background:#edf8dc;border:1px solid #d5e8bb;
+  border-radius:19px
+}
+.slr-page .slr-process-bottom>div{display:flex;flex-direction:column;gap:5px;max-width:635px}
+.slr-page .slr-process-bottom strong{font-size:15px;color:#27421b}
+.slr-page .slr-process-bottom div span{color:#596d50;font-size:12px;line-height:1.6}
+.slr-page .slr-process-quiet{font-size:11px;color:#62775c;font-weight:700;max-width:220px;line-height:1.5;text-align:right}
+.slr-page .slr-faq-section{padding-top:104px}
+.slr-page .slr-final-offer{padding-top:104px;padding-bottom:90px}
+.slr-page .slr-final-offer .slr-section-heading{max-width:740px;margin:0 auto 31px}
+.slr-page .slr-final-offer .slr-section-heading h2 span{color:#668f32}
+.slr-page .slr-final-price-grid{max-width:865px;gap:17px}
+.slr-page .slr-final-price-grid .slr-price-card{min-height:0;padding:29px}
+.slr-page .slr-final-price-grid .slr-price-description{min-height:0}
+.slr-page .slr-final-price-grid .slr-price-card ul{margin-bottom:0}
+.slr-page .slr-final-action{display:flex;align-items:center;flex-direction:column;gap:10px;margin:29px auto 0;text-align:center}
+.slr-page .slr-final-action>.slr-button{min-width:262px;min-height:53px}
+.slr-page .slr-final-action>p{margin:0;color:#788372;font-size:11.5px;line-height:1.6}
+.slr-page .slr-final-action .slr-pricing-disclosure{margin-top:8px}
+
+/* Dedicated tablet/mobile layouts: no desktop-sized cards squeezed onto small screens. */
+@media(max-width:850px){
+  .slr-page .slr-why,.slr-page .slr-explore,.slr-page .slr-process{padding-top:76px}
+  .slr-page .slr-why-heading h2{font-size:clamp(31px,6vw,44px)}
+  .slr-page .slr-explore-workbench{grid-template-columns:1fr}
+  .slr-page .slr-explore-selector{
+    display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:6px
+  }
+  .slr-page .slr-explore-selector>.slr-workbench-caption{grid-column:1/-1;margin:0 8px 2px}
+  .slr-page .slr-explore-choice{justify-content:center;gap:6px;padding:12px 7px;font-size:12px;text-align:center}
+  .slr-page .slr-explore-choice-number,.slr-page .slr-explore-choice svg{display:none}
+  .slr-page .slr-explore-side-note{grid-column:1/-1;margin:0;padding:2px 8px;font-size:10px}
+  .slr-page .slr-process-grid{gap:10px}
+  .slr-page .slr-process-card{padding:21px 17px}
+  .slr-page .slr-process-card h3{font-size:17px}
+}
+@media(max-width:570px){
+  .slr-page .slr-why,.slr-page .slr-explore,.slr-page .slr-process{padding-top:65px}
+  .slr-page .slr-why-heading{margin-bottom:25px}
+  .slr-page .slr-why-heading h2{font-size:clamp(29px,7.4vw,37px)}
+  .slr-page .slr-why-heading p{font-size:13px}
+  .slr-page .slr-perspective-grid{grid-template-columns:1fr;gap:11px}
+  .slr-page .slr-perspective{min-height:0;padding:22px 23px;border-radius:18px}
+  .slr-page .slr-perspective h3{margin:19px 0 9px;font-size:26px}
+  .slr-page .slr-perspective p{font-size:12px;margin-bottom:15px}
+  .slr-page .slr-why-conclusion{font-size:12px;margin-top:16px}
+  .slr-page .slr-explore .slr-section-heading{margin-bottom:22px}
+  .slr-page .slr-explore-workbench{padding:9px;gap:7px;border-radius:21px}
+  .slr-page .slr-explore-choice{font-size:11px;line-height:1.3;min-height:43px}
+  .slr-page .slr-explore-result{padding:18px 15px;border-radius:16px}
+  .slr-page .slr-explore-result h3{font-size:22px;margin:13px 0 18px}
+  .slr-page .slr-copy-comparison{grid-template-columns:1fr;gap:9px}
+  .slr-page .slr-copy-block{min-height:0;padding:16px}
+  .slr-page .slr-copy-block p{margin-top:9px;font-size:16px}
+  .slr-page .slr-explore-explanation{margin-top:15px;font-size:12px}
+  .slr-page .slr-explore-footnote{font-size:11px}
+  .slr-page .slr-process-grid{grid-template-columns:1fr;gap:11px}
+  .slr-page .slr-process-card{padding:22px;border-radius:17px}
+  .slr-page .slr-process-card h3{margin:12px 0 7px;font-size:18px}
+  .slr-page .slr-process-bottom{flex-direction:column;align-items:flex-start;padding:21px;gap:13px}
+  .slr-page .slr-process-quiet{text-align:left;max-width:none}
+  .slr-page .slr-faq-section,.slr-page .slr-final-offer{padding-top:73px}
+  .slr-page .slr-final-offer{padding-bottom:57px}
+  .slr-page .slr-final-price-grid .slr-price-card{padding:22px}
+  .slr-page .slr-final-action>.slr-button{width:100%;max-width:360px;min-width:0}
+}
+@media(max-width:360px){
+  .slr-page .slr-explore-choice{font-size:10px;padding:11px 5px}
+  .slr-page .slr-why-heading h2{font-size:28px}
+  .slr-page .slr-copy-block p{font-size:15px}
+}
+
+/* Dark mode remains a deliberate user choice and stays legible. */
+html[data-landing-theme="dark"] .slr-page .slr-why-heading h2 span,
+html[data-landing-theme="dark"] .slr-page .slr-final-offer .slr-section-heading h2 span{color:#bdfb54}
+html[data-landing-theme="dark"] .slr-page :is(
+ .slr-why-heading p,.slr-perspective p,.slr-why-conclusion,.slr-explore-footnote,
+ .slr-process-card p,.slr-process-bottom div span,.slr-process-quiet,
+ .slr-final-action>p,.slr-explore-side-note
+){color:#b2bcaf}
+html[data-landing-theme="dark"] .slr-page :is(
+ .slr-perspective,.slr-perspective--visitor,.slr-explore-result,.slr-process-card,.slr-copy-block,.slr-copy-block--after,
+ .slr-final-price-grid .slr-price-card
+){background:#171b16!important;border-color:#384336!important;box-shadow:none!important}
+html[data-landing-theme="dark"] .slr-page :is(.slr-explore-workbench,.slr-process-bottom){
+  background:#101610!important;border-color:#354133!important;box-shadow:none!important
+}
+html[data-landing-theme="dark"] .slr-page :is(
+ .slr-perspective h3,.slr-explore-result h3,.slr-copy-block p,.slr-process-card h3,
+ .slr-process-bottom strong
+){color:#f3f6ef!important}
+html[data-landing-theme="dark"] .slr-page :is(
+ .slr-perspective-tag,.slr-perspective-caption,.slr-workbench-caption,.slr-explore-choice-number,
+ .slr-copy-block>span
+){color:#a5b79b!important}
+html[data-landing-theme="dark"] .slr-page .slr-explore-choice{color:#cbd4c7}
+html[data-landing-theme="dark"] .slr-page .slr-explore-choice:hover{background:#252e22;border-color:#495a42}
+html[data-landing-theme="dark"] .slr-page .slr-explore-choice.is-active{
+  background:#c7f36a!important;border-color:#c7f36a!important;color:#182110!important
+}
+html[data-landing-theme="dark"] .slr-page .slr-explore-choice.is-active .slr-explore-choice-number{color:#40512a!important}
+html[data-landing-theme="dark"] .slr-page .slr-explore-signal{
+  background:#2b4320!important;color:#c7f36a!important
+}
+html[data-landing-theme="dark"] .slr-page .slr-explore-explanation{color:#c4d2ba!important}
+html[data-landing-theme="dark"] .slr-page .slr-final-price-grid .slr-price-card ul{border-color:#404b3c!important}
+@media(prefers-reduced-motion:reduce){
+  .slr-page .slr-explore-choice{transition:none}
+}
