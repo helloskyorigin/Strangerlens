@@ -9,6 +9,18 @@ import ScanScreen from "../components/ScanScreen";
 import { mapBackendToFrontend } from "../lib/mapper";
 import { paymentAnalysis, paymentSnapshot } from "./fixtures/payment-report";
 
+// Regression: fresh entry and SPA view transitions must not preserve mid-page scroll.
+const pageSource=readFileSync("app/page.tsx","utf8");
+assert.ok(pageSource.includes('window.history.scrollRestoration = "manual"'),
+ "Prevent the browser from restoring the previous vertical position");
+assert.ok(pageSource.includes('window.addEventListener("pageshow", onPageShow)'),
+ "Reset scroll when mobile browsers restore a page from their cache");
+assert.ok(pageSource.includes('}, [currentView]);') &&
+  pageSource.includes("showScreenFromTop();"),
+ "Each landing/scan/results transition starts at the top");
+assert.ok(pageSource.includes('scrollToInput();'),
+ "Explicit New Check URL input scrolling remains available");
+
 const landing=renderToStaticMarkup(<StrangerLensLanding url="" onUrlChange={()=>{}} onAnalyze={()=>{}} isVerifying={false} errorMessage={null}/>);
 const dl=new JSDOM(landing).window.document;
 assert.ok(dl.querySelector("h1")?.textContent?.includes("Would a stranger"),"Hero talks directly about first impressions");
