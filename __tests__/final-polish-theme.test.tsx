@@ -35,7 +35,7 @@ const offer=renderToStaticMarkup(<CompleteReportPreview
  signals={[{key:"trust",id:"trust",title:"Trust",score:63,scoreDisplay:"63/100",status:"Needs work",badgeType:"amber"}] as any}
  purchaseReadinessApplicable canCheckout busy={false} onUnlock={()=>{}}/>);
 assert.ok(offer.includes("Included in Full Analysis") && !offer.includes("YOU HAVE") && !offer.includes("sl-v7-tier-compare"));
-assert.ok(offer.includes("Check what could make buying difficult") && offer.includes("Unlock Full Analysis — $9"));
+assert.ok(offer.includes("Know Why Visitors Might Hesitate") && offer.includes("Unlock Full Analysis — $9"));
 assert.equal((offer.match(/Unlock Full Analysis — \$9/g)||[]).length,1,"Single $9 checkout button.");
 for(const page of [<PrivacyPolicyPage/>,<RefundPolicyPage/>,<ContactSupportPage/>]){
  const html=renderToStaticMarkup(page);

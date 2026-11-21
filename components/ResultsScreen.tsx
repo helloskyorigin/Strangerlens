@@ -620,12 +620,14 @@ export default function ResultsScreen({
                 Check payment status
               </button>}
           </div>}
-        <ClarityResultsOverview
-          report={report}
-          isUnlocked={isReportUnlocked}
-          unlockedPurchase={unlockedPurchase}
-          onExplainScore={() => setIsScoreModalOpen(true)}
-        />
+        <div className="sl-v11-summary">
+          <ClarityResultsOverview
+            report={report}
+            isUnlocked={isReportUnlocked}
+            unlockedPurchase={unlockedPurchase}
+            onExplainScore={() => setIsScoreModalOpen(true)}
+          />
+        </div>
 
         {/* Paid users can download directly before the long chapters. */}
         {isReportUnlocked && renderPdfActions()}
@@ -633,7 +635,7 @@ export default function ResultsScreen({
         {/* A single $9 offer follows the free signals, with no duplicate pitch. */}
         {!isReportUnlocked && (
           <>
-            <div ref={mobileUpgradeRef} data-testid="full-report-upgrade-anchor">
+            <div ref={mobileUpgradeRef} className="sl-v11-offer-wrap" data-testid="full-report-upgrade-anchor">
             <CompleteReportPreview
               signals={report.signalsList}
               purchaseReadinessApplicable={showLockedPurchase}
