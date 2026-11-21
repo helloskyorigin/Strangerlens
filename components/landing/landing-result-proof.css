@@ -337,3 +337,61 @@ html[data-landing-theme="dark"] .slr-page .slr-hero-scan .slr-form-submit{
 html[data-landing-theme="dark"] .slr-page .slr-hero-scan .slr-form-submit svg{color:#101010!important}
 html[data-landing-theme="light"] .slr-page .slr-nav-actions .sl-theme-quick{
   background:#fff!important;border-color:#e3e9de!important;color:#1c261a!important}
+
+
+/* Last-mile readability for the interactive fictional example and pricing in dark mode.
+   These were previously light-only surfaces; keep every sentence visible. */
+html[data-landing-theme="dark"] .slr-page .slr-example :is(
+  .slr-example-original,.slr-example-browser,.slr-example-site,
+  .slr-example-findings,.slr-example-thought,.slr-example-fix>div
+){
+  background:#171717!important;background-image:none!important;
+  border-color:#434343!important;box-shadow:none!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-example :is(
+  .slr-example-heading h2 span,.slr-example-site h3,.slr-example-thought strong,
+  .slr-example-evidence p,.slr-example-fix>div p,.slr-example-fix>div strong
+){color:#f3f3f3!important}
+html[data-landing-theme="dark"] .slr-page .slr-example :is(
+  .slr-example-heading>p,.slr-example-browser,.slr-example-site>p,
+  .slr-example-findings-head,.slr-example-thought p,.slr-example-evidence small,
+  .slr-example-fix>p,.slr-example-disclosure
+){color:#bfbfbf!important}
+html[data-landing-theme="dark"] .slr-page .slr-example :is(
+  .slr-example-site>span:first-child,.slr-example-findings-head span:first-child,
+  .slr-example-question,.slr-example-fix>span,
+  .slr-example-evidence>span,.slr-example-fix>div strong
+){color:#dedede!important}
+html[data-landing-theme="dark"] .slr-page .slr-example .slr-example-evidence{
+  border-color:#454545!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-example .slr-browser-dots i{
+  background:#777!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-example-tabs button{
+  background:#242424!important;color:#ddd!important;border-color:#515151!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-example-tabs button.is-active{
+  background:#f2f2f2!important;color:#111!important;border-color:#f2f2f2!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-example-faux-button{
+  background:#f1f1f1!important;color:#111!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-example-faux-button svg{
+  color:#111!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-price-card ul{
+  border-color:#444!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-price-card :is(
+  .slr-price-description,.slr-price>span,.slr-price-card>small
+){color:#c9c9c9!important}
+html[data-landing-theme="dark"] .slr-page .slr-bottom-panel{
+  background:#171717!important;background-image:none!important;border-color:#444!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-bottom-panel p{
+  color:#c7c7c7!important;
+}
+html[data-landing-theme="dark"] .slr-page .slr-footer-links a:hover{
+  color:#fff!important;
+}
