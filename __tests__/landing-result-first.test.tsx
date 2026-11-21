@@ -19,6 +19,24 @@ assert.equal(doc.querySelectorAll(".slr-nav-actions .slr-nav-cta").length,1,
 assert.equal(doc.querySelectorAll("h1").length,1,"One clear headline");
 assert.ok(doc.querySelector(".slr-hero-proof .slr-hero-copy #slr-scan .slr-form-submit")?.textContent?.includes("Reveal My Clarity Score — Free"),
   "Real free URL form is available above results preview");
+// The URL field is its own rounded surface, never a box around the CTA.
+const urlField=doc.querySelector("#slr-scan .slr-input-wrap")!;
+const input=urlField.querySelector<HTMLInputElement>("#slr-website-url")!;
+assert.ok(input,"URL input is inside its own rounded field");
+assert.equal(input.type,"url","Mobile gets the URL keyboard");
+assert.equal(input.getAttribute("autocomplete"),"url");
+assert.equal(urlField.querySelectorAll("button").length,0,
+  "The lime submit button must sit outside the URL field");
+assert.ok(doc.querySelector("#slr-scan > .slr-form-submit"),
+  "CTA is a separate sibling, not nested inside the URL field");
+const inputPolish=readFileSync("components/landing/landing-story.css","utf8");
+assert.ok(inputPolish.includes("URL field / autofill hardening") &&
+  inputPolish.includes("input:is(:-webkit-autofill") &&
+  inputPolish.includes("-webkit-box-shadow:0 0 0 1000px #1A1D19 inset!important") &&
+  inputPolish.includes("outline:0!important") &&
+  inputPolish.includes("border-radius:23px!important"),
+  "Android autofill rectangle and focus outline are neutralized in light and dark modes");
+
 const sample=doc.querySelector('.slr-hero-proof .slr-live-demo')!;
 assert.ok(sample && sample.getAttribute("aria-label")?.includes("Illustrative"),"Honest sample alongside hero");
 assert.equal(sample.querySelectorAll(".slr-live-demo-row").length,5,"Exactly five real report signal categories");
