@@ -6,7 +6,7 @@ import PaidReportAccordion from "@/components/PaidReportAccordion";
 import { trackFunnelEvent } from "@/lib/ui-funnel-events";
 import { persistActiveReportSession } from "@/lib/active-report-session";
 import { escapeHtmlText } from "@/lib/escape-html";
-import { Download, Check, X, Lock, Loader2, AlertCircle, ArrowRight, FileText } from "lucide-react";
+import { Download, Check, X, Lock, Loader2, AlertCircle, ArrowRight } from "lucide-react";
 import { LandingThemeSwitcher } from "@/components/landing/LandingThemeSwitcher";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import Link from "next/link";
@@ -16,7 +16,6 @@ import { generateReportPdf } from "@/lib/pdf-generator";
 import type { PdfDownloadResult } from "@/lib/pdf-generator";
 import type { PremiumWorkbench } from "@/types/premiumWorkbench";
 import ClaritySignalTooltip from "@/components/ClaritySignalTooltip";
-import BrandMark from "@/components/BrandMark";
 import {
   startReportCheckout,
   rememberReportAccess,
@@ -498,17 +497,9 @@ export default function ResultsScreen({
       <header className="sl-v8-header">
         <div className="sl-v8-header-inner">
           <div className="sl-v8-nav-left">
-            <button type="button" onClick={onBackToLanding} className="sl-v8-nav-brand"
-              aria-label="Return to StrangerLens home">
-              <BrandMark className="h-9 w-9" />
-              <span>StrangerLens<i>.</i></span>
-            </button>
-            <span className="sl-v8-nav-divider" aria-hidden="true" />
-            <span className="sl-v8-nav-title">Results</span>
+            <LandingThemeSwitcher compact />
           </div>
           <div className="sl-v8-nav-right">
-            <LandingThemeSwitcher compact />
-            <Link href="/my-reports" className="sl-v8-my-reports" aria-label="My Reports" title="My Reports"><FileText size={18} aria-hidden="true"/> <span>My Reports</span></Link>
             <button type="button" onClick={onRunNewCheck || onBackToLanding} className="sl-v8-new-check">
               New Check <ArrowRight size={16} aria-hidden="true"/>
             </button>

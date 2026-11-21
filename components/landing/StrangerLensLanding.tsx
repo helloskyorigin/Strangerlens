@@ -95,8 +95,8 @@ const questions = [
     a: "It needs a public website with readable content. Password-protected pages, JavaScript-only content or sites that block automated access may produce limited results. If content can't be inspected reliably, the report should indicate the coverage limit.",
   },
   {
-    q: "How do I access an old report?",
-    a: "Use My Reports in the same browser where you ran the check. Report access relies on browser-held references, so clearing your browser data or switching devices may remove access. Keep your payment receipt and contact support if you need help.",
+    q: "Can I reopen a purchased report?",
+    a: "If you kept its direct report link, open it in the original browser. Access relies on saved browser references, so clearing data or switching devices may remove access. Keep your payment receipt and contact support if you need help.",
   },
   {
     q: "Do I need an account or a subscription?",
@@ -141,11 +141,10 @@ export default function StrangerLensLanding({
           </a>
           <nav className="slr-navlinks" aria-label="Primary navigation">
             {navLinks.map(link => <a key={link.href} href={link.href}>{link.label}</a>)}
-            <Link href="/my-reports">My Reports</Link>
           </nav>
           <div className="slr-nav-actions">
             <button type="button" className="slr-button slr-nav-cta" onClick={goToScan}>
-              Check my website <ArrowUpRight size={16} />
+              Check My Website Free <ArrowUpRight size={16} />
             </button>
             <button type="button" className="slr-menu-toggle"
               onClick={() => setMenuOpen(open => !open)}
@@ -158,18 +157,17 @@ export default function StrangerLensLanding({
         {menuOpen && (
           <nav id="slr-mobile-menu" className="slr-mobile-menu slr-container" aria-label="Mobile navigation">
             {navLinks.map(link => <a key={link.href} href={link.href} onClick={() => setMenuOpen(false)}>{link.label}<ArrowUpRight size={16} /></a>)}
-            <Link href="/my-reports" onClick={() => setMenuOpen(false)}>My Reports<ArrowUpRight size={16} /></Link>
-            <button type="button" className="slr-button" onClick={goToScan}>Check my website <ArrowUpRight size={16} /></button>
+            <button type="button" className="slr-button" onClick={goToScan}>Check My Website Free <ArrowUpRight size={16} /></button>
           </nav>
         )}
       </header>
 
       <main id="main-content">
         <section className="slr-hero slr-container" aria-labelledby="slr-hero-title">
-          <div className="slr-kicker"><span className="slr-kicker-dot" /> A FRESH LOOK AT YOUR WEBSITE</div>
-          <h1 id="slr-hero-title">You know your website.<br /><span className="slr-underline">A stranger doesn&apos;t.</span></h1>
-          <p className="slr-hero-subtitle">See your website through someone else&apos;s eyes.</p>
-          <p className="slr-hero-description">Discover what your page communicates, where its message falls short, and what to improve — backed by the content actually on your site.</p>
+          <div className="slr-kicker"><span className="slr-kicker-dot" /> FREE WEBSITE CLARITY CHECK</div>
+          <h1 id="slr-hero-title">What&apos;s unclear on<br /><span className="slr-underline">your website?</span></h1>
+          <p className="slr-hero-subtitle">Spot what could leave first-time visitors guessing.</p>
+          <p className="slr-hero-description">Get your free clarity score, see five key signals, and find out what deserves a closer look.</p>
           <form id="slr-scan" className="slr-scan-form" onSubmit={onAnalyze} noValidate>
             <div className="slr-input-wrap">
               <label htmlFor="slr-website-url" className="slr-sr-only">Your public website URL</label>
@@ -179,7 +177,7 @@ export default function StrangerLensLanding({
                 aria-invalid={Boolean(errorMessage)} aria-describedby={errorMessage ? "slr-url-error" : undefined}
                 disabled={isVerifying} />
               <button className="slr-button slr-form-submit" type="submit" disabled={isVerifying}>
-                <span>{isVerifying ? "Connecting to website..." : "See my website differently"}</span>
+                <span>{isVerifying ? "Connecting to website..." : "Find My Website’s Weak Spots — Free"}</span>
                 <ArrowUpRight size={18} aria-hidden="true" />
               </button>
             </div>
@@ -308,14 +306,14 @@ export default function StrangerLensLanding({
               <div className="slr-price"><strong>$0</strong><span>free</span></div>
               <p className="slr-price-description">Understand how clearly your website introduces itself.</p>
               <ul><li><Check size={17} /> Overall clarity score</li><li><Check size={17} /> Five core signal scores</li><li><Check size={17} /> Statuses and lowest-scoring area</li></ul>
-              <button className="slr-button slr-price-button" type="button" onClick={goToScan}>Check my website <ArrowUpRight size={17} /></button>
+              <button className="slr-button slr-price-button" type="button" onClick={goToScan}>Check My Website Free <ArrowUpRight size={17} /></button>
             </div>
             <div className="slr-price-card slr-price-featured">
               <span className="slr-price-label">FULL CLARITY REPORT <span className="slr-price-chip">ONE-TIME</span></span>
               <div className="slr-price"><strong>$9</strong><span>per report</span></div>
               <p className="slr-price-description">Move beyond a number. Understand what needs attention and how to improve it.</p>
               <ul><li><Check size={17} /> All detailed signal findings</li><li><Check size={17} /> Website evidence & practical recommendations</li><li><Check size={17} /> Prioritized improvement plan</li><li><Check size={17} /> Editable copy suggestions</li><li><Check size={17} /> Stranger&apos;s View & first-five-seconds breakdown</li><li><Check size={17} /> Purchase readiness when applicable</li></ul>
-              <button className="slr-button slr-price-button" type="button" onClick={goToScan}>See what my website needs <ArrowUpRight size={17} /></button>
+              <button className="slr-button slr-price-button" type="button" onClick={goToScan}>Find My Website’s Weak Spots <ArrowUpRight size={17} /></button>
               <small>PDF download and saved report access included as utilities.</small>
             </div>
           </div>
@@ -331,17 +329,17 @@ export default function StrangerLensLanding({
 
         <section className="slr-bottom-cta slr-container">
           <div className="slr-bottom-panel">
-            <span className="slr-eyebrow">THE NEXT VISITOR WON&apos;T KNOW WHAT YOU KNOW</span>
-            <h2>Find the gaps before<br />someone else has to.</h2>
-            <p>Take one fresh look at the website you&apos;ve been staring at for months.</p>
-            <button type="button" className="slr-button" onClick={goToScan}>Check my website <ArrowUpRight size={17}/></button>
+            <span className="slr-eyebrow">KNOW WHAT NEEDS ATTENTION</span>
+            <h2>Don&apos;t guess what&apos;s unclear.<br />Check your website.</h2>
+            <p>See your clarity score for free. Unlock practical fixes only if you need them.</p>
+            <button type="button" className="slr-button" onClick={goToScan}>Find My Website’s Weak Spots <ArrowUpRight size={17}/></button>
           </div>
         </section>
       </main>
 
       <footer className="slr-footer slr-container">
-        <div className="slr-footer-main"><a className="slr-brand" href="#top"><img src="/strangerlens-mark.webp" alt="" width={34} height={34}/><span>StrangerLens<span className="slr-brand-dot">.</span></span></a><p>A fresh perspective on what your website communicates.</p></div>
-        <div className="slr-footer-links"><Link href="/my-reports">My Reports</Link>{LEGAL_CONFIG.links.map(link => <Link href={link.href} key={link.href}>{link.label}</Link>)}<a href={getSupportGmailComposeUrl()} target="_blank" rel="noopener noreferrer">Email support</a></div>
+        <div className="slr-footer-main"><a className="slr-brand" href="#top"><img src="/strangerlens-mark.webp" alt="" width={34} height={34}/><span>StrangerLens<span className="slr-brand-dot">.</span></span></a><p>Know what your website explains—and what it leaves unclear.</p></div>
+        <div className="slr-footer-links">{LEGAL_CONFIG.links.map(link => <Link href={link.href} key={link.href}>{link.label}</Link>)}<a href={getSupportGmailComposeUrl()} target="_blank" rel="noopener noreferrer">Email support</a></div>
         <div className="slr-footer-bottom"><span>© {new Date().getFullYear()} StrangerLens. All rights reserved.</span><span>AI-based assessment of publicly accessible website content.</span></div>
       </footer>
     </div>
