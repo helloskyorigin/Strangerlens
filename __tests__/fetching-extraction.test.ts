@@ -1,6 +1,7 @@
 import { describe, test, expect } from "./test-harness";
 import { extractWebsiteSnapshot } from "../lib/content-extractor";
 import { formatSnapshotForAi } from "../services/ai/analysisPrompt";
+import { formatSupportingContextPromptPayload } from "../services/ai/supportingContextAnalyzer";
 import {
   getCachedFetch,
   setCachedFetch,
@@ -579,5 +580,10 @@ describe("Phase 1 Task 4: Content Extractor & Fetch Cache Tests", () => {
         p.url === page.finalUrl && p.headline === page.snapshot.hero.headline)).toBe(true);
     }
     expect(prompt.supportingPages.some((p: {url:string})=>p.url.endsWith("/pricing"))).toBe(true);
+    const secondPass = JSON.parse(formatSupportingContextPromptPayload(snapshot, base, linked.pages));
+    expect(secondPass.supportingPages.length).toBe(8);
+    for(const linkedPage of linked.pages){
+      expect(secondPass.supportingPages.some((p: {sourceUrl:string})=>p.sourceUrl===linkedPage.finalUrl)).toBe(true);
+    }
   });
 });
