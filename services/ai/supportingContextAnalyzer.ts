@@ -413,10 +413,33 @@ export async function generateSupportingPageContext(
       if (options.aiRunner) {
         rawAiOutput = await options.aiRunner(promptPayload, bundle.pages);
       } else {
-        rawAiOutput = await callDefaultSupportingContextAI(promptPayload, {
-          timeoutMs: options.aiTimeoutMs,
-          signal: options.signal,
-        });
+        // Single total budget for secondary synthesis (not 12 seconds per
+        // sequential model). Every fetched page is still read by the primary
+        // AI before this step; on timeout we derive honest deterministic
+        // context from those same snapshots rather than dropping the pages.
+        const maxWaitMs = options.aiTimeoutMs ?? SERVER_LIMITS.SUPPORTING_CONTEXT_AI_TIMEOUT_MS;
+        const controller = new AbortController();
+        const forwardAbort = () => controller.abort();
+        if (options.signal?.aborted) controller.abort();
+        else options.signal?.addEventListener("abort", forwardAbort, { once: true });
+        let timeout: ReturnType<typeof setTimeout> | null = null;
+        try {
+          rawAiOutput = await Promise.race([
+            callDefaultSupportingContextAI(promptPayload, {
+              timeoutMs: maxWaitMs,
+              signal: controller.signal,
+            }),
+            new Promise<never>((_, reject) => {
+              timeout = setTimeout(() => {
+                controller.abort();
+                reject(new Error("Supporting-page synthesis exceeded its total time budget"));
+              }, maxWaitMs);
+            }),
+          ]);
+        } finally {
+          if (timeout) clearTimeout(timeout);
+          options.signal?.removeEventListener("abort", forwardAbort);
+        }
       }
     } catch (aiErr: unknown) {
       aiErrorMessage =
