@@ -40,6 +40,23 @@ assert.ok(inputPolish.includes("URL field / autofill hardening") &&
 const sample=doc.querySelector('.slr-hero-proof .slr-live-demo')!;
 assert.ok(sample && sample.getAttribute("aria-label")?.includes("Illustrative"),"Honest sample alongside hero");
 assert.equal(sample.querySelectorAll(".slr-live-demo-row").length,5,"Exactly five real report signal categories");
+
+assert.equal(sample.querySelector(".slr-live-demo-scoreline strong")?.textContent?.trim(),"55/100",
+  "Illustrative overall score matches the five example dimensions");
+assert.deepEqual([...sample.querySelectorAll(".slr-live-demo-row-score")].map(el=>Number(el.textContent)),[57,43,36,73,66],
+  "Sample signals are varied and show meaningful improvement opportunities");
+assert.equal(sample.querySelectorAll(".slr-live-demo-visitor-thought").length,5,
+  "Each signal has one concrete visitor question or observation");
+assert.ok(sample.querySelector(".slr-live-demo-row-score")?.getAttribute("style")?.includes("background-color"),
+  "Score chip has a durable readable surface even when dark-theme CSS is delayed");
+const samplePolish=readFileSync("components/landing/landing-story.css","utf8");
+for(const fragment of [".slr-live-demo-row-head .slr-live-demo-row-score","color:#D9FF9B!important",
+  "background:#24331C!important","height:10px!important",
+  "slr-live-demo-fill--red","slr-live-demo-fill--amber","slr-live-demo-fill--good",
+  "slr-live-demo-visitor-thought"]){
+  assert.ok(samplePolish.includes(fragment),"Sample contrast or distinct signal styling missing: "+fragment);
+}
+
 assert.ok(sample.textContent?.includes("First Impression")&&sample.textContent?.includes("Audience") &&
   sample.textContent?.includes("Value")&&sample.textContent?.includes("Trust")&&sample.textContent?.includes("Action"),
   "Sample reflects the actual free signal categories");
